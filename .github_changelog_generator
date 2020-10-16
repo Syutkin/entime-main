@@ -1,0 +1,7 @@
+project=Entime
+user=Syutkin
+enhancement_labels=enhancement,Enhancement,improvement
+merge_prefix=**Merged pull requests:**
+issue_prefix=**Остальное:**
+bug_prefix=**Исправленные ошибки:**
+enhancement_prefix=**Изменения:**

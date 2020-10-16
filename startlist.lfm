@@ -1,0 +1,236 @@
+object StartlistForm: TStartlistForm
+  Left = 753
+  Height = 526
+  Top = 149
+  Width = 382
+  Anchors = []
+  Caption = 'Параметры стартового протокола'
+  ClientHeight = 526
+  ClientWidth = 382
+  Constraints.MinHeight = 350
+  Constraints.MinWidth = 280
+  OnCreate = FormCreate
+  Position = poMainFormCenter
+  ShowHint = True
+  LCLVersion = '2.0.6.0'
+  object TimeEdit1: TTimeEdit
+    Left = 5
+    Height = 23
+    Top = 25
+    Width = 372
+    ButtonWidth = 23
+    Align = alTop
+    BorderSpacing.Around = 5
+    NumGlyphs = 1
+    MaxLength = 0
+    TabOrder = 0
+    Text = '0'
+  end
+  object Label1: TLabel
+    Left = 5
+    Height = 15
+    Top = 5
+    Width = 372
+    Align = alTop
+    BorderSpacing.Around = 5
+    Caption = 'Время старта первого участника'
+    ParentColor = False
+  end
+  object Label2: TLabel
+    Left = 5
+    Height = 15
+    Top = 58
+    Width = 372
+    Align = alTop
+    BorderSpacing.Top = 5
+    BorderSpacing.Around = 5
+    Caption = 'Количество секунд между стартами участников'
+    ParentColor = False
+  end
+  object Label3: TLabel
+    Left = 5
+    Height = 15
+    Top = 111
+    Width = 372
+    Align = alTop
+    BorderSpacing.Top = 5
+    BorderSpacing.Around = 5
+    Caption = 'Количество минут между категориями'
+    ParentColor = False
+  end
+  object SpinEditEx1: TSpinEditEx
+    Left = 5
+    Height = 23
+    Top = 78
+    Width = 372
+    Align = alTop
+    Alignment = taLeftJustify
+    BorderSpacing.Around = 5
+    MaxLength = 0
+    TabOrder = 1
+    MaxValue = 300
+    MinValue = 20
+    Value = 20
+  end
+  object SpinEditEx2: TSpinEditEx
+    Left = 5
+    Height = 23
+    Top = 131
+    Width = 372
+    Align = alTop
+    Alignment = taLeftJustify
+    BorderSpacing.Around = 5
+    MaxLength = 0
+    TabOrder = 2
+    MaxValue = 10
+    MinValue = 1
+    Value = 1
+  end
+  object ButtonPanel1: TButtonPanel
+    AnchorSideLeft.Control = Owner
+    AnchorSideRight.Control = Owner
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 6
+    Height = 34
+    Top = 486
+    Width = 370
+    OKButton.Name = 'OKButton'
+    OKButton.DefaultCaption = True
+    HelpButton.Name = 'HelpButton'
+    HelpButton.DefaultCaption = True
+    CloseButton.Name = 'CloseButton'
+    CloseButton.DefaultCaption = True
+    CancelButton.Name = 'CancelButton'
+    CancelButton.DefaultCaption = True
+    TabOrder = 3
+    ShowButtons = [pbOK, pbCancel]
+  end
+  object Label5: TLabel
+    Left = 5
+    Height = 15
+    Top = 164
+    Width = 372
+    Align = alTop
+    BorderSpacing.Top = 5
+    BorderSpacing.Around = 5
+    Caption = 'Сортировка внутри категории'
+    ParentColor = False
+  end
+  object ComboBox1: TComboBox
+    Left = 5
+    Height = 23
+    Top = 184
+    Width = 372
+    Align = alTop
+    BorderSpacing.Around = 5
+    ItemHeight = 15
+    ItemIndex = 0
+    Items.Strings = (
+      'По номерам по возрастанию'
+      'По номерам по убыванию'
+      'По именам А-Я'
+      'По именам Я-А'
+    )
+    Style = csDropDownList
+    TabOrder = 4
+    Text = 'По номерам по возрастанию'
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 29
+    Top = 232
+    Width = 382
+    Align = alTop
+    AutoSize = True
+    BevelOuter = bvNone
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.Layout = cclTopToBottomThenLeftToRight
+    ClientHeight = 29
+    ClientWidth = 382
+    TabOrder = 5
+    object cbDNS: TCheckBoxThemed
+      Left = 5
+      Height = 19
+      Hint = 'Не стартовал в квалификации'
+      Top = 5
+      Width = 123
+      BorderSpacing.Around = 5
+      Caption = 'DNS'
+      Checked = True
+      State = cbChecked
+      TabOrder = 0
+    end
+    object cbDNF: TCheckBoxThemed
+      AnchorSideTop.Side = asrCenter
+      Left = 133
+      Height = 19
+      Hint = 'Не финишировал в квалификации'
+      Top = 5
+      Width = 123
+      BorderSpacing.Around = 5
+      Caption = 'DNF'
+      Checked = True
+      State = cbChecked
+      TabOrder = 1
+    end
+    object cbDSQ: TCheckBoxThemed
+      Left = 261
+      Height = 19
+      Hint = 'Дисквалифицирован'
+      Top = 5
+      Width = 121
+      Caption = 'DSQ'
+      TabOrder = 2
+    end
+  end
+  object Label6: TLabel
+    Left = 5
+    Height = 15
+    Top = 217
+    Width = 372
+    Align = alTop
+    BorderSpacing.Left = 5
+    BorderSpacing.Top = 10
+    BorderSpacing.Right = 5
+    Caption = 'Включать в финальный заезд следующих участников:'
+    ParentColor = False
+  end
+  object Panel2: TPanel
+    Left = 5
+    Height = 209
+    Top = 271
+    Width = 372
+    Align = alClient
+    BorderSpacing.Top = 5
+    BorderSpacing.Around = 5
+    BevelOuter = bvNone
+    Caption = 'Panel2'
+    ClientHeight = 209
+    ClientWidth = 372
+    TabOrder = 6
+    object Label4: TLabel
+      Left = 0
+      Height = 15
+      Top = 0
+      Width = 372
+      Align = alTop
+      Caption = 'Порядок старта категорий'
+      ParentColor = False
+    end
+    object ListBox1: TListBox
+      Left = 0
+      Height = 189
+      Top = 20
+      Width = 372
+      Align = alClient
+      BorderSpacing.Top = 5
+      DragMode = dmAutomatic
+      ItemHeight = 0
+      OnDragDrop = ListBox1DragDrop
+      OnDragOver = ListBox1DragOver
+      OnMouseDown = ListBox1MouseDown
+      TabOrder = 0
+    end
+  end
+end

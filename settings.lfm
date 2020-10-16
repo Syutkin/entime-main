@@ -1,0 +1,739 @@
+object SettingsForm: TSettingsForm
+  Left = 763
+  Height = 521
+  Top = 192
+  Width = 884
+  Anchors = []
+  Caption = 'Настройки'
+  ClientHeight = 521
+  ClientWidth = 884
+  Constraints.MinHeight = 350
+  Constraints.MinWidth = 675
+  OnCreate = FormCreate
+  Position = poMainFormCenter
+  ShowHint = True
+  LCLVersion = '2.0.6.0'
+  object ButtonPanel1: TButtonPanel
+    Left = 6
+    Height = 26
+    Top = 489
+    Width = 872
+    OKButton.Name = 'OKButton'
+    OKButton.DefaultCaption = True
+    HelpButton.Name = 'HelpButton'
+    HelpButton.DefaultCaption = True
+    CloseButton.Name = 'CloseButton'
+    CloseButton.DefaultCaption = True
+    CancelButton.Name = 'CancelButton'
+    CancelButton.DefaultCaption = True
+    TabOrder = 0
+    ShowButtons = [pbOK, pbCancel]
+    ShowBevel = False
+  end
+  object TreeView1: TTreeView
+    AnchorSideBottom.Control = ButtonPanel1
+    Left = 0
+    Height = 483
+    Top = 0
+    Width = 200
+    Align = alLeft
+    BorderSpacing.Bottom = 5
+    Constraints.MinWidth = 200
+    ReadOnly = True
+    ScrollBars = ssAutoVertical
+    TabOrder = 1
+    OnChange = TreeView1Change
+    Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
+    Items.Data = {
+      F9FFFFFF020004000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000000
+      0000000A000000D09ED0B1D189D0B8D0B5FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+      FF00000000000000000006000000D092D0B8D0B4FFFFFFFFFFFFFFFFFFFFFFFF
+      FFFFFFFF00000000000000000018000000D0A1D0BED180D0B5D0B2D0BDD0BED0
+      B2D0B0D0BDD0B8D0B5FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000000000
+      00000C000000434F4D20D0BFD0BED180D182
+    }
+  end
+  object Notebook1: TNotebook
+    Left = 200
+    Height = 483
+    Top = 0
+    Width = 684
+    PageIndex = 3
+    Align = alClient
+    TabOrder = 2
+    object Page1: TPage
+      object ComboBoxLanguage: TComboBox
+        AnchorSideLeft.Control = Page1
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = Page1
+        AnchorSideRight.Side = asrBottom
+        Left = 5
+        Height = 23
+        Top = 28
+        Width = 674
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Around = 5
+        ItemHeight = 15
+        Items.Strings = (
+          'Русский'
+          'English'
+        )
+        OnChange = ComboBoxLanguageChange
+        Style = csDropDownList
+        TabOrder = 0
+      end
+      object DelayEdit: TSpinEdit
+        AnchorSideLeft.Control = Page1
+        AnchorSideTop.Control = DividerBevelDelay1
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = Page1
+        AnchorSideRight.Side = asrBottom
+        Left = 5
+        Height = 23
+        Hint = 'Задержка в миллисекундах между добавлением'#13#10'нового значения времени при срабатывании датчика.'#13#10'Служит для уменьшения спама.'#10'От 0 до 100000'
+        Top = 76
+        Width = 674
+        Alignment = taRightJustify
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Around = 5
+        MaxValue = 100000
+        ParentFont = False
+        TabOrder = 1
+      end
+      object DividerBevelLanguage1: TDividerBevel
+        AnchorSideLeft.Control = Page1
+        AnchorSideTop.Control = Page1
+        AnchorSideRight.Control = Page1
+        AnchorSideRight.Side = asrBottom
+        Left = 5
+        Height = 15
+        Top = 5
+        Width = 674
+        Caption = 'Язык'
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Around = 5
+        Font.Style = [fsBold]
+        LeftIndent = 75
+        ParentFont = False
+      end
+      object DividerBevelDelay1: TDividerBevel
+        AnchorSideLeft.Control = Page1
+        AnchorSideTop.Control = ComboBoxLanguage
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = Page1
+        AnchorSideRight.Side = asrBottom
+        Left = 5
+        Height = 15
+        Top = 56
+        Width = 674
+        Caption = 'Задержка в миллисекундах'
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Around = 5
+        Font.Style = [fsBold]
+        LeftIndent = 75
+        ParentFont = False
+      end
+    end
+    object Page2: TPage
+      OnBeforeShow = Page2BeforeShow
+      object CheckBoxHideZeroHour: TCheckBoxThemed
+        AnchorSideLeft.Control = Page2
+        AnchorSideTop.Control = Page2
+        Left = 5
+        Height = 19
+        Top = 5
+        Width = 221
+        BorderSpacing.Around = 5
+        Caption = 'Скрывать нулевой час в результатах'
+        Checked = True
+        State = cbChecked
+        TabOrder = 0
+      end
+    end
+    object Page3: TPage
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      ChildSizing.EnlargeVertical = crsHomogenousChildResize
+      ChildSizing.Layout = cclTopToBottomThenLeftToRight
+      object GroupBoxCategory: TGroupBox
+        Left = 5
+        Height = 483
+        Hint = 'Категории, которые будут показываться в окне результатов'
+        Top = 0
+        Width = 308
+        BorderSpacing.Left = 5
+        Caption = 'Категории'
+        ClientHeight = 463
+        ClientWidth = 304
+        Constraints.MinWidth = 200
+        ParentFont = False
+        TabOrder = 0
+        object Edit6: TComboBox
+          AnchorSideLeft.Control = GroupBoxCategory
+          AnchorSideTop.Control = Edit5
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = GroupBoxCategory
+          AnchorSideRight.Side = asrBottom
+          Left = 5
+          Height = 23
+          Top = 127
+          Width = 294
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 2
+          BorderSpacing.Right = 5
+          ItemHeight = 15
+          OnDropDown = EditDropDown
+          ParentFont = False
+          TabOrder = 0
+        end
+        object Edit5: TComboBox
+          AnchorSideLeft.Control = GroupBoxCategory
+          AnchorSideTop.Control = Edit4
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = GroupBoxCategory
+          AnchorSideRight.Side = asrBottom
+          Left = 5
+          Height = 23
+          Top = 102
+          Width = 294
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 2
+          BorderSpacing.Right = 5
+          BorderSpacing.Bottom = 2
+          ItemHeight = 15
+          OnDropDown = EditDropDown
+          ParentFont = False
+          TabOrder = 1
+        end
+        object Edit4: TComboBox
+          AnchorSideLeft.Control = GroupBoxCategory
+          AnchorSideTop.Control = Edit3
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = GroupBoxCategory
+          AnchorSideRight.Side = asrBottom
+          Left = 5
+          Height = 23
+          Top = 77
+          Width = 294
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 2
+          BorderSpacing.Right = 5
+          BorderSpacing.Bottom = 2
+          ItemHeight = 15
+          OnDropDown = EditDropDown
+          ParentFont = False
+          TabOrder = 2
+        end
+        object Edit3: TComboBox
+          AnchorSideLeft.Control = GroupBoxCategory
+          AnchorSideTop.Control = Edit2
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = GroupBoxCategory
+          AnchorSideRight.Side = asrBottom
+          Left = 5
+          Height = 23
+          Top = 52
+          Width = 294
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 2
+          BorderSpacing.Right = 5
+          BorderSpacing.Bottom = 2
+          ItemHeight = 15
+          OnDropDown = EditDropDown
+          ParentFont = False
+          TabOrder = 3
+        end
+        object Edit2: TComboBox
+          AnchorSideLeft.Control = GroupBoxCategory
+          AnchorSideTop.Control = Edit1
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = GroupBoxCategory
+          AnchorSideRight.Side = asrBottom
+          Left = 5
+          Height = 23
+          Top = 27
+          Width = 294
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 2
+          BorderSpacing.Right = 5
+          BorderSpacing.Bottom = 2
+          ItemHeight = 15
+          OnDropDown = EditDropDown
+          ParentFont = False
+          TabOrder = 4
+        end
+        object Edit1: TComboBox
+          AnchorSideLeft.Control = GroupBoxCategory
+          AnchorSideTop.Control = GroupBoxCategory
+          AnchorSideRight.Control = GroupBoxCategory
+          AnchorSideRight.Side = asrBottom
+          Left = 5
+          Height = 23
+          Top = 2
+          Width = 294
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 2
+          BorderSpacing.Right = 5
+          BorderSpacing.Bottom = 2
+          ItemHeight = 15
+          OnDropDown = EditDropDown
+          ParentFont = False
+          TabOrder = 5
+        end
+      end
+      object GroupBoxStages: TGroupBox
+        AnchorSideRight.Control = Page2
+        AnchorSideRight.Side = asrBottom
+        Left = 318
+        Height = 483
+        Top = 0
+        Width = 361
+        BorderSpacing.Left = 5
+        BorderSpacing.Right = 5
+        Caption = 'Спецучастки'
+        ClientHeight = 463
+        ClientWidth = 357
+        Constraints.MinWidth = 200
+        ParentFont = False
+        TabOrder = 1
+        object SUEdit1: TEdit
+          AnchorSideLeft.Control = GroupBoxStages
+          AnchorSideTop.Control = GroupBoxStages
+          AnchorSideRight.Control = GroupBoxStages
+          AnchorSideRight.Side = asrBottom
+          Left = 5
+          Height = 23
+          Top = 2
+          Width = 347
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 2
+          BorderSpacing.Right = 5
+          BorderSpacing.Bottom = 2
+          ParentFont = False
+          TabOrder = 0
+        end
+        object SUEdit2: TEdit
+          AnchorSideLeft.Control = GroupBoxStages
+          AnchorSideTop.Control = SUEdit1
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = GroupBoxStages
+          AnchorSideRight.Side = asrBottom
+          Left = 5
+          Height = 23
+          Top = 27
+          Width = 347
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 2
+          BorderSpacing.Right = 5
+          BorderSpacing.Bottom = 2
+          ParentFont = False
+          TabOrder = 1
+        end
+        object SUEdit3: TEdit
+          AnchorSideLeft.Control = GroupBoxStages
+          AnchorSideTop.Control = SUEdit2
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = GroupBoxStages
+          AnchorSideRight.Side = asrBottom
+          Left = 5
+          Height = 23
+          Top = 52
+          Width = 347
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 2
+          BorderSpacing.Right = 5
+          BorderSpacing.Bottom = 2
+          ParentFont = False
+          TabOrder = 2
+        end
+        object SUEdit4: TEdit
+          AnchorSideLeft.Control = GroupBoxStages
+          AnchorSideTop.Control = SUEdit3
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = GroupBoxStages
+          AnchorSideRight.Side = asrBottom
+          Left = 5
+          Height = 23
+          Top = 77
+          Width = 347
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 2
+          BorderSpacing.Right = 5
+          BorderSpacing.Bottom = 2
+          ParentFont = False
+          TabOrder = 3
+        end
+        object SUEdit5: TEdit
+          AnchorSideLeft.Control = GroupBoxStages
+          AnchorSideTop.Control = SUEdit4
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = GroupBoxStages
+          AnchorSideRight.Side = asrBottom
+          Left = 5
+          Height = 23
+          Top = 102
+          Width = 347
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 2
+          BorderSpacing.Right = 5
+          BorderSpacing.Bottom = 2
+          ParentFont = False
+          TabOrder = 4
+        end
+        object SUEdit6: TEdit
+          AnchorSideLeft.Control = GroupBoxStages
+          AnchorSideTop.Control = SUEdit5
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = GroupBoxStages
+          AnchorSideRight.Side = asrBottom
+          Left = 5
+          Height = 23
+          Top = 127
+          Width = 347
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 2
+          BorderSpacing.Right = 5
+          ParentFont = False
+          TabOrder = 5
+        end
+        object CheckGroup1: TCheckGroup
+          AnchorSideLeft.Control = GroupBoxStages
+          AnchorSideTop.Control = SUEdit6
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = GroupBoxStages
+          AnchorSideRight.Side = asrBottom
+          Left = 5
+          Height = 70
+          Top = 152
+          Width = 347
+          Anchors = [akTop, akLeft, akRight]
+          AutoFill = True
+          AutoSize = True
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 2
+          BorderSpacing.Right = 5
+          Caption = 'Активные спецучастки:'
+          ChildSizing.LeftRightSpacing = 6
+          ChildSizing.TopBottomSpacing = 6
+          ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+          ChildSizing.EnlargeVertical = crsHomogenousChildResize
+          ChildSizing.ShrinkHorizontal = crsScaleChilds
+          ChildSizing.ShrinkVertical = crsScaleChilds
+          ChildSizing.Layout = cclLeftToRightThenTopToBottom
+          ChildSizing.ControlsPerLine = 3
+          ClientHeight = 50
+          ClientWidth = 343
+          Columns = 3
+          Items.Strings = (
+            'СУ1'
+            'СУ2'
+            'СУ3'
+            'СУ4'
+            'СУ5'
+            'СУ6'
+          )
+          ParentFont = False
+          TabOrder = 6
+          Data = {
+            06000000020202020202
+          }
+        end
+        object ComboBoxAStage: TComboBox
+          AnchorSideLeft.Control = GroupBoxStages
+          AnchorSideTop.Control = CheckGroup1
+          AnchorSideTop.Side = asrBottom
+          Left = 5
+          Height = 23
+          Top = 227
+          Width = 50
+          BorderSpacing.Left = 5
+          BorderSpacing.Top = 5
+          ItemHeight = 15
+          OnDropDown = ComboBoxAStageDropDown
+          ParentFont = False
+          Style = csDropDownList
+          TabOrder = 7
+        end
+        object ActiveStageLabel: TLabel
+          AnchorSideLeft.Control = ComboBoxAStage
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Control = ComboBoxAStage
+          AnchorSideTop.Side = asrCenter
+          AnchorSideRight.Control = GroupBoxStages
+          AnchorSideRight.Side = asrBottom
+          Left = 60
+          Height = 15
+          Top = 231
+          Width = 292
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Left = 5
+          BorderSpacing.Right = 5
+          Caption = 'СУ для показа в окне результатов'
+          ParentColor = False
+          ParentFont = False
+          WordWrap = True
+        end
+      end
+    end
+    object Page4: TPage
+      object PanelComSettings: TPanel
+        AnchorSideLeft.Control = Page3
+        AnchorSideTop.Control = DividerBevelCOMSettings1
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Side = asrBottom
+        Left = 5
+        Height = 148
+        Top = 25
+        Width = 176
+        AutoSize = True
+        BorderSpacing.Around = 5
+        BevelOuter = bvNone
+        ChildSizing.HorizontalSpacing = 10
+        ChildSizing.VerticalSpacing = 2
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 2
+        ClientHeight = 148
+        ClientWidth = 176
+        TabOrder = 0
+        object Label1: TLabel
+          AnchorSideTop.Side = asrCenter
+          AnchorSideBottom.Side = asrBottom
+          Left = 0
+          Height = 23
+          Top = 0
+          Width = 66
+          Caption = 'Port'
+          Layout = tlCenter
+          ParentColor = False
+          OnClick = Label1Click
+        end
+        object ComComboBox1: TComboBox
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideRight.Side = asrBottom
+          Left = 76
+          Height = 23
+          Top = 0
+          Width = 100
+          ItemHeight = 15
+          TabOrder = 0
+        end
+        object Label2: TLabel
+          AnchorSideTop.Side = asrCenter
+          Left = 0
+          Height = 23
+          Top = 25
+          Width = 66
+          Caption = 'Baud rate'
+          Layout = tlCenter
+          ParentColor = False
+        end
+        object ComComboBox2: TComboBox
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Side = asrBottom
+          Left = 76
+          Height = 23
+          Top = 25
+          Width = 100
+          ItemHeight = 15
+          Style = csDropDownList
+          TabOrder = 1
+        end
+        object Label3: TLabel
+          AnchorSideTop.Side = asrCenter
+          Left = 0
+          Height = 23
+          Top = 50
+          Width = 66
+          Caption = 'Data bits'
+          Layout = tlCenter
+          ParentColor = False
+        end
+        object ComComboBox3: TComboBox
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Side = asrBottom
+          Left = 76
+          Height = 23
+          Top = 50
+          Width = 100
+          ItemHeight = 15
+          Style = csDropDownList
+          TabOrder = 2
+        end
+        object Label4: TLabel
+          AnchorSideTop.Side = asrCenter
+          Left = 0
+          Height = 23
+          Top = 75
+          Width = 66
+          Caption = 'Stop bits'
+          Layout = tlCenter
+          ParentColor = False
+        end
+        object ComComboBox4: TComboBox
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Side = asrBottom
+          Left = 76
+          Height = 23
+          Top = 75
+          Width = 100
+          ItemHeight = 15
+          Style = csDropDownList
+          TabOrder = 3
+        end
+        object Label5: TLabel
+          AnchorSideTop.Side = asrCenter
+          Left = 0
+          Height = 23
+          Top = 100
+          Width = 66
+          Caption = 'Parity'
+          Layout = tlCenter
+          ParentColor = False
+        end
+        object ComComboBox5: TComboBox
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Side = asrBottom
+          Left = 76
+          Height = 23
+          Top = 100
+          Width = 100
+          ItemHeight = 15
+          Style = csDropDownList
+          TabOrder = 4
+        end
+        object Label6: TLabel
+          AnchorSideTop.Side = asrCenter
+          Left = 0
+          Height = 23
+          Top = 125
+          Width = 66
+          Caption = 'Flow control'
+          Layout = tlCenter
+          ParentColor = False
+        end
+        object ComComboBox6: TComboBox
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Side = asrBottom
+          Left = 76
+          Height = 23
+          Top = 125
+          Width = 100
+          ItemHeight = 15
+          Style = csDropDownList
+          TabOrder = 5
+        end
+      end
+      object DividerBevelCOMSettings1: TDividerBevel
+        AnchorSideLeft.Control = Page3
+        AnchorSideTop.Control = Page3
+        AnchorSideRight.Control = Page3
+        AnchorSideRight.Side = asrBottom
+        Left = 5
+        Height = 15
+        Top = 5
+        Width = 674
+        Caption = 'COM порт'
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Around = 5
+        Font.Style = [fsBold]
+        LeftIndent = 75
+        ParentFont = False
+      end
+      object DividerBevelCOMSettings2: TDividerBevel
+        AnchorSideLeft.Control = Page3
+        AnchorSideTop.Control = PanelComSettings
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = Page3
+        AnchorSideRight.Side = asrBottom
+        Left = 5
+        Height = 15
+        Top = 178
+        Width = 674
+        Caption = 'Режим работы с финишем'
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Around = 5
+        Font.Style = [fsBold]
+        LeftIndent = 75
+        ParentFont = False
+        Visible = False
+      end
+      object PanelCOMFinishTimeSettings: TPanel
+        AnchorSideLeft.Control = Page3
+        AnchorSideTop.Control = DividerBevelCOMSettings2
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = Page3
+        AnchorSideRight.Side = asrBottom
+        Left = 5
+        Height = 48
+        Top = 198
+        Width = 207
+        AutoSize = True
+        BorderSpacing.Around = 5
+        BevelOuter = bvNone
+        ChildSizing.HorizontalSpacing = 10
+        ChildSizing.VerticalSpacing = 2
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 2
+        ClientHeight = 48
+        ClientWidth = 207
+        TabOrder = 1
+        Visible = False
+        object RadioButtonCOMSetStr: TRadioButton
+          AnchorSideTop.Side = asrCenter
+          Left = 0
+          Height = 23
+          Hint = 'Программа будет ожидать из COM порта заданную строку,'#13#10'после получения которой, будет взята текущая метка времени'
+          Top = 0
+          Width = 117
+          Caption = 'Спец. команда'
+          Checked = True
+          TabOrder = 0
+          TabStop = True
+        end
+        object EditCOMSetStr: TEdit
+          AnchorSideLeft.Side = asrBottom
+          Left = 127
+          Height = 23
+          Hint = 'Строка, после получения которой,'#13#10'будет взята текущая метка времени,'#13#10'по умолчанию F'
+          Top = 0
+          Width = 80
+          TabOrder = 1
+        end
+        object RadioButtonCOMSetTime: TRadioButton
+          Left = 0
+          Height = 23
+          Hint = 'Программа будет ожидать из COM порта метку времени,'#13#10'которая и будет установлена'
+          Top = 25
+          Width = 117
+          Caption = 'Отметка времени'
+          TabOrder = 2
+        end
+        object EditCOMSetTime: TEdit
+          Left = 127
+          Height = 23
+          Hint = 'Формат метки времени'#13#10'По умолчанию чч:мм:cc,000'
+          Top = 25
+          Width = 80
+          TabOrder = 3
+        end
+      end
+    end
+  end
+end

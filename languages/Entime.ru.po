@@ -1,0 +1,1972 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: ru\n"
+"X-Generator: Poedit 2.2.3\n"
+
+#: i18n.sadddayresults
+msgid "Добавить результаты дня"
+msgstr ""
+
+#: i18n.sbdstartlistfileexists
+msgid "Файл стартового протокола уже существует. Перезаписать?"
+msgstr ""
+
+#: i18n.scannotbackup
+msgid "Не удалось сделать бэкап, продолжить загрузку результатов?"
+msgstr ""
+
+#: i18n.scannotdeletefile
+msgid "Не удалось перезаписать файл"
+msgstr ""
+
+#: i18n.scat1
+msgid "Девушки"
+msgstr "Девушки"
+
+#: i18n.scat2
+msgid "Юниоры"
+msgstr "Юниоры"
+
+#: i18n.scat3
+msgid "Любители"
+msgstr "Любители"
+
+#: i18n.scat4
+msgid "Мастера"
+msgstr "Мастера"
+
+#: i18n.scat5
+msgid "Элита"
+msgstr "Элита"
+
+#: i18n.scat6
+msgid "Электро"
+msgstr "Электро"
+
+#: i18n.sclearallstatus
+msgid "Действительно убрать DNS/DNF/DSQ с участника номер"
+msgstr "Действительно убрать DNS/DNF/DSQ с участника номер"
+
+#: i18n.sclearallstatuslog
+msgid "DNS/DNF/DSQ убрано с участника номер"
+msgstr "DNS/DNF/DSQ убрано с участника номер"
+
+#: i18n.scleardsq
+msgid "Действительно убрать DSQ с участника номер"
+msgstr "Действительно убрать DSQ с участника номер"
+
+#: i18n.scleardsqlog
+msgid "DSQ убрана с участника номер"
+msgstr "DSQ убрана с участника номер"
+
+#: i18n.sclearresults
+msgid "Действительно удалить все результаты?"
+msgstr "Действительно удалить все результаты?"
+
+#: i18n.sclearstatus
+msgid "Действительно убрать DNS/DNF с участника номер"
+msgstr "Действительно убрать DNS/DNF с участника номер"
+
+#: i18n.sclearstatuslog
+msgid "DNS/DNF убрано с участника номер"
+msgstr "DNS/DNF убрано с участника номер"
+
+#: i18n.scomopenerror
+msgid "Не удалось открыть порт"
+msgstr ""
+
+#: i18n.sconfignotfound
+msgid "Файл настроек не найден, создание файла настроек по умолчанию"
+msgstr "Файл настроек не найден, создание файла настроек по умолчанию"
+
+#: i18n.scorrection
+msgctxt "i18n.scorrection"
+msgid "Поправка"
+msgstr "Поправка"
+
+#: i18n.scorrectionalreadyset
+msgid "поправка уже установлена. Перезаписать значение?"
+msgstr ""
+
+#: i18n.scurrentresults
+msgctxt "i18n.scurrentresults"
+msgid "Текущие результаты"
+msgstr "Текущие результаты"
+
+#: i18n.sdatabaseopenerror
+msgid "Ошибка открытия базы: "
+msgstr "Ошибка открытия базы: "
+
+#: i18n.sdbfileclosed
+msgid "Файл соревнований закрыт:"
+msgstr "Файл соревнований закрыт:"
+
+#: i18n.sdbfileopen
+msgid "Файл соревнований открыт:"
+msgstr "Файл соревнований открыт:"
+
+#: i18n.sdeleted
+msgid "удалён"
+msgstr "удалён"
+
+#: i18n.sdeletenumber
+msgid "Действительно удалить участника c номером"
+msgstr "Действительно удалить участника c номером"
+
+#: i18n.sdidnotfinish
+msgid "не финишировал"
+msgstr "не финишировал"
+
+#: i18n.sdidnotstart
+msgid "не стартовал"
+msgstr "не стартовал"
+
+#: i18n.sdidnotstartsetfinish
+msgid "не числится в списке стартовавших, но не финишировавших. Всё равно установить финишное время?"
+msgstr "не числится в списке стартовавших, но не финишировавших. Всё равно установить финишное время?"
+
+#: i18n.sdiffleader
+msgctxt "i18n.sdiffleader"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: i18n.sdisqualified
+msgid "дисквалифицирован"
+msgstr "дисквалифицирован"
+
+#: i18n.sdonotexist
+msgid "не существует"
+msgstr "не существует"
+
+#: i18n.senglish
+msgid "English"
+msgstr "English"
+
+#: i18n.senterstarttime
+msgid "Введите новое время старта для номера"
+msgstr ""
+
+#: i18n.sfilecopyerror
+msgctxt "i18n.sfilecopyerror"
+msgid "Ошибка создания файла финала"
+msgstr ""
+
+#: i18n.sfilesareequal
+msgctxt "i18n.sfilesareequal"
+msgid "Имя файла финала должно отличаться от имени файла квалификации"
+msgstr ""
+
+#: i18n.sfinalfileexists
+msgid "Файл финала уже существует. Перезаписать?"
+msgstr ""
+
+#: i18n.sfinishtime
+msgid "Финиш"
+msgstr "Финиш"
+
+#: i18n.sfinishtimeopenerror
+msgid "Неверный формат файла с результатами СУ"
+msgstr ""
+
+#: i18n.sfinishtimeset
+msgid "Установлено финишное время для номера"
+msgstr "Установлено финишное время для номера"
+
+#: i18n.sgeneratestartlist
+msgid "Стартовый протокол финального заезда сформирован"
+msgstr ""
+
+#: i18n.simportfinish
+#, fuzzy
+#| msgid "Импорт финиша"
+msgctxt "i18n.simportfinish"
+msgid "Импорт результатов"
+msgstr "Импорт финиша"
+
+#: i18n.simportfinishtime
+msgid "Финишное время для СУ"
+msgstr "Финишное время для СУ"
+
+#: i18n.simportstarttime
+msgid "Стартовый протокол для СУ"
+msgstr ""
+
+#: i18n.sincorrectcorrection
+msgctxt "i18n.sincorrectcorrection"
+msgid "Некорректное значение поправки, введите верное значение"
+msgstr "Некорректное значение поправки, введите верное значение"
+
+#: i18n.sloadcsvparticipants
+msgid "Список участников загружен"
+msgstr "Список участников загружен"
+
+#: i18n.sloaded
+#, fuzzy
+#| msgid "загружено"
+msgctxt "i18n.sloaded"
+msgid "загружен"
+msgstr "загружено"
+
+#: i18n.sloaded_o
+msgctxt "i18n.sloaded_o"
+msgid "загружено"
+msgstr ""
+
+#: i18n.sloadingconfig
+#| msgid "Загрузка настроек"
+msgid "Загрузка настроек из файла"
+msgstr "Загрузка настроек из файла"
+
+#: i18n.snewfilecreated
+msgid "Файл соревнований создан"
+msgstr "Файл соревнований создан"
+
+#: i18n.snewfileexistunknow
+msgid "Не удалось проверить существование указанного файла"
+msgstr "Не удалось проверить существование указанного файла"
+
+#: i18n.snewfilenotcreated
+msgid "Не удалось создать файл соревнований"
+msgstr "Не удалось создать файл соревнований"
+
+#: i18n.snumber
+msgctxt "i18n.snumber"
+msgid "Номер"
+msgstr "Номер"
+
+#: i18n.snumberu
+msgid "Номеру"
+msgstr ""
+
+#: i18n.sonstage
+msgid "на СУ"
+msgstr "на СУ"
+
+#: i18n.sparticipantwithnumber
+msgid "Участник с номером"
+msgstr "Участник с номером"
+
+#: i18n.spenalty
+msgctxt "i18n.spenalty"
+msgid "Штраф"
+msgstr "Штраф"
+
+#: i18n.spenaltytimeformat
+msgid "Штрафное время вводится в формате мм:сс или чч:мм:сс"
+msgstr "Штрафное время вводится в формате мм:сс или чч:мм:сс"
+
+#: i18n.splace
+msgctxt "i18n.splace"
+msgid "Место"
+msgstr "Место"
+
+#: i18n.squalificationresults
+msgid "По результатам квалификации"
+msgstr ""
+
+#: i18n.sreallydisqualifynumber
+msgid "Действительно дисквалифицировать участника под номером"
+msgstr "Действительно дисквалифицировать участника под номером"
+
+#: i18n.sresult
+msgctxt "i18n.sresult"
+msgid "Результат"
+msgstr "Результат"
+
+#: i18n.sresultscleared
+msgid "Результаты соревнований удалены!"
+msgstr "Результаты соревнований удалены!"
+
+#: i18n.sresultsexportedtofile
+#| msgid "Результаты экспортированны в файл"
+msgid "Финишный протокол экспортирован в файл"
+msgstr "Финишный протокол экспортирован в файл"
+
+#: i18n.sresultsthruexportedtofile
+msgid "Сквозной протокол экспортирован в файл"
+msgstr "Сквозной протокол экспортирован в файл"
+
+#: i18n.srussian
+msgid "Русский"
+msgstr "Русский"
+
+#: i18n.ssaveresults
+msgid "Сохранить результаты?"
+msgstr ""
+
+#: i18n.ssetcategoryname
+msgid "Проставить категории из списка участников в окно результатов?"
+msgstr "Проставить категории из списка участников в окно результатов?"
+
+#: i18n.ssetintervalwarning
+msgid "Интервал задаётся как целое неотрицательное число миллисекунд"
+msgstr "Интервал задаётся как целое неотрицательное число миллисекунд"
+
+#: i18n.ssettimetosu
+#, fuzzy
+#| msgid "Проставить время для СУ:"
+msgctxt "i18n.ssettimetosu"
+msgid "Проставить результаты для СУ:"
+msgstr "Проставить время для СУ:"
+
+#: i18n.sshowncategories
+msgid "Категории для показа в окне результатов:"
+msgstr "Категории для показа в окне результатов:"
+
+#: i18n.sstartfilecopyerror
+msgid "Ошибка создания стартового файла"
+msgstr ""
+
+#: i18n.sstartfilecreated
+msgid "Файл для стартовых ворот создан"
+msgstr ""
+
+#: i18n.sstartprogram
+msgid "Запуск программы"
+msgstr "Запуск программы"
+
+#: i18n.sstarttime
+msgctxt "i18n.sstarttime"
+msgid "Старт"
+msgstr "Старт"
+
+#: i18n.ssu
+msgid "СУ"
+msgstr "СУ"
+
+#: i18n.ssu1
+msgctxt "i18n.ssu1"
+msgid "СУ 1"
+msgstr "СУ 1"
+
+#: i18n.ssu2
+msgctxt "i18n.ssu2"
+msgid "СУ 2"
+msgstr "СУ 2"
+
+#: i18n.ssu3
+msgctxt "i18n.ssu3"
+msgid "СУ 3"
+msgstr "СУ 3"
+
+#: i18n.ssu4
+msgctxt "i18n.ssu4"
+msgid "СУ 4"
+msgstr "СУ 4"
+
+#: i18n.ssu5
+msgctxt "i18n.ssu5"
+msgid "СУ 5"
+msgstr "СУ 5"
+
+#: i18n.ssu6
+msgctxt "i18n.ssu6"
+msgid "СУ 6"
+msgstr "СУ 6"
+
+#: i18n.ssurewithnumber
+msgid "Уверены, что участник под номером"
+msgstr "Уверены, что участник под номером"
+
+#: i18n.stimetostart
+msgid "Время старта"
+msgstr ""
+
+#: i18n.stotal
+msgctxt "i18n.stotal"
+msgid "Общий"
+msgstr "Общий"
+
+#: i18n.supdateerror
+msgid "Ошибка обновления результатов: "
+msgstr "Ошибка обновления результатов: "
+
+#: i18n.supdatefinishtime
+msgid "Обновить финишное время для номера"
+msgstr "Обновить финишное время для номера"
+
+#: tloraform.accopy.caption
+msgctxt "tloraform.accopy.caption"
+msgid "Копировать"
+msgstr ""
+
+#: tloraform.caption
+msgid "LoRaForm"
+msgstr ""
+
+#: tloraform.rxdbgridlora.columns[0].title.caption
+#, fuzzy
+msgctxt "tloraform.rxdbgridlora.columns[0].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tloraform.rxdbgridlora.columns[1].title.caption
+#, fuzzy
+msgctxt "tloraform.rxdbgridlora.columns[1].title.caption"
+msgid "Старт"
+msgstr "Старт"
+
+#: tloraform.rxdbgridlora.columns[2].title.caption
+#, fuzzy
+msgctxt "tloraform.rxdbgridlora.columns[2].title.caption"
+msgid "Поправка"
+msgstr "Поправка"
+
+#: tloraform.rxdbgridlora.columns[3].title.caption
+msgid "Установлено"
+msgstr ""
+
+#: tloraform.rxdbgridlora.columns[4].title.caption
+#, fuzzy
+msgctxt "tloraform.rxdbgridlora.columns[4].title.caption"
+msgid "Время"
+msgstr "Время"
+
+#: tloraform.rxdbgridlora.hint
+msgctxt "tloraform.rxdbgridlora.hint"
+msgid "Двойной клик на строке с нужной поправкой заносит её в основную таблицу"
+msgstr ""
+
+#: tmainform.acclearresults.caption
+msgid "Очистить результаты"
+msgstr "Очистить результаты"
+
+#: tmainform.acclearresults.hint
+msgid "Очистить результаты соревнований и оставить остальную информацию об участниках"
+msgstr "Очистить результаты соревнований и оставить остальную информацию об участниках"
+
+#: tmainform.accomclose.caption
+msgctxt "tmainform.accomclose.caption"
+msgid "Закрыть COM порт"
+msgstr "Закрыть COM порт"
+
+#: tmainform.accomclose.hint
+msgctxt "tmainform.accomclose.hint"
+msgid "Закрыть COM порт"
+msgstr "Закрыть COM порт"
+
+#: tmainform.accomopen.caption
+msgid "Открыть COM порт"
+msgstr "Открыть COM порт"
+
+#: tmainform.accomopen.hint
+msgid "Открыть COM порт для работы"
+msgstr "Открыть COM порт для работы"
+
+#: tmainform.accomsetup.caption
+msgid "Настройка"
+msgstr "Настройка"
+
+#: tmainform.accomsetup.hint
+msgid "Настройка COM порта для работы с подключаемым устройством"
+msgstr "Настройка COM порта для работы с подключаемым устройством"
+
+#: tmainform.acgeneratestarttime.caption
+msgid "Сформировать стартовый протокол"
+msgstr ""
+
+#: tmainform.acloraclear.caption
+#, fuzzy
+msgctxt "tmainform.acloraclear.caption"
+msgid "Очистить"
+msgstr "Очистить"
+
+#: tmainform.acloraclear.hint
+msgid "Убирает ненужные значение поправки"
+msgstr ""
+
+#: tmainform.acrunsettings.caption
+msgctxt "tmainform.acrunsettings.caption"
+msgid "Настройки"
+msgstr "Настройки"
+
+#: tmainform.acsetclear.caption
+msgid "Очистить статус"
+msgstr "Очистить статус"
+
+#: tmainform.acsetdnf.caption
+msgctxt "tmainform.acsetdnf.caption"
+msgid "DNF"
+msgstr "DNF"
+
+#: tmainform.acsetdnfontrace.caption
+msgid "Не финишировал"
+msgstr "Не финишировал"
+
+#: tmainform.acsetdns.caption
+msgctxt "tmainform.acsetdns.caption"
+msgid "DNS"
+msgstr "DNS"
+
+#: tmainform.acsetdnscor.caption
+msgid "Не стартовал"
+msgstr "Не стартовал"
+
+#: tmainform.acsetdsq.caption
+msgctxt "tmainform.acsetdsq.caption"
+msgid "DSQ"
+msgstr "DSQ"
+
+#: tmainform.acsetfinish.caption
+msgid "Записать"
+msgstr "Записать"
+
+#: tmainform.acsetstarttime.caption
+msgctxt "tmainform.acsetstarttime.caption"
+msgid "Изменить время старта"
+msgstr ""
+
+#: tmainform.acsyncmodule.caption
+msgid "Синхронизировать модуль"
+msgstr ""
+
+#: tmainform.acupdateresults.caption
+msgid "Обновить результаты"
+msgstr "Обновить результаты"
+
+#: tmainform.acviewmemo.caption
+#, fuzzy
+msgctxt "tmainform.acviewmemo.caption"
+msgid "Отладка"
+msgstr "Отладка"
+
+#: tmainform.acviewmemo.hint
+#, fuzzy
+msgctxt "tmainform.acviewmemo.hint"
+msgid "Показать или скрыть отладочную панель"
+msgstr "Показать или скрыть отладочную панель"
+
+#: tmainform.acviewresults.caption
+msgctxt "tmainform.acviewresults.caption"
+msgid "Результаты"
+msgstr "Результаты"
+
+#: tmainform.acviewresults.hint
+msgid "Показать или скрыть окно с результатами"
+msgstr "Показать или скрыть окно с результатами"
+
+#: tmainform.buttonclearmemo.caption
+#, fuzzy
+msgctxt "tmainform.buttonclearmemo.caption"
+msgid "Очистить"
+msgstr "Очистить"
+
+#: tmainform.buttonsavememo.caption
+msgid "Сохранить"
+msgstr ""
+
+#: tmainform.currentsu.caption
+msgid "Текущий СУ"
+msgstr "Текущий СУ"
+
+#: tmainform.editcopy1.caption
+msgctxt "tmainform.editcopy1.caption"
+msgid "Копиров&ать"
+msgstr ""
+
+#: tmainform.editcopy1.hint
+msgctxt "tmainform.editcopy1.hint"
+msgid "Копировать"
+msgstr ""
+
+#: tmainform.editcopy2.caption
+msgctxt "tmainform.editcopy2.caption"
+msgid "Копиров&ать"
+msgstr ""
+
+#: tmainform.editcopy2.hint
+msgctxt "tmainform.editcopy2.hint"
+msgid "Копировать"
+msgstr ""
+
+#: tmainform.empty.caption
+msgid "Empty"
+msgstr ""
+
+#: tmainform.fileclose.caption
+msgctxt "tmainform.fileclose.caption"
+msgid "Закрыть"
+msgstr "Закрыть"
+
+#: tmainform.fileexit.caption
+msgid "В&ыход"
+msgstr "В&ыход"
+
+#: tmainform.fileexit.hint
+msgid "Выход"
+msgstr "Выход"
+
+#: tmainform.fileexportallresults.caption
+msgid "Экспорт результатов дня ..."
+msgstr ""
+
+#: tmainform.fileexportallresults.dialog.title
+msgid "Экспорт результатов"
+msgstr ""
+
+#: tmainform.fileexportallresults.hint
+msgid ""
+"Экспорт результатов этапа для суммирования\n"
+"с другим соревнованием/днём соревнования\n"
+msgstr ""
+
+#: tmainform.fileexportbdstartlist.caption
+msgctxt "tmainform.fileexportbdstartlist.caption"
+msgid "Экспорт стартового протокола ..."
+msgstr ""
+
+#: tmainform.fileexportbdstartlist.dialog.title
+msgctxt "tmainform.fileexportbdstartlist.dialog.title"
+msgid "Создать файл для стартовых ворот"
+msgstr ""
+
+#: tmainform.fileexportbdstartlist.hint
+msgctxt "tmainform.fileexportbdstartlist.hint"
+msgid "Создать файл для стартовых ворот"
+msgstr ""
+
+#: tmainform.fileexportfull.caption
+msgid "Экспорт финишного протокола ..."
+msgstr "Экспорт финишного протокола ..."
+
+#: tmainform.fileexportfull.dialog.title
+msgid "Экспорт финишного протокола"
+msgstr "Экспорт финишного протокола"
+
+#: tmainform.fileexportfull.hint
+msgid "Формирование финишного протокола в виде электронной таблицы"
+msgstr "Формирование финишного протокола в виде электронной таблицы"
+
+#: tmainform.fileexportstageresults.caption
+msgctxt "tmainform.fileexportstageresults.caption"
+msgid "Экспорт результатов этапа ..."
+msgstr ""
+
+#: tmainform.fileexportstageresults.dialog.title
+msgctxt "tmainform.fileexportstageresults.dialog.title"
+msgid "Экспорт результатов этапа"
+msgstr ""
+
+#: tmainform.fileexportstageresults.hint
+msgid "Экспорт результатов этапа для переноса в другую БД"
+msgstr ""
+
+#: tmainform.fileexportsumdays.caption
+msgid "Сохранить &как ..."
+msgstr ""
+
+#: tmainform.fileexportsumdays.dialog.title
+msgid "Сохранить сумму результатов как"
+msgstr ""
+
+#: tmainform.fileexportsumdays.hint
+msgid "Сохранить как..."
+msgstr ""
+
+#: tmainform.fileexportthru.caption
+msgid "Экспорт сквозного протокола ..."
+msgstr "Экспорт сквозного протокола ..."
+
+#: tmainform.fileexportthru.dialog.title
+msgid "Экспорт сквозного протокола"
+msgstr "Экспорт сквозного протокола"
+
+#: tmainform.fileexportthru.hint
+msgid "Формирование сквозного протокола в виде электронной таблицы"
+msgstr "Формирование сквозного протокола в виде электронной таблицы"
+
+#: tmainform.filegeneratefinal.caption
+msgid "Создать финальный заезд..."
+msgstr ""
+
+#: tmainform.filegeneratefinal.dialog.title
+msgctxt "tmainform.filegeneratefinal.dialog.title"
+msgid "Создать финальный заезд по результатам квалификации"
+msgstr ""
+
+#: tmainform.filegeneratefinal.hint
+msgctxt "tmainform.filegeneratefinal.hint"
+msgid "Создать финальный заезд по результатам квалификации"
+msgstr ""
+
+#: tmainform.filenewdb.caption
+msgid "Н&овое соревнование ..."
+msgstr "Н&овое соревнование ..."
+
+#: tmainform.filenewdb.dialog.title
+msgctxt "tmainform.filenewdb.dialog.title"
+msgid "Создать новый файл соревнований"
+msgstr "Создать новый файл соревнований"
+
+#: tmainform.filenewdb.hint
+msgctxt "tmainform.filenewdb.hint"
+msgid "Создать новый файл соревнований"
+msgstr "Создать новый файл соревнований"
+
+#: tmainform.fileopencsv.caption
+msgid "О&ткрыть список участников ..."
+msgstr "О&ткрыть список участников ..."
+
+#: tmainform.fileopencsv.dialog.title
+msgid "Открыть существующий файл со списком участников"
+msgstr "Открыть существующий файл со списком участников"
+
+#: tmainform.fileopencsv.hint
+msgid "Открыть список участников в CSV формате"
+msgstr "Открыть список участников в CSV формате"
+
+#: tmainform.fileopencsvresult.caption
+#, fuzzy
+#| msgid "Импорт результатов ..."
+msgid "Загрузить результаты ..."
+msgstr "Импорт результатов ..."
+
+#: tmainform.fileopencsvresult.hint
+msgid "Загрузить результаты в файл соревнований"
+msgstr "Загрузить результаты в файл соревнований"
+
+#: tmainform.fileopencsvsum.caption
+msgid "Открыть сумму результатов ..."
+msgstr ""
+
+#: tmainform.fileopencsvsum.dialog.title
+msgid "Открыть существующий файл с суммой результатов"
+msgstr ""
+
+#: tmainform.fileopencsvsum.hint
+msgid "Открыть сумму результатов дня/предыдущего соревнования"
+msgstr ""
+
+#: tmainform.fileopendb.caption
+msgid "О&ткрыть ..."
+msgstr "О&ткрыть ..."
+
+#: tmainform.fileopendb.dialog.title
+msgctxt "tmainform.fileopendb.dialog.title"
+msgid "Открыть существующий файл соревнований"
+msgstr "Открыть существующий файл соревнований"
+
+#: tmainform.fileopendb.hint
+msgctxt "tmainform.fileopendb.hint"
+msgid "Открыть существующий файл соревнований"
+msgstr "Открыть существующий файл соревнований"
+
+#: tmainform.generatesumdays.caption
+msgid "Суммировать результаты нескольких дней ..."
+msgstr ""
+
+#: tmainform.gridresult1.columns[0].title.caption
+msgctxt "tmainform.gridresult1.columns[0].title.caption"
+msgid "Категория"
+msgstr "Категория"
+
+#: tmainform.gridresult1.columns[1].title.caption
+msgctxt "tmainform.gridresult1.columns[1].title.caption"
+msgid "Место"
+msgstr "Место"
+
+#: tmainform.gridresult1.columns[2].title.caption
+msgctxt "tmainform.gridresult1.columns[2].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tmainform.gridresult1.columns[3].title.caption
+msgctxt "tmainform.gridresult1.columns[3].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tmainform.gridresult1.columns[4].title.caption
+msgctxt "tmainform.gridresult1.columns[4].title.caption"
+msgid "Штраф"
+msgstr "Штраф"
+
+#: tmainform.gridresult1.columns[5].title.caption
+msgctxt "tmainform.gridresult1.columns[5].title.caption"
+msgid "Результат"
+msgstr "Результат"
+
+#: tmainform.gridresult1.columns[6].title.caption
+msgctxt "tmainform.gridresult1.columns[6].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tmainform.gridresult2.columns[0].title.caption
+msgctxt "tmainform.gridresult2.columns[0].title.caption"
+msgid "Категория"
+msgstr "Категория"
+
+#: tmainform.gridresult2.columns[1].title.caption
+msgctxt "tmainform.gridresult2.columns[1].title.caption"
+msgid "Место"
+msgstr "Место"
+
+#: tmainform.gridresult2.columns[2].title.caption
+msgctxt "tmainform.gridresult2.columns[2].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tmainform.gridresult2.columns[3].title.caption
+msgctxt "tmainform.gridresult2.columns[3].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tmainform.gridresult2.columns[4].title.caption
+msgctxt "tmainform.gridresult2.columns[4].title.caption"
+msgid "Штраф"
+msgstr "Штраф"
+
+#: tmainform.gridresult2.columns[5].title.caption
+msgctxt "tmainform.gridresult2.columns[5].title.caption"
+msgid "Результат"
+msgstr "Результат"
+
+#: tmainform.gridresult2.columns[6].title.caption
+msgctxt "tmainform.gridresult2.columns[6].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tmainform.gridresult3.columns[0].title.caption
+msgctxt "tmainform.gridresult3.columns[0].title.caption"
+msgid "Категория"
+msgstr "Категория"
+
+#: tmainform.gridresult3.columns[1].title.caption
+msgctxt "tmainform.gridresult3.columns[1].title.caption"
+msgid "Место"
+msgstr "Место"
+
+#: tmainform.gridresult3.columns[2].title.caption
+msgctxt "tmainform.gridresult3.columns[2].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tmainform.gridresult3.columns[3].title.caption
+msgctxt "tmainform.gridresult3.columns[3].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tmainform.gridresult3.columns[4].title.caption
+msgctxt "tmainform.gridresult3.columns[4].title.caption"
+msgid "Штраф"
+msgstr "Штраф"
+
+#: tmainform.gridresult3.columns[5].title.caption
+msgctxt "tmainform.gridresult3.columns[5].title.caption"
+msgid "Результат"
+msgstr "Результат"
+
+#: tmainform.gridresult3.columns[6].title.caption
+msgctxt "tmainform.gridresult3.columns[6].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tmainform.gridresult4.columns[0].title.caption
+msgctxt "tmainform.gridresult4.columns[0].title.caption"
+msgid "Категория"
+msgstr "Категория"
+
+#: tmainform.gridresult4.columns[1].title.caption
+msgctxt "tmainform.gridresult4.columns[1].title.caption"
+msgid "Место"
+msgstr "Место"
+
+#: tmainform.gridresult4.columns[2].title.caption
+msgctxt "tmainform.gridresult4.columns[2].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tmainform.gridresult4.columns[3].title.caption
+msgctxt "tmainform.gridresult4.columns[3].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tmainform.gridresult4.columns[4].title.caption
+msgctxt "tmainform.gridresult4.columns[4].title.caption"
+msgid "Штраф"
+msgstr "Штраф"
+
+#: tmainform.gridresult4.columns[5].title.caption
+msgctxt "tmainform.gridresult4.columns[5].title.caption"
+msgid "Результат"
+msgstr "Результат"
+
+#: tmainform.gridresult4.columns[6].title.caption
+msgctxt "tmainform.gridresult4.columns[6].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tmainform.gridresult5.columns[0].title.caption
+msgctxt "tmainform.gridresult5.columns[0].title.caption"
+msgid "Категория"
+msgstr "Категория"
+
+#: tmainform.gridresult5.columns[1].title.caption
+msgctxt "tmainform.gridresult5.columns[1].title.caption"
+msgid "Место"
+msgstr "Место"
+
+#: tmainform.gridresult5.columns[2].title.caption
+msgctxt "tmainform.gridresult5.columns[2].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tmainform.gridresult5.columns[3].title.caption
+msgctxt "tmainform.gridresult5.columns[3].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tmainform.gridresult5.columns[4].title.caption
+msgctxt "tmainform.gridresult5.columns[4].title.caption"
+msgid "Штраф"
+msgstr "Штраф"
+
+#: tmainform.gridresult5.columns[5].title.caption
+msgctxt "tmainform.gridresult5.columns[5].title.caption"
+msgid "Результат"
+msgstr "Результат"
+
+#: tmainform.gridresult5.columns[6].title.caption
+msgctxt "tmainform.gridresult5.columns[6].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tmainform.gridresult6.columns[0].title.caption
+msgctxt "tmainform.gridresult6.columns[0].title.caption"
+msgid "Категория"
+msgstr "Категория"
+
+#: tmainform.gridresult6.columns[1].title.caption
+msgctxt "tmainform.gridresult6.columns[1].title.caption"
+msgid "Место"
+msgstr "Место"
+
+#: tmainform.gridresult6.columns[2].title.caption
+msgctxt "tmainform.gridresult6.columns[2].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tmainform.gridresult6.columns[3].title.caption
+msgctxt "tmainform.gridresult6.columns[3].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tmainform.gridresult6.columns[4].title.caption
+msgctxt "tmainform.gridresult6.columns[4].title.caption"
+msgid "Штраф"
+msgstr "Штраф"
+
+#: tmainform.gridresult6.columns[5].title.caption
+msgctxt "tmainform.gridresult6.columns[5].title.caption"
+msgid "Результат"
+msgstr "Результат"
+
+#: tmainform.gridresult6.columns[6].title.caption
+msgctxt "tmainform.gridresult6.columns[6].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tmainform.gridresult7.columns[0].title.caption
+msgctxt "tmainform.gridresult7.columns[0].title.caption"
+msgid "Категория"
+msgstr "Категория"
+
+#: tmainform.gridresult7.columns[1].title.caption
+msgctxt "tmainform.gridresult7.columns[1].title.caption"
+msgid "Место"
+msgstr "Место"
+
+#: tmainform.gridresult7.columns[2].title.caption
+msgctxt "tmainform.gridresult7.columns[2].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tmainform.gridresult7.columns[3].title.caption
+msgctxt "tmainform.gridresult7.columns[3].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tmainform.gridresult7.columns[4].title.caption
+msgctxt "tmainform.gridresult7.columns[4].title.caption"
+msgid "Результат"
+msgstr "Результат"
+
+#: tmainform.gridresult7.columns[5].title.caption
+msgctxt "tmainform.gridresult7.columns[5].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tmainform.gridresult8.columns[0].title.caption
+msgctxt "tmainform.gridresult8.columns[0].title.caption"
+msgid "Категория"
+msgstr "Категория"
+
+#: tmainform.gridresult8.columns[10].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresult8.columns[10].title.caption"
+msgid "Результат"
+msgstr "Результат"
+
+#: tmainform.gridresult8.columns[11].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresult8.columns[11].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tmainform.gridresult8.columns[1].title.caption
+msgctxt "tmainform.gridresult8.columns[1].title.caption"
+msgid "Место"
+msgstr "Место"
+
+#: tmainform.gridresult8.columns[2].title.caption
+msgctxt "tmainform.gridresult8.columns[2].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tmainform.gridresult8.columns[3].title.caption
+msgctxt "tmainform.gridresult8.columns[3].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tmainform.gridresult8.columns[4].title.caption
+#, fuzzy
+#| msgid "Результат"
+msgctxt "tmainform.gridresult8.columns[4].title.caption"
+msgid "СУ 1"
+msgstr "Результат"
+
+#: tmainform.gridresult8.columns[5].title.caption
+#, fuzzy
+#| msgid "Отставание"
+msgctxt "tmainform.gridresult8.columns[5].title.caption"
+msgid "СУ 2"
+msgstr "Отставание"
+
+#: tmainform.gridresult8.columns[6].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresult8.columns[6].title.caption"
+msgid "СУ 3"
+msgstr "СУ 3"
+
+#: tmainform.gridresult8.columns[7].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresult8.columns[7].title.caption"
+msgid "СУ 4"
+msgstr "СУ 4"
+
+#: tmainform.gridresult8.columns[8].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresult8.columns[8].title.caption"
+msgid "СУ 5"
+msgstr "СУ 5"
+
+#: tmainform.gridresult8.columns[9].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresult8.columns[9].title.caption"
+msgid "СУ 6"
+msgstr "СУ 6"
+
+#: tmainform.groupbox1.caption
+msgid "Количество участников"
+msgstr "Количество участников"
+
+#: tmainform.groupbox2.caption
+msgid "Сейчас на трассе"
+msgstr "Сейчас на трассе"
+
+#: tmainform.lorapopupdefault.caption
+msgid "По умолчанию"
+msgstr ""
+
+#: tmainform.lorapopupdefault.hint
+msgid "Показать только необработанные результаты"
+msgstr ""
+
+#: tmainform.lorapopuphideselected.caption
+msgid "Скрыть выбранное"
+msgstr ""
+
+#: tmainform.lorapopuphideselected.hint
+msgid "Скрыть выбранное значение из списка"
+msgstr ""
+
+#: tmainform.lorapopupopen.caption
+msgid "В новом окне"
+msgstr ""
+
+#: tmainform.lorapopupopen.hint
+msgid ""
+"Показать все результаты в новом окне,\n"
+"включая дополнительную информацию\n"
+msgstr ""
+
+#: tmainform.lorapopupshow15min.caption
+msgid "Всё за 15 минут"
+msgstr ""
+
+#: tmainform.lorapopupshow15min.hint
+msgid "Показать все результаты за последние 15 минут"
+msgstr ""
+
+#: tmainform.lorapopupshowall.caption
+msgid "Показать всё"
+msgstr ""
+
+#: tmainform.lorapopupshowall.hint
+msgid "Показать все результаты"
+msgstr ""
+
+#: tmainform.lorapopupshowfromstart.caption
+msgid "Всё за соревнование"
+msgstr ""
+
+#: tmainform.lorapopupshowfromstart.hint
+msgid "Показать все результаты от начала соревнования"
+msgstr ""
+
+#: tmainform.menuitem3.caption
+msgid "Вид"
+msgstr "Вид"
+
+#: tmainform.menuitemabout.caption
+msgid "О программе"
+msgstr "О программе"
+
+#: tmainform.menuitemcompetition.caption
+msgid "Соревнование"
+msgstr ""
+
+#: tmainform.menuitemdebug.caption
+#, fuzzy
+msgctxt "tmainform.menuitemdebug.caption"
+msgid "Отладка"
+msgstr "Отладка"
+
+#: tmainform.menuitemfile.caption
+msgid "Файл"
+msgstr "Файл"
+
+#: tmainform.menuitemhelp.caption
+msgid "Помощь"
+msgstr "Помощь"
+
+#: tmainform.menuitemmonitormode.caption
+msgctxt "tmainform.menuitemmonitormode.caption"
+msgid "Режим монитора"
+msgstr ""
+
+#: tmainform.menuitemopencsv.caption
+msgid "Загрузить список участников ..."
+msgstr ""
+
+#: tmainform.menuitemopenrecent.caption
+msgid "Открыть недавнее"
+msgstr "Открыть недавнее"
+
+#: tmainform.menuitemtools.caption
+msgid "Инструменты"
+msgstr "Инструменты"
+
+#: tmainform.panellora.caption
+msgid "Время от стартовой отсечки"
+msgstr ""
+
+#: tmainform.pmdeletenumber.caption
+msgid "Удалить участника"
+msgstr "Удалить участника"
+
+#: tmainform.pmsetstatus.caption
+msgid "Установить ..."
+msgstr "Установить ..."
+
+#: tmainform.racemodelabel.caption
+msgid "Режим гонки"
+msgstr "Режим гонки"
+
+#: tmainform.racemodelabel.hint
+msgid ""
+"В режиме гонки редактирование таблицы запрещено\n"
+"При нажатии на пробел фиксируется время\n"
+msgstr ""
+"В режиме гонки редактирование таблицы запрещено\n"
+"При нажатии на пробел фиксируется время\n"
+
+#: tmainform.radiocur1.caption
+msgid "1"
+msgstr "1"
+
+#: tmainform.radiocur2.caption
+msgid "2"
+msgstr "2"
+
+#: tmainform.radiocur3.caption
+msgid "3"
+msgstr "3"
+
+#: tmainform.radiocur4.caption
+msgid "4"
+msgstr "4"
+
+#: tmainform.radiocur5.caption
+msgid "5"
+msgstr "5"
+
+#: tmainform.radiocur6.caption
+msgid "6"
+msgstr "6"
+
+#: tmainform.resultclear.caption
+msgctxt "tmainform.resultclear.caption"
+msgid "Очистить"
+msgstr "Очистить"
+
+#: tmainform.rxdbgrid1.columns[0].title.caption
+msgid "id"
+msgstr ""
+
+#: tmainform.rxdbgrid1.columns[10].title.caption
+msgid "СУ 1|Поправка"
+msgstr "СУ 1|Поправка"
+
+#: tmainform.rxdbgrid1.columns[11].title.caption
+msgid "СУ 1|Старт"
+msgstr "СУ 1|Старт"
+
+#: tmainform.rxdbgrid1.columns[12].title.caption
+msgid "СУ 1|Финиш"
+msgstr "СУ 1|Финиш"
+
+#: tmainform.rxdbgrid1.columns[13].title.caption
+msgid "СУ 1|Штраф"
+msgstr "СУ 1|Штраф"
+
+#: tmainform.rxdbgrid1.columns[14].title.caption
+msgid "СУ 1|Результат"
+msgstr "СУ 1|Результат"
+
+#: tmainform.rxdbgrid1.columns[15].title.caption
+msgid "СУ 1|Отставание"
+msgstr "СУ 1|Отставание"
+
+#: tmainform.rxdbgrid1.columns[16].title.caption
+msgid "СУ 1|Место"
+msgstr "СУ 1|Место"
+
+#: tmainform.rxdbgrid1.columns[17].title.caption
+msgid "СУ 2|Поправка"
+msgstr "СУ 2|Поправка"
+
+#: tmainform.rxdbgrid1.columns[18].title.caption
+msgid "СУ 2|Старт"
+msgstr "СУ 2|Старт"
+
+#: tmainform.rxdbgrid1.columns[19].title.caption
+msgid "СУ 2|Финиш"
+msgstr "СУ 2|Финиш"
+
+#: tmainform.rxdbgrid1.columns[1].title.caption
+msgctxt "tmainform.rxdbgrid1.columns[1].title.caption"
+msgid "Категория"
+msgstr "Категория"
+
+#: tmainform.rxdbgrid1.columns[20].title.caption
+msgid "СУ 2|Штраф"
+msgstr "СУ 2|Штраф"
+
+#: tmainform.rxdbgrid1.columns[21].title.caption
+msgid "СУ 2|Результат"
+msgstr "СУ 2|Результат"
+
+#: tmainform.rxdbgrid1.columns[22].title.caption
+msgid "СУ 2|Отставание"
+msgstr "СУ 2|Отставание"
+
+#: tmainform.rxdbgrid1.columns[23].title.caption
+msgid "СУ 2|Место"
+msgstr "СУ 2|Место"
+
+#: tmainform.rxdbgrid1.columns[24].title.caption
+msgid "СУ 3|Поправка"
+msgstr "СУ 3|Поправка"
+
+#: tmainform.rxdbgrid1.columns[25].title.caption
+msgid "СУ 3|Старт"
+msgstr "СУ 3|Старт"
+
+#: tmainform.rxdbgrid1.columns[26].title.caption
+msgid "СУ 3|Финиш"
+msgstr "СУ 3|Финиш"
+
+#: tmainform.rxdbgrid1.columns[27].title.caption
+msgid "СУ 3|Штраф"
+msgstr "СУ 3|Штраф"
+
+#: tmainform.rxdbgrid1.columns[28].title.caption
+msgid "СУ 3|Результат"
+msgstr "СУ 3|Результат"
+
+#: tmainform.rxdbgrid1.columns[29].title.caption
+msgid "СУ 3|Отставание"
+msgstr "СУ 3|Отставание"
+
+#: tmainform.rxdbgrid1.columns[2].title.caption
+msgctxt "tmainform.rxdbgrid1.columns[2].title.caption"
+msgid "Место"
+msgstr "Место"
+
+#: tmainform.rxdbgrid1.columns[30].title.caption
+msgid "СУ 3|Место"
+msgstr "СУ 3|Место"
+
+#: tmainform.rxdbgrid1.columns[31].title.caption
+msgid "СУ 4|Поправка"
+msgstr "СУ 4|Поправка"
+
+#: tmainform.rxdbgrid1.columns[32].title.caption
+msgid "СУ 4|Старт"
+msgstr "СУ 4|Старт"
+
+#: tmainform.rxdbgrid1.columns[33].title.caption
+msgid "СУ 4|Финиш"
+msgstr "СУ 4|Финиш"
+
+#: tmainform.rxdbgrid1.columns[34].title.caption
+msgid "СУ 4|Штраф"
+msgstr "СУ 4|Штраф"
+
+#: tmainform.rxdbgrid1.columns[35].title.caption
+msgid "СУ 4|Результат"
+msgstr "СУ 4|Результат"
+
+#: tmainform.rxdbgrid1.columns[36].title.caption
+msgid "СУ 4|Отставание"
+msgstr "СУ 4|Отставание"
+
+#: tmainform.rxdbgrid1.columns[37].title.caption
+msgid "СУ 4|Место"
+msgstr "СУ 4|Место"
+
+#: tmainform.rxdbgrid1.columns[38].title.caption
+msgid "СУ 5|Поправка"
+msgstr "СУ 5|Поправка"
+
+#: tmainform.rxdbgrid1.columns[39].title.caption
+msgid "СУ 5|Старт"
+msgstr "СУ 5|Старт"
+
+#: tmainform.rxdbgrid1.columns[3].title.caption
+msgctxt "tmainform.rxdbgrid1.columns[3].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tmainform.rxdbgrid1.columns[40].title.caption
+msgid "СУ 5|Финиш"
+msgstr "СУ 5|Финиш"
+
+#: tmainform.rxdbgrid1.columns[41].title.caption
+msgid "СУ 5|Штраф"
+msgstr "СУ 5|Штраф"
+
+#: tmainform.rxdbgrid1.columns[42].title.caption
+msgid "СУ 5|Результат"
+msgstr "СУ 5|Результат"
+
+#: tmainform.rxdbgrid1.columns[43].title.caption
+msgid "СУ 5|Отставание"
+msgstr "СУ 5|Отставание"
+
+#: tmainform.rxdbgrid1.columns[44].title.caption
+msgid "СУ 5|Место"
+msgstr "СУ 5|Место"
+
+#: tmainform.rxdbgrid1.columns[45].title.caption
+msgid "СУ 6|Поправка"
+msgstr "СУ 6|Поправка"
+
+#: tmainform.rxdbgrid1.columns[46].title.caption
+msgid "СУ 6|Старт"
+msgstr "СУ 6|Старт"
+
+#: tmainform.rxdbgrid1.columns[47].title.caption
+msgid "СУ 6|Финиш"
+msgstr "СУ 6|Финиш"
+
+#: tmainform.rxdbgrid1.columns[48].title.caption
+msgid "СУ 6|Штраф"
+msgstr "СУ 6|Штраф"
+
+#: tmainform.rxdbgrid1.columns[49].title.caption
+msgid "СУ 6|Результат"
+msgstr "СУ 6|Результат"
+
+#: tmainform.rxdbgrid1.columns[4].title.caption
+msgid "Rfid"
+msgstr "Rfid"
+
+#: tmainform.rxdbgrid1.columns[50].title.caption
+msgid "СУ 6|Отставание"
+msgstr "СУ 6|Отставание"
+
+#: tmainform.rxdbgrid1.columns[51].title.caption
+msgid "СУ 6|Место"
+msgstr "СУ 6|Место"
+
+#: tmainform.rxdbgrid1.columns[52].title.caption
+msgid "Итог"
+msgstr "Итог"
+
+#: tmainform.rxdbgrid1.columns[53].title.caption
+msgctxt "tmainform.rxdbgrid1.columns[53].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tmainform.rxdbgrid1.columns[54].title.caption
+msgid "status"
+msgstr ""
+
+#: tmainform.rxdbgrid1.columns[5].title.caption
+msgctxt "tmainform.rxdbgrid1.columns[5].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tmainform.rxdbgrid1.columns[6].title.caption
+msgid "Никнейм"
+msgstr "Никнейм"
+
+#: tmainform.rxdbgrid1.columns[7].title.caption
+msgid "Возраст"
+msgstr "Возраст"
+
+#: tmainform.rxdbgrid1.columns[8].title.caption
+msgid "Команда"
+msgstr "Команда"
+
+#: tmainform.rxdbgrid1.columns[9].title.caption
+msgid "Город"
+msgstr "Город"
+
+#: tmainform.rxdbgridcorrection.columns[0].title.caption
+msgctxt "tmainform.rxdbgridcorrection.columns[0].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tmainform.rxdbgridcorrection.columns[1].title.caption
+msgctxt "tmainform.rxdbgridcorrection.columns[1].title.caption"
+msgid "Поправка"
+msgstr "Поправка"
+
+#: tmainform.rxdbgridlora.columns[0].title.caption
+#, fuzzy
+msgctxt "tmainform.rxdbgridlora.columns[0].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tmainform.rxdbgridlora.columns[1].title.caption
+#, fuzzy
+msgctxt "tmainform.rxdbgridlora.columns[1].title.caption"
+msgid "Старт"
+msgstr "Старт"
+
+#: tmainform.rxdbgridlora.columns[2].title.caption
+#, fuzzy
+msgctxt "tmainform.rxdbgridlora.columns[2].title.caption"
+msgid "Поправка"
+msgstr "Поправка"
+
+#: tmainform.rxdbgridlora.hint
+msgctxt "tmainform.rxdbgridlora.hint"
+msgid "Двойной клик на строке с нужной поправкой заносит её в основную таблицу"
+msgstr ""
+
+#: tmainform.sgridresult.columns[0].title.caption
+msgctxt "tmainform.sgridresult.columns[0].title.caption"
+msgid "Время"
+msgstr "Время"
+
+#: tmainform.sgridresult.columns[1].title.caption
+msgctxt "tmainform.sgridresult.columns[1].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tmainform.sgridresult.columns[2].title.caption
+msgid "Ввод"
+msgstr ""
+
+#: tmainform.sheetstage1.caption
+msgctxt "tmainform.sheetstage1.caption"
+msgid "СУ 1"
+msgstr "СУ 1"
+
+#: tmainform.sheetstage2.caption
+msgctxt "tmainform.sheetstage2.caption"
+msgid "СУ 2"
+msgstr "СУ 2"
+
+#: tmainform.sheetstage3.caption
+msgctxt "tmainform.sheetstage3.caption"
+msgid "СУ 3"
+msgstr "СУ 3"
+
+#: tmainform.sheetstage4.caption
+msgctxt "tmainform.sheetstage4.caption"
+msgid "СУ 4"
+msgstr "СУ 4"
+
+#: tmainform.sheetstage5.caption
+msgctxt "tmainform.sheetstage5.caption"
+msgid "СУ 5"
+msgstr "СУ 5"
+
+#: tmainform.sheetstage6.caption
+msgctxt "tmainform.sheetstage6.caption"
+msgid "СУ 6"
+msgstr "СУ 6"
+
+#: tmainform.sheetstagesum.caption
+msgctxt "tmainform.sheetstagesum.caption"
+msgid "Общий"
+msgstr "Общий"
+
+#: tmainform.sheetstagetotal.caption
+msgid "Сквозной"
+msgstr "Сквозной"
+
+#: tmainform.statrxdbgrid1.columns[0].title.caption
+msgctxt "tmainform.statrxdbgrid1.columns[0].title.caption"
+msgid "Категория"
+msgstr "Категория"
+
+#: tmainform.statrxdbgrid1.columns[1].title.caption
+msgid "Кол-во"
+msgstr "Кол-во"
+
+#: tmainform.statrxdbgrid2.columns[0].title.caption
+msgctxt "tmainform.statrxdbgrid2.columns[0].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tmainform.statrxdbgrid2.columns[1].title.caption
+msgctxt "tmainform.statrxdbgrid2.columns[1].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tmainform.statrxdbgrid2.columns[2].title.caption
+msgctxt "tmainform.statrxdbgrid2.columns[2].title.caption"
+msgid "Старт"
+msgstr "Старт"
+
+#: tmainform.statrxdbgrid2.columns[3].title.caption
+msgctxt "tmainform.statrxdbgrid2.columns[3].title.caption"
+msgid "Время"
+msgstr "Время"
+
+#: tmainform.statusbarleft.panels[0].text
+msgid "часы"
+msgstr "часы"
+
+#: tmainform.statusbarleft.panels[1].text
+msgid "Serial"
+msgstr ""
+
+#: tmainform.tabsheet1.caption
+msgid "Стартовый"
+msgstr "Стартовый"
+
+#: tmainform.tabsheet2.caption
+msgid "Статистика"
+msgstr "Статистика"
+
+#: tmainform.tabsheet3.caption
+msgctxt "tmainform.tabsheet3.caption"
+msgid "Результаты"
+msgstr "Результаты"
+
+#: tresultsform.caption
+msgctxt "tresultsform.caption"
+msgid "Результаты"
+msgstr "Результаты"
+
+#: tresultsform.groupboxresults.caption
+msgctxt "tresultsform.groupboxresults.caption"
+msgid "Текущие результаты"
+msgstr "Текущие результаты"
+
+#: tresultsform.rxdbgridcat1.columns[0].title.caption
+msgctxt "tresultsform.rxdbgridcat1.columns[0].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tresultsform.rxdbgridcat1.columns[1].title.caption
+msgctxt "tresultsform.rxdbgridcat1.columns[1].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tresultsform.rxdbgridcat1.columns[2].title.caption
+msgctxt "tresultsform.rxdbgridcat1.columns[2].title.caption"
+msgid "Результат"
+msgstr "Результат"
+
+#: tresultsform.rxdbgridcat1.columns[3].title.caption
+msgctxt "tresultsform.rxdbgridcat1.columns[3].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tresultsform.rxdbgridcat1.columns[4].title.caption
+msgctxt "tresultsform.rxdbgridcat1.columns[4].title.caption"
+msgid "Место"
+msgstr "Место"
+
+#: tresultsform.rxdbgridcat2.columns[0].title.caption
+msgctxt "tresultsform.rxdbgridcat2.columns[0].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tresultsform.rxdbgridcat2.columns[1].title.caption
+msgctxt "tresultsform.rxdbgridcat2.columns[1].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tresultsform.rxdbgridcat2.columns[2].title.caption
+msgctxt "tresultsform.rxdbgridcat2.columns[2].title.caption"
+msgid "Результат"
+msgstr "Результат"
+
+#: tresultsform.rxdbgridcat2.columns[3].title.caption
+msgctxt "tresultsform.rxdbgridcat2.columns[3].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tresultsform.rxdbgridcat2.columns[4].title.caption
+msgctxt "tresultsform.rxdbgridcat2.columns[4].title.caption"
+msgid "Место"
+msgstr "Место"
+
+#: tresultsform.rxdbgridcat3.columns[0].title.caption
+msgctxt "tresultsform.rxdbgridcat3.columns[0].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tresultsform.rxdbgridcat3.columns[1].title.caption
+msgctxt "tresultsform.rxdbgridcat3.columns[1].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tresultsform.rxdbgridcat3.columns[2].title.caption
+msgctxt "tresultsform.rxdbgridcat3.columns[2].title.caption"
+msgid "Результат"
+msgstr "Результат"
+
+#: tresultsform.rxdbgridcat3.columns[3].title.caption
+msgctxt "tresultsform.rxdbgridcat3.columns[3].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tresultsform.rxdbgridcat3.columns[4].title.caption
+msgctxt "tresultsform.rxdbgridcat3.columns[4].title.caption"
+msgid "Место"
+msgstr "Место"
+
+#: tresultsform.rxdbgridcat4.columns[0].title.caption
+msgctxt "tresultsform.rxdbgridcat4.columns[0].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tresultsform.rxdbgridcat4.columns[1].title.caption
+msgctxt "tresultsform.rxdbgridcat4.columns[1].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tresultsform.rxdbgridcat4.columns[2].title.caption
+msgctxt "tresultsform.rxdbgridcat4.columns[2].title.caption"
+msgid "Результат"
+msgstr "Результат"
+
+#: tresultsform.rxdbgridcat4.columns[3].title.caption
+msgctxt "tresultsform.rxdbgridcat4.columns[3].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tresultsform.rxdbgridcat4.columns[4].title.caption
+msgctxt "tresultsform.rxdbgridcat4.columns[4].title.caption"
+msgid "Место"
+msgstr "Место"
+
+#: tresultsform.rxdbgridcat5.columns[0].title.caption
+msgctxt "tresultsform.rxdbgridcat5.columns[0].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tresultsform.rxdbgridcat5.columns[1].title.caption
+msgctxt "tresultsform.rxdbgridcat5.columns[1].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tresultsform.rxdbgridcat5.columns[2].title.caption
+msgctxt "tresultsform.rxdbgridcat5.columns[2].title.caption"
+msgid "Результат"
+msgstr "Результат"
+
+#: tresultsform.rxdbgridcat5.columns[3].title.caption
+msgctxt "tresultsform.rxdbgridcat5.columns[3].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tresultsform.rxdbgridcat5.columns[4].title.caption
+msgctxt "tresultsform.rxdbgridcat5.columns[4].title.caption"
+msgid "Место"
+msgstr "Место"
+
+#: tresultsform.rxdbgridcat6.columns[0].title.caption
+msgctxt "tresultsform.rxdbgridcat6.columns[0].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tresultsform.rxdbgridcat6.columns[1].title.caption
+msgctxt "tresultsform.rxdbgridcat6.columns[1].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tresultsform.rxdbgridcat6.columns[2].title.caption
+msgctxt "tresultsform.rxdbgridcat6.columns[2].title.caption"
+msgid "Результат"
+msgstr "Результат"
+
+#: tresultsform.rxdbgridcat6.columns[3].title.caption
+msgctxt "tresultsform.rxdbgridcat6.columns[3].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tresultsform.rxdbgridcat6.columns[4].title.caption
+msgctxt "tresultsform.rxdbgridcat6.columns[4].title.caption"
+msgid "Место"
+msgstr "Место"
+
+#: tresultsform.rxdbgridresults.columns[0].title.caption
+msgctxt "tresultsform.rxdbgridresults.columns[0].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tresultsform.rxdbgridresults.columns[1].title.caption
+msgctxt "tresultsform.rxdbgridresults.columns[1].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tresultsform.rxdbgridresults.columns[2].title.caption
+msgctxt "tresultsform.rxdbgridresults.columns[2].title.caption"
+msgid "Категория"
+msgstr "Категория"
+
+#: tresultsform.rxdbgridresults.columns[3].title.caption
+msgctxt "tresultsform.rxdbgridresults.columns[3].title.caption"
+msgid "Результат"
+msgstr "Результат"
+
+#: tresultsform.rxdbgridresults.columns[4].title.caption
+msgctxt "tresultsform.rxdbgridresults.columns[4].title.caption"
+msgid "Место"
+msgstr "Место"
+
+#: tsettingsform.activestagelabel.caption
+msgid "СУ для показа в окне результатов"
+msgstr "СУ для показа в окне результатов"
+
+#: tsettingsform.caption
+msgctxt "tsettingsform.caption"
+msgid "Настройки"
+msgstr "Настройки"
+
+#: tsettingsform.checkboxhidezerohour.caption
+msgid "Скрывать нулевой час в результатах"
+msgstr ""
+
+#: tsettingsform.checkgroup1.caption
+msgid "Активные спецучастки:"
+msgstr "Активные спецучастки:"
+
+#: tsettingsform.delayedit.hint
+msgid ""
+"Задержка в миллисекундах между добавлением\n"
+"нового значения времени при срабатывании датчика.\n"
+"Служит для уменьшения спама.\n"
+"От 0 до 100000\n"
+msgstr ""
+"Задержка в миллисекундах между добавлением\n"
+"нового значения времени при срабатывании датчика.\n"
+"Служит для уменьшения спама.\n"
+"От 0 до 100000\n"
+
+#: tsettingsform.dividerbevelcomsettings1.caption
+msgid "COM порт"
+msgstr ""
+
+#: tsettingsform.dividerbevelcomsettings2.caption
+msgid "Режим работы с финишем"
+msgstr ""
+
+#: tsettingsform.dividerbeveldelay1.caption
+#, fuzzy
+msgctxt "tsettingsform.dividerbeveldelay1.caption"
+msgid "Задержка в миллисекундах"
+msgstr "Задержка в миллисекундах"
+
+#: tsettingsform.dividerbevellanguage1.caption
+#, fuzzy
+msgctxt "tsettingsform.dividerbevellanguage1.caption"
+msgid "Язык"
+msgstr "Язык"
+
+#: tsettingsform.editcomsetstr.hint
+msgid ""
+"Строка, после получения которой,\n"
+"будет взята текущая метка времени,\n"
+"по умолчанию F\n"
+msgstr ""
+
+#: tsettingsform.editcomsettime.hint
+msgid ""
+"Формат метки времени\n"
+"По умолчанию чч:мм:cc,000\n"
+msgstr ""
+
+#: tsettingsform.groupboxcategory.caption
+#, fuzzy
+msgctxt "tsettingsform.groupboxcategory.caption"
+msgid "Категории"
+msgstr "Категории"
+
+#: tsettingsform.groupboxcategory.hint
+#, fuzzy
+msgctxt "tsettingsform.groupboxcategory.hint"
+msgid "Категории, которые будут показываться в окне результатов"
+msgstr "Категории, которые будут показываться в окне результатов"
+
+#: tsettingsform.groupboxstages.caption
+#, fuzzy
+msgctxt "tsettingsform.groupboxstages.caption"
+msgid "Спецучастки"
+msgstr "Спецучастки"
+
+#: tsettingsform.label1.caption
+msgid "Port"
+msgstr ""
+
+#: tsettingsform.label2.caption
+msgid "Baud rate"
+msgstr ""
+
+#: tsettingsform.label3.caption
+msgid "Data bits"
+msgstr ""
+
+#: tsettingsform.label4.caption
+msgid "Stop bits"
+msgstr ""
+
+#: tsettingsform.label5.caption
+msgid "Parity"
+msgstr ""
+
+#: tsettingsform.label6.caption
+msgid "Flow control"
+msgstr ""
+
+#: tsettingsform.radiobuttoncomsetstr.caption
+msgid "Спец. команда"
+msgstr ""
+
+#: tsettingsform.radiobuttoncomsetstr.hint
+msgid ""
+"Программа будет ожидать из COM порта заданную строку,\n"
+"после получения которой, будет взята текущая метка времени\n"
+msgstr ""
+
+#: tsettingsform.radiobuttoncomsettime.caption
+msgid "Отметка времени"
+msgstr ""
+
+#: tsettingsform.radiobuttoncomsettime.hint
+msgid ""
+"Программа будет ожидать из COM порта метку времени,\n"
+"которая и будет установлена\n"
+msgstr ""
+
+#: tstartlistform.caption
+msgid "Параметры стартового протокола"
+msgstr ""
+
+#: tstartlistform.cbdnf.caption
+#, fuzzy
+msgctxt "tstartlistform.cbdnf.caption"
+msgid "DNF"
+msgstr "DNF"
+
+#: tstartlistform.cbdnf.hint
+msgctxt "tstartlistform.cbdnf.hint"
+msgid "Не финишировал в квалификации"
+msgstr ""
+
+#: tstartlistform.cbdns.caption
+#, fuzzy
+msgctxt "tstartlistform.cbdns.caption"
+msgid "DNS"
+msgstr "DNS"
+
+#: tstartlistform.cbdns.hint
+msgctxt "tstartlistform.cbdns.hint"
+msgid "Не стартовал в квалификации"
+msgstr ""
+
+#: tstartlistform.cbdsq.caption
+#, fuzzy
+msgctxt "tstartlistform.cbdsq.caption"
+msgid "DSQ"
+msgstr "DSQ"
+
+#: tstartlistform.cbdsq.hint
+msgctxt "tstartlistform.cbdsq.hint"
+msgid "Дисквалифицирован"
+msgstr ""
+
+#: tstartlistform.combobox1.text
+msgid "По номерам по возрастанию"
+msgstr ""
+
+#: tstartlistform.label1.caption
+msgid "Время старта первого участника"
+msgstr ""
+
+#: tstartlistform.label2.caption
+msgid "Количество секунд между стартами участников"
+msgstr ""
+
+#: tstartlistform.label3.caption
+msgid "Количество минут между категориями"
+msgstr ""
+
+#: tstartlistform.label4.caption
+msgid "Порядок старта категорий"
+msgstr ""
+
+#: tstartlistform.label5.caption
+msgid "Сортировка внутри категории"
+msgstr ""
+
+#: tstartlistform.label6.caption
+msgid "Включать в финальный заезд следующих участников:"
+msgstr ""
+
+#: tstartlistform.panel2.caption
+msgid "Panel2"
+msgstr ""
+
+#: tstartlistform.timeedit1.text
+msgid "0"
+msgstr ""
+

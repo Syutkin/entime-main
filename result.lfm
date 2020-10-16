@@ -1,0 +1,1864 @@
+object ResultsForm: TResultsForm
+  Left = 254
+  Height = 1375
+  Top = 11
+  Width = 2236
+  Caption = 'Результаты'
+  ClientHeight = 0
+  ClientWidth = 0
+  Constraints.MinHeight = 900
+  Constraints.MinWidth = 1200
+  DesignTimePPI = 144
+  OnChangeBounds = FormResize
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnDblClick = FormResize
+  OnResize = FormResize
+  SessionProperties = 'Height;Left;Top;Width;WindowState;Splitter1.Top;Splitter2.Top;Splitter3.Top;Splitter4.Top'
+  ShowInTaskBar = stAlways
+  LCLVersion = '2.0.10.0'
+  object GroupBox1: TGroupBox
+    AnchorSideLeft.Control = GroupBoxResults
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = GroupBox2
+    AnchorSideBottom.Control = Splitter1
+    Left = 1224
+    Height = 379
+    Top = 0
+    Width = 756
+    Anchors = [akTop, akLeft, akBottom]
+    ClientHeight = 349
+    ClientWidth = 752
+    Font.Style = [fsBold]
+    ParentBidiMode = False
+    ParentFont = False
+    TabOrder = 0
+    OnDblClick = FormResize
+    object RxDBGridCat1: TRxDBGrid
+      Left = 0
+      Height = 349
+      Top = 0
+      Width = 752
+      ColumnDefValues.BlobText = '(данные)'
+      TitleButtons = False
+      AutoSort = True
+      Columns = <      
+        item
+          Alignment = taCenter
+          Font.Style = [fsBold]
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Номер'
+          Width = 75
+          FieldName = 'number'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Имя'
+          Width = 375
+          FieldName = 'name'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          Color = 9568145
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Результат'
+          Width = 225
+          FieldName = 'result'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Отставание'
+          FieldName = 'diffleader'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Место'
+          Width = 69
+          FieldName = 'place'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end>
+      KeyStrokes = <      
+        item
+          Command = rxgcShowFindDlg
+          ShortCut = 16454
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowColumnsDlg
+          ShortCut = 16471
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowFilterDlg
+          ShortCut = 16468
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowSortDlg
+          ShortCut = 16467
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowQuickFilter
+          ShortCut = 16465
+          Enabled = True
+        end      
+        item
+          Command = rxgcHideQuickFilter
+          ShortCut = 16456
+          Enabled = True
+        end      
+        item
+          Command = rxgcSelectAll
+          ShortCut = 16449
+          Enabled = True
+        end      
+        item
+          Command = rxgcDeSelectAll
+          ShortCut = 16429
+          Enabled = True
+        end      
+        item
+          Command = rxgcInvertSelection
+          ShortCut = 16426
+          Enabled = True
+        end      
+        item
+          Command = rxgcOptimizeColumnsWidth
+          ShortCut = 16427
+          Enabled = True
+        end      
+        item
+          Command = rxgcCopyCellValue
+          ShortCut = 16451
+          Enabled = True
+        end>
+      FooterOptions.DrawFullLine = False
+      SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+      SearchOptions.FromStart = False
+      OptionsRx = [rdgAllowQuickFilter]
+      Align = alClient
+      Color = clWindow
+      DrawFullLine = False
+      FocusColor = clRed
+      SelectedColor = clHighlight
+      GridLineStyle = psSolid
+      DataSource = CatDataSource1
+      DefaultColWidth = 96
+      FixedCols = 0
+      Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgConfirmDelete, dgCancelOnExit]
+      ParentFont = False
+      Scrollbars = ssNone
+      TabOrder = 0
+      TitleFont.Style = [fsBold]
+      OnDblClick = FormResize
+      OnPrepareCanvas = ColorResultCells
+    end
+  end
+  object GroupBox2: TGroupBox
+    AnchorSideLeft.Control = GroupBox1
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Splitter3
+    Left = 1980
+    Height = 386
+    Top = 0
+    Width = 256
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    ClientHeight = 356
+    ClientWidth = 252
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 1
+    OnDblClick = FormResize
+    object RxDBGridCat2: TRxDBGrid
+      Left = 0
+      Height = 356
+      Top = 0
+      Width = 252
+      ColumnDefValues.BlobText = '(данные)'
+      TitleButtons = False
+      AutoSort = True
+      Columns = <      
+        item
+          Alignment = taCenter
+          Font.Style = [fsBold]
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Номер'
+          Width = 75
+          FieldName = 'number'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Имя'
+          Width = 375
+          FieldName = 'name'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          Color = 9568145
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Результат'
+          Width = 225
+          FieldName = 'result'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Отставание'
+          FieldName = 'diffleader'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Место'
+          Width = 69
+          FieldName = 'place'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end>
+      KeyStrokes = <      
+        item
+          Command = rxgcShowFindDlg
+          ShortCut = 16454
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowColumnsDlg
+          ShortCut = 16471
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowFilterDlg
+          ShortCut = 16468
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowSortDlg
+          ShortCut = 16467
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowQuickFilter
+          ShortCut = 16465
+          Enabled = True
+        end      
+        item
+          Command = rxgcHideQuickFilter
+          ShortCut = 16456
+          Enabled = True
+        end      
+        item
+          Command = rxgcSelectAll
+          ShortCut = 16449
+          Enabled = True
+        end      
+        item
+          Command = rxgcDeSelectAll
+          ShortCut = 16429
+          Enabled = True
+        end      
+        item
+          Command = rxgcInvertSelection
+          ShortCut = 16426
+          Enabled = True
+        end      
+        item
+          Command = rxgcOptimizeColumnsWidth
+          ShortCut = 16427
+          Enabled = True
+        end      
+        item
+          Command = rxgcCopyCellValue
+          ShortCut = 16451
+          Enabled = True
+        end>
+      FooterOptions.DrawFullLine = False
+      SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+      SearchOptions.FromStart = False
+      OptionsRx = []
+      Align = alClient
+      Color = clWindow
+      DrawFullLine = False
+      FocusColor = clRed
+      SelectedColor = clHighlight
+      GridLineStyle = psSolid
+      DataSource = CatDataSource2
+      DefaultColWidth = 96
+      FixedCols = 0
+      Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgConfirmDelete, dgCancelOnExit]
+      ParentFont = False
+      Scrollbars = ssNone
+      TabOrder = 0
+      TitleFont.Style = [fsBold]
+      OnDblClick = FormResize
+      OnPrepareCanvas = ColorResultCells
+    end
+  end
+  object GroupBox3: TGroupBox
+    AnchorSideLeft.Control = GroupBoxResults
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Splitter1
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = GroupBox4
+    AnchorSideBottom.Control = Splitter2
+    Left = 1224
+    Height = 538
+    Top = 395
+    Width = 756
+    Anchors = [akTop, akLeft, akBottom]
+    BorderSpacing.Top = 8
+    ClientHeight = 508
+    ClientWidth = 752
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 2
+    OnDblClick = FormResize
+    object RxDBGridCat3: TRxDBGrid
+      Left = 0
+      Height = 508
+      Top = 0
+      Width = 752
+      ColumnDefValues.BlobText = '(данные)'
+      TitleButtons = False
+      AutoSort = True
+      Columns = <      
+        item
+          Alignment = taCenter
+          Font.Style = [fsBold]
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Номер'
+          Width = 75
+          FieldName = 'number'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Имя'
+          Width = 375
+          FieldName = 'name'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          Color = 9568145
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Результат'
+          Width = 225
+          FieldName = 'result'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Отставание'
+          FieldName = 'diffleader'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Место'
+          Width = 69
+          FieldName = 'place'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end>
+      KeyStrokes = <      
+        item
+          Command = rxgcShowFindDlg
+          ShortCut = 16454
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowColumnsDlg
+          ShortCut = 16471
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowFilterDlg
+          ShortCut = 16468
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowSortDlg
+          ShortCut = 16467
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowQuickFilter
+          ShortCut = 16465
+          Enabled = True
+        end      
+        item
+          Command = rxgcHideQuickFilter
+          ShortCut = 16456
+          Enabled = True
+        end      
+        item
+          Command = rxgcSelectAll
+          ShortCut = 16449
+          Enabled = True
+        end      
+        item
+          Command = rxgcDeSelectAll
+          ShortCut = 16429
+          Enabled = True
+        end      
+        item
+          Command = rxgcInvertSelection
+          ShortCut = 16426
+          Enabled = True
+        end      
+        item
+          Command = rxgcOptimizeColumnsWidth
+          ShortCut = 16427
+          Enabled = True
+        end      
+        item
+          Command = rxgcCopyCellValue
+          ShortCut = 16451
+          Enabled = True
+        end>
+      FooterOptions.DrawFullLine = False
+      SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+      SearchOptions.FromStart = False
+      OptionsRx = []
+      Align = alClient
+      Color = clWindow
+      DrawFullLine = False
+      FocusColor = clRed
+      SelectedColor = clHighlight
+      GridLineStyle = psSolid
+      DataSource = CatDataSource3
+      DefaultColWidth = 96
+      FixedCols = 0
+      Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgConfirmDelete, dgCancelOnExit]
+      ParentFont = False
+      Scrollbars = ssNone
+      TabOrder = 0
+      TitleFont.Style = [fsBold]
+      OnDblClick = FormResize
+      OnPrepareCanvas = ColorResultCells
+    end
+  end
+  object GroupBox4: TGroupBox
+    AnchorSideLeft.Control = GroupBox3
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Splitter3
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Splitter4
+    Left = 1980
+    Height = 493
+    Top = 402
+    Width = 256
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Top = 8
+    ClientHeight = 463
+    ClientWidth = 252
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 3
+    OnDblClick = FormResize
+    object RxDBGridCat4: TRxDBGrid
+      Left = 0
+      Height = 463
+      Top = 0
+      Width = 252
+      ColumnDefValues.BlobText = '(данные)'
+      TitleButtons = False
+      AutoSort = True
+      Columns = <      
+        item
+          Alignment = taCenter
+          Font.Style = [fsBold]
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Номер'
+          Width = 75
+          FieldName = 'number'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Имя'
+          Width = 375
+          FieldName = 'name'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          Color = 9568145
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Результат'
+          Width = 225
+          FieldName = 'result'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Отставание'
+          FieldName = 'diffleader'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Место'
+          Width = 69
+          FieldName = 'place'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end>
+      KeyStrokes = <      
+        item
+          Command = rxgcShowFindDlg
+          ShortCut = 16454
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowColumnsDlg
+          ShortCut = 16471
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowFilterDlg
+          ShortCut = 16468
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowSortDlg
+          ShortCut = 16467
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowQuickFilter
+          ShortCut = 16465
+          Enabled = True
+        end      
+        item
+          Command = rxgcHideQuickFilter
+          ShortCut = 16456
+          Enabled = True
+        end      
+        item
+          Command = rxgcSelectAll
+          ShortCut = 16449
+          Enabled = True
+        end      
+        item
+          Command = rxgcDeSelectAll
+          ShortCut = 16429
+          Enabled = True
+        end      
+        item
+          Command = rxgcInvertSelection
+          ShortCut = 16426
+          Enabled = True
+        end      
+        item
+          Command = rxgcOptimizeColumnsWidth
+          ShortCut = 16427
+          Enabled = True
+        end      
+        item
+          Command = rxgcCopyCellValue
+          ShortCut = 16451
+          Enabled = True
+        end>
+      FooterOptions.DrawFullLine = False
+      SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+      SearchOptions.FromStart = False
+      OptionsRx = []
+      Align = alClient
+      Color = clWindow
+      DrawFullLine = False
+      FocusColor = clRed
+      SelectedColor = clHighlight
+      GridLineStyle = psSolid
+      DataSource = CatDataSource4
+      DefaultColWidth = 96
+      FixedCols = 0
+      Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgConfirmDelete, dgCancelOnExit]
+      ParentFont = False
+      Scrollbars = ssNone
+      TabOrder = 0
+      TitleFont.Style = [fsBold]
+      OnDblClick = FormResize
+      OnPrepareCanvas = ColorResultCells
+    end
+  end
+  object GroupBox5: TGroupBox
+    AnchorSideLeft.Control = GroupBoxResults
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Splitter2
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = GroupBox6
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 1224
+    Height = 426
+    Top = 949
+    Width = 756
+    Anchors = [akTop, akLeft, akBottom]
+    BorderSpacing.Top = 8
+    ClientHeight = 396
+    ClientWidth = 752
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 4
+    OnDblClick = FormResize
+    object RxDBGridCat5: TRxDBGrid
+      Left = 0
+      Height = 396
+      Top = 0
+      Width = 752
+      ColumnDefValues.BlobText = '(данные)'
+      TitleButtons = False
+      AutoSort = True
+      Columns = <      
+        item
+          Alignment = taCenter
+          Font.Style = [fsBold]
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Номер'
+          Width = 75
+          FieldName = 'number'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Имя'
+          Width = 375
+          FieldName = 'name'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          Color = 9568145
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Результат'
+          Width = 225
+          FieldName = 'result'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Отставание'
+          FieldName = 'diffleader'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Место'
+          Width = 69
+          FieldName = 'place'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end>
+      KeyStrokes = <      
+        item
+          Command = rxgcShowFindDlg
+          ShortCut = 16454
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowColumnsDlg
+          ShortCut = 16471
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowFilterDlg
+          ShortCut = 16468
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowSortDlg
+          ShortCut = 16467
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowQuickFilter
+          ShortCut = 16465
+          Enabled = True
+        end      
+        item
+          Command = rxgcHideQuickFilter
+          ShortCut = 16456
+          Enabled = True
+        end      
+        item
+          Command = rxgcSelectAll
+          ShortCut = 16449
+          Enabled = True
+        end      
+        item
+          Command = rxgcDeSelectAll
+          ShortCut = 16429
+          Enabled = True
+        end      
+        item
+          Command = rxgcInvertSelection
+          ShortCut = 16426
+          Enabled = True
+        end      
+        item
+          Command = rxgcOptimizeColumnsWidth
+          ShortCut = 16427
+          Enabled = True
+        end      
+        item
+          Command = rxgcCopyCellValue
+          ShortCut = 16451
+          Enabled = True
+        end>
+      FooterOptions.DrawFullLine = False
+      SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+      SearchOptions.FromStart = False
+      OptionsRx = []
+      Align = alClient
+      Color = clWindow
+      DrawFullLine = False
+      FocusColor = clRed
+      SelectedColor = clHighlight
+      GridLineStyle = psSolid
+      DataSource = CatDataSource5
+      DefaultColWidth = 96
+      FixedCols = 0
+      Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgConfirmDelete, dgCancelOnExit]
+      ParentFont = False
+      Scrollbars = ssNone
+      TabOrder = 0
+      TitleFont.Style = [fsBold]
+      OnDblClick = FormResize
+      OnPrepareCanvas = ColorResultCells
+    end
+  end
+  object GroupBox6: TGroupBox
+    AnchorSideLeft.Control = GroupBox5
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Splitter4
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 1980
+    Height = 464
+    Top = 911
+    Width = 256
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Top = 8
+    ClientHeight = 434
+    ClientWidth = 252
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 5
+    OnDblClick = FormResize
+    object RxDBGridCat6: TRxDBGrid
+      Left = 0
+      Height = 434
+      Top = 0
+      Width = 252
+      ColumnDefValues.BlobText = '(данные)'
+      TitleButtons = False
+      AutoSort = True
+      Columns = <      
+        item
+          Alignment = taCenter
+          Font.Style = [fsBold]
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Номер'
+          Width = 75
+          FieldName = 'number'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Имя'
+          Width = 375
+          FieldName = 'name'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          Color = 9568145
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Результат'
+          Width = 225
+          FieldName = 'result'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Отставание'
+          FieldName = 'diffleader'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Место'
+          Width = 69
+          FieldName = 'place'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end>
+      KeyStrokes = <      
+        item
+          Command = rxgcShowFindDlg
+          ShortCut = 16454
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowColumnsDlg
+          ShortCut = 16471
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowFilterDlg
+          ShortCut = 16468
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowSortDlg
+          ShortCut = 16467
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowQuickFilter
+          ShortCut = 16465
+          Enabled = True
+        end      
+        item
+          Command = rxgcHideQuickFilter
+          ShortCut = 16456
+          Enabled = True
+        end      
+        item
+          Command = rxgcSelectAll
+          ShortCut = 16449
+          Enabled = True
+        end      
+        item
+          Command = rxgcDeSelectAll
+          ShortCut = 16429
+          Enabled = True
+        end      
+        item
+          Command = rxgcInvertSelection
+          ShortCut = 16426
+          Enabled = True
+        end      
+        item
+          Command = rxgcOptimizeColumnsWidth
+          ShortCut = 16427
+          Enabled = True
+        end      
+        item
+          Command = rxgcCopyCellValue
+          ShortCut = 16451
+          Enabled = True
+        end>
+      FooterOptions.DrawFullLine = False
+      SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+      SearchOptions.FromStart = False
+      OptionsRx = []
+      Align = alClient
+      Color = clWindow
+      DrawFullLine = False
+      FocusColor = clRed
+      SelectedColor = clHighlight
+      GridLineStyle = psSolid
+      DataSource = CatDataSource6
+      DefaultColWidth = 96
+      FixedCols = 0
+      Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgConfirmDelete, dgCancelOnExit]
+      ParentFont = False
+      Scrollbars = ssNone
+      TabOrder = 0
+      TitleFont.Style = [fsBold]
+      OnDblClick = FormResize
+      OnPrepareCanvas = ColorResultCells
+    end
+  end
+  object GroupBoxResults: TGroupBox
+    AnchorSideRight.Control = GroupBox1
+    Left = 0
+    Height = 1375
+    Top = 0
+    Width = 1224
+    Align = alLeft
+    Caption = 'Текущие результаты'
+    ClientHeight = 1345
+    ClientWidth = 1220
+    Font.Style = [fsBold]
+    ParentFont = False
+    TabOrder = 6
+    OnDblClick = FormResize
+    object RxDBGridResults: TRxDBGrid
+      Left = 0
+      Height = 1345
+      Top = 0
+      Width = 1220
+      ColumnDefValues.BlobText = '(данные)'
+      TitleButtons = False
+      AutoSort = True
+      Columns = <      
+        item
+          Alignment = taCenter
+          Font.Style = [fsBold]
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Номер'
+          Width = 108
+          FieldName = 'number'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Имя'
+          Width = 681
+          FieldName = 'name'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Категория'
+          Width = 204
+          FieldName = 'category'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Результат'
+          Width = 272
+          FieldName = 'result'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end      
+        item
+          Alignment = taCenter
+          MinSize = 15
+          MaxSize = 300
+          Title.Alignment = taCenter
+          Title.Orientation = toHorizontal
+          Title.Caption = 'Место'
+          Width = 94
+          FieldName = 'place'
+          EditButtons = <>
+          Filter.DropDownRows = 0
+          Filter.EmptyValue = '(Пусто)'
+          Filter.NotEmptyValue = '(Не пусто)'
+          Filter.AllValue = '(Все значения)'
+          Filter.EmptyFont.Style = [fsItalic]
+          Filter.ItemIndex = -1
+          Footers = <>
+        end>
+      KeyStrokes = <      
+        item
+          Command = rxgcShowFindDlg
+          ShortCut = 16454
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowColumnsDlg
+          ShortCut = 16471
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowFilterDlg
+          ShortCut = 16468
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowSortDlg
+          ShortCut = 16467
+          Enabled = True
+        end      
+        item
+          Command = rxgcShowQuickFilter
+          ShortCut = 16465
+          Enabled = True
+        end      
+        item
+          Command = rxgcHideQuickFilter
+          ShortCut = 16456
+          Enabled = True
+        end      
+        item
+          Command = rxgcSelectAll
+          ShortCut = 16449
+          Enabled = True
+        end      
+        item
+          Command = rxgcDeSelectAll
+          ShortCut = 16429
+          Enabled = True
+        end      
+        item
+          Command = rxgcInvertSelection
+          ShortCut = 16426
+          Enabled = True
+        end      
+        item
+          Command = rxgcOptimizeColumnsWidth
+          ShortCut = 16427
+          Enabled = True
+        end      
+        item
+          Command = rxgcCopyCellValue
+          ShortCut = 16451
+          Enabled = True
+        end>
+      FooterOptions.DrawFullLine = False
+      SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+      SearchOptions.FromStart = False
+      OptionsRx = []
+      Align = alClient
+      Color = clWindow
+      DrawFullLine = False
+      FocusColor = clRed
+      SelectedColor = clHighlight
+      GridLineStyle = psSolid
+      DataSource = ResultDataSource
+      DefaultColWidth = 96
+      FixedCols = 0
+      Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgConfirmDelete, dgCancelOnExit]
+      ParentFont = False
+      Scrollbars = ssNone
+      TabOrder = 0
+      TitleFont.Style = [fsBold]
+      OnDblClick = FormResize
+    end
+  end
+  object Splitter1: TSplitter
+    AnchorSideLeft.Control = GroupBox1
+    AnchorSideRight.Control = GroupBox2
+    Cursor = crVSplit
+    Left = 1224
+    Height = 8
+    Top = 379
+    Width = 756
+    Align = alNone
+    Anchors = [akLeft, akRight]
+    ResizeAnchor = akTop
+  end
+  object Splitter2: TSplitter
+    AnchorSideLeft.Control = GroupBox3
+    AnchorSideRight.Control = GroupBox4
+    Cursor = crVSplit
+    Left = 1224
+    Height = 8
+    Top = 933
+    Width = 756
+    Align = alNone
+    Anchors = [akLeft, akRight]
+    ResizeAnchor = akTop
+  end
+  object Splitter3: TSplitter
+    AnchorSideLeft.Control = GroupBox2
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Cursor = crVSplit
+    Left = 1980
+    Height = 8
+    Top = 386
+    Width = 256
+    Align = alNone
+    Anchors = [akLeft, akRight]
+    ResizeAnchor = akTop
+  end
+  object Splitter4: TSplitter
+    AnchorSideLeft.Control = GroupBox4
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Cursor = crVSplit
+    Left = 1980
+    Height = 8
+    Top = 895
+    Width = 256
+    Align = alNone
+    Anchors = [akLeft, akRight]
+    ResizeAnchor = akTop
+  end
+  object CatDataSource1: TDataSource
+    DataSet = CatDataset1
+    Left = 1332
+    Top = 108
+  end
+  object CatDataset1: TSqlite3Dataset
+    PrimaryKey = 'id'
+    TableName = 'main'
+    Left = 1332
+    Top = 204
+    object CatDataset1number: TLongintField
+      FieldKind = fkData
+      FieldName = 'number'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object CatDataset1name: TStringField
+      FieldKind = fkData
+      FieldName = 'name'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object CatDataset1result: TStringField
+      FieldKind = fkData
+      FieldName = 'result'
+      Index = 2
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+      Size = 255
+    end
+    object CatDataset1diffleader: TStringField
+      FieldKind = fkData
+      FieldName = 'diffleader'
+      Index = 3
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+      Size = 255
+    end
+    object CatDataset1place: TLongintField
+      FieldKind = fkData
+      FieldName = 'place'
+      Index = 4
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+  end
+  object CatDataset2: TSqlite3Dataset
+    PrimaryKey = 'id'
+    TableName = 'main'
+    Left = 2112
+    Top = 204
+    object CatDataset2number: TLongintField
+      FieldKind = fkData
+      FieldName = 'number'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object CatDataset2name: TStringField
+      FieldKind = fkData
+      FieldName = 'name'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object CatDataset2result: TStringField
+      FieldKind = fkData
+      FieldName = 'result'
+      Index = 2
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+      Size = 255
+    end
+    object CatDataset2diffleader: TStringField
+      FieldKind = fkData
+      FieldName = 'diffleader'
+      Index = 3
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+      Size = 255
+    end
+    object CatDataset2place: TLongintField
+      FieldKind = fkData
+      FieldName = 'place'
+      Index = 4
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+  end
+  object CatDataset3: TSqlite3Dataset
+    PrimaryKey = 'id'
+    TableName = 'main'
+    Left = 1332
+    Top = 684
+    object CatDataset3number: TLongintField
+      FieldKind = fkData
+      FieldName = 'number'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object CatDataset3name: TStringField
+      FieldKind = fkData
+      FieldName = 'name'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object CatDataset3result: TStringField
+      FieldKind = fkData
+      FieldName = 'result'
+      Index = 2
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+      Size = 255
+    end
+    object CatDataset3diffleader: TStringField
+      FieldKind = fkData
+      FieldName = 'diffleader'
+      Index = 3
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+      Size = 255
+    end
+    object CatDataset3place: TLongintField
+      FieldKind = fkData
+      FieldName = 'place'
+      Index = 4
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+  end
+  object CatDataset4: TSqlite3Dataset
+    PrimaryKey = 'id'
+    TableName = 'main'
+    Left = 2112
+    Top = 684
+    object CatDataset4number: TLongintField
+      FieldKind = fkData
+      FieldName = 'number'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object CatDataset4name: TStringField
+      FieldKind = fkData
+      FieldName = 'name'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object CatDataset4result: TStringField
+      FieldKind = fkData
+      FieldName = 'result'
+      Index = 2
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+      Size = 255
+    end
+    object CatDataset4diffleader: TStringField
+      FieldKind = fkData
+      FieldName = 'diffleader'
+      Index = 3
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+      Size = 255
+    end
+    object CatDataset4place: TLongintField
+      FieldKind = fkData
+      FieldName = 'place'
+      Index = 4
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+  end
+  object CatDataset5: TSqlite3Dataset
+    PrimaryKey = 'id'
+    TableName = 'main'
+    Left = 1332
+    Top = 1248
+    object CatDataset5number: TLongintField
+      FieldKind = fkData
+      FieldName = 'number'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object CatDataset5name: TStringField
+      FieldKind = fkData
+      FieldName = 'name'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object CatDataset5result: TStringField
+      FieldKind = fkData
+      FieldName = 'result'
+      Index = 2
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+      Size = 255
+    end
+    object CatDataset5diffleader: TStringField
+      FieldKind = fkData
+      FieldName = 'diffleader'
+      Index = 3
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+      Size = 255
+    end
+    object CatDataset5place: TLongintField
+      FieldKind = fkData
+      FieldName = 'place'
+      Index = 4
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+  end
+  object CatDataset6: TSqlite3Dataset
+    PrimaryKey = 'id'
+    TableName = 'main'
+    Left = 2112
+    Top = 1248
+    object CatDataset6number: TLongintField
+      FieldKind = fkData
+      FieldName = 'number'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object CatDataset6name: TStringField
+      FieldKind = fkData
+      FieldName = 'name'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object CatDataset6result: TStringField
+      FieldKind = fkData
+      FieldName = 'result'
+      Index = 2
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+      Size = 255
+    end
+    object CatDataset6diffleader: TStringField
+      FieldKind = fkData
+      FieldName = 'diffleader'
+      Index = 3
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+      Size = 255
+    end
+    object CatDataset6place: TLongintField
+      FieldKind = fkData
+      FieldName = 'place'
+      Index = 4
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+  end
+  object CatDataSource2: TDataSource
+    DataSet = CatDataset2
+    Left = 2112
+    Top = 108
+  end
+  object CatDataSource3: TDataSource
+    DataSet = CatDataset3
+    Left = 1332
+    Top = 588
+  end
+  object CatDataSource4: TDataSource
+    DataSet = CatDataset4
+    Left = 2112
+    Top = 588
+  end
+  object CatDataSource5: TDataSource
+    DataSet = CatDataset5
+    Left = 1332
+    Top = 1143
+  end
+  object CatDataSource6: TDataSource
+    DataSet = CatDataset6
+    Left = 2112
+    Top = 1143
+  end
+  object ResultDataSource: TDataSource
+    DataSet = ResultDataset
+    Left = 84
+    Top = 108
+  end
+  object ResultDataset: TSqlite3Dataset
+    PrimaryKey = 'id'
+    TableName = 'main'
+    Left = 84
+    Top = 204
+    object ResultDatasetcategory: TStringField
+      FieldKind = fkData
+      FieldName = 'category'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object ResultDatasetnumber: TLongintField
+      FieldKind = fkData
+      FieldName = 'number'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object ResultDatasetname: TStringField
+      FieldKind = fkData
+      FieldName = 'name'
+      Index = 2
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object ResultDatasetresult: TStringField
+      DisplayWidth = 255
+      FieldKind = fkData
+      FieldName = 'result'
+      Index = 3
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+      Size = 255
+    end
+    object ResultDatasetplace: TLongintField
+      FieldKind = fkData
+      FieldName = 'place'
+      Index = 4
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+  end
+end
