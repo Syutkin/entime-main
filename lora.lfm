@@ -1,23 +1,24 @@
 object LoRaForm: TLoRaForm
   Left = 709
-  Height = 623
+  Height = 779
   Top = 228
-  Width = 511
+  Width = 639
   Caption = 'LoRaForm'
-  ClientHeight = 623
-  ClientWidth = 511
-  Constraints.MinHeight = 150
-  Constraints.MinWidth = 150
+  ClientHeight = 779
+  ClientWidth = 639
+  Constraints.MinHeight = 188
+  Constraints.MinWidth = 188
+  DesignTimePPI = 120
   OnClose = FormClose
   OnCreate = FormCreate
   Position = poMainFormCenter
-  LCLVersion = '2.0.6.0'
+  LCLVersion = '2.0.10.0'
   object RxDBGridLoRa: TRxDBGrid
     Left = 0
-    Height = 623
+    Height = 779
     Hint = 'Двойной клик на строке с нужной поправкой заносит её в основную таблицу'
     Top = 0
-    Width = 511
+    Width = 639
     ColumnDefValues.BlobText = '(данные)'
     TitleButtons = False
     AutoSort = True
@@ -25,10 +26,12 @@ object LoRaForm: TLoRaForm
       item
         Alignment = taCenter
         Font.Style = [fsBold]
+        MinSize = 12
+        MaxSize = 250
         Title.Alignment = taCenter
         Title.Orientation = toHorizontal
         Title.Caption = 'Номер'
-        Width = 75
+        Width = 94
         FieldName = 'number'
         EditButtons = <>
         Filter.DropDownRows = 0
@@ -41,10 +44,12 @@ object LoRaForm: TLoRaForm
       end    
       item
         Alignment = taRightJustify
+        MinSize = 12
+        MaxSize = 250
         Title.Alignment = taCenter
         Title.Orientation = toHorizontal
         Title.Caption = 'Старт'
-        Width = 100
+        Width = 125
         FieldName = 'starttime'
         EditButtons = <>
         Filter.DropDownRows = 0
@@ -57,10 +62,12 @@ object LoRaForm: TLoRaForm
       end    
       item
         Alignment = taRightJustify
+        MinSize = 12
+        MaxSize = 250
         Title.Alignment = taCenter
         Title.Orientation = toHorizontal
         Title.Caption = 'Поправка'
-        Width = 100
+        Width = 125
         FieldName = 'correction'
         EditButtons = <>
         Filter.DropDownRows = 0
@@ -72,10 +79,12 @@ object LoRaForm: TLoRaForm
         Footers = <>
       end    
       item
+        MinSize = 12
+        MaxSize = 250
         Title.Alignment = taCenter
         Title.Orientation = toHorizontal
         Title.Caption = 'Установлено'
-        Width = 100
+        Width = 125
         FieldName = 'isset'
         EditButtons = <>
         Filter.DropDownRows = 0
@@ -88,10 +97,12 @@ object LoRaForm: TLoRaForm
       end    
       item
         Alignment = taRightJustify
+        MinSize = 12
+        MaxSize = 250
         Title.Alignment = taCenter
         Title.Orientation = toHorizontal
         Title.Caption = 'Время'
-        Width = 100
+        Width = 125
         FieldName = 'timemark'
         EditButtons = <>
         Filter.DropDownRows = 0
@@ -171,6 +182,7 @@ object LoRaForm: TLoRaForm
     DataSource = DataSourceLoRa
     FixedCols = 0
     Options = [dgEditing, dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
+    ParentFont = False
     PopupMenu = PopupMenu1
     ReadOnly = True
     Scrollbars = ssAutoVertical
@@ -178,27 +190,27 @@ object LoRaForm: TLoRaForm
   end
   object DataSourceLoRa: TDataSource
     DataSet = Sqlite3DatasetLoRa
-    left = 104
-    top = 245
+    Left = 130
+    Top = 306
   end
   object Sqlite3DatasetLoRa: TSqlite3Dataset
     PrimaryKey = 'id'
     TableName = 'lora'
-    left = 104
-    top = 312
+    Left = 130
+    Top = 390
   end
   object PopupMenu1: TPopupMenu
     Images = MainForm.ImageList1
-    left = 208
-    top = 48
+    Left = 260
+    Top = 60
     object MenuItemCopy: TMenuItem
       Action = AcCopy
     end
   end
   object ActionList1: TActionList
     Images = MainForm.ImageList1
-    left = 280
-    top = 48
+    Left = 350
+    Top = 60
     object AcCopy: TAction
       Caption = 'Копировать'
       ImageIndex = 24

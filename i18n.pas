@@ -43,6 +43,7 @@ resourcestring
   sIncorrectCorrection = 'Некорректное значение поправки, введите верное значение';
   sUpdateError = 'Ошибка обновления результатов: ';
   sDatabaseOpenError = 'Ошибка открытия базы: ';
+  sTelegramBotSendingError= 'Ошибка отправки данных в телеграм бота: ';
   sNewFileCreated = 'Файл соревнований создан';
   sNewFileNotCreated = 'Не удалось создать файл соревнований';
   sNewFileExistUnknow = 'Не удалось проверить существование указанного файла';

@@ -7,13 +7,16 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
   i18n, rxspin, LCLTranslator, Buttons, DBCtrls, ButtonPanel, ComCtrls, Spin,
-  LazSerial, Lazsynaser, DividerBevel, CheckBoxThemed, translations;
+  LazSerial, Lazsynaser, DataPortHTTP, DividerBevel, CheckBoxThemed,
+  translations, opensslsockets, fphttpclient;
 
 type
 
   { TSettingsForm }
 
   TSettingsForm = class(TForm)
+    ButtonLEDTest: TButton;
+    ButtonTelegramTest: TButton;
     ButtonPanel1: TButtonPanel;
     CheckBoxHideZeroHour: TCheckBoxThemed;
     CheckGroup1: TCheckGroup;
@@ -28,6 +31,10 @@ type
     DelayEdit: TSpinEdit;
     DividerBevelCOMSettings1: TDividerBevel;
     DividerBevelCOMSettings2: TDividerBevel;
+    DividerBevelLEDAdress: TDividerBevel;
+    DividerBevelTelegramTest: TDividerBevel;
+    DividerBevelTelegramBotAdress: TDividerBevel;
+    DividerBevelLEDTest: TDividerBevel;
     Edit1: TComboBox;
     Edit2: TComboBox;
     Edit3: TComboBox;
@@ -42,11 +49,34 @@ type
     Label4: TLabel;
     Label5: TLabel;
     Label6: TLabel;
+    LabelName: TLabel;
+    LabelSingleline: TLabel;
+    LabelCategory: TLabel;
+    LabelResult: TLabel;
+    LabelDiff: TLabel;
+    LabelPlace: TLabel;
+    LabelUpperline: TLabel;
+    LabelBottomline: TLabel;
+    LabelNumber: TLabel;
+    TelegramResult: TEdit;
+    TelegramDiff: TEdit;
+    TelegramPlace: TEdit;
+    TelegramName: TEdit;
+    TelegramCategory: TEdit;
+    TelegramNumber: TEdit;
+    PanelTelegramTest: TPanel;
+    TelegramBotAdressEdit: TEdit;
+    LEDUpperline: TEdit;
+    LEDBottomline: TEdit;
+    LEDSingleline: TEdit;
     Notebook1: TNotebook;
-    Page1: TPage;
-    Page2: TPage;
-    Page3: TPage;
-    Page4: TPage;
+    Page1Commons: TPage;
+    Page2View: TPage;
+    Page3Competition: TPage;
+    Page4COM: TPage;
+    Page5LED: TPage;
+    Page6Telegram: TPage;
+    PanelLEDTest: TPanel;
     PanelComSettings: TPanel;
     DividerBevelLanguage1: TDividerBevel;
     DividerBevelDelay1: TDividerBevel;
@@ -62,13 +92,16 @@ type
     SUEdit2: TEdit;
     SUEdit3: TEdit;
     GroupBoxStages: TGroupBox;
+    LEDAdress: TEdit;
     TreeView1: TTreeView;
+    procedure ButtonLEDTestClick(Sender: TObject);
+    procedure ButtonTelegramTestClick(Sender: TObject);
     procedure ComboBoxAStageDropDown(Sender: TObject);
     procedure ComboBoxLanguageChange(Sender: TObject);
     procedure EditDropDown(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Label1Click(Sender: TObject);
-    procedure Page2BeforeShow(ASender: TObject; ANewPage: TPage; ANewIndex: Integer);
+    procedure Page2ViewBeforeShow(ASender: TObject; ANewPage: TPage; ANewIndex: integer);
     procedure RunSettings;
     procedure TreeView1Change(Sender: TObject; Node: TTreeNode);
   private
@@ -152,6 +185,9 @@ begin
   ComboBoxAStage.Items.Add(astage);
   ComboBoxAStage.Text := astage;
 
+  LEDAdress.Text := ledpaneladress;
+  TelegramBotAdressEdit.Text := telegrambotadress;
+
   Notebook1.PageIndex := 0;
 
   {-------------- скопированно из lazSerialSetup---------------------------------}
@@ -176,7 +212,8 @@ begin
 
 end;
 
-procedure TSettingsForm.Page2BeforeShow(ASender: TObject; ANewPage: TPage; ANewIndex: Integer);
+procedure TSettingsForm.Page2ViewBeforeShow(ASender: TObject;
+  ANewPage: TPage; ANewIndex: integer);
 begin
 
 end;
@@ -215,9 +252,11 @@ begin
         if astage = '' then
           astage := '1';
         //эта дичь определяет был ли переход от работы с одним этапом на несколько
-        if (not stage[2]) and (not stage[3]) and (not stage[4]) and (not stage[5]) and
-          (not stage[6]) and (CheckGroup1.Checked[1] or CheckGroup1.Checked[2] or
-          CheckGroup1.Checked[3] or CheckGroup1.Checked[4] or CheckGroup1.Checked[5]) then
+        if (not stage[2]) and (not stage[3]) and (not stage[4]) and
+          (not stage[5]) and (not stage[6]) and
+          (CheckGroup1.Checked[1] or CheckGroup1.Checked[2] or
+          CheckGroup1.Checked[3] or CheckGroup1.Checked[4] or
+          CheckGroup1.Checked[5]) then
           //для того, чтобы освободить место для таблицы с вводом поправки
           //без этого в текущей организации GUI были коллизии
           MainForm.Splitter1.Top := MainForm.Splitter1.Top + MainForm.CurrentSU.Height;
@@ -238,6 +277,9 @@ begin
         end;
 
         zerohour := CheckBoxHideZeroHour.Checked;
+        ledpaneladress := LEDAdress.Text;
+        telegrambotadress := TelegramBotAdressEdit.Text;
+        MainForm.DataPortHTTP1.Url := 'http://' + ledpaneladress + '/post';
 
         if dbopen then
         begin
@@ -251,7 +293,8 @@ begin
             end;
             for i := 1 to maxstages do
             begin
-              SQL.Add('("stage' + IntToStr(i) + '", "' + BoolToStr(stage[i], True) + '"),');
+              SQL.Add('("stage' + IntToStr(i) + '", "' +
+                BoolToStr(stage[i], True) + '"),');
               SQL.Add('("stagename' + IntToStr(i) + '", "' + sname[i] + '"),');
             end;
             SQL.Add('("activestage", "' + astage + '")');
@@ -272,8 +315,8 @@ begin
           RecalculateStatus(GetAllStageStatus(0));
           UpdateResults;
         end;
-        Log(sShownCategories + ' ' + cat[1] + ', ' + cat[2] + ', ' + cat[3] + ', ' +
-          cat[4] + ', ' + cat[5] + ', ' + cat[6]);
+        Log(sShownCategories + ' ' + cat[1] + ', ' + cat[2] + ', ' +
+          cat[3] + ', ' + cat[4] + ', ' + cat[5] + ', ' + cat[6]);
       end;
     finally
       Free;
@@ -301,6 +344,89 @@ begin
     end;
   end;
   ComboBoxAStage.Text := s;
+end;
+
+procedure TSettingsForm.ButtonLEDTestClick(Sender: TObject);
+begin
+  MainForm.DataPortHTTP1.Close();
+  ledpaneladress := LEDAdress.Text;
+  MainForm.DataPortHTTP1.Url := 'http://' + ledpaneladress + '/post';
+  MainForm.DataPortHTTP1.Params.Clear;
+  if not string(LEDSingleline.Text).IsEmpty then
+  begin
+    Print(LEDSingleline.Text);
+    MainForm.DataPortHTTP1.Params.Add('singleline=' + LEDSingleline.Text);
+  end
+  else
+  begin
+    Print(LEDUpperline.Text);
+    Print(LEDBottomline.Text);
+    MainForm.DataPortHTTP1.Params.Add('upperline=' + LEDUpperline.Text);
+    MainForm.DataPortHTTP1.Params.Add('bottomline=' + LEDBottomline.Text);
+  end;
+  Print(MainForm.DataPortHTTP1.Params.Text);
+  MainForm.DataPortHTTP1.Open();
+  MainForm.DataPortHTTP1.Push('');
+end;
+
+procedure TSettingsForm.ButtonTelegramTestClick(Sender: TObject);
+var
+  QueryParams: TStrings = nil;
+  AURL: string;
+  s: string = '';
+  item: string;
+  l: TStringstream;
+  http: tfphttpclient;
+begin
+  telegrambotadress := TelegramBotAdressEdit.Text;
+  l := TStringStream.Create('');
+  http := tfphttpclient.Create(nil);
+  with http do
+    try
+      QueryParams := TStringList.Create;
+      //AddHeader('Authorization', 'AccessToken MjtAFOrgYUrsfCC7KPLpAi03N4Od17Bh');
+      //AddHeader('X-User-Authorization', 'Basic aW5mb0BzcG1hc2gucnU6NTE0NzU4');
+      //AddHeader('Content-Type', 'text/html;charset=UTF-8');
+      with QueryParams do
+      begin
+        if not string(TelegramNumber.Text).IsEmpty then
+          Values['number'] := EncodeURLElement(TelegramNumber.Text);
+        if not string(TelegramName.Text).IsEmpty then
+          Values['name'] := EncodeURLElement(TelegramName.Text);
+        if not string(TelegramCategory.Text).IsEmpty then
+          Values['category'] := EncodeURLElement(TelegramCategory.Text);
+        if not string(TelegramResult.Text).IsEmpty then
+          Values['result'] := EncodeURLElement(TelegramResult.Text);
+        if not string(TelegramDiff.Text).IsEmpty then
+          Values['diff'] := EncodeURLElement(TelegramDiff.Text);
+        if not string(TelegramPlace.Text).IsEmpty then
+          Values['place'] := EncodeURLElement(TelegramPlace.Text);
+      end;
+      AURL := telegrambotadress;
+      for item in QueryParams do
+        s := s + '&' + item;
+      AURL := AURL + '?' + s.Substring(1);
+
+      try
+        httpmethod('GET', AURL, l, []);
+      except
+        On E: Exception do
+        begin
+          Log(sTelegramBotSendingError + E.Message);
+        end;
+
+      end;
+      MainForm.Memo.Lines.Append(IntToStr(ResponseStatusCode) + ' ' +
+        ResponseStatusText);
+      MainForm.Memo.Lines.Append(ResponseHeaders.Text);
+      MainForm.Memo.Lines.Append(l.DataString);
+
+    finally
+      MainForm.Memo.Lines.Append(AURL);
+      Free;
+      QueryParams.Free;
+      l.Free;
+    end;
 end;
 
 procedure TSettingsForm.ComboBoxLanguageChange(Sender: TObject);

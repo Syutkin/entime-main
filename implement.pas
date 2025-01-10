@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Controls, rxdbgrid, Sqlite3DS, i18n, Dialogs,
   ComCtrls, StdCtrls, strutils, sqldb, sqlite3conn, LazUTF8, Forms,
   ButtonPanel, Math, fileutil, LazFileUtils, DB, dateutils, DateTimePicker,
-  csvdocument;
+  csvdocument, opensslsockets, fphttpclient;
 
 type
   TMyDBGrid = class(TRxDBGrid);
@@ -72,14 +72,21 @@ function SelectedStage: integer;
 function CurrentStage: integer;
 function BackupBD: boolean;
 function HideLeadingZeroHour(Sender: TField): string;
+function FormatNumber(number: integer): string;
+function FormatTime(time: string): string;
+function FormatDiff(diff: string; diffsign: string = ' '): string;
+function FormatPlace(place: integer): string;
+function FormatLEDLine(number: integer; time: string; diff: string;
+  place: integer; diffsign: string = ' '): string;
 function dbopen: boolean;
 function dbnotempty: boolean;
 
+
 implementation
 
-uses Main, Result, Startlist;
+uses Main, Result, Startlist, StartItemModel;
 
-{$I include/my.inc}
+  {$I include/my.inc}
 
 // https://www.freepascal.org/docs-html/current/fcl/db/tdataset.refresh.html
 // https://forum.lazarus.freepascal.org/index.php?topic=38564.0
@@ -497,6 +504,7 @@ begin
             IntToStr(i) + ' = "' + status + '", diffleader' + IntToStr(i) +
             ' = NULL, status' + IntToStr(i) + ' = ' + s + ' WHERE number = :NUMBER;');
           ParamByName('NUMBER').AsString := n;
+          Close;
           ExecSQL;
           SQLTransaction.Commit;
           Close;
@@ -517,6 +525,7 @@ begin
           //        SQL.Add('UPDATE main SET place1 = NULL, result1 = "DSQ", diffleader1 = NULL, status = 3 WHERE number = :NUMBER;');
           SQL.Add('UPDATE main SET status = 3 WHERE number = :NUMBER;');
           ParamByName('NUMBER').AsString := n;
+          Close;
           ExecSQL;
           SQLTransaction.Commit;
           Close;
@@ -573,6 +582,7 @@ begin
         SQL.Clear;
         SQL.Add('UPDATE main SET status = ' + stat + ' WHERE number = :NUMBER;');
         ParamByName('NUMBER').AsString := n;
+        Close;
         ExecSQL;
         SQLTransaction.Commit;
       end;
@@ -631,6 +641,7 @@ begin
               ' = NULL, status' + IntToStr(i) +
               ' = NULL, status = NULL WHERE number = :NUMBER;');
             ParamByName('NUMBER').AsString := n;
+            Close;
             ExecSQL;
             SQLTransaction.Commit;
             Close;
@@ -654,6 +665,7 @@ begin
             SQL.Clear;
             SQL.Add('UPDATE main SET status = NULL WHERE number = :NUMBER;');
             ParamByName('NUMBER').AsString := n;
+            Close;
             ExecSQL;
             SQLTransaction.Commit;
             Close;
@@ -688,6 +700,7 @@ begin
               IntToStr(i) + ' = NULL, diffleader' + IntToStr(i) +
               ' = NULL, status' + IntToStr(i) + ' = NULL WHERE number = :NUMBER;');
             ParamByName('NUMBER').AsString := n;
+            Close;
             ExecSQL;
             SQLTransaction.Commit;
             Close;
@@ -724,17 +737,17 @@ begin
         MainForm.SQLTransaction1.Active := True;
         MainForm.SQLite3Connection1.ExecuteDirect('CREATE TABLE "main" (' +
           ' "id"	    INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,' +
-          ' "category"	    VARCHAR,' + ' "sumplace"	  INTEGER,' +
-          ' "number"	    INTEGER UNIQUE,' + ' "rfid"   INTEGER,' +
+          ' "category"	    VARCHAR,' + ' "sumplace"	    INTEGER,' +
+          ' "number"	  INTEGER NOT NULL UNIQUE,' + ' "rfid"   INTEGER,' +
           ' "name"          VARCHAR,' + ' "nickname"	  VARCHAR,' +
           ' "age"           VARCHAR,' + ' "team"          VARCHAR,' +
           ' "city"          VARCHAR,' + ' "starttime1"	  VARCHAR,' +
           ' "correction1"   INTEGER,' + ' "finishtime1"   VARCHAR,' +
-          ' "penalty1"	    VARCHAR,' + ' "result1"	  VARCHAR,' +
+          ' "penalty1"	    VARCHAR,' + ' "result1"	    VARCHAR,' +
           ' "diffleader1"   VARCHAR,' + ' "place1"	  INTEGER,' +
           ' "status1"       VARCHAR,' + ' "starttime2"	  VARCHAR,' +
           ' "correction2"   INTEGER,' + ' "finishtime2"   VARCHAR,' +
-          ' "penalty2"	    VARCHAR,' + ' "result2"	  VARCHAR,' +
+          ' "penalty2"	  VARCHAR,' + ' "result2"	  VARCHAR,' +
           ' "diffleader2"   VARCHAR,' + ' "place2"        INTEGER,' +
           ' "status2"       VARCHAR,' + ' "starttime3"    VARCHAR,' +
           ' "correction3"   INTEGER,' + ' "finishtime3"   VARCHAR,' +
@@ -746,7 +759,7 @@ begin
           ' "diffleader4"   VARCHAR,' + ' "place4"        INTEGER,' +
           ' "status4"       VARCHAR,' + ' "starttime5"	  VARCHAR,' +
           ' "correction5"   INTEGER,' + ' "finishtime5"   VARCHAR,' +
-          ' "penalty5"	    VARCHAR,' + ' "result5"	  VARCHAR,' +
+          ' "penalty5"	  VARCHAR,' + ' "result5"	  VARCHAR,' +
           ' "diffleader5"   VARCHAR,' + ' "place5"        INTEGER,' +
           ' "status5"       VARCHAR,' + ' "starttime6"    VARCHAR,' +
           ' "correction6"   INTEGER,' + ' "finishtime6"   VARCHAR,' +
@@ -759,7 +772,7 @@ begin
         MainForm.SQLTransaction1.Commit;
 
         MainForm.SQLite3Connection1.ExecuteDirect('CREATE TABLE "load" (' +
-          ' "category"	 VARCHAR,' + ' "number"	    INTEGER,' +
+          ' "category"	 VARCHAR,' + ' "number"	 INTEGER,' +
           ' "name"	 VARCHAR,' + ' "nickname"   VARCHAR,' +
           ' "age"        VARCHAR,' + ' "team"	    VARCHAR,' +
           ' "city"       VARCHAR,' + ' "starttime1" VARCHAR,' +
@@ -777,7 +790,7 @@ begin
 
         MainForm.SQLite3Connection1.ExecuteDirect('CREATE TABLE "start" (' +
           '"id"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,' +
-          '"number"	INTEGER UNIQUE,' + '"starttime"  	   TEXT,' +
+          '"number"	INTEGER NOT NULL UNIQUE,' + '"starttime"  	   TEXT,' +
           '"automaticstarttime"	TEXT,' + '"automaticcorrection"    INTEGER,' +
           '"automaticphonetime"	TEXT,' + '"manualstarttime"        TEXT,' +
           '"manualcorrection"	INTEGER,' + '"finishtime"          TEXT);');
@@ -798,13 +811,13 @@ begin
         MainForm.SQLTransaction1.Commit;
 
         MainForm.SQLite3Connection1.ExecuteDirect('CREATE TABLE "config" (' +
-          ' "key"	          VARCHAR UNIQUE,' + ' "value"	  VARCHAR);');
+          ' "key"	          VARCHAR NOT NULL UNIQUE,' + ' "value"	  VARCHAR);');
         MainForm.SQLTransaction1.Commit;
 
         MainForm.SQLite3Connection1.ExecuteDirect('CREATE TABLE "lora" (' +
           ' "id"	  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,' +
-          ' "number"	  INTEGER,' + ' "starttime"          VARCHAR,' +
-          ' "correction"  VARCHAR,' + ' "isset"              INTEGER,' +
+          ' "number"     INTEGER,' + ' "starttime"          VARCHAR,' +
+          ' "correction"  VARCHAR,' + ' "isset"             INTEGER,' +
           ' "timemark"	  VARCHAR' + ');');
         MainForm.SQLTransaction1.Commit;
 
@@ -841,9 +854,20 @@ end;
 
 procedure SetFinish;
 var
-  row, number, i: integer;
+  row, number, leadernumber, currentplace, i: integer;
   setfinish: boolean = False;
   c: TComponent;
+  currentresult, bottomline, currentcategory, st, leaderresult, upperline, Name: string;
+  currentdiff: string = '';
+  response: string;
+
+  //Отправка в телегу
+  QueryParams: TStrings = nil;
+  AURL: string;
+  s: string = '';
+  item: string;
+  l: TStringstream;
+  http: tfphttpclient;
 begin
   Screen.Cursor := crSQLWait;
   try
@@ -902,6 +926,21 @@ begin
           end;
           if setfinish then
           begin
+            //сначала определяем номер и результат текущего лидера категории для LED панели или телеграм бота
+            if Mainform.AcLEDPanel.Checked or Mainform.AcTelegramBot.Checked then
+            begin
+              st := IntToStr(CurrentStage);
+              currentcategory := MainForm.SQLQuery1.FieldByName('category').AsString;
+              Name := MainForm.SQLQuery1.FieldByName('name').AsString;
+              MainForm.SQLQuery1.Active := False;
+              MainForm.SQLQuery1.SQL.Text :=
+                'select * from main where category = "' + currentcategory +
+                '" AND place' + st + ' = 1;';
+              MainForm.SQLQuery1.Active := True;
+              leaderresult := MainForm.SQLQuery1.FieldByName('result' + st).AsString;
+              leadernumber := MainForm.SQLQuery1.FieldByName('number').AsInteger;
+            end;
+
             MainForm.SQLQuery1.SQL.Clear;
             MainForm.SQLQuery1.SQL.Add('UPDATE main');
             for i := 1 to maxstages do
@@ -915,12 +954,222 @@ begin
             MainForm.SQLQuery1.ParamByName('TIME').Text :=
               MainForm.sGridResult.Cells[0, row];
             MainForm.SQLQuery1.ParamByName('NUMBER').AsInteger := number;
+            // ToDo: Без close падает, что за ExecSQL тут вообще?
+            MainForm.SQLQuery1.Close;
             MainForm.SQLQuery1.ExecSQL;
             //ставим время финиша для номера
             UpdateResults;
             //ставим результат
             MainForm.sGridResult.DeleteRow(row);
             Log(sFinishTimeSet + ' ' + IntToStr(number));
+
+            //если используется LED панель или телеграм бот, добываем для них данные
+            if Mainform.AcLEDPanel.Checked or Mainform.AcTelegramBot.Checked then
+            begin
+              //результаты текущего участника
+              MainForm.SQLQuery1.Active := False;
+              MainForm.SQLQuery1.SQL.Text :=
+                'select * from main where number = :NUMBER;';
+              MainForm.SQLQuery1.ParamByName('NUMBER').AsInteger := number;
+              MainForm.SQLQuery1.Active := True;
+
+              currentresult := MainForm.SQLQuery1.FieldByName('result' + st).AsString;
+              currentplace := MainForm.SQLQuery1.FieldByName('place' + st).AsInteger;
+
+              //если текущий участник занял первое место
+              if currentplace = 1 then
+              begin
+
+                // ToDo: фоматирование
+
+                //результаты лидера категории для определения, насколько обогнал предыдущего лидера текущий участник
+                if leadernumber > 0 then
+                begin
+                  MainForm.SQLQuery1.Active := False;
+                  MainForm.SQLQuery1.SQL.Text :=
+                    'select * from main where number = ' + IntToStr(leadernumber) + ';';
+                  MainForm.SQLQuery1.Active := True;
+                  currentdiff :=
+                    MainForm.SQLQuery1.FieldByName('diffleader' + st).AsString;
+
+                  //формируем верхнюю строку (текущий участник-лидер)
+                  //upperline := FormatLEDLine(number, currentresult, currentdiff, currentplace, '-');
+                  //bottomline := FormatLEDLine(leadernumber, leaderresult, '', 2);
+                end
+                else
+                begin
+                  //upperline := FormatLEDLine(number, currentresult, '', currentplace);
+                  //bottomline := '';
+                end;
+              end
+              //если текущий участник НЕ занял первое место
+              else
+              begin
+                //  upperline := FormatLEDLine(leadernumber, leaderresult, '', 1);
+                currentdiff :=
+                  MainForm.SQLQuery1.FieldByName('diffleader' + st).AsString;
+                //  bottomline := FormatLEDLine(number, currentresult, currentdiff, currentplace);
+              end;
+            end;
+
+            //если используется LED панель, отправляем в неё данные
+            if Mainform.AcLEDPanel.Checked then
+            begin
+              if MainForm.DataPortHTTP1.Active then
+                MainForm.DataPortHTTP1.Close();
+              //результаты текущего участника
+              //MainForm.SQLQuery1.Active := False;
+              //MainForm.SQLQuery1.SQL.Text :=
+              //  'select * from main where number = :NUMBER;';
+              //MainForm.SQLQuery1.ParamByName('NUMBER').AsInteger := number;
+              //MainForm.SQLQuery1.Active := True;
+
+              //currentresult := MainForm.SQLQuery1.FieldByName('result' + st).AsString;
+              //currentplace := MainForm.SQLQuery1.FieldByName('place' + st).AsInteger;
+
+              //если текущий участник занял первое место
+              if currentplace = 1 then
+              begin
+
+                // ToDo: фоматирование
+
+                //результаты лидера категории для определения, насколько обогнал предыдущего лидера текущий участник
+                if leadernumber > 0 then
+                begin
+                  //MainForm.SQLQuery1.Active := False;
+                  //MainForm.SQLQuery1.SQL.Text :=
+                  //  'select * from main where number = ' + IntToStr(leadernumber) + ';';
+                  //MainForm.SQLQuery1.Active := True;
+                  //currentdiff := MainForm.SQLQuery1.FieldByName('diffleader' + st).AsString;
+
+                  //формируем верхнюю строку (текущий участник-лидер)
+                  upperline :=
+                    FormatLEDLine(number, currentresult, currentdiff, currentplace, '-');
+                  bottomline := FormatLEDLine(leadernumber, leaderresult, '', 2);
+                end
+                else
+                begin
+                  upperline := FormatLEDLine(number, currentresult, '', currentplace);
+                  bottomline := '';
+                end;
+              end
+              //если текущий участник НЕ занял первое место
+              else
+              begin
+                upperline := FormatLEDLine(leadernumber, leaderresult, '', 1);
+                //currentdiff := MainForm.SQLQuery1.FieldByName('diffleader' + st).AsString;
+                bottomline := FormatLEDLine(number, currentresult,
+                  currentdiff, currentplace);
+              end;
+
+              MainForm.DataPortHTTP1.Params.Clear;
+              MainForm.DataPortHTTP1.Params.Add('upperline=' + upperline);
+              MainForm.DataPortHTTP1.Params.Add('bottomline=' + bottomline);
+              Print(MainForm.DataPortHTTP1.Params.Text);
+              Print(MainForm.DataPortHTTP1.Url);
+              MainForm.DataPortHTTP1.Open();
+              MainForm.DataPortHTTP1.Push('');
+            end;
+
+            //если хотим отправлять данные в бота телеги
+            if Mainform.AcTelegramBot.Checked then
+            begin
+              //if MainForm.DataPortHTTPTelegramBot.Active then
+              //  MainForm.DataPortHTTPTelegramBot.Close();
+              //если текущий участник занял первое место
+              if currentplace = 1 then
+              begin
+                //результаты лидера категории для определения, насколько обогнал предыдущего лидера текущий участник
+                if leadernumber > 0 then
+                begin
+                  // Участник кого-то обогнал
+                  //upperline := FormatLEDLine(number, currentresult, currentdiff, currentplace, '-');
+                  //bottomline := FormatLEDLine(leadernumber, leaderresult, '', 2);
+                  currentdiff := FormatDiff(currentdiff, '-');
+                end
+                else
+                begin
+                  // Участник первый финишировавший
+                  //upperline := FormatLEDLine(number, currentresult, '', currentplace);
+                  //bottomline := '';
+                end;
+              end
+              //если текущий участник НЕ занял первое место
+              else
+              begin
+                //upperline := FormatLEDLine(leadernumber, leaderresult, '', 1);
+                currentdiff :=
+                  MainForm.SQLQuery1.FieldByName('diffleader' + st).AsString;
+                currentdiff := FormatDiff(currentdiff, '');
+                //bottomline := FormatLEDLine(number, currentresult, currentdiff, currentplace);
+              end;
+
+              // отправка данных в телегу
+              l := TStringStream.Create('');
+              http := tfphttpclient.Create(nil);
+              with http do
+              try
+                QueryParams := TStringList.Create;
+                //AddHeader('Authorization', 'AccessToken MjtAFOrgYUrsfCC7KPLpAi03N4Od17Bh');
+                //AddHeader('X-User-Authorization', 'Basic aW5mb0BzcG1hc2gucnU6NTE0NzU4');
+                //AddHeader('Content-Type', 'application/json;charset=UTF-8');
+                with QueryParams do
+                begin
+                  if not IntToStr(number).IsEmpty then
+                    Values['number'] := EncodeURLElement(IntToStr(number));
+                  if not Name.IsEmpty then
+                    Values['name'] := EncodeURLElement(Name);
+                  if not currentcategory.IsEmpty then
+                    Values['category'] := EncodeURLElement(currentcategory);
+                  if not currentresult.IsEmpty then
+                    Values['result'] := EncodeURLElement(FormatTime(currentresult));
+                  if not currentdiff.IsEmpty then
+                    Values['diff'] := EncodeURLElement(currentdiff);
+                  if not IntToStr(currentplace).IsEmpty then
+                    Values['place'] := EncodeURLElement(IntToStr(currentplace));
+                end;
+                AURL := telegrambotadress;
+                for item in QueryParams do
+                  s := s + '&' + item;
+                AURL := AURL + '?' + s.Substring(1);
+
+                try
+                  httpmethod('GET', AURL, l, []);
+                except
+                  On E: Exception do
+                  begin
+                    //MessageDlg(sTelegramBotSendingError + E.Message, mtError, [mbOK], 0);
+                    Log(sTelegramBotSendingError + E.Message);
+                  end;
+
+                end;
+                MainForm.Memo.Lines.Append(IntToStr(ResponseStatusCode) +
+                  ' ' + ResponseStatusText);
+                MainForm.Memo.Lines.Append(ResponseHeaders.Text);
+                MainForm.Memo.Lines.Append(l.DataString);
+
+              finally
+                MainForm.Memo.Lines.Append(AURL);
+                Free;
+                QueryParams.Free;
+                l.Free;
+              end;
+
+              //end;
+
+              //MainForm.DataPortHTTPTelegramBot.Params.Clear;
+              //MainForm.DataPortHTTPTelegramBot.Params.Add('number=' + IntToStr(number));
+              //MainForm.DataPortHTTPTelegramBot.Params.Add('name=' + name);
+              //MainForm.DataPortHTTPTelegramBot.Params.Add('category=' + currentcategory);
+              //MainForm.DataPortHTTPTelegramBot.Params.Add('result=' + FormatTime(currentresult));
+              //MainForm.DataPortHTTPTelegramBot.Params.Add('diff=' + currentdiff);
+              //MainForm.DataPortHTTPTelegramBot.Params.Add('place=' + IntToStr(currentplace));
+
+              //Print(MainForm.DataPortHTTPTelegramBot.Params.Text);
+              //Print(MainForm.DataPortHTTPTelegramBot.Url);
+              //MainForm.DataPortHTTPTelegramBot.Open();
+              //MainForm.DataPortHTTPTelegramBot.Push('');
+            end;
           end;
         end
         else
@@ -976,9 +1225,11 @@ begin
             Close;
             SQL.Text := 'UPDATE main SET correction' + IntToStr(CurrentStage) +
               ' = ' + correction + ' WHERE number = ' + n + ';';
+            Close;
             ExecSQL;
             Close;
             SQL.Text := 'UPDATE lora SET isset = 1 WHERE id = ' + id + ';';
+            Close;
             ExecSQL;
             SQLTransaction.Commit;
             Close;
@@ -1061,6 +1312,7 @@ begin
           SQL.Add('END,');
           SQL.Add('finishtime' + IntToStr(i) + ' = CASE WHEN status' +
             IntToStr(i) + ' NOTNULL THEN NULL ELSE finishtime' + IntToStr(i) + ' END;');
+          Close;
           ExecSQL;
           SQL.Clear;
 
@@ -1068,6 +1320,7 @@ begin
           SQL.Add('UPDATE main SET place' + IntToStr(i) + ' = NULL, diffleader' +
             IntToStr(i) + ' = NULL;');
           //WHERE status NOTNULL;');
+          Close;
           ExecSQL;
           SQL.Clear;
 
@@ -1081,12 +1334,14 @@ begin
             IntToStr(i) + ' DESC');
           SQL.Add('ON CONFLICT(number) DO UPDATE SET place' + IntToStr(i) +
             ' = excluded.place' + IntToStr(i) + ';');
+          Close;
           ExecSQL;
           SQL.Clear;
 
           //обнуляем отставание для первых номеров
           SQL.Add('UPDATE main SET diffleader' + IntToStr(i) +
             ' = NULL WHERE place' + IntToStr(i) + ' = 1;');
+          Close;
           ExecSQL;
           SQL.Clear;
 
@@ -1103,6 +1358,7 @@ begin
             'SELECT strftime(''%H:%M:%f'',(t2.current - t1.leader1 + 0.5)), t2.num2 from t1, t2 WHERE t1.cat1 = t2.cat2');
           SQL.Add('ON CONFLICT(number) DO UPDATE SET diffleader' +
             IntToStr(i) + '= excluded.diffleader' + IntToStr(i) + ';');
+          Close;
           ExecSQL;
           SQLTransaction.Commit;
           Close;
@@ -1136,11 +1392,13 @@ begin
           SQL.Add('+ julianday(result' + IntToStr(i) + ') -2451543.5');
       end;
       SQL.Add(')END;');
+      Close;
       ExecSQL;
       //ставим общий результат
       SQL.Clear;
       SQL.Add('UPDATE main SET sumplace = NULL, sumdiffleader = NULL;');
       // WHERE status NOTNULL;');
+      Close;
       ExecSQL;
       //обнуляем места (а вдруг были) для dsq/dnf/dns
       SQL.Clear;
@@ -1148,10 +1406,12 @@ begin
       SQL.Add(
         'SELECT number, row_number() over(partition BY category ORDER BY sumresult) as sumplace FROM main WHERE sumresult > 0 AND status ISNULL ORDER BY sumresult DESC');
       SQL.Add('ON CONFLICT(number) DO UPDATE SET sumplace = excluded.sumplace;');
+      Close;
       ExecSQL;
       //обновляем места
       SQL.Clear;
       SQL.Add('UPDATE main SET sumdiffleader = NULL WHERE sumplace = 1;');
+      Close;
       ExecSQL;
       //обнуляем отставание для первых номеров
       SQL.Clear;
@@ -1165,6 +1425,7 @@ begin
         'SELECT strftime(''%H:%M:%f'',(t2.current - t1.leader1 + 0.5)), t2.num2 from t1, t2 WHERE t1.cat1 = t2.cat2');
       SQL.Add(
         'ON CONFLICT(number) DO UPDATE SET sumdiffleader= excluded.sumdiffleader;');
+      Close;
       ExecSQL;
       //ставим отставание от лидера категории
       SQLTransaction.Commit;
@@ -1251,6 +1512,7 @@ begin
       //обнуляем места (а вдруг были) для dsq/dnf/dns
       SQL.Add('UPDATE main SET sumplace = NULL, sumdiffleader = NULL;');
       // WHERE status NOTNULL;');
+      Close;
       ExecSQL;
       SQL.Clear;
 
@@ -1270,11 +1532,13 @@ begin
       end;
       SQL.Add('ORDER BY sumresult DESC');
       SQL.Add('ON CONFLICT(number) DO UPDATE SET sumplace = excluded.sumplace;');
+      Close;
       ExecSQL;
       SQL.Clear;
 
       //обнуляем отставание для первых номеров
       SQL.Add('UPDATE main SET sumdiffleader = NULL WHERE sumplace = 1;');
+      Close;
       ExecSQL;
       SQL.Clear;
 
@@ -1289,6 +1553,7 @@ begin
         'SELECT strftime(''%H:%M:%f'',(t2.current - t1.leader1 + 0.5)), t2.num2 from t1, t2 WHERE t1.cat1 = t2.cat2');
       SQL.Add(
         'ON CONFLICT(number) DO UPDATE SET sumdiffleader= excluded.sumdiffleader;');
+      Close;
       ExecSQL;
       SQL.Clear;
 
@@ -1303,6 +1568,7 @@ begin
         ' ' + sSU + ''', t2.num2 from t1, t2 WHERE t1.cat1 = t2.cat2');
       SQL.Add(
         'ON CONFLICT(number) DO UPDATE SET sumdiffleader= excluded.sumdiffleader;');
+      Close;
       ExecSQL;
       SQLTransaction.Commit;
     end;
@@ -1324,6 +1590,7 @@ begin
 
       //обнуляем отставание и место для всех
       SQL.Add('UPDATE main SET thrudiff = NULL, thruplace = NULL;');
+      Close;
       ExecSQL;
       SQL.Clear;
 
@@ -1332,6 +1599,7 @@ begin
       SQL.Add(
         'SELECT number, row_number() over(ORDER BY sumresult) as thruplace FROM main WHERE sumresult > 0 AND status ISNULL ORDER BY thruplace');
       SQL.Add('ON CONFLICT(number) DO UPDATE SET thruplace = excluded.thruplace;');
+      Close;
       ExecSQL;
       SQL.Clear;
 
@@ -1347,6 +1615,7 @@ begin
       SQL.Add(
         'SELECT strftime(''%H:%M:%f'',(t2.current - t1.leader1 + 0.5)), t2.num2 from t1, t2, tthru WHERE t2.num2 = tthru.number ORDER BY thruplace');
       SQL.Add('ON CONFLICT(number) DO UPDATE SET thrudiff= excluded.thrudiff;');
+      Close;
       ExecSQL;
       SQLTransaction.Commit;
       Close;
@@ -1381,6 +1650,7 @@ begin
         end;
         SQL.Add(
           'sumplace=NULL, sumresult=NULL, sumdiffleader=NULL, thrudiff=NULL, status=NULL;');
+        Close;
         ExecSQL;
         SQLTransaction.Commit;
         Close;
@@ -1439,6 +1709,7 @@ begin
         SQL.Clear;
         SQL.Add('UPDATE main SET status' + IntToStr(st) + ' = NULL, starttime' +
           IntToStr(st) + ' = "' + TimeToStr(t) + '" WHERE number = ' + n + ';');
+        Close;
         ExecSQL;
         SQLTransaction.Commit;
         Close;
@@ -1472,6 +1743,13 @@ procedure LoadParticipantsList(FileName: string);
 var
   ocsvStrings: TStringList;
   i, k: integer;
+  startItem: TStartItemModel;
+  startItems: TList;
+  legend: TStringList;
+  item: TStringList;
+  legendItem: string;
+  legendMap: TLegend;
+  sql: string;
 begin
   if dbopen then
   begin
@@ -1481,52 +1759,191 @@ begin
       begin
         SQL.Clear;
         SQL.Add('DELETE from load');
+        Close;
         ExecSQL;
         SQLTransaction.Commit;
         Close;
       end;
-
+      // TODO: Somewhere memory leak
       ocsvStrings := TStringList.Create;
+      legend := TStringList.Create;
+      legend.Delimiter := ';';
+      legend.StrictDelimiter := True;
+      item := TStringList.Create;
+      item.Delimiter := ';';
+      item.StrictDelimiter := True;
+      legendMap := TLegend.Create;
+      startItems := TList.Create;
       try
         ocsvStrings.LoadFromFile(FileName);
+        {$IFDEF Windows}
+        ocsvStrings.Text:= WinCPToUTF8(ocsvStrings.Text);
+        {$ENDIF}
+
+        //-----
+        legend.DelimitedText := ocsvStrings[0];
+        //for item in legend do Print(item);
+        for i := 1 to ocsvStrings.Count - 1 do
+        begin
+          item.DelimitedText := ocsvStrings[i];
+          startItem := TStartItemModel.Create;
+          for legendItem in legend do
+          begin
+            if legendMap.number.IndexOf(legendItem.ToLower) >= 0 then
+            begin
+              startItem.number := item[legend.IndexOf(legendItem)].ToInteger;
+            end
+            else if legendMap.Name.IndexOf(legendItem.ToLower) >= 0 then
+            begin
+              startItem.Name := item[legend.IndexOf(legendItem)];
+            end
+            else if legendMap.category.IndexOf(legendItem.ToLower) >= 0 then
+            begin
+              startItem.category := item[legend.IndexOf(legendItem)];
+            end
+            else if legendMap.nickname.IndexOf(legendItem.ToLower) >= 0 then
+            begin
+              startItem.nickname := item[legend.IndexOf(legendItem)];
+            end
+            else if legendMap.birthday.IndexOf(legendItem.ToLower) >= 0 then
+            begin
+              startItem.birthday := item[legend.IndexOf(legendItem)];
+            end
+            else if legendMap.team.IndexOf(legendItem.ToLower) >= 0 then
+            begin
+              startItem.team := item[legend.IndexOf(legendItem)];
+            end
+            else if legendMap.city.IndexOf(legendItem.ToLower) >= 0 then
+            begin
+              startItem.city := item[legend.IndexOf(legendItem)];
+            end
+            else if legendMap.phone.IndexOf(legendItem.ToLower) >= 0 then
+            begin
+              startItem.phone := item[legend.IndexOf(legendItem)];
+            end
+            else if legendMap.email.IndexOf(legendItem.ToLower) >= 0 then
+            begin
+              startItem.email := item[legend.IndexOf(legendItem)];
+            end
+            else if legendMap.comment.IndexOf(legendItem.ToLower) >= 0 then
+            begin
+              startItem.comment := item[legend.IndexOf(legendItem)];
+            end
+            else
+            begin
+              startItem.startTimes.Add(item[legend.IndexOf(legendItem)]);
+            end;
+          end;
+          startItems.Add(startItem);
+        end;
+
         MainForm.SQLQuery1.SQL.Clear;
         MainForm.SQLQuery1.SQL.Add(
           'INSERT INTO load (category, number, name, nickname, age, team, city, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6)');
         MainForm.SQLQuery1.SQL.Add('VALUES');
-        for i := 1 to ocsvStrings.Count - 1 do
-          //от 1 чтобы убрать заголовки в файле
+        for i := 0 to startItems.Count - 1 do
         begin
-          //ocsvStrings.ValueFromIndex[i] := WinCPToUTF8(ocsvStrings.ValueFromIndex[i]);
-          k := CountOccurrences(';', ocsvStrings.ValueFromIndex[i]);
-          //считаем кол-во разделителей(;), чтобы понять сколько стартовых времён
-          //ToDo: добавить проверку чтобы значений было не больше 12
-          if k < 13 then
+          item.Free;
+          item := TStringList.Create;
+          item.Delimiter := ';';
+          item.QuoteChar := #0;
+          item.add(TStartItemModel(startItems[i]).category);
+          item.add(TStartItemModel(startItems[i]).number.toString);
+          item.add(TStartItemModel(startItems[i]).Name);
+          item.add(TStartItemModel(startItems[i]).nickname);
+          item.add(TStartItemModel(startItems[i]).birthday);
+          item.add(TStartItemModel(startItems[i]).team);
+          item.add(TStartItemModel(startItems[i]).city);
+
+          //считаем кол-во стартовых времён
+          k := TStartItemModel(startItems[i]).startTimes.Count;
+          if k < 6 then
           begin
-            for k := 12 - k downto 1 do
+            for k := 6 - k downto 1 do
             begin
-              ocsvStrings.ValueFromIndex[i] :=
-                ocsvStrings.ValueFromIndex[i] + ';';
-              //если стартов не 6, то ставим ';', т.е. заполняем отсутствующие времена стартов (null) на оставшиеся СУ
+              //если стартов не 6, то заполняем до шести
+              TStartItemModel(startItems[i]).startTimes.Add('');
+
             end;
-            ocsvStrings.ValueFromIndex[i] :=
-              ReplaceStr(ocsvStrings.ValueFromIndex[i], '''', '''''');
-            //экранируем ' в SQL запросе
-            ocsvStrings.ValueFromIndex[i] :=
-              ReplaceStr(ocsvStrings.ValueFromIndex[i], ';', ''',''');
           end;
-          MainForm.SQLQuery1.SQL.Add('(''' + ocsvStrings.ValueFromIndex[i] + ''')');
-          if i <> ocsvStrings.Count - 1 then
-            MainForm.SQLQuery1.SQL.Add(',');
+          item.AddStrings(TStartItemModel(startItems[i]).startTimes);
+          sql := item.DelimitedText;
+          //экранируем ' в SQL запросе
+          sql := ReplaceStr(sql, '''', '''''');
+          sql := ReplaceStr(sql, ';', ''',''');
+
+          MainForm.SQLQuery1.SQL.Add('(''' + sql + ''')');
           //если строка не последняя ставим запятую
+          if i <> startItems.Count - 1 then
+            MainForm.SQLQuery1.SQL.Add(',');
         end;
         MainForm.SQLQuery1.SQL.Add(';');
-        {$IFDEF Windows}
-        MainForm.SQLQuery1.SQL.Text :=
-          WinCPToUTF8(MainForm.SQLQuery1.SQL.Text);
-        {$ENDIF}
+        //{$IFDEF Windows}
+        //MainForm.SQLQuery1.SQL.Text:= WinCPToUTF8(MainForm.SQLQuery1.SQL.Text);
+        //{$ENDIF}
         try
+          MainForm.SQLQuery1.Close;
           MainForm.SQLQuery1.ExecSQL;
           MainForm.SQLQuery1.SQLTransaction.Commit;
+
+
+          // Запись в основную таблицу
+          with MainForm.SQLQuery1 do
+          begin
+            SQL.Clear;
+            SQL.Add(
+              'INSERT into main (category, number, name, nickname, age, team, city, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6)');
+            SQL.Add(
+              'SELECT category, number, name, nickname, age, team, city, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6 FROM load WHERE number NOTNULL AND number != ""');
+            SQL.Add('ON CONFLICT(number) DO UPDATE SET');
+            SQL.Add(
+              'category = excluded.category, name = excluded.name, nickname = excluded.nickname, age = excluded.age, team = excluded.team, city = excluded.city, starttime1 = excluded.starttime1,');
+            SQL.Add(
+              'starttime2 = excluded.starttime2, starttime3 = excluded.starttime3, starttime4 = excluded.starttime4, starttime5 = excluded.starttime5, starttime6 = excluded.starttime6;');
+            Close;
+            ExecSQL;
+            SQLTransaction.Commit;
+            Close;
+          end;
+
+          if MessageDlg(sSetCategoryName, mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+          begin
+            //записывать ли первые несколько* категорий из списка участников
+            with MainForm.SQLQuery1 do
+            begin
+              //в окно результатов и в конфиг БД
+              Close;
+              //*несколько равно количеству категорий, показываемых в окне результатов
+              SQL.Text := 'SELECT category FROM main GROUP BY category';
+              Open;
+              k := RecordCount;
+              if k > visiblecat then
+                k := visiblecat;
+              for i := 1 to k do
+              begin
+                cat[i] := Fields.Fields[0].AsString;
+                Next;
+              end;
+              Close;
+              SQL.Clear;
+              SQL.Add('INSERT INTO config (key, value) VALUES');
+              for i := 1 to visiblecat do
+              begin
+                SQL.Add('("catname' + IntToStr(i) + '", "' + cat[i] + '")');
+                if i < visiblecat then
+                  SQL.Add(',');
+              end;
+              SQL.Add('ON CONFLICT(key) DO UPDATE SET value = excluded.value;');
+              Close;
+              ExecSQL;
+              SQLTransaction.Commit;
+              Close;
+            end;
+            LoadIniCategory;
+          end;
+          RefreshAll;
+          Log(sLoadCSVParticipants);
+          Screen.Cursor := crDefault;
         except
           On E: Exception do
           begin
@@ -1536,63 +1953,73 @@ begin
         end;
         MainForm.SQLQuery1.Close;
       finally
-        ocsvStrings.Free;
-      end;
-
-      with MainForm.SQLQuery1 do
-      begin
-        SQL.Clear;
-        SQL.Add(
-          'INSERT into main (category, number, name, nickname, age, team, city, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6)');
-        SQL.Add(
-          'SELECT category, number, name, nickname, age, team, city, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6 FROM load WHERE number NOTNULL AND number != ""');
-        SQL.Add('ON CONFLICT(number) DO UPDATE SET');
-        SQL.Add(
-          'category = excluded.category, name = excluded.name, nickname = excluded.nickname, age = excluded.age, team = excluded.team, city = excluded.city, starttime1 = excluded.starttime1,');
-        SQL.Add(
-          'starttime2 = excluded.starttime2, starttime3 = excluded.starttime3, starttime4 = excluded.starttime4, starttime5 = excluded.starttime5, starttime6 = excluded.starttime6;');
-        ExecSQL;
-        SQLTransaction.Commit;
-        Close;
-      end;
-
-      if MessageDlg(sSetCategoryName, mtConfirmation, [mbYes, mbNo], 0) = mrYes then
-      begin
-        //записывать ли первые несколько* категорий из списка участников
-        with MainForm.SQLQuery1 do
         begin
-          //в окно результатов и в конфиг БД
-          Close;
-          //*несколько равно количеству категорий, показываемых в окне результатов
-          SQL.Text := 'SELECT category FROM main GROUP BY category';
-          Open;
-          k := RecordCount;
-          if k > visiblecat then
-            k := visiblecat;
-          for i := 1 to k do
-          begin
-            cat[i] := Fields.Fields[0].AsString;
-            Next;
-          end;
-          Close;
-          SQL.Clear;
-          SQL.Add('INSERT INTO config (key, value) VALUES');
-          for i := 1 to visiblecat do
-          begin
-            SQL.Add('("catname' + IntToStr(i) + '", "' + cat[i] + '")');
-            if i < visiblecat then
-              SQL.Add(',');
-          end;
-          SQL.Add('ON CONFLICT(key) DO UPDATE SET value = excluded.value;');
-          ExecSQL;
-          SQLTransaction.Commit;
-          Close;
+          ocsvStrings.Free;
+          legend.Free;
+          item.Free;
+          legendMap.Free;
+          startItems.Free;
+          startItem.Free;
+
         end;
-        LoadIniCategory;
       end;
-      RefreshAll;
-      Log(sLoadCSVParticipants);
-      Screen.Cursor := crDefault;
+      //-----
+      //  MainForm.SQLQuery1.SQL.Clear;
+      //  MainForm.SQLQuery1.SQL.Add(
+      //    'INSERT INTO load (category, number, name, nickname, age, team, city, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6)');
+      //  MainForm.SQLQuery1.SQL.Add('VALUES');
+      //  for i := 1 to ocsvStrings.Count - 1 do
+      //    //от 1 чтобы убрать заголовки в файле
+      //  begin
+      //    //ocsvStrings.ValueFromIndex[i] := WinCPToUTF8(ocsvStrings.ValueFromIndex[i]);
+      //    k := CountOccurrences(';', ocsvStrings.ValueFromIndex[i]);
+      //    //считаем кол-во разделителей(;), чтобы понять сколько стартовых времён
+      //    //ToDo: добавить проверку чтобы значений было не больше 12
+      //    if k < 13 then
+      //    begin
+      //      for k := 12 - k downto 1 do
+      //      begin
+      //        ocsvStrings.ValueFromIndex[i] :=
+      //          ocsvStrings.ValueFromIndex[i] + ';';
+      //        //если стартов не 6, то ставим ';', т.е. заполняем отсутствующие времена стартов (null) на оставшиеся СУ
+      //      end;
+      //      ocsvStrings.ValueFromIndex[i] :=
+      //        ReplaceStr(ocsvStrings.ValueFromIndex[i], '''', '''''');
+      //      //экранируем ' в SQL запросе
+      //      ocsvStrings.ValueFromIndex[i] :=
+      //        ReplaceStr(ocsvStrings.ValueFromIndex[i], ';', ''',''');
+      //    end;
+      //    MainForm.SQLQuery1.SQL.Add('(''' + ocsvStrings.ValueFromIndex[i] + ''')');
+      //    if i <> ocsvStrings.Count - 1 then
+      //      MainForm.SQLQuery1.SQL.Add(',');
+      //    //если строка не последняя ставим запятую
+      //  end;
+      //  MainForm.SQLQuery1.SQL.Add(';');
+      //  //{$IFDEF Windows}
+      //  //MainForm.SQLQuery1.SQL.Text :=
+      //  //WinCPToUTF8(MainForm.SQLQuery1.SQL.Text);
+      //  //{$ENDIF}
+      //  try
+      //    MainForm.SQLQuery1.Close;
+      //    MainForm.SQLQuery1.ExecSQL;
+      //    MainForm.SQLQuery1.SQLTransaction.Commit;
+      //  except
+      //    On E: Exception do
+      //    begin
+      //      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+      //      Log(sDatabaseOpenError + E.Message);
+      //    end;
+      //  end;
+      //  MainForm.SQLQuery1.Close;
+      //finally
+      //  ocsvStrings.Free;
+      //  legend.Free;
+      //  item.Free;
+      //  legendMap.Free;
+      //  startItems.Free;
+      //  startItem.Free;
+      //end;
+
     except
       On E: Exception do
       begin
@@ -1600,6 +2027,7 @@ begin
         Log(sDatabaseOpenError + E.Message);
       end;
     end;
+    Screen.Cursor := crDefault;
   end;
 end;
 
@@ -1739,6 +2167,7 @@ begin
           begin
             SQL.Clear;
             SQL.Add('DELETE from loadresult');
+            Close;
             ExecSQL;
             SQLTransaction.Commit;
             Close;
@@ -1804,6 +2233,7 @@ begin
               end;
               MainForm.SQLQuery1.SQL.Add(';');
               //Print(MainForm.SQLQuery1.SQL.Text);
+              MainForm.SQLQuery1.Close;
               MainForm.SQLQuery1.ExecSQL;
               MainForm.SQLQuery1.SQLTransaction.Commit;
               MainForm.SQLQuery1.Close;
@@ -1831,6 +2261,7 @@ begin
                   ' = excluded.penalty' + IntToStr(importfinish) + ',');
                 SQL.Add('status' + IntToStr(importfinish) +
                   ' = excluded.status' + IntToStr(importfinish));
+                Close;
                 ExecSQL;
                 SQLTransaction.Commit;
                 Close;
@@ -1903,6 +2334,7 @@ begin
               end;
 
               MainForm.SQLQuery1.SQL.Add(';');
+              MainForm.SQLQuery1.Close;
               MainForm.SQLQuery1.ExecSQL;
               MainForm.SQLQuery1.SQLTransaction.Commit;
               MainForm.SQLQuery1.Close;
@@ -1925,6 +2357,7 @@ begin
                 SQL.Add('status' + IntToStr(importfinish) +
                   ' = excluded.status' + IntToStr(importfinish));
                 //Print(SQL.Text);
+                Close;
                 ExecSQL;
                 SQLTransaction.Commit;
                 Close;
@@ -1995,6 +2428,7 @@ begin
               end;
 
               MainForm.SQLQuery1.SQL.Add(';');
+              MainForm.SQLQuery1.Close;
               MainForm.SQLQuery1.ExecSQL;
               MainForm.SQLQuery1.SQLTransaction.Commit;
               MainForm.SQLQuery1.Close;
@@ -2013,6 +2447,7 @@ begin
                   ' = excluded.finishtime' + IntToStr(importfinish) + ',');
                 SQL.Add('status' + IntToStr(importfinish) +
                   ' = excluded.status' + IntToStr(importfinish));
+                Close;
                 ExecSQL;
                 SQLTransaction.Commit;
                 Close;
@@ -2119,6 +2554,7 @@ begin
       SQL.Text := 'INSERT INTO lora (number, starttime, correction, timemark) ' +
         'VALUES (' + number + ', "' + FormatDateTime('hh:nn:ss.zzz', StartTime) +
         '", ' + correction + ', "' + FormatDateTime('hh:nn:ss', Now) + '");';
+      Close;
       ExecSQL;
       SQLTransaction.Commit;
       Close;
@@ -2229,12 +2665,14 @@ begin
       begin
         //удаляем всё из "start"
         SQL.Text := 'DELETE from start';
+        Close;
         ExecSQL;
         //копируем number, starttime(текущий) в start table
         SQL.Text :=
           'INSERT INTO start (number, starttime) ' + 'SELECT number, starttime' +
           IntToStr(CurrentStage) + ' FROM main WHERE true ' +
           'ON CONFLICT(number) DO UPDATE SET starttime = excluded.starttime;';
+        Close;
         ExecSQL;
         SQLTransaction.Commit;
         Close;
@@ -2380,6 +2818,7 @@ begin
       with MainForm.SQLQuery1 do
       begin
         SQL.Text := 'DELETE from load';
+        Close;
         ExecSQL;
         SQLTransaction.Commit;
         Close;
@@ -2427,16 +2866,20 @@ begin
         {$ENDIF}
         try
           begin
+            MainForm.SQLQuery1.Close;
             MainForm.SQLQuery1.ExecSQL;
             //ставим результат ноль, если DNS/DNF/DSQ
             MainForm.SQLQuery1.SQL.Text :=
               'UPDATE load SET starttime1 = "00:00:00.000" WHERE starttime1 = "DSQ" OR starttime1 = "DNF" OR starttime1 = "DNS" OR starttime1 ISNULL OR starttime1 = "";';
+            MainForm.SQLQuery1.Close;
             MainForm.SQLQuery1.ExecSQL;
             MainForm.SQLQuery1.SQL.Text :=
               'UPDATE load SET age = "0" WHERE age = "";';
+            MainForm.SQLQuery1.Close;
             MainForm.SQLQuery1.ExecSQL;
             MainForm.SQLQuery1.SQL.Text :=
               'UPDATE load SET starttime2 = "0" WHERE starttime2 = "";';
+            MainForm.SQLQuery1.Close;
             MainForm.SQLQuery1.ExecSQL;
             MainForm.SQLQuery1.SQLTransaction.Commit;
           end;
@@ -2466,6 +2909,7 @@ begin
           'sumstages = excluded.sumstages + sumstages,');
         SQL.Add(
           'status = excluded.status + status;');
+        Close;
         ExecSQL;
         SQLTransaction.Commit;
         Close;
@@ -2652,6 +3096,7 @@ begin
   end;
   backupfile := CreateAbsolutePath(FormatDateTime('YYYY-MM-DD hh-mm-ss', now) +
     ' ' + ExtractFileName(fname), ExtractFilePath(fName) + backupfolder);
+
   MainForm.FileCloseExecute(nil);
   SetfName('');
   if not CopyFile(fName, backupfile, False, False) then
@@ -2685,6 +3130,73 @@ begin
   end;
   Result := aText;
 end;
+
+function FormatNumber(number: integer): string;
+begin
+  Result := Format('%3d', [number]);
+end;
+
+function FormatTime(time: string): string;
+begin
+  //9 правых символов в отсечке времени (отрезаем часы)
+  Delete(time, 1, Length(time) - 9);
+  if Pos('0', time) = 1 then
+  begin
+    Delete(time, 1, 1);
+  end;
+  Result := Format('%9s', [time]);
+end;
+
+function FormatDiff(diff: string; diffsign: string = ' '): string;
+begin
+  if (not diff.IsEmpty) then                                 //00:00:00.000
+  begin
+    //если разница во времени больше часа
+    if (StrToInt(Copy(diff, 1, 2)) > 0) then
+    begin
+      Result := Copy(diff, 2, 7);
+    end
+    //если разница во времени больше десяти минуты
+    else if (StrToInt(Copy(diff, 4, 2)) > 9) then
+    begin
+      Result := Copy(diff, 4, 7);
+    end
+    //если разница во времени меньше десяти минут но больше минуты
+    else if (StrToInt(Copy(diff, 4, 2)) > 0) then
+    begin
+      Result := diffsign + Copy(diff, 5, 6);
+    end
+    //если разница во времени меньше минуты
+    else
+    begin
+      //6 правых символов в отсечке времени (оставляем только секунды и тысычные)
+      Delete(diff, 1, Length(diff) - 6);
+      if Pos('0', diff) = 1 then
+      begin
+        Delete(diff, 1, 1);
+      end;
+      Result := diffsign + Format('%6s', [diff]);
+    end;
+  end
+  else
+  begin
+    Result := diffsign + Format('%6s', [diff]);
+  end;
+end;
+
+function FormatPlace(place: integer): string;
+begin
+  Result := FormatNumber(place);
+end;
+
+function FormatLEDLine(number: integer; time: string; diff: string;
+  place: integer; diffsign: string = ' '): string;
+begin
+  Result := FormatNumber(number) + ' ' + FormatTime(time) + ' ' +
+    FormatDiff(diff, diffsign) + ' ' + FormatPlace(place);
+
+end;
+
 
 function dbopen: boolean;
   //просто два коротких синонима

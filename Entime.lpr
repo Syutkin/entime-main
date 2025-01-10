@@ -9,18 +9,16 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   Main,
   LazSerialPort,
   rxnew,
-  rx,
   sqlite3laz,
   lazcontrols, datetimectrls,
   Result,
-  HistoryLazarus;
+  HistoryLazarus, startitemmodel;
 
 {$R *.res}
 
 begin
   RequireDerivedFormResource := True;
   Application.Scaled:=True;
-  Application.Title := 'Entime';
   Application.Initialize;
   Application.CreateForm(TMainForm, MainForm);
   Application.CreateForm(TResultsForm, ResultsForm);

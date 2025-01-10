@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="11"/>
+    <Version Value="12"/>
     <PathDelim Value="\"/>
     <General>
+      <Flags>
+        <CompatibilityMode Value="True"/>
+      </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <MainUnit Value="0"/>
       <Title Value="Entime"/>
       <Scaled Value="True"/>
       <ResourceType Value="res"/>
@@ -25,8 +27,8 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="7"/>
-      <RevisionNr Value="10"/>
-      <BuildNr Value="62"/>
+      <RevisionNr Value="13"/>
+      <BuildNr Value="70"/>
       <Language Value="0419"/>
       <CharSet Value="04B0"/>
       <Attributes pvaDebug="True"/>
@@ -153,42 +155,45 @@
         <Mode0 Name="default"/>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="11">
+    <RequiredPackages Count="12">
       <Item1>
-        <PackageName Value="DateTimeCtrls"/>
+        <PackageName Value="FCL"/>
       </Item1>
       <Item2>
-        <PackageName Value="LazControls"/>
+        <PackageName Value="LCL"/>
       </Item2>
       <Item3>
-        <PackageName Value="HistoryLazarus"/>
+        <PackageName Value="LazControls"/>
       </Item3>
       <Item4>
-        <PackageName Value="rx"/>
+        <PackageName Value="DateTimeCtrls"/>
       </Item4>
       <Item5>
-        <PackageName Value="rxdbgrid_export_spreadsheet"/>
+        <PackageName Value="SQLDBLaz"/>
       </Item5>
       <Item6>
         <PackageName Value="sqlite3laz"/>
       </Item6>
       <Item7>
-        <PackageName Value="FCL"/>
+        <PackageName Value="laz_synapse"/>
       </Item7>
       <Item8>
-        <PackageName Value="rxnew"/>
+        <PackageName Value="DataPortLasarus"/>
       </Item8>
       <Item9>
-        <PackageName Value="laz_synapse"/>
+        <PackageName Value="LazSerialPort"/>
       </Item9>
       <Item10>
-        <PackageName Value="LazSerialPort"/>
+        <PackageName Value="rxnew"/>
       </Item10>
       <Item11>
-        <PackageName Value="LCL"/>
+        <PackageName Value="rxdbgrid_export_spreadsheet"/>
       </Item11>
+      <Item12>
+        <PackageName Value="HistoryLazarus"/>
+      </Item12>
     </RequiredPackages>
-    <Units Count="9">
+    <Units Count="10">
       <Unit0>
         <Filename Value="Entime.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -246,6 +251,11 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="LoRa"/>
       </Unit8>
+      <Unit9>
+        <Filename Value="startitemmodel.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StartItemModel"/>
+      </Unit9>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -260,6 +270,7 @@
     </SearchPaths>
     <Linking>
       <Debugging>
+        <DebugInfoType Value="dsDwarf3"/>
         <UseHeaptrc Value="True"/>
       </Debugging>
       <Options>

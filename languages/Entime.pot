@@ -26,6 +26,7 @@ msgid "Юниоры"
 msgstr ""
 
 #: i18n.scat3
+msgctxt "i18n.scat3"
 msgid "Любители"
 msgstr ""
 
@@ -145,12 +146,10 @@ msgid "Введите новое время старта для номера"
 msgstr ""
 
 #: i18n.sfilecopyerror
-msgctxt "i18n.sfilecopyerror"
 msgid "Ошибка создания файла финала"
 msgstr ""
 
 #: i18n.sfilesareequal
-msgctxt "i18n.sfilesareequal"
 msgid "Имя файла финала должно отличаться от имени файла квалификации"
 msgstr ""
 
@@ -195,12 +194,10 @@ msgid "Список участников загружен"
 msgstr ""
 
 #: i18n.sloaded
-msgctxt "i18n.sloaded"
 msgid "загружен"
 msgstr ""
 
 #: i18n.sloaded_o
-msgctxt "i18n.sloaded_o"
 msgid "загружено"
 msgstr ""
 
@@ -355,6 +352,10 @@ msgstr ""
 msgid "Уверены, что участник под номером"
 msgstr ""
 
+#: i18n.stelegrambotsendingerror
+msgid "Ошибка отправки данных в телеграм бота: "
+msgstr ""
+
 #: i18n.stimetostart
 msgid "Время старта"
 msgstr ""
@@ -502,12 +503,19 @@ msgid "Записать"
 msgstr ""
 
 #: tmainform.acsetstarttime.caption
-msgctxt "tmainform.acsetstarttime.caption"
 msgid "Изменить время старта"
 msgstr ""
 
 #: tmainform.acsyncmodule.caption
 msgid "Синхронизировать модуль"
+msgstr ""
+
+#: tmainform.actelegrambot.caption
+msgid "Telegram bot"
+msgstr ""
+
+#: tmainform.actelegrambot.hint
+msgid "Отправлять данные в бота"
 msgstr ""
 
 #: tmainform.acupdateresults.caption
@@ -520,7 +528,6 @@ msgid "Отладка"
 msgstr ""
 
 #: tmainform.acviewmemo.hint
-msgctxt "tmainform.acviewmemo.hint"
 msgid "Показать или скрыть отладочную панель"
 msgstr ""
 
@@ -571,7 +578,6 @@ msgid "Empty"
 msgstr ""
 
 #: tmainform.fileclose.caption
-msgctxt "tmainform.fileclose.caption"
 msgid "Закрыть"
 msgstr ""
 
@@ -594,11 +600,10 @@ msgstr ""
 #: tmainform.fileexportallresults.hint
 msgid ""
 "Экспорт результатов этапа для суммирования\n"
-"с другим соревнованием/днём соревнования\n"
+"с другим соревнованием/днём соревнования"
 msgstr ""
 
 #: tmainform.fileexportbdstartlist.caption
-msgctxt "tmainform.fileexportbdstartlist.caption"
 msgid "Экспорт стартового протокола ..."
 msgstr ""
 
@@ -625,12 +630,10 @@ msgid "Формирование финишного протокола в вид�
 msgstr ""
 
 #: tmainform.fileexportstageresults.caption
-msgctxt "tmainform.fileexportstageresults.caption"
 msgid "Экспорт результатов этапа ..."
 msgstr ""
 
 #: tmainform.fileexportstageresults.dialog.title
-msgctxt "tmainform.fileexportstageresults.dialog.title"
 msgid "Экспорт результатов этапа"
 msgstr ""
 
@@ -1071,7 +1074,7 @@ msgstr ""
 #: tmainform.lorapopupopen.hint
 msgid ""
 "Показать все результаты в новом окне,\n"
-"включая дополнительную информацию\n"
+"включая дополнительную информацию"
 msgstr ""
 
 #: tmainform.lorapopupshow15min.caption
@@ -1103,7 +1106,6 @@ msgid "Вид"
 msgstr ""
 
 #: tmainform.menuitem5.caption
-msgctxt "tmainform.menuitem5.caption"
 msgid "http запрос"
 msgstr ""
 
@@ -1129,7 +1131,6 @@ msgid "Помощь"
 msgstr ""
 
 #: tmainform.menuitemmonitormode.caption
-msgctxt "tmainform.menuitemmonitormode.caption"
 msgid "Режим монитора"
 msgstr ""
 
@@ -1164,7 +1165,7 @@ msgstr ""
 #: tmainform.racemodelabel.hint
 msgid ""
 "В режиме гонки редактирование таблицы запрещено\n"
-"При нажатии на пробел фиксируется время\n"
+"При нажатии на пробел фиксируется время"
 msgstr ""
 
 #: tmainform.radiocur1.caption
@@ -1172,6 +1173,7 @@ msgid "1"
 msgstr ""
 
 #: tmainform.radiocur2.caption
+msgctxt "tmainform.radiocur2.caption"
 msgid "2"
 msgstr ""
 
@@ -1748,6 +1750,11 @@ msgctxt "tsettingsform.buttonledtest.caption"
 msgid "Применить"
 msgstr ""
 
+#: tsettingsform.buttontelegramtest.caption
+msgctxt "tsettingsform.buttontelegramtest.caption"
+msgid "Применить"
+msgstr ""
+
 #: tsettingsform.caption
 msgctxt "tsettingsform.caption"
 msgid "Настройки"
@@ -1766,7 +1773,7 @@ msgid ""
 "Задержка в миллисекундах между добавлением\n"
 "нового значения времени при срабатывании датчика.\n"
 "Служит для уменьшения спама.\n"
-"От 0 до 100000\n"
+"От 0 до 100000"
 msgstr ""
 
 #: tsettingsform.dividerbevelcomsettings1.caption
@@ -1778,20 +1785,30 @@ msgid "Режим работы с финишем"
 msgstr ""
 
 #: tsettingsform.dividerbeveldelay1.caption
-msgctxt "tsettingsform.dividerbeveldelay1.caption"
 msgid "Задержка в миллисекундах"
 msgstr ""
 
 #: tsettingsform.dividerbevellanguage1.caption
-msgctxt "tsettingsform.dividerbevellanguage1.caption"
 msgid "Язык"
 msgstr ""
 
 #: tsettingsform.dividerbevelledadress.caption
+msgctxt "tsettingsform.dividerbevelledadress.caption"
 msgid "Адрес"
 msgstr ""
 
 #: tsettingsform.dividerbevelledtest.caption
+msgctxt "tsettingsform.dividerbevelledtest.caption"
+msgid "Тест"
+msgstr ""
+
+#: tsettingsform.dividerbeveltelegrambotadress.caption
+msgctxt "tsettingsform.dividerbeveltelegrambotadress.caption"
+msgid "Адрес"
+msgstr ""
+
+#: tsettingsform.dividerbeveltelegramtest.caption
+msgctxt "tsettingsform.dividerbeveltelegramtest.caption"
 msgid "Тест"
 msgstr ""
 
@@ -1799,27 +1816,24 @@ msgstr ""
 msgid ""
 "Строка, после получения которой,\n"
 "будет взята текущая метка времени,\n"
-"по умолчанию F\n"
+"по умолчанию F"
 msgstr ""
 
 #: tsettingsform.editcomsettime.hint
 msgid ""
 "Формат метки времени\n"
-"По умолчанию чч:мм:cc,000\n"
+"По умолчанию чч:мм:cc,000"
 msgstr ""
 
 #: tsettingsform.groupboxcategory.caption
-msgctxt "tsettingsform.groupboxcategory.caption"
 msgid "Категории"
 msgstr ""
 
 #: tsettingsform.groupboxcategory.hint
-msgctxt "tsettingsform.groupboxcategory.hint"
 msgid "Категории, которые будут показываться в окне результатов"
 msgstr ""
 
 #: tsettingsform.groupboxstages.caption
-msgctxt "tsettingsform.groupboxstages.caption"
 msgid "Спецучастки"
 msgstr ""
 
@@ -1851,12 +1865,46 @@ msgstr ""
 msgid "Нижняя строка"
 msgstr ""
 
+#: tsettingsform.labelcategory.caption
+msgctxt "tsettingsform.labelcategory.caption"
+msgid "Категория"
+msgstr ""
+
+#: tsettingsform.labeldiff.caption
+msgctxt "tsettingsform.labeldiff.caption"
+msgid "Отставание"
+msgstr ""
+
+#: tsettingsform.labelname.caption
+msgctxt "tsettingsform.labelname.caption"
+msgid "Имя"
+msgstr ""
+
+#: tsettingsform.labelnumber.caption
+msgctxt "tsettingsform.labelnumber.caption"
+msgid "Номер"
+msgstr ""
+
+#: tsettingsform.labelplace.caption
+msgctxt "tsettingsform.labelplace.caption"
+msgid "Место"
+msgstr ""
+
+#: tsettingsform.labelresult.caption
+msgctxt "tsettingsform.labelresult.caption"
+msgid "Результат"
+msgstr ""
+
 #: tsettingsform.labelsingleline.caption
 msgid "Одна строка"
 msgstr ""
 
 #: tsettingsform.labelupperline.caption
 msgid "Верхняя строка"
+msgstr ""
+
+#: tsettingsform.ledadress.texthint
+msgid "192.168.1.10"
 msgstr ""
 
 #: tsettingsform.radiobuttoncomsetstr.caption
@@ -1866,7 +1914,7 @@ msgstr ""
 #: tsettingsform.radiobuttoncomsetstr.hint
 msgid ""
 "Программа будет ожидать из COM порта заданную строку,\n"
-"после получения которой, будет взята текущая метка времени\n"
+"после получения которой, будет взята текущая метка времени"
 msgstr ""
 
 #: tsettingsform.radiobuttoncomsettime.caption
@@ -1876,7 +1924,38 @@ msgstr ""
 #: tsettingsform.radiobuttoncomsettime.hint
 msgid ""
 "Программа будет ожидать из COM порта метку времени,\n"
-"которая и будет установлена\n"
+"которая и будет установлена"
+msgstr ""
+
+#: tsettingsform.telegrambotadressedit.texthint
+msgctxt "tsettingsform.telegrambotadressedit.texthint"
+msgid "http://sample.server/get"
+msgstr ""
+
+#: tsettingsform.telegramcategory.text
+msgctxt "tsettingsform.telegramcategory.text"
+msgid "Любители"
+msgstr ""
+
+#: tsettingsform.telegramdiff.text
+msgid "01:59.523"
+msgstr ""
+
+#: tsettingsform.telegramname.text
+msgid "Каценеленбоген Ерофей"
+msgstr ""
+
+#: tsettingsform.telegramnumber.text
+msgid "25"
+msgstr ""
+
+#: tsettingsform.telegramplace.text
+msgctxt "tsettingsform.telegramplace.text"
+msgid "2"
+msgstr ""
+
+#: tsettingsform.telegramresult.text
+msgid "03:43.459"
 msgstr ""
 
 #: tstartlistform.caption
@@ -1889,7 +1968,6 @@ msgid "DNF"
 msgstr ""
 
 #: tstartlistform.cbdnf.hint
-msgctxt "tstartlistform.cbdnf.hint"
 msgid "Не финишировал в квалификации"
 msgstr ""
 
@@ -1899,7 +1977,6 @@ msgid "DNS"
 msgstr ""
 
 #: tstartlistform.cbdns.hint
-msgctxt "tstartlistform.cbdns.hint"
 msgid "Не стартовал в квалификации"
 msgstr ""
 
@@ -1909,7 +1986,6 @@ msgid "DSQ"
 msgstr ""
 
 #: tstartlistform.cbdsq.hint
-msgctxt "tstartlistform.cbdsq.hint"
 msgid "Дисквалифицирован"
 msgstr ""
 

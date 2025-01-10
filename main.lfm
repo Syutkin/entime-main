@@ -1,10 +1,10 @@
 object MainForm: TMainForm
-  Left = 470
-  Height = 499
-  Top = 127
-  Width = 913
-  ClientHeight = 479
-  ClientWidth = 913
+  Left = 300
+  Height = 668
+  Top = 14
+  Width = 1096
+  ClientHeight = 648
+  ClientWidth = 1096
   Constraints.MinHeight = 400
   Constraints.MinWidth = 900
   KeyPreview = True
@@ -13,13 +13,13 @@ object MainForm: TMainForm
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   OnResize = FormResize
-  SessionProperties = 'AcViewDebug.Checked;AcViewResults.Checked;Height;Left;RaceMode.Checked;RxDBGridCorrection.Height;Serial.Device;Top;Width;WindowState'
+  SessionProperties = 'AcLEDPanel.Checked;AcViewDebug.Checked;AcViewResults.Checked;Height;Left;RaceMode.Checked;RxDBGridCorrection.Height;Serial.Device;Top;Width;WindowState;AcTelegramBot.Checked'
   ShowHint = True
-  LCLVersion = '2.0.10.0'
+  LCLVersion = '2.2.6.0'
   object DebugSplitter: TSplitter
-    Left = 658
-    Height = 423
-    Top = 31
+    Left = 841
+    Height = 594
+    Top = 29
     Width = 5
     Align = alRight
     ResizeAnchor = akRight
@@ -27,13 +27,13 @@ object MainForm: TMainForm
   object DebugPanel: TPanel
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 663
-    Height = 423
-    Top = 31
+    Left = 846
+    Height = 594
+    Top = 29
     Width = 250
     Align = alRight
     BevelOuter = bvNone
-    ClientHeight = 423
+    ClientHeight = 594
     ClientWidth = 250
     Constraints.MinWidth = 250
     ParentFont = False
@@ -45,7 +45,7 @@ object MainForm: TMainForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonSaveMemo
       Left = 0
-      Height = 388
+      Height = 559
       Top = 0
       Width = 250
       Anchors = [akTop, akLeft, akRight, akBottom]
@@ -65,7 +65,7 @@ object MainForm: TMainForm
       AnchorSideBottom.Side = asrBottom
       Left = 85
       Height = 25
-      Top = 393
+      Top = 564
       Width = 75
       Anchors = [akLeft, akBottom]
       BorderSpacing.Around = 5
@@ -81,7 +81,7 @@ object MainForm: TMainForm
       AnchorSideBottom.Side = asrBottom
       Left = 5
       Height = 25
-      Top = 393
+      Top = 564
       Width = 75
       Anchors = [akLeft, akBottom]
       BorderSpacing.Around = 5
@@ -93,16 +93,16 @@ object MainForm: TMainForm
   end
   object ToolPanel1: TToolPanel
     Left = 0
-    Height = 31
+    Height = 29
     Top = 0
-    Width = 913
+    Width = 1096
     Items = <>
     Options = []
     CustomizeShortCut = False
     Align = alTop
     BorderWidth = 4
-    ClientHeight = 31
-    ClientWidth = 913
+    ClientHeight = 29
+    ClientWidth = 1096
     ParentFont = False
     TabOrder = 2
     object RaceMode: TCheckBox
@@ -111,7 +111,7 @@ object MainForm: TMainForm
       AnchorSideTop.Side = asrCenter
       Left = 5
       Height = 19
-      Top = 6
+      Top = 5
       Width = 20
       Color = clDefault
       OnClick = RaceModeClick
@@ -128,7 +128,7 @@ object MainForm: TMainForm
       Left = 26
       Height = 15
       Hint = 'В режиме гонки редактирование таблицы запрещено'#13#10'При нажатии на пробел фиксируется время'
-      Top = 8
+      Top = 7
       Width = 73
       BorderSpacing.Left = 1
       Caption = 'Режим гонки'
@@ -139,9 +139,9 @@ object MainForm: TMainForm
   end
   object PageControl1: TPageControl
     Left = 0
-    Height = 423
-    Top = 31
-    Width = 423
+    Height = 594
+    Top = 29
+    Width = 606
     ActivePage = TabSheet1
     Align = alClient
     ParentFont = False
@@ -149,35 +149,33 @@ object MainForm: TMainForm
     TabOrder = 3
     object TabSheet1: TTabSheet
       Caption = 'Стартовый'
-      ClientHeight = 395
-      ClientWidth = 415
+      ClientHeight = 566
+      ClientWidth = 598
       ParentFont = False
       object MainPanel: TPanel
         AnchorSideRight.Control = DebugSplitter
         AnchorSideRight.Side = asrBottom
         Left = 0
-        Height = 395
+        Height = 566
         Top = 0
-        Width = 480
+        Width = 598
         Align = alClient
         BevelOuter = bvNone
-        ClientHeight = 395
-        ClientWidth = 480
+        ClientHeight = 566
+        ClientWidth = 598
         Constraints.MinWidth = 480
         ParentFont = False
         TabOrder = 0
         object RxDBGrid1: TRxDBGrid
           Left = 0
-          Height = 395
+          Height = 566
           Top = 0
-          Width = 480
+          Width = 598
           ColumnDefValues.BlobText = '(данные)'
           TitleButtons = True
           AutoSort = True
           Columns = <          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'id'
@@ -194,8 +192,6 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'Категория'
@@ -212,8 +208,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               ReadOnly = True
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
@@ -232,8 +226,6 @@ object MainForm: TMainForm
             item
               Alignment = taCenter
               Font.Style = [fsBold]
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'Номер'
@@ -249,8 +241,6 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'Rfid'
@@ -266,8 +256,6 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'Имя'
@@ -283,8 +271,6 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'Никнейм'
@@ -301,8 +287,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taRightJustify
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'Возраст'
@@ -318,8 +302,6 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'Команда'
@@ -335,8 +317,6 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'Город'
@@ -353,8 +333,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taRightJustify
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 1|Поправка'
@@ -376,8 +354,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 1|Старт'
@@ -394,8 +370,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 1|Финиш'
@@ -412,8 +386,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taRightJustify
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 1|Штраф'
@@ -436,8 +408,6 @@ object MainForm: TMainForm
             item
               Alignment = taCenter
               Color = 9568145
-              MinSize = 10
-              MaxSize = 200
               ReadOnly = True
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
@@ -455,8 +425,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 1|Отставание'
@@ -473,8 +441,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 1|Место'
@@ -490,8 +456,6 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 2|Поправка'
@@ -508,8 +472,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 2|Старт'
@@ -526,8 +488,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 2|Финиш'
@@ -543,8 +503,6 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 2|Штраф'
@@ -562,8 +520,6 @@ object MainForm: TMainForm
             item
               Alignment = taCenter
               Color = 9568145
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 2|Результат'
@@ -580,8 +536,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 2|Отставание'
@@ -598,8 +552,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 2|Место'
@@ -615,8 +567,6 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 3|Поправка'
@@ -633,8 +583,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 3|Старт'
@@ -651,8 +599,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 3|Финиш'
@@ -668,8 +614,6 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 3|Штраф'
@@ -687,8 +631,6 @@ object MainForm: TMainForm
             item
               Alignment = taCenter
               Color = 9568145
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 3|Результат'
@@ -705,8 +647,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 3|Отставание'
@@ -723,8 +663,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 3|Место'
@@ -740,8 +678,6 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 4|Поправка'
@@ -758,8 +694,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 4|Старт'
@@ -776,8 +710,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 4|Финиш'
@@ -793,8 +725,6 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 4|Штраф'
@@ -812,8 +742,6 @@ object MainForm: TMainForm
             item
               Alignment = taCenter
               Color = 9568145
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 4|Результат'
@@ -830,8 +758,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 4|Отставание'
@@ -848,8 +774,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 4|Место'
@@ -865,8 +789,6 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 5|Поправка'
@@ -883,8 +805,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 5|Старт'
@@ -901,8 +821,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 5|Финиш'
@@ -918,8 +836,6 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 5|Штраф'
@@ -937,8 +853,6 @@ object MainForm: TMainForm
             item
               Alignment = taCenter
               Color = 9568145
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 5|Результат'
@@ -955,8 +869,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 5|Отставание'
@@ -973,8 +885,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 5|Место'
@@ -990,8 +900,6 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 6|Поправка'
@@ -1008,8 +916,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 6|Старт'
@@ -1026,8 +932,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 6|Финиш'
@@ -1043,8 +947,6 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 6|Штраф'
@@ -1062,8 +964,6 @@ object MainForm: TMainForm
             item
               Alignment = taCenter
               Color = 9568145
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 6|Результат'
@@ -1080,8 +980,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 6|Отставание'
@@ -1098,8 +996,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 6|Место'
@@ -1117,8 +1013,6 @@ object MainForm: TMainForm
             item
               Alignment = taCenter
               Color = 9568145
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'Итог'
@@ -1135,8 +1029,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'Отставание'
@@ -1152,8 +1044,6 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'status'
@@ -1234,7 +1124,6 @@ object MainForm: TMainForm
           DrawFullLine = False
           FocusColor = clRed
           SelectedColor = clHighlight
-          GridLineStyle = psSolid
           DataSource = MainDataSource1
           Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgCancelOnExit, dgHeaderPushedLook, dgDblClickAutoSize]
           ParentFont = False
@@ -1242,6 +1131,7 @@ object MainForm: TMainForm
           Scrollbars = ssAutoBoth
           TabOrder = 0
           OnEditingDone = RxDBGrid1EditingDone
+          OnKeyDown = RxDBGrid1KeyDown
           OnKeyPress = RxDBGrid1KeyPress
           OnSelectEditor = RxDBGrid1SelectEditor
         end
@@ -1260,8 +1150,8 @@ object MainForm: TMainForm
     end
     object TabSheet2: TTabSheet
       Caption = 'Статистика'
-      ClientHeight = 1100
-      ClientWidth = 1303
+      ClientHeight = 566
+      ClientWidth = 598
       OnShow = TabSheet2Show
       ParentFont = False
       object GroupBox1: TGroupBox
@@ -1270,11 +1160,11 @@ object MainForm: TMainForm
         Left = 0
         Height = 330
         Top = 0
-        Width = 250
+        Width = 167
         AutoSize = True
         Caption = 'Количество участников'
         ClientHeight = 310
-        ClientWidth = 246
+        ClientWidth = 163
         Constraints.MaxHeight = 330
         Constraints.MinHeight = 330
         Constraints.MinWidth = 167
@@ -1282,16 +1172,14 @@ object MainForm: TMainForm
         TabOrder = 0
         object StatRxDBGrid1: TRxDBGrid
           Left = 0
-          Height = 465
+          Height = 310
           Top = 0
-          Width = 246
+          Width = 163
           ColumnDefValues.BlobText = '(данные)'
           TitleButtons = False
           AutoSort = False
           Columns = <          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'Категория'
@@ -1313,8 +1201,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'Кол-во'
@@ -1404,7 +1290,6 @@ object MainForm: TMainForm
           DrawFullLine = False
           FocusColor = clRed
           SelectedColor = clHighlight
-          GridLineStyle = psSolid
           DataSource = StatDataSource1
           FixedCols = 0
           Options = [dgTitles, dgColumnResize, dgRowLines, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
@@ -1420,12 +1305,12 @@ object MainForm: TMainForm
         Left = 172
         Height = 330
         Top = 0
-        Width = 524
+        Width = 349
         AutoSize = True
         BorderSpacing.Left = 5
         Caption = 'Сейчас на трассе'
         ClientHeight = 310
-        ClientWidth = 520
+        ClientWidth = 345
         Constraints.MaxHeight = 330
         Constraints.MinHeight = 330
         Constraints.MinWidth = 349
@@ -1433,17 +1318,15 @@ object MainForm: TMainForm
         TabOrder = 1
         object StatRxDBGrid2: TRxDBGrid
           Left = 0
-          Height = 465
+          Height = 310
           Top = 0
-          Width = 520
+          Width = 345
           ColumnDefValues.BlobText = '(данные)'
           TitleButtons = False
           AutoSort = False
           Columns = <          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'Номер'
@@ -1464,8 +1347,6 @@ object MainForm: TMainForm
                 end>
             end          
             item
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'Имя'
@@ -1487,8 +1368,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'Старт'
@@ -1505,8 +1384,6 @@ object MainForm: TMainForm
             end          
             item
               Alignment = taCenter
-              MinSize = 10
-              MaxSize = 200
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'Время'
@@ -1589,7 +1466,6 @@ object MainForm: TMainForm
           DrawFullLine = False
           FocusColor = clRed
           SelectedColor = clHighlight
-          GridLineStyle = psSolid
           DataSource = StatDataSource2
           FixedCols = 0
           Options = [dgTitles, dgColumnResize, dgRowLines, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
@@ -1602,14 +1478,14 @@ object MainForm: TMainForm
     end
     object TabSheet3: TTabSheet
       Caption = 'Результаты'
-      ClientHeight = 1100
-      ClientWidth = 1303
+      ClientHeight = 566
+      ClientWidth = 598
       ParentFont = False
       object SheetStage: TPageControl
         Left = 0
-        Height = 1100
+        Height = 566
         Top = 0
-        Width = 1303
+        Width = 598
         ActivePage = SheetStage1
         Align = alClient
         ParentFont = False
@@ -1617,21 +1493,19 @@ object MainForm: TMainForm
         TabOrder = 0
         object SheetStage1: TTabSheet
           Caption = 'СУ 1'
-          ClientHeight = 1062
-          ClientWidth = 1295
+          ClientHeight = 538
+          ClientWidth = 590
           ParentFont = False
           object GridResult1: TRxDBGrid
             Left = 0
-            Height = 1062
+            Height = 538
             Top = 0
-            Width = 1295
+            Width = 590
             ColumnDefValues.BlobText = '(данные)'
             TitleButtons = False
             AutoSort = True
             Columns = <            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Категория'
@@ -1648,8 +1522,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Место'
@@ -1667,8 +1539,6 @@ object MainForm: TMainForm
               item
                 Alignment = taCenter
                 Font.Style = [fsBold]
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Номер'
@@ -1684,8 +1554,6 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Имя'
@@ -1701,8 +1569,6 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Штраф'
@@ -1720,8 +1586,6 @@ object MainForm: TMainForm
               item
                 Alignment = taCenter
                 Font.Style = [fsBold]
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Результат'
@@ -1738,8 +1602,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Отставание'
@@ -1819,7 +1681,6 @@ object MainForm: TMainForm
             DrawFullLine = False
             FocusColor = clRed
             SelectedColor = clHighlight
-            GridLineStyle = psSolid
             DataSource = ResultDataSource1
             FixedCols = 0
             Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
@@ -1831,21 +1692,19 @@ object MainForm: TMainForm
         end
         object SheetStage2: TTabSheet
           Caption = 'СУ 2'
-          ClientHeight = 1062
-          ClientWidth = 1292
+          ClientHeight = 538
+          ClientWidth = 590
           ParentFont = False
           object GridResult2: TRxDBGrid
             Left = 0
-            Height = 1062
+            Height = 538
             Top = 0
-            Width = 1292
+            Width = 590
             ColumnDefValues.BlobText = '(данные)'
             TitleButtons = False
             AutoSort = True
             Columns = <            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Категория'
@@ -1862,8 +1721,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Место'
@@ -1881,8 +1738,6 @@ object MainForm: TMainForm
               item
                 Alignment = taCenter
                 Font.Style = [fsBold]
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Номер'
@@ -1898,8 +1753,6 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Имя'
@@ -1915,8 +1768,6 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Штраф'
@@ -1934,8 +1785,6 @@ object MainForm: TMainForm
               item
                 Alignment = taCenter
                 Font.Style = [fsBold]
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Результат'
@@ -1952,8 +1801,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Отставание'
@@ -2033,7 +1880,6 @@ object MainForm: TMainForm
             DrawFullLine = False
             FocusColor = clRed
             SelectedColor = clHighlight
-            GridLineStyle = psSolid
             DataSource = ResultDataSource2
             FixedCols = 0
             Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
@@ -2045,21 +1891,19 @@ object MainForm: TMainForm
         end
         object SheetStage3: TTabSheet
           Caption = 'СУ 3'
-          ClientHeight = 1062
-          ClientWidth = 1292
+          ClientHeight = 538
+          ClientWidth = 590
           ParentFont = False
           object GridResult3: TRxDBGrid
             Left = 0
-            Height = 1062
+            Height = 538
             Top = 0
-            Width = 1292
+            Width = 590
             ColumnDefValues.BlobText = '(данные)'
             TitleButtons = False
             AutoSort = True
             Columns = <            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Категория'
@@ -2076,8 +1920,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Место'
@@ -2095,8 +1937,6 @@ object MainForm: TMainForm
               item
                 Alignment = taCenter
                 Font.Style = [fsBold]
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Номер'
@@ -2112,8 +1952,6 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Имя'
@@ -2129,8 +1967,6 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Штраф'
@@ -2148,8 +1984,6 @@ object MainForm: TMainForm
               item
                 Alignment = taCenter
                 Font.Style = [fsBold]
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Результат'
@@ -2166,8 +2000,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Отставание'
@@ -2247,7 +2079,6 @@ object MainForm: TMainForm
             DrawFullLine = False
             FocusColor = clRed
             SelectedColor = clHighlight
-            GridLineStyle = psSolid
             DataSource = ResultDataSource3
             FixedCols = 0
             Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
@@ -2259,21 +2090,19 @@ object MainForm: TMainForm
         end
         object SheetStage4: TTabSheet
           Caption = 'СУ 4'
-          ClientHeight = 1062
-          ClientWidth = 1292
+          ClientHeight = 538
+          ClientWidth = 590
           ParentFont = False
           object GridResult4: TRxDBGrid
             Left = 0
-            Height = 1062
+            Height = 538
             Top = 0
-            Width = 1292
+            Width = 590
             ColumnDefValues.BlobText = '(данные)'
             TitleButtons = False
             AutoSort = True
             Columns = <            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Категория'
@@ -2290,8 +2119,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Место'
@@ -2309,8 +2136,6 @@ object MainForm: TMainForm
               item
                 Alignment = taCenter
                 Font.Style = [fsBold]
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Номер'
@@ -2326,8 +2151,6 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Имя'
@@ -2343,8 +2166,6 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Штраф'
@@ -2362,8 +2183,6 @@ object MainForm: TMainForm
               item
                 Alignment = taCenter
                 Font.Style = [fsBold]
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Результат'
@@ -2380,8 +2199,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Отставание'
@@ -2461,7 +2278,6 @@ object MainForm: TMainForm
             DrawFullLine = False
             FocusColor = clRed
             SelectedColor = clHighlight
-            GridLineStyle = psSolid
             DataSource = ResultDataSource4
             FixedCols = 0
             Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
@@ -2473,21 +2289,19 @@ object MainForm: TMainForm
         end
         object SheetStage5: TTabSheet
           Caption = 'СУ 5'
-          ClientHeight = 1062
-          ClientWidth = 1292
+          ClientHeight = 538
+          ClientWidth = 590
           ParentFont = False
           object GridResult5: TRxDBGrid
             Left = 0
-            Height = 1062
+            Height = 538
             Top = 0
-            Width = 1292
+            Width = 590
             ColumnDefValues.BlobText = '(данные)'
             TitleButtons = False
             AutoSort = True
             Columns = <            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Категория'
@@ -2504,8 +2318,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Место'
@@ -2523,8 +2335,6 @@ object MainForm: TMainForm
               item
                 Alignment = taCenter
                 Font.Style = [fsBold]
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Номер'
@@ -2540,8 +2350,6 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Имя'
@@ -2557,8 +2365,6 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Штраф'
@@ -2576,8 +2382,6 @@ object MainForm: TMainForm
               item
                 Alignment = taCenter
                 Font.Style = [fsBold]
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Результат'
@@ -2594,8 +2398,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Отставание'
@@ -2675,7 +2477,6 @@ object MainForm: TMainForm
             DrawFullLine = False
             FocusColor = clRed
             SelectedColor = clHighlight
-            GridLineStyle = psSolid
             DataSource = ResultDataSource5
             FixedCols = 0
             Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
@@ -2687,21 +2488,19 @@ object MainForm: TMainForm
         end
         object SheetStage6: TTabSheet
           Caption = 'СУ 6'
-          ClientHeight = 1062
-          ClientWidth = 1292
+          ClientHeight = 538
+          ClientWidth = 590
           ParentFont = False
           object GridResult6: TRxDBGrid
             Left = 0
-            Height = 1062
+            Height = 538
             Top = 0
-            Width = 1292
+            Width = 590
             ColumnDefValues.BlobText = '(данные)'
             TitleButtons = False
             AutoSort = True
             Columns = <            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Категория'
@@ -2718,8 +2517,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Место'
@@ -2737,8 +2534,6 @@ object MainForm: TMainForm
               item
                 Alignment = taCenter
                 Font.Style = [fsBold]
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Номер'
@@ -2754,8 +2549,6 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Имя'
@@ -2771,8 +2564,6 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Штраф'
@@ -2790,8 +2581,6 @@ object MainForm: TMainForm
               item
                 Alignment = taCenter
                 Font.Style = [fsBold]
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Результат'
@@ -2808,8 +2597,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Отставание'
@@ -2889,7 +2676,6 @@ object MainForm: TMainForm
             DrawFullLine = False
             FocusColor = clRed
             SelectedColor = clHighlight
-            GridLineStyle = psSolid
             DataSource = ResultDataSource6
             FixedCols = 0
             Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
@@ -2901,21 +2687,19 @@ object MainForm: TMainForm
         end
         object SheetStageSum: TTabSheet
           Caption = 'Общий'
-          ClientHeight = 1062
-          ClientWidth = 1292
+          ClientHeight = 538
+          ClientWidth = 590
           ParentFont = False
           object GridResult8: TRxDBGrid
             Left = 0
-            Height = 1062
+            Height = 538
             Top = 0
-            Width = 1292
+            Width = 590
             ColumnDefValues.BlobText = '(данные)'
             TitleButtons = False
             AutoSort = True
             Columns = <            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Категория'
@@ -2932,8 +2716,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Место'
@@ -2951,8 +2733,6 @@ object MainForm: TMainForm
               item
                 Alignment = taCenter
                 Font.Style = [fsBold]
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Номер'
@@ -2968,8 +2748,6 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Имя'
@@ -2986,8 +2764,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'СУ 1'
@@ -3004,8 +2780,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'СУ 2'
@@ -3022,8 +2796,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'СУ 3'
@@ -3040,8 +2812,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'СУ 4'
@@ -3058,8 +2828,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'СУ 5'
@@ -3076,8 +2844,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'СУ 6'
@@ -3095,8 +2861,6 @@ object MainForm: TMainForm
               item
                 Alignment = taCenter
                 Font.Style = [fsBold]
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Результат'
@@ -3113,8 +2877,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Отставание'
@@ -3194,7 +2956,6 @@ object MainForm: TMainForm
             DrawFullLine = False
             FocusColor = clRed
             SelectedColor = clHighlight
-            GridLineStyle = psSolid
             DataSource = ResultDataSource8
             FixedCols = 0
             Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
@@ -3206,21 +2967,19 @@ object MainForm: TMainForm
         end
         object SheetStageTotal: TTabSheet
           Caption = 'Сквозной'
-          ClientHeight = 1062
-          ClientWidth = 1292
+          ClientHeight = 538
+          ClientWidth = 590
           ParentFont = False
           object GridResult7: TRxDBGrid
             Left = 0
-            Height = 1062
+            Height = 538
             Top = 0
-            Width = 1292
+            Width = 590
             ColumnDefValues.BlobText = '(данные)'
             TitleButtons = False
             AutoSort = True
             Columns = <            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Категория'
@@ -3237,8 +2996,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Место'
@@ -3256,8 +3013,6 @@ object MainForm: TMainForm
               item
                 Alignment = taCenter
                 Font.Style = [fsBold]
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Номер'
@@ -3273,8 +3028,6 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Имя'
@@ -3292,8 +3045,6 @@ object MainForm: TMainForm
               item
                 Alignment = taCenter
                 Font.Style = [fsBold]
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Результат'
@@ -3310,8 +3061,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                MinSize = 10
-                MaxSize = 200
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Отставание'
@@ -3391,7 +3140,6 @@ object MainForm: TMainForm
             DrawFullLine = False
             FocusColor = clRed
             SelectedColor = clHighlight
-            GridLineStyle = psSolid
             DataSource = ResultDataSource7
             FixedCols = 0
             Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
@@ -3407,13 +3155,13 @@ object MainForm: TMainForm
   object StatusBarPanel: TPanel
     Left = 0
     Height = 25
-    Top = 454
-    Width = 913
+    Top = 623
+    Width = 1096
     Align = alBottom
     AutoSize = True
     BevelOuter = bvNone
     ClientHeight = 25
-    ClientWidth = 913
+    ClientWidth = 1096
     ParentFont = False
     TabOrder = 4
     object StatusBarLeft: TStatusBar
@@ -3439,7 +3187,7 @@ object MainForm: TMainForm
       SimplePanel = False
     end
     object StatusBarRight: TStatusBar
-      Left = 613
+      Left = 796
       Height = 25
       Top = 0
       Width = 300
@@ -3461,7 +3209,7 @@ object MainForm: TMainForm
       Left = 300
       Height = 23
       Top = 1
-      Width = 313
+      Width = 496
       Anchors = [akTop, akLeft, akRight, akBottom]
       BorderSpacing.Top = 1
       BorderSpacing.Bottom = 1
@@ -3473,14 +3221,14 @@ object MainForm: TMainForm
     end
   end
   object EditPanel: TPanel
-    Left = 423
-    Height = 423
-    Top = 31
+    Left = 606
+    Height = 594
+    Top = 29
     Width = 235
     Align = alRight
     AutoSize = True
     BevelOuter = bvNone
-    ClientHeight = 423
+    ClientHeight = 594
     ClientWidth = 235
     Constraints.MinWidth = 235
     ParentFont = False
@@ -3493,7 +3241,7 @@ object MainForm: TMainForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = Splitter1
       Left = 0
-      Height = 100
+      Height = 139
       Top = 45
       Width = 235
       ColumnDefValues.BlobText = '(данные)'
@@ -3502,8 +3250,6 @@ object MainForm: TMainForm
       Columns = <      
         item
           Alignment = taCenter
-          MinSize = 10
-          MaxSize = 200
           Title.Alignment = taCenter
           Title.Orientation = toHorizontal
           Title.Caption = 'Номер'
@@ -3519,8 +3265,6 @@ object MainForm: TMainForm
           Footers = <>
         end      
         item
-          MinSize = 10
-          MaxSize = 200
           Title.Alignment = taCenter
           Title.Orientation = toHorizontal
           Title.Caption = 'Поправка'
@@ -3602,7 +3346,6 @@ object MainForm: TMainForm
       DrawFullLine = False
       FocusColor = clRed
       SelectedColor = clHighlight
-      GridLineStyle = psSolid
       Constraints.MinHeight = 100
       DataSource = CorrectionDataSource
       FixedCols = 0
@@ -3713,7 +3456,7 @@ object MainForm: TMainForm
       Cursor = crVSplit
       Left = 0
       Height = 5
-      Top = 130
+      Top = 184
       Width = 235
       Align = alNone
       Anchors = [akLeft, akRight]
@@ -3726,7 +3469,7 @@ object MainForm: TMainForm
       Cursor = crVSplit
       Left = 0
       Height = 5
-      Top = 316
+      Top = 444
       Width = 235
       Align = alNone
       Anchors = [akLeft, akRight]
@@ -3740,12 +3483,12 @@ object MainForm: TMainForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = Splitter2
       Left = 0
-      Height = 200
-      Top = 135
+      Height = 255
+      Top = 189
       Width = 235
       Anchors = [akTop, akLeft, akRight, akBottom]
       BevelOuter = bvNone
-      ClientHeight = 200
+      ClientHeight = 255
       ClientWidth = 235
       Constraints.MinHeight = 200
       ParentFont = False
@@ -3757,7 +3500,7 @@ object MainForm: TMainForm
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = ButtonSetFinish
         Left = 0
-        Height = 165
+        Height = 220
         Top = 0
         Width = 235
         Anchors = [akTop, akLeft, akRight, akBottom]
@@ -3766,22 +3509,16 @@ object MainForm: TMainForm
         ColCount = 3
         Columns = <        
           item
-            MinSize = 10
-            MaxSize = 200
             Title.Alignment = taCenter
             Title.Caption = 'Время'
             Width = 125
           end        
           item
-            MinSize = 10
-            MaxSize = 200
             Title.Alignment = taCenter
             Title.Caption = 'Номер'
             Width = 75
           end        
           item
-            MinSize = 10
-            MaxSize = 200
             Title.Caption = 'Ввод'
             Visible = False
           end>
@@ -3803,7 +3540,7 @@ object MainForm: TMainForm
         AnchorSideBottom.Side = asrBottom
         Left = 5
         Height = 25
-        Top = 170
+        Top = 225
         Width = 78
         Anchors = [akLeft, akBottom]
         AutoSize = True
@@ -3821,7 +3558,7 @@ object MainForm: TMainForm
         AnchorSideBottom.Side = asrBottom
         Left = 88
         Height = 25
-        Top = 170
+        Top = 225
         Width = 76
         Action = AcSetFinish
         Anchors = [akLeft, akBottom]
@@ -3841,12 +3578,12 @@ object MainForm: TMainForm
       AnchorSideBottom.Control = EditPanel
       AnchorSideBottom.Side = asrBottom
       Left = 0
-      Height = 102
-      Top = 321
+      Height = 145
+      Top = 449
       Width = 235
       Anchors = [akTop, akLeft, akRight, akBottom]
       Caption = 'Время от стартовой отсечки'
-      ClientHeight = 82
+      ClientHeight = 125
       ClientWidth = 231
       ParentFont = False
       TabOrder = 5
@@ -3856,7 +3593,7 @@ object MainForm: TMainForm
         AnchorSideBottom.Side = asrBottom
         Left = 5
         Height = 25
-        Top = 52
+        Top = 95
         Width = 75
         Action = AcLoRaClear
         Anchors = [akLeft, akBottom]
@@ -3871,7 +3608,7 @@ object MainForm: TMainForm
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = ButtonLoRaClear
         Left = 0
-        Height = 47
+        Height = 90
         Hint = 'Двойной клик на строке с нужной поправкой заносит её в основную таблицу'
         Top = 0
         Width = 231
@@ -3882,8 +3619,6 @@ object MainForm: TMainForm
           item
             Alignment = taCenter
             Font.Style = [fsBold]
-            MinSize = 10
-            MaxSize = 200
             Title.Alignment = taCenter
             Title.Orientation = toHorizontal
             Title.Caption = 'Номер'
@@ -3900,8 +3635,6 @@ object MainForm: TMainForm
           end        
           item
             Alignment = taRightJustify
-            MinSize = 10
-            MaxSize = 200
             Title.Alignment = taCenter
             Title.Orientation = toHorizontal
             Title.Caption = 'Старт'
@@ -3918,8 +3651,6 @@ object MainForm: TMainForm
           end        
           item
             Alignment = taRightJustify
-            MinSize = 10
-            MaxSize = 200
             Title.Alignment = taCenter
             Title.Orientation = toHorizontal
             Title.Caption = 'Поправка'
@@ -3999,7 +3730,6 @@ object MainForm: TMainForm
         DrawFullLine = False
         FocusColor = clRed
         SelectedColor = clHighlight
-        GridLineStyle = psSolid
         DataSource = DataSourceLoRa
         FixedCols = 0
         Options = [dgEditing, dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
@@ -4019,6 +3749,17 @@ object MainForm: TMainForm
     Parity = pNone
     FlowControl = fcNone
     StopBits = sbOne
+    SynSer.Tag = 0
+    SynSer.Handle = -1
+    SynSer.RaiseExcept = False
+    SynSer.TestDSR = False
+    SynSer.TestCTS = False
+    SynSer.MaxLineLength = 0
+    SynSer.DeadlockTimeout = 30000
+    SynSer.LinuxLock = False
+    SynSer.ConvertLineEnd = False
+    SynSer.AtTimeout = 1000
+    SynSer.InterPacketTimeout = True
     Device = 'COM1'
     RcvLineCRLF = True
     OnRxData = SerialRxData
@@ -4146,6 +3887,17 @@ object MainForm: TMainForm
       object MenuItemCOMSync: TMenuItem
         Action = AcSyncModule
       end
+      object N14: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemLED: TMenuItem
+        Action = AcLEDPanel
+        AutoCheck = True
+      end
+      object MenuItemTelegramBot: TMenuItem
+        Action = AcTelegramBot
+        AutoCheck = True
+      end
     end
     object MenuItemHelp: TMenuItem
       Caption = 'Помощь'
@@ -4159,7 +3911,7 @@ object MainForm: TMainForm
       Caption = 'Отладка'
       Visible = False
       object MenuItem5: TMenuItem
-        Action = FileExportBDStartlist
+        Caption = 'http запрос'
         OnClick = MenuItem5Click
       end
       object MenuItem6: TMenuItem
@@ -4527,6 +4279,18 @@ object MainForm: TMainForm
       Category = 'File'
       Caption = 'В&ыход'
       Hint = 'Выход'
+    end
+    object AcLEDPanel: TAction
+      AutoCheck = True
+      Caption = 'LED панель'
+      Hint = 'Использовать LED панель для показа финишных результатов'
+      OnExecute = AcLEDPanelExecute
+    end
+    object AcTelegramBot: TAction
+      AutoCheck = True
+      Caption = 'Telegram bot'
+      Hint = 'Отправлять данные в бота'
+      OnExecute = AcTelegramBotExecute
     end
   end
   object Timer1: TTimer
@@ -5144,6 +4908,7 @@ object MainForm: TMainForm
     Database = SQLite3Connection1
     Transaction = SQLTransaction1
     Params = <>
+    Macros = <>
     Left = 456
     Top = 528
   end
@@ -5452,6 +5217,7 @@ object MainForm: TMainForm
     Database = SQLite3Connection2
     Transaction = SQLTransaction2
     Params = <>
+    Macros = <>
     Left = 456
     Top = 592
   end
@@ -5485,6 +5251,17 @@ object MainForm: TMainForm
         Name = 'zerohour'
         OnSave = RxIniPropStorage1StoredValues3Save
         OnRestore = RxIniPropStorage1StoredValues3Restore
+      end    
+      item
+        Name = 'ledpaneladress'
+        Value = '192.168.1.100'
+        OnSave = RxIniPropStorage1StoredValues4Save
+        OnRestore = RxIniPropStorage1StoredValues4Restore
+      end    
+      item
+        Name = 'telegrambotadress'
+        OnSave = RxIniPropStorage1StoredValues5Save
+        OnRestore = RxIniPropStorage1StoredValues5Restore
       end>
     OnSavingProperties = RxIniPropStorage1SavingProperties
     OnRestoreProperties = RxIniPropStorage1RestoreProperties
@@ -5877,935 +5654,339 @@ object MainForm: TMainForm
     Left = 152
     Top = 216
     Bitmap = {
-      4C691D0000001000000010000000FFFFFF00FFFFFF000088CC610088CC810088
-      CC810088CC810088CC810088CC810088CC810088CC810088CC810088CC810088
-      CC810088CC610087CB000087CB00FFFFFF00FFFFFF000087CA8388DBF4FF60C1
-      E9FF5FBFEAFF80D3F4FF9CE3FDFFA2E6FFFFA2E6FFFFA2E6FFFFA2E6FFFFA6EA
-      FFFF0087CA830087CA000087CA00FFFFFF00FFFFFF000085C885ACF1FFFFABEF
-      FEFF94E2F8FF6EC8EDFF4397B9FF8EB7BAFF8EB7BAFF8EB7BAFF8EB7BAFF93BC
-      BBFF1B84B0963E818D003D7F8C00FFFFFF00FFFFFF000084C587A9EEFDFFA4E9
-      FCFFA4E9FCFFAAEEFDFF6DAFCDFFF8F8EEFFF6F6E8FFF3F3E3FFF2F2E1FFC2C2
-      B1FF467F85B87C7C522579795000FFFFFF00FFFFFF000082C28AA6EBFCFFA1E6
-      FBFFA1E6FBFFA6EBFCFF62A8C9FFF4F4ECFFF0F0E6FFEBEBDDFFE7E7D6FFB6B6
-      A5FFFFFFFFFF7979506979795025FFFFFF00FFFFFF00007FBF8DA3E8FBFF9DE3
-      F9FF9DE3F9FFA3E8FBFF589FC2FFF5F5EFFFF4F4ECFFF0F0E6FFEBEBDDFFA4A4
-      93FFA4A493FFA4A493FF4949257CFFFFFF00FFFFFF00007DBB909EE5F9FF98DF
-      F6FF98DFF6FF9EE5F9FF569CBFFFF7F7F1FFF5F5EFFFF4F4ECFFF0F0E6FFEBEB
-      DDFFE7E7D6FFF2F2E1FF7171486CFFFFFF00FFFFFF00007BB8949BE1F7FF94DB
-      F4FF94DBF4FF9BE1F7FF5299BCFFF8F8F4FFF7F7F1FFF5F5EFFFF4F4ECFFF0F0
-      E6FFEBEBDDFFF4F4E3FF6C6C446EFFFFFF00FFFFFF000078B49797DEF6FF90D8
-      F2FF90D8F2FF97DEF6FF4F96B8FFFAFAF6FFF8F8F4FFF7F7F1FFF5F5EFFFF4F4
-      ECFFF0F0E6FFF6F6E8FF67674070FFFFFF00FFFFFF000076B09B92DAF4FF8BD4
-      F0FF8BD4F0FF92DAF4FF4C92B6FFFBFBF8FFFAFAF6FFF8F8F4FFF7F7F1FFF5F5
-      EFFFF4F4ECFFF9F9EFFF62623C72FFFFFF00FFFFFF000073AC9E8ED6F2FF87D0
-      EDFF87D0EDFF8ED6F2FF488FB2FFFCFCFBFFFBFBF8FFFAFAF6FFF8F8F4FFF7F7
-      F1FFF5F5EFFFFAFAF2FF5D5D3774FFFFFF00FFFFFF00006FA7A48AD3F0FF82CD
-      EBFF82CDEBFF8AD3F0FF468BAFFFFDFDFCFFFCFCFBFFFBFBF8FFFAFAF6FFF8F8
-      F4FFF7F7F1FFFAFAF4FF58583276FFFFFF00FFFFFF00006699B287D1EFFF7FCA
-      E9FF7FCAE9FF87D0EFFF4489ACFFFEFEFEFFFDFDFCFFFCFCFBFFFBFBF8FFFAFA
-      F6FFF8F8F4FFFBFBF6FF51512D78FFFFFF00FFFFFF00005E8D8E3591BDF168B8
-      DDFA81CBECFF84CEEEFF4186A8FFFFFFFFFFFFFFFEFFFEFEFDFFFEFEFCFFFDFD
-      FAFFFCFCF9FFFEFEF9FF3F3F1D7FFFFFFF00FFFFFF00005D8C00006599500064
-      97991C7AA9C052A5CDE0075477E22D2D0D872D2D0D872D2D0D872D2D0D872D2D
-      0D872D2D0D872D2D0D8723230B6AFFFFFF00FFFFFF00005D8C00006497000062
-      9300005E8E30005C8C7C005884950000001A0000001A0000001A0000001A0000
-      001A0000001A0000001A00000011FFFFFF00FFFFFF007F7F554D7F7F55667F7F
-      55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F55247D7D
-      53007A7A51007979500079795000FFFFFF00FFFFFF007D7D5367FCFCF5FFF9F9
-      EFFFF6F6EAFFF4F4E5FFF3F3E2FFF2F2E1FFF2F2E1FFC2C2B1FF7D7D53677D7D
-      53257A7A51007979500079795000FFFFFF00FFFFFF007A7A5168FAFAF3FFF4F4
-      ECFFF1F1E7FFECECDFFFE8E8D9FFE6E6D5FFE5E5D4FFB6B6A5FFFFFFFFFF7A7A
-      51687A7A51257979500079795000FFFFFF00FFFFFF0077774E69FAFAF4FFF5F5
-      EEFFF4F4ECFFF1F1E7FFECECDFFFE8E8D9FFE6E6D5FFA4A493FFA4A493FFA4A4
-      93FF4949257C4949250049492500FFFFFF00FFFFFF0074744C6BFBFBF6FFF6F6
-      F0FFF5F5EEFFF4F4ECFFF1F1E7FFECECDFFFE8E8D9FFE6E6D5FFE5E5D4FFF2F2
-      E1FF74744C6B74744C0074744C00FFFFFF00FFFFFF007171486CFCFCF7FFF7F7
-      F2FFF6F6F0FFF5F5EEFFF4F4ECFFF1F1E7FFECECDFFFE8E8D9FFE6E6D5FFF2F2
-      E1FF7171486C7171480071714800FFFFFF00FFFFFF006D6D456DFCFCF8FFF8F8
-      F4FFF7F7F2FFF6F6F0FFF5F5EEFFF4F4ECFFF1F1E7FFECECDFFFE8E8D9FFF3F3
-      E2FF6D6D456D6D6D45006D6D4500FFFFFF00FFFFFF006969426FFDFDFAFFFAFA
-      F6FFF8F8F4FFF7F7F2FFF6F6F0FFF5F5EEFFF4F4ECFFF1F1E7FFECECDFFFF4F4
-      E5FF6969426F6969420069694200FFFFFF00FFFFFF0065653E71FDFDFBFFFBFB
-      F8FFFAFAF6FFF8F8F4FFF7F7F2FFF6F6F0FFF5F5EEFFF4F4ECFFF1F1E7FFF7F7
-      EAFF65653E7165653E0065653E00FFFFFF00FFFFFF0061613A72FEFEFCFFFCFC
-      F9FFFBFBF8FFFAFAF6FFF8F8F4FFF7F7F2FFF6F6F0FFF5F5EEFF6EC75EFF43B9
-      30FF2E9214C73F8221003A801E00FFFFFF00FFFFFF005C5C3774FEFEFDFFFDFD
-      FBFFFCFCF9FFFBFBF8FFFAFAF6FFF8F8F4FFF7F7F2FFF6F6F0FF41B430FF75EE
-      64FF1B9D06E3159F0200129D0000FFFFFF00FFFFFF0058583376FFFFFEFFFDFD
-      FCFFFDFDFBFFFCFCF9FFFBFBF8FFFAFAF6FF6EC262FF40AF30FF3FAF30FF66EB
-      55FF199605E4129D00CC129C0099FFFFFF00FFFFFF0054542F77FFFFFFFFFEFE
-      FEFFFDFDFCFFFDFDFBFFFCFCF9FFFBFBF8FF3FAA31FF52E741FF52E741FF52E7
-      41FF52E741FF52E741FF109500CCFFFFFF00FFFFFF004949267BFFFFFFFFFFFF
-      FFFFFEFEFEFFFDFDFCFFFDFDFBFFFCFCF9FF6DB963FF3DA231FF3DA231FF3DE2
-      2CFF148504E50E8C00CC0E8D0099FFFFFF00FFFFFF0038381782FFFFFFFFFFFF
-      FFFFFFFFFFFFFFFFFEFFFEFEFDFFFEFEFCFFFDFDFBFFFDFDFAFF3C9B32FF2BDF
-      1AFF117A03E60E8601000E8C0000FFFFFF00FFFFFF002C2C0C652A2A0B872A2A
-      0B872A2A0B872A2A0B872A2A0B872A2A0B872A2A0B872A2A0B87115504D00961
-      02E70A6502AE0B6902000E8C000065AA87007E7E54007F7F554D7F7F55667F7F
-      55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F55247D7D
-      53007A7A5100FFFFFF00FFFFFF0065AA87006C9F7B007D7D5367FCFCF5FFF9F9
-      EFFFF6F6EAFFF4F4E5FFF3F3E2FFF2F2E1FFF2F2E1FFC2C2B1FF7D7D53677D7D
-      53257A7A5100FFFFFF00FFFFFF0065AA87C065AA87FF65AA87FF65AA87FF65AA
-      87FF65AA87FF65AA87FF65AA87FF85B99AFFE5E5D4FFB6B6A5FFFFFFFFFF7A7A
-      51687A7A5125FFFFFF00FFFFFF0060A782FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-      FFFFFFFFFFFFFFFFFFFFFFFFFFFF60A782FFE6E6D5FFA4A493FFA4A493FFA4A4
-      93FF4949257CFFFFFF00FFFFFF0058A37AFFFCFEFCFF58A37AFF58A37AFFD2E6
-      DBFF81BA9AFF58A37AFFFCFEFCFF58A37AFFE8E8D9FFE6E6D5FFE5E5D4FFF2F2
-      E1FF74744C6BFFFFFF00FFFFFF00509F72FFF8FDF8FF509F72FFCCE4D5FF509F
-      72FF509F72FF7AB693FFF8FDF8FF509F72FFECECDFFFE8E8D9FFE6E6D5FFF2F2
-      E1FF7171486CFFFFFF00FFFFFF00479A69FFF4FCF4FFC6E0CEFF479A69FFC5E0
-      CEFF479A69FFC5E0CEFFF4FCF4FF479A69FFF1F1E7FFECECDFFFE8E8D9FFF3F3
-      E2FF6D6D456DFFFFFF00FFFFFF003D965FFFEFFAEFFF68AD82FF3D965FFF3D96
-      5FFFBFDDC7FF3D965FFFEFFAEFFF3D965FFFF4F4ECFFF1F1E7FFECECDFFFF4F4
-      E5FF6969426FFFFFFF00FFFFFF00349156FFEBF9EBFF8DC29EFF8DC29EFF8DC2
-      9EFF349156FF349156FFEBF9EBFF349156FFF5F5EEFFF4F4ECFFF1F1E7FFF7F7
-      EAFF65653E71FFFFFF00FFFFFF002C8D4EFFECFCECFFE8F8E8FFE8F8E8FFE8F8
-      E8FFE8F8E8FFE8F8E8FFECFCECFF2C8D4EFFF6F6F0FFF5F5EEFFF4F4ECFFF9F9
-      EFFF61613A72FFFFFF00FFFFFF00278A49C0268A48FF268A48FF268A48FF268A
-      48FF268A48FF268A48FF268A48FF5BA673FFF7F7F2FF7A7A7AFF7A7A7AFFFAFA
-      F2FF5C5C3774FFFFFF00FFFFFF00268A4800317D410058583376FFFFFEFFFDFD
-      FCFFFDFDFBFFFCFCF9FFFBFBF8FFFAFAF6FFF8F8F4FF919190FF6E6E6EFFFAFA
-      F3FF58583376FFFFFF00FFFFFF003C6E3B0054542F0054542F77FFFFFFFFFEFE
-      FEFFFDFDFCFFFDFDFBFFFCFCF9FFFBFBF8FFFAFAF6FFF8F8F4FF636363FFFBFB
-      F5FF54542F77FFFFFF00FFFFFF0049492600494926004949267BFFFFFFFFFFFF
-      FFFFFEFEFEFFFDFDFCFFFDFDFBFFFCFCF9FFFBFBF8FF828281FFD1D1CEFFFBFB
-      F6FF4949267BFFFFFF00FFFFFF00383817003838170038381782FFFFFFFFFFFF
-      FFFFFFFFFFFFFFFFFEFFFEFEFDFFFEFEFCFFFDFDFBFFFDFDFAFFFCFCF8FFFEFE
-      F9FF38381782FFFFFF00FFFFFF002D2D0D002D2D0D002C2C0C652A2A0B872A2A
-      0B872A2A0B872A2A0B872A2A0B872A2A0B872A2A0B872A2A0B872A2A0B872A2A
-      0B872C2C0C65FFFFFF00FFFFFF00FFFFFF00FFFFFF005555554D555555665555
-      5566555555665555556655555566555555665555556655555566555555665555
-      55665555554D5555550055555500FFFFFF00FFFFFF004E4E4E66EAEAEAFFDFDF
-      DFFFD6D6D6FFD3D2D2FFC7BDBDFFC5B4B4FFCEBCBCFFDBC9C9FFE9D7D7FFF7E6
-      E6FF4E4E4E6A5151510051515100FFFFFF00FFFFFF004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFADA3A3FFAB9C9BFFB8A7A6FFCAB9B8FFDDCCCBFFF2E2
-      E1FF4E4E4E6A5151510051515100FFFFFF00FFFFFF004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFADA4A3FFAB9C9AFFB6A8A5FFC8BAB7FFDBCCCAFFF0E2
-      E0FF4E4E4E6A5151510051515100FFFFFF00FFFFFF004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFACA4A3FFA99D99FFB5A8A4FFC6BAB6FFD8CCC9FFEDE2
-      DFFF4E4E4E6A5151510051515100FFFFFF00FFFFFF004E4E4E336C6C6CB39B9B
-      9BFF999999FF8F8F8FFF7C7C7CFF787878FF808080FF8C8C8CFF9B9B9BFF7575
-      75B74E4E4E365151510051515100FFFFFF00FFFFFF004E4E4E66EAEAEAFFDFDF
-      DFFFD6D6D6FFD3D2D2FFC5BEBCFFBFB6B1FFC5BDB7FFD0CAC3FFDED8D2FFECE6
-      E0FF4E4E4E6A5151510051515100FFFFFF00FFFFFF004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFABA5A2FFA59F97FFAEAAA0FFBEBBB2FFA6A5A3FF9999
-      99FF3C3C3C692929290029292900FFFFFF00FFFFFF004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFAAA6A2FFA39F96FFABAA9FFFBBBCB0FF959595FFDDEE
-      DDFF0101016B0101013101010100FFFFFF00FFFFFF004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFA6A4A0FF9B9A94FF999A95FF959694FF909090FFCAD6
-      CAFFDDEEDDFF0101017101010133FFFFFF00FFFFFF004E4E4E336C6C6CB39B9B
-      9BFF999999FF8F8F8FFF8A8C8AFF9BA19BFFBAC4BAFFD3E1D3FFDDEEDDFFDDEE
-      DDFFDDEEDDFFDDEEDDFF02020277FFFFFF00FFFFFF004C4C4C66EAEAEAFFDFDF
-      DFFFD6D6D6FFD3D2D2FFBBB7B4FFA6A69FFF989A95FF8C8D8BFF848484FFC7D4
-      C7FFDDEEDDFF0303037D03030338FFFFFF00FFFFFF0040404065E6E6E6FFD0D0
-      D0FFBDBDBDFFB9B9B9FFA8A8A2FF9DA293FFA3AC9AFFB1BDAAFF7E7E7EFFDDEE
-      DDFF030303830303033B03030300FFFFFF00FFFFFF002D2D2D69E6E6E6FFD0D0
-      D0FFBDBDBDFFB9B9B9FFA8A8A2FF9CA293FFA1AD99FFAFBEA9FF8A8E89FF7979
-      79FF232323721616160016161600FFFFFF00FFFFFF001A1A1A73EAEAEAFFDFDF
-      DFFFD6D6D6FFD3D2D2FFC2C0BCFFB4B8ACFFB5BFAEFFBECBB9FFC9D8C7FFD7E6
-      D6FF1A1A1A731A1A1A001A1A1A00FFFFFF00FFFFFF000C0C0C60080808810505
-      0581040404810404048204040483050505830606068308080883090909820A0A
-      0A820D0D0D600E0E0E000E0E0E0065AA87007E7E54007F7F554D7F7F55667F7F
-      55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F55247D7D
-      53007A7A5100FFFFFF00FFFFFF0065AA87006C9F7B007D7D5367FCFCF5FFF9F9
-      EFFFF6F6EAFFF4F4E5FFF3F3E2FFF2F2E1FFF2F2E1FFC2C2B1FF7D7D53677D7D
-      53257A7A5100FFFFFF00FFFFFF0065AA87C065AA87FF65AA87FF65AA87FF65AA
-      87FF65AA87FF65AA87FF65AA87FF85B99AFFE5E5D4FFB6B6A5FFFFFFFFFF7A7A
-      51687A7A5125FFFFFF00FFFFFF0060A782FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-      FFFFFFFFFFFFFFFFFFFFFFFFFFFF60A782FFE6E6D5FFA4A493FFA4A493FFA4A4
-      93FF4949257CFFFFFF00FFFFFF0058A37AFFFCFEFCFF58A37AFF58A37AFFD2E6
-      DBFF81BA9AFF58A37AFFFCFEFCFF58A37AFFE8E8D9FFE6E6D5FFE5E5D4FFF2F2
-      E1FF74744C6BFFFFFF00FFFFFF00509F72FFF8FDF8FF509F72FFCCE4D5FF509F
-      72FF509F72FF7AB693FFF8FDF8FF509F72FFECECDFFFE8E8D9FFE6E6D5FFF2F2
-      E1FF7171486CFFFFFF00FFFFFF00479A69FFF4FCF4FFC6E0CEFF479A69FFC5E0
-      CEFF479A69FFC5E0CEFFF4FCF4FF479A69FFF1F1E7FFECECDFFFE8E8D9FFF3F3
-      E2FF6D6D456DFFFFFF00FFFFFF003D965FFFEFFAEFFF68AD82FF3D965FFF3D96
-      5FFFBFDDC7FF3D965FFFEFFAEFFF3D965FFFF4F4ECFFF1F1E7FFECECDFFFF4F4
-      E5FF6969426FFFFFFF00FFFFFF00349156FFEBF9EBFF8DC29EFF8DC29EFF8DC2
-      9EFF349156FF349156FFEBF9EBFF349156FFF5F5EEFFF4F4ECFFF1F1E7FFF7F7
-      EAFF65653E71FFFFFF00FFFFFF002C8D4EFFECFCECFFE8F8E8FFE8F8E8FFE8F8
-      E8FFE8F8E8FFE8F8E8FFECFCECFF2C8D4EFFF6F6F0FFF5F5EEFFF4F4ECFFF9F9
-      EFFF61613A72FFFFFF00FFFFFF00278A49C0268A48FF268A48FF268A48FF268A
-      48FF268A48FF268A48FF268A48FF5BA673FFF7F7F2FFF6F6F0FFF5F5EEFFFAFA
-      F2FF5C5C3774FFFFFF00FFFFFF00268A4800317D410058583376FFFFFEFFFDFD
-      FCFFFDFDFBFFFCFCF9FFFBFBF8FFFAFAF6FFF8F8F4FFF7F7F2FFF6F6F0FFFAFA
-      F3FF58583376FFFFFF00FFFFFF003C6E3B0054542F0054542F77FFFFFFFFFEFE
-      FEFFFDFDFCFFFDFDFBFFFCFCF9FFFBFBF8FFFAFAF6FFF8F8F4FFF7F7F2FFFBFB
-      F5FF54542F77FFFFFF00FFFFFF0049492600494926004949267BFFFFFFFFFFFF
-      FFFFFEFEFEFFFDFDFCFFFDFDFBFFFCFCF9FFFBFBF8FFFAFAF6FFF8F8F4FFFBFB
-      F6FF4949267BFFFFFF00FFFFFF00383817003838170038381782FFFFFFFFFFFF
-      FFFFFFFFFFFFFFFFFEFFFEFEFDFFFEFEFCFFFDFDFBFFFDFDFAFFFCFCF8FFFEFE
-      F9FF38381782FFFFFF00FFFFFF002D2D0D002D2D0D002C2C0C652A2A0B872A2A
-      0B872A2A0B872A2A0B872A2A0B872A2A0B872A2A0B872A2A0B872A2A0B872A2A
-      0B872C2C0C65FFFFFF00FFFFFF003A3B3B00555555005555554D555555665555
-      5566555555665555556655555566555555665555556655555566555555665555
-      55665555554DFFFFFF00FFFFFF003A3B3B00494949004E4E4E66EAEAEAFFDFDF
-      DFFFD6D6D6FFD3D2D2FFC7BDBDFFC5B4B4FFCEBCBCFFDBC9C9FFE9D7D7FFF7E6
-      E6FF4E4E4E6AFFFFFF00FFFFFF00353637C03A3B3BFF3A3B3BFF3A3B3BFF3A3B
-      3BFF3A3B3BFF3A3B3BFF3A3B3BFF3A3B3BFF3A3B3BFF5D595AFFDDCCCBFFF2E2
-      E1FF4E4E4E6AFFFFFF00FFFFFF000A0C0FFFABABACFFFEFEFEFF0A0C0FFFABAB
-      ACFFFEFEFEFFABABACFF0A0C0FFFFEFEFEFF0A0C0FFF0A0C0FFFDBCCCAFFF0E2
-      E0FF4E4E4E6AFFFFFF00FFFFFF00070502FFD3D2D1FF41403EFF070502FFF6F6
-      F6FF070502FFF6F6F6FF070502FFF6F6F6FF070502FF070502FFD8CCC9FFEDE2
-      DFFF4E4E4E6AFFFFFF00FFFFFF00261B10FF5A5249FFCECCCBFF261B10FFECEC
-      ECFF261B10FFECECECFF261B10FFECECECFF261B10FF261B10FF9B9B9BFF7575
-      75B74E4E4E36FFFFFF00FFFFFF004F3A26FFE2E2E2FFB2AAA3FF4F3A26FFB2AA
-      A3FFE2E2E2FFB2AAA3FF4F3A26FFE2E2E2FFE2E2E2FF4F3A26FFDED8D2FFECE6
-      E0FF4E4E4E6AFFFFFF00FFFFFF00715438C075573AFF75573AFF75573AFF7557
-      3AFF75573AFFDDDDDDFF75573AFF75573AFF75573AFF867058FFD0CDC5FFE5E2
-      DBFF4E4E4E6AFFFFFF00FFFFFF0075573A00735B44004E4E4E66E6E6E6FFD0D0
-      D0FFB1A8A0FFA1907FFFA19589FFA39F96FFABAA9FFFBBBCB0FFCDCDC4FFE2E2
-      DAFF4E4E4E6AFFFFFF00FFFFFF0065564800555555004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFAAA7A2FFA1A095FFA9AB9EFFB8BCAFFFCACDC2FFDFE2
-      D8FF4E4E4E6AFFFFFF00FFFFFF0055555500555555004E4E4E336C6C6CB39B9B
-      9BFF999999FF8F8F8FFF7C7C7CFF787878FF808080FF8C8C8CFF9B9B9BFF7575
-      75B74E4E4E36FFFFFF00FFFFFF0053535300535353004C4C4C66EAEAEAFFDFDF
-      DFFFD6D6D6FFD3D2D2FFC3C0BCFFB8B7ADFFBABEB1FFC3CABCFFD0D8CAFFDEE6
-      D9FF4C4C4C6AFFFFFF00FFFFFF00464646004646460040404065E6E6E6FFD0D0
-      D0FFBDBDBDFFB9B9B9FFA8A8A2FF9DA293FFA3AC9AFFB1BDAAFFC2CEBEFFD7E2
-      D4FF41414167FFFFFF00FFFFFF0031313100313131002D2D2D69E6E6E6FFD0D0
-      D0FFBDBDBDFFB9B9B9FFA8A8A2FF9CA293FFA1AD99FFAFBEA9FFC0CEBDFFD5E2
-      D3FF2E2E2E6AFFFFFF00FFFFFF001B1B1B001B1B1B001A1A1A73EAEAEAFFDFDF
-      DFFFD6D6D6FFD3D2D2FFC2C0BCFFB4B8ACFFB5BFAEFFBECBB9FFC9D8C7FFD7E6
-      D6FF1A1A1A73FFFFFF00FFFFFF000E0E0E000E0E0E000C0C0C60080808810505
-      0581040404810404048204040483050505830606068308080883090909820A0A
-      0A820D0D0D60FFFFFF00FFFFFF00FFFFFF00FFFFFF005555554D555555665555
-      5566555555665555556655555566555555665555556655555566555555665555
-      55665555554D5555550055555500FFFFFF00FFFFFF004E4E4E66EAEAEAFFDFDF
-      DFFFD6D6D6FFD3D2D2FFC7BDBDFFC5B4B4FFCEBCBCFFDBC9C9FFE9D7D7FFF7E6
-      E6FF4E4E4E6A5151510051515100FFFFFF00FFFFFF004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFADA3A3FFAB9C9BFFB8A7A6FFCAB9B8FFDDCCCBFFF2E2
-      E1FF4E4E4E6A5151510051515100FFFFFF00FFFFFF004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFADA4A3FFAB9C9AFFB6A8A5FFC8BAB7FFDBCCCAFFF0E2
-      E0FF4E4E4E6A5151510051515100FFFFFF00FFFFFF004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFACA4A3FFA99D99FFB5A8A4FFC6BAB6FFD8CCC9FFEDE2
-      DFFF4E4E4E6A5151510051515100FFFFFF00FFFFFF004E4E4E336C6C6CB39B9B
-      9BFF999999FF8F8F8FFF7C7C7CFF787878FF808080FF8C8C8CFF9B9B9BFF7575
-      75B74E4E4E365151510051515100FFFFFF00FFFFFF004E4E4E66EAEAEAFFDFDF
-      DFFFD6D6D6FFD3D2D2FFC5BEBCFFBFB6B1FFC5BDB7FFD0CAC3FFDED8D2FFECE6
-      E0FF4E4E4E6A5151510051515100FFFFFF00FFFFFF004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFABA5A2FFA59F97FFAEAAA0FFBEBBB2FFD0CDC5FFE5E2
-      DBFF4E4E4E6A5151510051515100FFFFFF00FFFFFF004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFAAA6A2FFA39F96FFABAA9FFFBBBCB0FFCDCDC4FFE2E2
-      DAFF4E4E4E6A5151510051515100FFFFFF00FFFFFF004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFAAA7A2FFA1A095FFA9AB9EFFB8BCAFFF5CB74DFF3DB5
-      2BFF288D1AC336792D0032772900FFFFFF00FFFFFF004E4E4E336C6C6CB39B9B
-      9BFF999999FF8F8F8FFF7C7C7CFF787878FF808080FF8C8C8CFF2FA21FFF75EE
-      64FF17A004D713A10000129D0000FFFFFF00FFFFFF004C4C4C66EAEAEAFFDFDF
-      DFFFD6D6D6FFD3D2D2FFC3C0BCFFB8B7ADFF5AAE4BFF35A726FF38A929FF66EB
-      55FF189608E1129D00CC129C0099FFFFFF00FFFFFF0040404065E6E6E6FFD0D0
-      D0FFBDBDBDFFB9B9B9FFA8A8A2FF9DA293FF2E9A1FFF52E741FF52E741FF52E7
-      41FF52E741FF52E741FF109500CCFFFFFF00FFFFFF002D2D2D69E6E6E6FFD0D0
-      D0FFBDBDBDFFB9B9B9FFA8A8A2FF9CA293FF48993DFF2E9622FF329A26FF3DE2
-      2CFF118405E20E8C00CC0E8D0099FFFFFF00FFFFFF001A1A1A73EAEAEAFFDFDF
-      DFFFD6D6D6FFD3D2D2FFC2C0BCFFB4B8ACFFB5BFAEFFBECBB9FF329428FF2BDF
-      1AFF0D7803E30D8501000E8C0000FFFFFF00FFFFFF000C0C0C60080808810505
-      0581040404810404048204040483050505830606068308080883064A03CE065E
-      01E6076202AC086602000E8C0000FFFFFF00FFFFFF005555554D555555665555
-      5566555555665555556655555566555555665555556655555566555555665555
-      55665555554DFFFFFF00FFFFFF00FFFFFF00FFFFFF004E4E4E66EAEAEAFFDFDF
-      DFFFD6D6D6FFD3D2D2FFC7BDBDFFC5B4B4FFCEBCBCFFDBC9C9FFE9D7D7FFF7E6
-      E6FF4E4E4E6AFFFFFF00FFFFFF00FFFFFF00FFFFFF004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFADA3A3FFAB9C9BFFB8A7A6FFCAB9B8FFDDCCCBFFF2E2
-      E1FF4E4E4E6AFFFFFF00FFFFFF00FFFFFF00FFFFFF004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFADA4A3FFAB9C9AFFB6A8A5FFC8BAB7FFDBCCCAFFF0E2
-      E0FF4E4E4E6AFFFFFF00FFFFFF00FFFFFF00FFFFFF004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFACA4A3FFA99D99FFB5A8A4FFC6BAB6FFD8CCC9FFEDE2
-      DFFF4E4E4E6AFFFFFF00FFFFFF00FFFFFF00FFFFFF004E4E4E336C6C6CB39B9B
-      9BFF999999FF8F8F8FFF7C7C7CFF787878FF808080FF8C8C8CFF9B9B9BFF7575
-      75B74E4E4E36FFFFFF00FFFFFF00FFFFFF00FFFFFF004E4E4E66EAEAEAFFDFDF
-      DFFFD6D6D6FFD3D2D2FFC5BEBCFFBFB6B1FFC5BDB7FFD0CAC3FFDED8D2FFECE6
-      E0FF4E4E4E6AFFFFFF00FFFFFF00FFFFFF00FFFFFF004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFABA5A2FFA59F97FFAEAAA0FFBEBBB2FFD0CDC5FFE5E2
-      DBFF4E4E4E6AFFFFFF00FFFFFF00FFFFFF00FFFFFF004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFAAA6A2FFA39F96FFABAA9FFFBBBCB0FFCDCDC4FFE2E2
-      DAFF4E4E4E6AFFFFFF00FFFFFF00FFFFFF00FFFFFF004E4E4E66E6E6E6FFD0D0
-      D0FFBDBDBDFFBAB9B9FFAAA7A2FFA1A095FFA9AB9EFFB8BCAFFFCACDC2FFDFE2
-      D8FF4E4E4E6AFFFFFF00FFFFFF00FFFFFF00FFFFFF004E4E4E336C6C6CB39B9B
-      9BFF999999FF8F8F8FFF7C7C7CFF787878FF808080FF8C8C8CFF9B9B9BFF7575
-      75B74E4E4E36FFFFFF00FFFFFF00FFFFFF00FFFFFF004C4C4C66EAEAEAFFDFDF
-      DFFFD6D6D6FFD3D2D2FFC3C0BCFFB8B7ADFFBABEB1FFC3CABCFFD0D8CAFFDEE6
-      D9FF4C4C4C6AFFFFFF00FFFFFF00FFFFFF00FFFFFF0040404065E6E6E6FFD0D0
-      D0FFBDBDBDFFB9B9B9FFA8A8A2FF9DA293FFA3AC9AFFB1BDAAFFC2CEBEFFD7E2
-      D4FF41414167FFFFFF00FFFFFF00FFFFFF00FFFFFF002D2D2D69E6E6E6FFD0D0
-      D0FFBDBDBDFFB9B9B9FFA8A8A2FF9CA293FFA1AD99FFAFBEA9FFC0CEBDFFD5E2
-      D3FF2E2E2E6AFFFFFF00FFFFFF00FFFFFF00FFFFFF001A1A1A73EAEAEAFFDFDF
-      DFFFD6D6D6FFD3D2D2FFC2C0BCFFB4B8ACFFB5BFAEFFBECBB9FFC9D8C7FFD7E6
-      D6FF1A1A1A73FFFFFF00FFFFFF00FFFFFF00FFFFFF000C0C0C60080808810505
-      0581040404810404048204040483050505830606068308080883090909820A0A
-      0A820D0D0D60FFFFFF00FFFFFF007E7E54007E7E54007F7F554D7F7F55667F7F
-      55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F
-      55667F7F55667F7F55667F7F554D7D7D53007D7D53007D7D5367FFFFFFFFFFFF
-      FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-      FFFFFFFFFFFFFFFFFFFF7D7D53677A7A51007A7A51007A7A5168FFFFFEFFFFCC
-      44FFFECB43FFFCC941FFFBC840FFF9C63EFFF6C33BFFF4C139FFF2BF37FFF1BE
-      36FFEFBC34FFFFFFFEFF7A7A516877774E0077774E0077774E6AFEFEFCFFFFCC
-      44FFFFEE88FFFCC941FFFBEA84FFF9E882FFF6E57FFFF4C139FFF1E07AFFEFDE
-      78FFEFBC34FFFEFEFCFF77774E6A73734B0073734B0073734B6BFDFDF9FFFFCC
-      44FFFECB43FFF4CE63FFEAD184FFE8CF82FFE5CC7FFFE3CA7DFFE1C87BFFE0C7
-      7AFFDEC578FFFDFDF9FF73734B6B6F6F47006F6F47006F6F476DFCFCF7FFFFCC
-      44FFFFEE88FFEBD285FFFCFCFAFFFCFCFAFFFCFCFAFFD2D2C1FFFCFCFAFFFCFC
-      FAFFCDCDBCFFFCFCF7FF6F6F476D5D5D38006B6B44006B6B446EFBFBF4FFCABD
-      8FFFBCBAA4FFD6CAA0FFD9D9C8FFD7D7C6FFD4D4C3FFDBDBCDFFD0D0BFFFCFCF
-      BEFFCDCDBCFFFBFBF4FF6B6B446E4E4E2A005757320067674070F9F9F1FFB0B0
-      9FFFFFFFFFFFBEB99EFFE9E9E1FFF9F9F5FFF9F9F5FFD2D2C1FFF9F9F5FFF9F9
-      F5FFCDCDBCFFF9F9F1FF676740704D4D295B4E4E2A794E4E2A79A8A897FFA8A8
-      97FFE9E9E4FFFCFCFAFFC1C1B0FFD1D1C0FFD4D4C3FFDADACBFFD0D0BFFFCFCF
-      BEFFCDCDBCFFF8F8EEFF63633C724343207EFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-      FFFFFFFFFEFFFBFBF8FFFBFBF8FFF9F9F4FFF7F7F1FFD2D2C1FFF7F7F1FFF7F7
-      F1FFCDCDBCFFF7F7EBFF5E5E38733A3A18623939178239391782989887FF9898
-      87FFE6E6E1FFFAFAF7FFBABAA9FFD0D0BFFFD4D4C3FFD9D9C9FFD0D0BFFFCFCF
-      BEFFCDCDBCFFF6F6E9FF5A5A3475393917003E3E1B0055553077F5F5E6FF9191
-      80FFFEFEFEFFA7A286FFDEDED4FFF5F5EEFFF5F5EEFFD2D2C1FFF5F5EEFFF5F5
-      EEFFCDCDBCFFF5F5E6FF5555307741411E004D4D29004D4D297AF4F4E4FFA99C
-      6DFF908E78FFC6BB90FFD9D9C8FFD7D7C6FFD4D4C3FFD2D2C1FFD0D0BFFFCFCF
-      BEFFCDCDBCFFF4F4E4FF4D4D297A3A3A18003A3A18003A3A1881F9F9E9FFF3F3
-      E2FFF3F3E2FFF3F3E2FFF3F3E2FFF3F3E2FFF3F3E2FFF3F3E2FFF3F3E2FFF3F3
-      E2FFF3F3E2FFF9F9E9FF3A3A18812E2E0E002E2E0E002D2D0D652B2B0B872B2B
-      0B872B2B0B872B2B0B872B2B0B872B2B0B872B2B0B872B2B0B872B2B0B872B2B
-      0B872B2B0B872B2B0B872D2D0D65FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000048000000CD000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      000000000049000000CE00000048000000000000000000000000000000000000
-      00000000000000000000000000000000000000000049000000CF000000490000
-      0049000000CF0000004900000000000000000000000000000000000000000000
-      00000000000000000000000000000000004A000000D16B6B6BFF000000D10000
-      00D1000000490000000000000000000000000000000000000000000000000000
-      00000000004A000000D3000000D3000000D3676767FF535353FF5C5C5CFF0000
-      00D30000004A0000000000000000000000000000000000000000000000000000
-      004A0000002A6C6C6CFF626262FF565656FF4D4D4DFF454545FF444444FF5151
-      51FF000000D40000000000000000000000000000000000000000000000000000
-      00D76A6A6AFF0000002B565656FF2D2C2CFF191919FF151414FF2D2D2DFF0000
-      00D70000004C0000000000000000000000000000000000000000000000000000
-      00D94D4C4CFF4E4E4EFF00000057403F3FFF232222FF272525FF000000D90000
-      004C0000000000000000000000000000000000000000000000000000004D0000
-      00DB403C3CFF332E2EFF484545FF000000583D3939FF332F2FFF000000DB0000
-      000000000000000000000000000000000000000000000000004E000000DD5B57
-      57FF413A3AFF383030FF3E3636FF484242FF0000002C403939FF000000DD0000
-      00000000000000000000000000000000000000000000000000E0615C5CFF4D44
-      44FF473C3CFF473C3CFF4C4343FF4D4444FF4D4343FF0000002D0000004F0000
-      000000000000000000000000000000000000000000000000004F000000E2635A
-      5AFF554848FF5D5353FF000000E2000000E2000000E20000004F000000000000
-      0000000000000000000000000000000000000000000000000051000000E50000
-      00E5665A5AFF000000E500000050000000000000000000000000000000000000
-      00000000000000000000000000000000000000000053000000EA000000520000
-      0052000000EA0000005200000000000000000000000000000000000000000000
-      000000000000000000000000000000000056000000F300000055000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000FB0000005800000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000480000
-      00CD0000004800000048000000CD000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000049000000CF6F6F
-      6FFF000000CF000000CF00000049000000000000000000000000000000000000
-      000000000000000000000000004A000000D2000000D2000000D26D6D6DFF5C5C
-      5CFF636363FF000000D20000004A000000000000000000000000000000000000
-      00000000000000000000000000D5737373FF696969FF606060FF575757FF4F4F
-      4FFF4C4C4CFF535353FF000000D5000000000000000000000000000000000000
-      000000000000000000000000004C000000D9696969FF535353FF4B4B4BFF4848
-      48FF505050FF000000D90000004C000000000000000000000000000000000000
-      00000000000000000000000000000000004D000000DD5A5A5AFF494949FF4949
-      49FF000000DD0000004D00000000000000000000000000000000000000000000
-      00000000002C0000007B00000000000000000000004F000000E14F4F4FFF4848
-      48FF000000E10000000000000000000000000000000000000049000000CF0000
-      00640000007C0000002C00000000000000000000000000000051000000E84747
-      47FF000000E800000000000000000000000000000000000000D1666666FF0000
-      00D1000000650000000000000000000000000000000000000000000000560000
-      00F70000005600000000000000000000000000000000000000D4504F4FFF5655
-      55FF000000D40000004B000000000000002D0000008000000000000000000000
-      0000000000000000000000000000000000000000004C000000D7433F3FFF342F
-      2FFF494646FF000000D700000068000000810000002D00000000000000000000
-      00000000000000000000000000000000004D000000DB605D5DFF423B3BFF3830
-      30FF3D3636FF453F3FFF000000DB0000006A0000000000000000000000000000
-      0000000000000000000000000000000000DF656262FF4E4545FF473C3CFF473C
-      3CFF4B4141FF4A4141FF493F3FFF000000DF0000000000000000000000000000
-      000000000000000000000000000000000050000000E3635B5BFF554848FF5C51
-      51FF000000E3000000E3000000E3000000500000000000000000000000000000
-      000000000000000000000000000000000053000000E9000000E9655858FF0000
-      00E9000000510000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000F80000005600000056000000F80000
-      0056000000000000000000000000000000000000000000000000000000000000
-      000000000000000000000000000065653E002E2E0E002B2B0B001E1E06000A0A
-      02000000000000000000000000001D1D1D00505050006C6C6C297C7C7C718787
-      8727888888008888880088888800000000000000000000000000000000000000
-      00000000000000000000000000001D1D1D004E4E4E2B5F5F5F77E1DADAFF5F5F
-      5F75616161008181810088888800000000000000000000000000000000000000
-      00000000000000000048000000CD1C1C1C644242427DD8CDCDFF303030853939
-      392C636363007F7F7F0088888800000000000000000000000000000000000000
-      000000000067000000CE737373FF000000CED0C2C2FF1E1E1E94282828324B4B
-      4B006C6C6C297C7C7C7187878727000000000000000000000000000000000000
-      002D181818D46D6D6DFF656565FF6C6C6CFF000000D00C0C0C6D262626004E4E
-      4E2B5F5F5F77E1DADAFF5F5F5F75000000000000000000000000000000000000
-      007D454545EE636363FF545454FF5C5C5CFF626262FF000000D31C1C1C664242
-      427DD8CDCDFF303030853939392C000000000000000000000000000000000000
-      00AC595959F74F4F4FFF4D4D4DFF4B4B4BFF4A4A4AFF464646FF000000D5D0C2
-      C2FF1E1E1E942828283238383800000000000000000000000000000000000000
-      00C95A5A5AFD494949FF414141FF2C2A2AFF1E1C1CFF292727FF2D2B2BFF0000
-      00D80C0C0C6F141414001C1C1C000000000000000000000000000000004D0000
-      00DB545454FF3B3939FF2C2727FF2A2424FF2A2424FF2A2424FF312C2CFF2F2A
-      2AFF000000DB000000000000000000000000000000000000004E000000DE6060
-      60FF403C3CFF393131FF383030FF383030FF383030FF3B3434FF3B3434FF0000
-      00DE0000004E00000000000000000000000000000000000000E1606060FF4642
-      42FF473D3DFF473C3CFF4C4343FF484040FE3F3737FA2D2727F40E0C0CE30000
-      0070000000000000000000000000000000000000000000000091000000E5625A
-      5AFF554848FF5D5353FF000000E5000000D6000000B800000087000000310000
-      0000000000000000000000000000000000000000005A000000FF555555FF0000
-      00EE665A5AFF000000EE00000053000000000000000000000000000000000000
-      00000000000000000000000000000000005A000000FF555555FF000000FF0000
-      0097000000FA0000005700000000000000000000000000000000000000000000
-      0000000000000000000000000000000000FF555555FF000000FF0000005A0000
-      0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000005A000000FF0000005A000000000000
-      00000000000000000000000000000000000000000000373737007F7F7F008888
-      88008888880088888800888888000101C6400101DEAF2B2B9D395555550001A3
-      BB0001444E0000000000000000001D1D1D00505050006C6C6C297C7C7C718787
-      87278888880088888800888888000101B1C18080FFFF38386F7C5454542401A3
-      BB0001444E0000000000000000001D1D1D004E4E4E2B5F5F5F77E1DADAFF5F5F
-      5F7561616100818181008888880000009F461A1A468EF7F7F7FF4A4A4A6C01A2
-      BA3F01444E0000000048000000CD1C1C1C644242427DD8CDCDFF303030853939
-      392C636363007F7F7F008888880000009C001212122E2222227D79E6F7FF0197
-      B0B5014B568C000000CE737373FF000000CED0C2C2FF1E1E1E94282828324B4B
-      4B006C6C6C297C7C7C718787872700009C000F0F0F0008424D41017E95BE79E6
-      F7FF07778AF352787EFF656565FF6C6C6CFF000000D00C0C0C6D262626004E4E
-      4E2B5F5F5F77E1DADAFF5F5F5F7500009C000F0F0F0008404B0000728944016D
-      80DE79E6F7FF1D8899FF40666DFF5C5C5CFF626262FF000000D31C1C1C664242
-      427DD8CDCDFF303030853939392C00004E000808080004202600003844000025
-      2CBB177586FE79E6F7FF178293FF405258FF4A4A4AFF464646FF000000D5D0C2
-      C2FF1E1E1E942828283238383800000000000000000000000000000000000000
-      00C9406065FD137081FFD9F4FFFF164B5DFF1E1C1CFF292727FF2D2B2BFF0000
-      00D80C0C0C6F141414001C1C1C000000000000000000000000000000004D0000
-      00DB545454FF2D3F45FF0F4253FF000000FF2A2424FF2A2424FF312C2CFF2F2A
-      2AFF000000DB000000000000000000000000000000000000004E000000DE6060
-      60FF403C3CFF393131FF383030FF383030FF383030FF3B3434FF3B3434FF0000
-      00DE0000004E00000000000000000000000000000000000000E1606060FF4642
-      42FF473D3DFF473C3CFF4C4343FF484040FE3F3737FA2D2727F40E0C0CE30000
-      0070000000000000000000000000000000000000000000000091000000E5625A
-      5AFF554848FF5D5353FF000000E5000000D6000000B800000087000000310000
-      0000000000000000000000000000000000000000005A000000FF555555FF0000
-      00EE665A5AFF000000EE00000053000000000000000000000000000000000000
-      00000000000000000000000000000000005A000000FF555555FF000000FF0000
-      0097000000FA0000005700000000000000000000000000000000000000000000
-      0000000000000000000000000000000000FF555555FF000000FF0000005A0000
-      0000000000000000000000000000000000000000000000000000000000000000
-      00000000000000000000000000000000005A000000FF0000005A000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000555555005555550055555500555555005555
-      5500545454005252520052525200525252005454541255555548555555605555
-      55600000001A00000000535353003F3F3F4D535353665353534D535353005353
-      53005252520050505000505050005151511261616167BBBCBCBDE5E5E5F11515
-      15670000001A393939005353530000000066EDEDEDFF64646476444444003939
-      3900363636004D4D4D004D4D4D004D4D4D4AB3B4B4BED9DADAFF3738388D0000
-      001A353535004B4B4B1B5353531A0000004D25252576C8C8C8D1585858763636
-      36002B2B2B00404040004949490049494965CED0D0F2696A6AB3000000330000
-      00004646461B4949496C4D4D4D63000000000000000024242476C0C0C0D14B4B
-      4B762727270028282800424242004444446ECACBCBFFCACBCBFF3435358D0000
-      00336A6B6B92E4E4E4F23F3F3F6900000000000000000000000023232376B7B7
-      B7D13D3D3D7619191900383838013E3E3E71C5C6C6FFB8BABAFFCACBCBFF6969
-      69B3D9DADAFFABABABC52D2D2D54000000000000000000000000000000002222
-      2276AFAFAFD130303076303030523C3C3C75BABBBBFFC5C6C6FFCACCCCFFCACB
-      CBF49C9C9CC82D2D2D7C1D1D1D16000000000000000000000000000000000000
-      00002121217671719FD70B0BC4D36F70D3FF242424810C0C0C870C0C0C870C0C
-      0C7D0C0C0C5D0F0F0F17161616000707070013131300191919001F1F1F002525
-      2500272727550707B0E68888FFFF0505AFE51818796E05057100090909000909
-      0900090909000F0F0F00161616000E0E0E0013131300191919001F1F1F002424
-      24513D3D3D89605FC0FF06068AE74E4EE8F60101D8B10101D7740101D0000505
-      6800090909000F0F0F00161616000E0E0E0013131300191919001E1E1E534140
-      4092CBC6C6FF3837378C111155710000B5CC6666F4FF0101D0B40101CF760101
-      C7000101BD00040485000B0B5E000E0E0E0013131300181818544442429AD4CB
-      CBFF3C3B3B941A1A1A540F0F67000000B0850000AFCC7070F7FF0101C7B70101
-      C6780101BD000000AA000000A5000E0E0E0013131356464343A1DDD2D2FF403E
-      3E9D14141456191919000F0F67000000AF000000AA850000A9CC7A7AFAFF0101
-      BDBC0101BC7B0000AA000000A5000E0E0E57454141A4E6D8D8FF423F3FA30F0F
-      0F5713131300191919000F0F67000000AF000000A9000000A3850000A2CC8282
-      FDFF0000AAC30000A8800000A5000A0A0A88EBDCDCFF423E3EA60B0B0B590E0E
-      0E0013131300191919000F0F67000000AF000000A9000000A20000009E850000
-      9DCC8888FFFF00009ACB00009A000707073E060606890707075A0A0A0A000E0E
-      0E002E2E2E00666666008080800060608C0020209F000000A20000009D000000
-      9985000098CC0000955C00009500FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00C4613F00D16D4B00E17C5A00EA84
-      6220EC866487EC8664D0EC8664F5EC8664F5EC8664D0EC866487EA846220E17C
-      5A00D16D4B00C4613F00FFFFFF00FFFFFF00C4613F00D16D4B00DF7A5860E384
-      64EBEFB7A4FFFAE4DDFFFEF9F7FFFEF9F7FFFAE4DDFFEFB7A4FFE38464EBDF7A
-      5860D16D4B00C4613F00FFFFFF00FFFFFF00C4613F00CF6B4960D77F61F9F6E3
-      DCFFFCFCFCFFFBFBFBFFFBFBFBFFFBFBFBFFFBFBFBFFFCFCFCFFF6E3DCFFD77F
-      61F9CF6B4960C4613F00FFFFFF00FFFFFF00BF5C3A20C56747EBF2DFD9FFF8F8
-      F8FFF7F7F7FFF7F7F7FFC15D3BFFC15D3BFFF7F7F7FFF7F7F7FFF8F8F8FFF2DF
-      D9FFC56747EBBF5C3A20FFFFFF00FFFFFF00B34F2D87D49D8AFFF5F5F5FFF3F3
-      F3FFF3F3F3FFF3F3F3FFB34F2DFFB34F2DFFF3F3F3FFF3F3F3FFF3F3F3FFF5F5
-      F5FFD49C89FFB34F2D87FFFFFF00FFFFFF00AB4624D0EAD5CDFFF0F0F0FFF0F0
-      F0FFF0F0F0FFEBEBEBFFE9E9E9FFE7E6E6FFD2D1D1FFCECECEFFCECECEFFD2D1
-      D1FFDCC7C0FFAB4624D0FFFFFF00FFFFFF00AD4422F5F4EFEDFFEEEEEEFFEAEA
-      EAFFDCDBDBFFD3D1D1FFAD4422FFAD4422FFD2D0D0FFD2D0D0FFD2D0D0FFD2D0
-      D0FFDFD8D7FFAD4422F5FFFFFF00FFFFFF00B74826F5F4EEEDFFE7E5E5FFDAD6
-      D6FFD8D4D4FFD8D4D4FFB74826FFB74826FFD8D4D4FFD8D4D4FFD8D4D4FFD8D4
-      D4FFE1D8D6FFB74826F5FFFFFF00FFFFFF00C5502ED0EAD0C8FFE1DADAFFE0D9
-      D9FFE0D9D9FFE0D9D9FFC5502EFFC5502EFFE0D9D9FFE0D9D9FFE0D9D9FFE0D9
-      D9FFE1C4BDFFC5502ED0FFFFFF00FFFFFF00D6593787E59D8AFFEAE2E2FFE7DF
-      DFFFE7DFDFFFE7DFDFFFD65937FFD65937FFE7DFDFFFE7DFDFFFE7DFDFFFE8E0
-      E0FFE19784FFD6593787FFFFFF00FFFFFF00E3603E20E66A4AEBF3D3CDFFF0E5
-      E5FFEFE4E4FFEFE4E4FFE5613FFFE5613FFFEFE4E4FFEFE4E4FFEFE4E4FFEFCD
-      C7FFE66A4AEBE3603E20FFFFFF00FFFFFF00E8634100EE664460EF7659F9F7D4
-      CEFFF7E9E9FFF7E8E8FFFCF4F4FFFCF4F4FFF7E8E8FFF7E9E9FFF6D1CAFFEF76
-      58F9EE664460E8634100FFFFFF00FFFFFF00E8634100EE664400EE664460EF6F
-      4FEBF5A28FFFFAD1CAFFFCE7E5FFFCE6E5FFF9D1C9FFF4A18EFFEF6E4EEBEE66
-      4460EE664400E8634100FFFFFF00FFFFFF00E8634100EE664400EE664400EE66
-      4420EE664487EE6644D0EE6644F5EE6644F5EE6644D0EE664487EE664420EE66
-      4400EE664400E8634100FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF000000A7000000AA480000
-      AACC0000AA480000A7000000A3000000A3000000A7000000AA480000AACC0000
-      AA480000A700FFFFFF00FFFFFF00FFFFFF00FFFFFF000000A7480000A7CC7777
-      FFFF0000A7CC0000A7480000A3000000A3000000A7480000A7CC7070F8FF0000
-      A7CC0000A748FFFFFF00FFFFFF00FFFFFF00FFFFFF000000A3CC7676FEFF4C4C
-      D4FF7272FAFF0000A3CC0000A3480000A3480000A3CC6262EAFF4C4CD4FF5C5C
-      E4FF0000A3CCFFFFFF00FFFFFF00FFFFFF00FFFFFF000000A1480000A0CC6767
-      EFFF3636BEFF5E5EE6FF0000A0CC0000A0CC4F4FD7FF3636BEFF4545CDFF0000
-      A0CC0000A148FFFFFF00FFFFFF00FFFFFF00FFFFFF000000A00000009C480000
-      9BCC5353DBFF2E2EB7FF3D3DC6FF3131BAFF15159FFF1E1EA8FF00009BCC0000
-      9C480000A000FFFFFF00FFFFFF00FFFFFF00FFFFFF000000A00000009B000000
-      9848000097CC2525B4FF1111A2FF1111A2FF1414A5FF000097CC000098480000
-      9B000000A000FFFFFF00FFFFFF00FFFFFF00FFFFFF000000870000008D000000
-      9148000092CC1515AFFF1111ACFF1111ACFF1111ACFF000092CC000091480000
-      8D0000008700FFFFFF00FFFFFF00FFFFFF00FFFFFF000000870000008C480000
-      8DCC1111B8FF1111B8FF1111B8FF1111B8FF1111B8FF1111B8FF00008DCC0000
-      8C4800008700FFFFFF00FFFFFF00FFFFFF00FFFFFF0000008748000087CC1111
-      C4FF1111C4FF1111C4FF000087CC000087CC1111C4FF1111C4FF1111C4FF0000
-      87CC00008748FFFFFF00FFFFFF00FFFFFF00FFFFFF00000082CC1111D0FF1111
-      D0FF1111D0FF000082CC0000834800008348000082CC1111D0FF1111D0FF1111
-      D0FF000082CCFFFFFF00FFFFFF00FFFFFF00FFFFFF0000007548000072CC1111
-      D8FF000072CC00007548000082000000820000007548000072CC1111D8FF0000
-      72CC00007548FFFFFF00FFFFFF00FFFFFF00FFFFFF0000007200000061480000
-      5FCC00006148000072000000820000008200000072000000614800005FCC0000
-      614800007200FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF004E4E4E0050505000535353005454
-      540D5555553755555553555555625555556255555553555555375454540D5353
-      5300505050004E4E4E00FFFFFF00FFFFFF004E4E4E0050505000535353286262
-      60699F9F96AAD7D7CCDFECECE5F8ECECE5F8D7D7CCDF9F9F96AA626260695353
-      5328505050004E4E4E00FFFFFF00FFFFFF004E4E4E005050502868686578CECE
-      BFE3E7E7DBFFF1F1EBFFC1C1BEFFF1F1EBFFF1F1EBFFE7E7DBFFCECEBFE36969
-      6678505050284E4E4E00FFFFFF00FFFFFF004D4D4D0E5D5D5B6CCDCDBFE3E0E0
-      D0FFF0F0E9FFF1F1EBFF8C8C8CFFF1F1EBFFF1F1EBFFF0F0E9FFE0E0D0FFCFCF
-      C2E35E5E5C6C4D4D4D0EFFFFFF00FFFFFF004A4A4A3A9A9A90ACDDDDCCFFE6E6
-      DAFFF1F1EBFFF1F1EBFF848484FFF1F1EBFFF1F1EBFFF1F1EBFFE6E6DAFFDFDF
-      CEFF9D9D96AC4A4A4A3AFFFFFF00FFFFFF004646465ACBCBBDE1DDDDCCFFDDDD
-      CCFFDDDDCCFFDDDDCCFF5C5C5CFFDDDDCCFFDDDDCCFFDDDDCCFFDDDDCCFFDDDD
-      CCFFD2D2C7E14646465AFFFFFF00FFFFFF004242426BDBDBCCF8DDDDCCFFDDDD
-      CCFFF1F1EBFFF1F1EBFF4F4F4FFFF1F1EBFFF1F1EBFFF1F1EBFFEFEFE7FFDDDD
-      CCFFE2E2D6F84242426BFFFFFF00FFFFFF003E3E3E6DDDDDCEF8DDDDCCFFF1F1
-      EBFFF1F1EBFF353535FF777777FF484848FF555555FF626262FF6E6E6EFFA9A9
-      A0FFE5E5D9F83E3E3E6DFFFFFF00FFFFFF003A3A3A5ECECEC2E2DDDDCCFFF1F1
-      EBFFF1F1EBFFDFDFDCFF383838FFDFDFDCFFDFDFDCFFDFDFDCFFDFDFDBFFD9D9
-      CCFFD7D7CFE23A3A3A5EFFFFFF00FFFFFF003535353F94948EB3E0E0D0FFEFEF
-      E7FFF1F1EBFFF1F1EBFFDFDFDCFFF1F1EBFFF1F1EBFFF1F1EBFFEFEFE7FFE2E2
-      D3FF9B9B99B33535353FFFFFFF00FFFFFF003232321044444377D4D4CAE6EDED
-      E4FFF1F1EBFFF1F1EBFFF1F1EBFFF1F1EBFFF1F1EBFFF1F1EBFFEDEDE5FFDADA
-      D5E64545457732323210FFFFFF00FFFFFF00303030002C2C2C2F4B4B4A89DADA
-      D5E6F3F3EEFFF1F1EBFFF1F1EBFFF1F1EBFFF1F1EBFFF3F3EEFFDEDEDBE64C4C
-      4C892C2C2C2F30303000FFFFFF00FFFFFF00303030002A2A2A001C1C1C322F2F
-      2F818D8D8CBBD9D9D7E6F3F3EFF9F3F3F0F9DADAD8E68E8E8EBB303030811C1C
-      1C322A2A2A0030303000FFFFFF00FFFFFF00303030002A2A2A001A1A1A000F0F
-      0F120C0C0C4A0C0C0C720C0C0C860C0C0C860C0C0C720C0C0C4A0F0F0F121A1A
-      1A002A2A2A0030303000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF004E4E4E0050505000535353005454
-      540D5555553755555553555555625555556255555553555555375454540D5353
-      5300505050004E4E4E004E4E4E00FFFFFF004E4E4E0050505000535353286262
-      60699F9F96AAD7D7CCDFECECE5F8ECECE5F8D7D7CCDF9F9F96AA626260695353
-      5328505050004E4E4E004E4E4E00FFFFFF004E4E4E005050502868686578CECE
-      BFE3E7E7DBFFF1F1EBFFC1C1BEFFF1F1EBFFF1F1EBFFE7E7DBFFCECEBFE36969
-      6678505050284E4E4E004E4E4E00FFFFFF004D4D4D0E5D5D5B6CCDCDBFE3E0E0
-      D0FFF0F0E9FFF1F1EBFF8C8C8CFFF1F1EBFFF1F1EBFFF0F0E9FFE0E0D0FFCFCF
-      C2E35E5E5C6C4D4D4D0E4C4C4C00FFFFFF004A4A4A3A9A9A90ACDDDDCCFFE6E6
-      DAFFF1F1EBFFF1F1EBFF848484FFF1F1EBFFF1F1EBFFF1F1EBFFE6E6DAFFDFDF
-      CEFF9D9D96AC4A4A4A3A4A4A4A00FFFFFF004646465ACBCBBDE1DDDDCCFFDDDD
-      CCFFDDDDCCFFDDDDCCFF5C5C5CFFDDDDCCFFDDDDCCFFDDDDCCFFDDDDCCFFDDDD
-      CCFFD2D2C7E14646465A46464600FFFFFF004242426BDBDBCCF8DDDDCCFFDDDD
-      CCFFF1F1EBFFF1F1EBFF4F4F4FFFF1F1EBFFF1F1EBFFF1F1EBFFEFEFE7FFDDDD
-      CCFFE2E2D6F84242426B42424200FFFFFF003E3E3E6DDDDDCEF8DDDDCCFFF1F1
-      EBFFF1F1EBFF353535FF777777FF484848FF555555FF626262FF6E6E6EFFA9A9
-      A0FFE5E5D9F83E3E3E6D3E3E3E00FFFFFF003A3A3A5ECECEC2E2DDDDCCFFF1F1
-      EBFFF1F1EBFFDFDFDCFF383838FFDFDFDCFFDFDFDCFFDFDFDCFFDFDFDBFFDFB2
-      77FFDBBE96E83A3A3A5E3A3A3A00FFFFFF003535353F94948EB3E0E0D0FFEFEF
-      E7FFF1F1EBFFF1F1EBFFDFDFDCFFF1F1EBFFF1F1EBFFF1F1EBFFEFEFE7FFE0A4
-      57FFD89848F0996D367F845F3200FFFFFF003232321044444377D4D4CAE6EDED
-      E4FFF1F1EBFFF1F1EBFFF1F1EBFFDEB179FFD89C54FFD89C54FFD79B53FFD497
-      4DFAFFE597FFD0862ECFD0852D5CFFFFFF00303030002C2C2C2F4B4B4A89DADA
-      D5E6F3F3EEFFF1F1EBFFF1F1EBFFCC914BFFFFE392FFFFD56AFFFFD15DFFFFD1
-      5DFFFFD15DFFFFD873FFC37923CCFFFFFF00303030002A2A2A001C1C1C322F2F
-      2F818D8D8CBBD9D9D7E6F3F3EFF9D0A270FDBC7F3CFAB1722DF2A7641BE6AE66
-      18D6FFC538FFB56A18CCB76C195CFFFFFF00303030002A2A2A001A1A1A000F0F
-      0F120C0C0C4A0C0C0C720C0C0C860C0C0C860C0C0C720C0C0C4A0F0F0F12A75C
-      0DCCA75C0DCCA95E0E5CB56A1800FFFFFF00303030002A2A2A001A1A1A000F0F
-      0F0009090900090909000909090009090900090909000909090056310B009C51
-      06999C51065CA75C0D00B56A18007F7F554D7F7F55667F7F55667F7F55667F7F
-      55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F
-      55667F7F55667F7F55667F7F554D7D7D5367FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-      FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-      FFFFFFFFFFFFFFFFFFFF7D7D53677A7A5168FFFFFEFFFFCC44FFFECB43FFFDCA
-      42FFFCC941FFFAC73FFFF8C53DFFF6C33CFFF5C23AFFF3C038FFF1BE36FFF0BD
-      35FFEFBC34FFFFFFFEFF7A7A516877774E6AFEFEFCFFFFCC44FFFFEE88FFFDCA
-      42FFFCEB85FFFBEA84FFF8C53DFFF6E57FFFF4E37DFFF3C038FFF1E07AFFEFDE
-      78FFEFBC34FFFEFEFCFF77774E6A73734B6BFDFDF9FFFFCC44FFFECB43FFF5CE
-      64FFEBD285FFE9D083FFE7CE81FFE5CC80FFE4CB7EFFE2C97CFFE0C77AFFDFC6
-      79FFDEC578FFFDFDF9FF73734B6B6F6F476DFCFCF7FFFFCC44FFFFEE88FFECD2
-      86FFFCFCFAFFFCFCFAFFD6D6C5FFFCFCFAFFFCFCFAFFD1D1C0FFFCFCFAFFFCFC
-      FAFFCDCDBCFFFCFCF7FF6F6F476D6B6B446EFBFBF4FFFFCC44FFFECB43FFECD2
-      86FFDADAC9FFD8D8C7FFDEDED0FFD4D4C3FFD3D3C2FFDADACCFFCFCFBEFFCECE
-      BDFFCDCDBCFFFBFBF4FF6B6B446E67674070F9F9F1FFFFCC44FFFFEE88FFECD2
-      86FFF9F9F5FFF9F9F5FFD6D6C5FFF9F9F5FFF9F9F5FFD1D1C0FFF9F9F5FFF9F9
-      F5FFCDCDBCFFF9F9F1FF6767407063633C72F8F8EEFFFFCC44FFFECB43FFECD2
-      86FFDADAC9FFD8D8C7FFDDDDCEFFD4D4C3FFD3D3C2FFD9D9CAFFCFCFBEFFCECE
-      BDFFCDCDBCFFF8F8EEFF63633C725E5E3873F7F7EBFFFFCC44FFFFEE88FFECD2
-      86FFF7F7F1FFF7F7F1FFD6D6C5FFF7F7F1FFF7F7F1FFD1D1C0FFF7F7F1FFF7F7
-      F1FFCDCDBCFFF7F7EBFF5E5E38735A5A3475F6F6E9FFFFCC44FFFECB43FFECD2
-      86FFDADAC9FFD8D8C7FFDCDCCCFFD4D4C3FFD3D3C2FFD8D8C8FFCFCFBEFFCECE
-      BDFFCDCDBCFFF6F6E9FF5A5A347555553077F5F5E6FFFFCC44FFFFEE88FFECD2
-      86FFF5F5EEFFF5F5EEFFD6D6C5FFF5F5EEFFF5F5EEFFD1D1C0FFF5F5EEFFF5F5
-      EEFFCDCDBCFFF5F5E6FF555530774D4D297AF4F4E4FFFFCC44FFFECB43FFECD2
-      86FFDADAC9FFD8D8C7FFD6D6C5FFD4D4C3FFD3D3C2FFD1D1C0FFCFCFBEFFCECE
-      BDFFCDCDBCFFF4F4E4FF4D4D297A3A3A1881F9F9E9FFF3F3E2FFF3F3E2FFF3F3
-      E2FFF3F3E2FFF3F3E2FFF3F3E2FFF3F3E2FFF3F3E2FFF3F3E2FFF3F3E2FFF3F3
-      E2FFF3F3E2FFF9F9E9FF3A3A18812D2D0D652B2B0B872B2B0B872B2B0B872B2B
-      0B872B2B0B872B2B0B872B2B0B872B2B0B872B2B0B872B2B0B872B2B0B872B2B
-      0B872B2B0B872B2B0B872D2D0D65FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00DC913500E1963900E59A3D00E89D
-      3F10E99E404DE99E408CE99E40C1E99E40CCE99E40A6E99E406CE89D3F1AE69B
-      3D00E99E405CE99E4099FFFFFF00FFFFFF00DC913500E1963900E59A3D22E79F
-      4378F1B964A6FACF80CFFEDA8EF1FEDA8EFFFACF81F5F1BB65E3E79E42BFE59A
-      3D85E59A3DCCE59A3DCCFFFFFF00FFFFFF00DC913500E0953919E49E435FFCD8
-      8D90FACF85B4FBD086D6FCD489F1FCD489FFFBD086FFFACF85FFFBD389FFE196
-      39CCFEDD92FFE19639CCFFFFFF00FFFFFF00DA8F3406DD943A43F8D2896DF4C5
-      7D90F4C77AB2E5A852BADB9034C1DB9034CCE5A852DCF7CD85FFF2C27AFFF8D3
-      89FFF7CD85FFDB9034CCFFFFFF00FFFFFF00D4893019E2A7554EEDBC766DEEBE
-      7491D4893088D58A314AD98E3300D3882F00D4893094D48930CCF4CD84FFEAB7
-      72FFF1C67EFFD48930CCFFFFFF00FFFFFF00CD822A25E6B16654E8B5706CD898
-      4478CE832B32CF842C00CB802800CC81295CCD822ACCF3CD84FFECBD77FFECBD
-      77FFF0C57EFFCD822ACCFFFFFF00FFFFFF00C67B2620E8B86F3FE6B46C40C57A
-      2533C2782200BF752000C1762100C67B2699C57A25CCC57A25CCC57A25CCC57A
-      25CCC57A25CCC67B2699FFFFFF00FFFFFF00BD721E99BE731FCCBE731FCCBE73
-      1FCCBE731FCCBE731FCCBD721E99C0752000C3782300BD721E00BE731F33E5B0
-      6140E7B4663FBD721E20FFFFFF00FFFFFF00B66B19CCEBB861FFE7B057FFE7B0
-      57FFEEBF6AFFB66B19CCB76C1A5CB56A1800AF641400B56A1932C7843178E3A8
-      4E6CDCA24C54B66B1925FFFFFF00FFFFFF00AF6414CCECB149FFE6A334FFEEB7
-      52FFAF6414CCAF641494AD621200AA5F0F00AE63134AAF641488E4A74491E8A8
-      3B6DCA88314EAF641419FFFFFF00FFFFFF00A85D0ECCF2B339FFF3B844FFEEA8
-      24FFF2B339FFC37E23DCA85D0ECCA85D0EC1C27E22BAE7A937B2EFAB2A90F3B8
-      436DAD631243A95E0F06FFFFFF00FFFFFF00A2570ACCF9BF40FFA2570ACCF7B5
-      2AFFF6B01CFFF7B11EFFF8B527FFF8B527F1F7B11ED6F6B01CB4F8BA3490AB62
-      105FA3580B19A65B0D00FFFFFF00FFFFFF009C5105CC9C5105CC9C510585A358
-      06BFC8841AE3EAA71FF5FCB920FFFCB920F1EAA61FCFC78219A6A35909789D52
-      0622A2570A00A65B0D00FFFFFF00FFFFFF00994E0399994E035C9B500400994E
-      031A984D026C984D02A6984D02CC984D02C1984D028C984D024D994E03109C51
-      0500A2570A00A65B0D00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00E99E4099E99E40CCE99E40CCE99E
-      40CCE99E40CCE99E40CCE99E4099E99E4020E99E4025E99E4019E89D3F06E59A
-      3D00E1963900DC913500FFFFFF00FFFFFF00E69B3D5CE59A3DCCFFE599FFFEDB
-      90FFFEDB90FFFFE095FFE59A3DCCFEDC913FF8CD7D54F1B9634EE79F4342E59A
-      3D19E1963900DC913500FFFFFF00FFFFFF00E1963900E1963984E19639CCFDDE
-      93FFF9CC82FFFCD98EFFE19639CCF9CC8240F9CC826BFACF856DFDDE936DE49F
-      445FE0953922DC913500FFFFFF00FFFFFF00DA8F341ADC9339BFF9D48AFFF2C2
-      7AFFFDDD92FFF9D48AFFDB9034CCDB903433E29F4978EEBA6F91F3C47C90FCDB
-      9190DD963B78DA8F3410FFFFFF00FFFFFF00D489306CE7B15FE3EEBE78FFF6D0
-      87FFD48930CCFFE599FFD48930CCD88D3200D58A3132D4893088E7B068B2EEBE
-      78B4E6AF5DA6D489304DFFFFFF00FFFFFF00CD822AA7ECBF73F5E8B570FFDB9D
-      4ADCCD822A94CD822ACCCD822ACCCD822A00D4893000CE832B4AD4903FBBE4AD
-      69D6ECBF73CFCD822A8CFFFFFF00FFFFFF00C57A25CCEDC076FFE2AB63FFC57A
-      25CCC97E2700C67B265CC67B2699C77C2600C97E2800C87D2700C57A25C1DFA5
-      5EF1EDC076F1C57A25C1FFFFFF00FFFFFF00BE731FCCE9B96BFFDEA253FFBE73
-      1FCCBB701D00C0752100C57A2500C0752100B76D1A00BB701D00BE731FCCDEA2
-      53FFE9B96BFFBE731FCCFFFFFF00FFFFFF00B66B19A7E1A954F5E2A448FFC783
-      2EDCB56A195AAF641400B1661400AA5F0F00AF641400B56A195AC7832EDCE2A4
-      48FFE1A954F5B66B19A7FFFFFF00FFFFFF00AF64146CCD8C33E3E8A83BFFE6AC
-      4BF7AF6414CCAE63135AAA5F0F00AA5F0F00AE63135AAF6414CCE6AC4BF7E8A8
-      3BFFCD8C33E3AF64146CFFFFFF00FFFFFF00A95E0F1AAD6412CFF1B338FFF0AC
-      2BFFEAB247F7C4832DDCA85D0ECCA85D0ECCC4832DDCEAB247F7F0AC2BFFF1B3
-      38FFAD6412CFA95E0F1AFFFFFF00FFFFFF00A65B0D00A3580B4DAD630ED2F7B2
-      21FFF6AE18FFF7B526FFF9BC36FFF9BC36FFF7B526FFF6AE18FFF7B221FFAD63
-      0ED2A3580B4DA65B0D00FFFFFF00FFFFFF00A65B0D00A2570A009D52064DA358
-      06CFC87E0BE3E9A00CF5FCB20AFFFCB20AFFE9A00CF5C87E0BE3A35806CF9D52
-      064DA2570A00A65B0D00FFFFFF00FFFFFF00A65B0D00A2570A009C510500994E
-      031A984D026C984D02A6984D02CC984D02CC984D02A6984D026C994E031A9C51
-      0500A2570A00A65B0D00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00016395000163940001629300016192000162
-      930001629300016394000000000001334C00016597000164960001639400003A
-      8C00003E9248003C8FCC00378A48016395000163940001629300016192000162
-      930001629300016394000000000001334C390165969C0164959C0163943E0039
-      8B48003688CC5285C9FF002E7ECC016395000163940001629300016192000162
-      93000162930001639400000000240000006788CCDDFF87CBDDFF016091AF0030
-      80CC3F72B6FF002774CC00247048016395000163940001629300016192000162
-      9300016293100162936D00000069DDDCDCFF949494FF70B4D6FF80C4DBFF015C
-      8DB2001A63CC0013584800226E00016395050163941401629328016192410161
-      9277106C9AAB4B9BBADB79B9D5FC919191FFD9D4D4FF8D8D8DFF68ACCEFF74B8
-      D4FF015887B4015686400155840001629383126D9BB82078A2C33385ABD058A2
-      C0E774B9D1FB6EACCCFF669DC8FF83C7DAFF888888FFD3CACAFF838383FF60A4
-      C6FF63A7C9FF015382A5015281000160913E015E8FB16AAEC9FF66A8C5FF5692
-      B8FF4B80AFFF5D97BFFF77B9D2FF669DC8FF7BBAD5FF7E7E7EFFCEC0C0FF7979
-      79FF5588BBFF014F7EA6014E7D00015F9000002B5548002B55CC336898FF508C
-      B3FF69ABC8FF67A7C6FF4D80B3FF71B1CEFF6EA9CDFF6CA3CEFF6D6D6DFFAA99
-      99FF010101A5014C7A42014B7A00015F9000002B55000157873F015585B65FA1
-      C0FF3F79A3FF4278A7FF66A6C5FF619DC2FF5E95C1FF74B4D1FF6598CBFF0101
-      01AB0101013C014B7900014B7A00015F9000002B550001568600002B5548002B
-      55CC4F8DB3FF68ACC8FF4880ACFF5087B3FF6AAAC8FF5588BBFF00416EC1003E
-      6A4401010100014B7900014B7A00015F9000002B550001568600002B5500014D
-      7C41014B79BB3A719FFF386F9DFF5F9FC0FF4578ABFF003763C600356046003C
-      680001010100014B7900014B7A00015F9000002B550001568600002B5500014C
-      7B00002B5548002B55CC5494B7FF34679AFF00305ACA002D584800335E00003C
-      680001010100014B7900014B7A00015F9000002B550001568600002B5500014C
-      7B00002B550000315C47002D57CC002C56CC002B5548002C570000335E00003C
-      680001010100014B7900014B7A00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00016395000163940001629300016192000162
-      930001629300016394000000000001334C00016597000164960001639400003A
-      8C00003E9248003C8FCC00378A48016395000163940001629300016192000162
-      930001629300016394000000000001334C390165969C0164959C0163943E0039
-      8B48003688CC5285C9FF002E7ECC016395000163940001629300016192000162
-      93000162930001639400000000240000006788CCDDFF87CBDDFF016091AF0030
-      80CC3F72B6FF002774CC00247048016395000163940001629300016192000162
-      9300016293100162936D00000069DDDCDCFF949494FF70B4D6FF80C4DBFF015C
-      8DB2001A63CC0013584800226E00016395050163941401629328016192410161
-      9277106C9AAB4B9BBADB79B9D5FC919191FFD9D4D4FF8D8D8DFF68ACCEFF74B8
-      D4FF015887B4015686400155840001629383126D9BB82078A2C33385ABD058A2
-      C0E774B9D1FB6EACCCFF669DC8FF83C7DAFF888888FFD3CACAFF838383FF60A4
-      C6FF63A7C9FF015382A5015281000160913E015E8FB16AAEC9FF66A8C5FF5692
-      B8FF4B80AFFF5D97BFFF77B9D2FF669DC8FF7BBAD5FF50939CFF45B8C8FF4C8F
-      98FF5588BBFF014F7EA6014E7D00015F9000002B5548002B55CC336898FF508C
-      B3FF69ABC8FF67A7C6FF4D80B3FF71B1CEFF6BAACDFF2BADCDFF9BE3E9FF42AA
-      BAFF01090AA8014C7A42014B7A00015F9000002B55000157873F015585B65FA1
-      C0FF3F79A3FF4278A7FF66A6C5FF619DC2FF3F98C1FF5BCCDDFFABF5FCFF40AE
-      BCEE016D7C70017DA000017DA100015F9000002B550001568600002B5548002B
-      55CC4F8DB3FF68ACC8FF4880ACFF4E87B3FF2BADC7FF88E2EFFF555555FF7FE2
-      EFF202ADC69D01ABC40401ABC400015F9000002B550001568600002B5500014D
-      7C41014B79BB3A719FFF386F9DFF4BA7C3FF39B1CBFF7CE4F1FF000000FF68D8
-      E7FF23B8CCC801A8C04301A7BF00015F9000002B550001568600002B5500014C
-      7B00002B5548002B55CC5494B7FF168BAEFF59CDD9FB46D3D7FF75B4B5FF40D0
-      D2FF3BCAD1EC01A4BC9801A2BA01015F9000002B550001568600002B5500014C
-      7B00002B550000315C4701496FD71297AFF442D9E0FF33D5DDFF000000FF33D5
-      DDFF34D5DDFF0DACC1C7019EB63A017B9F000061820001779A00006182000172
-      950000618200006484000199B19C23C9DAE929DBE9FF28DAE9FF79EDF5FF28DA
-      E9FF28DAE9FF1CC7D9E90199B19C008DA400008DA400008DA400008DA400008D
-      A400008DA400008DA400008BA2940089A0C60089A0C60089A0C60089A0C60089
-      A0C60089A0C60089A0C6008BA294FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF000000A2000000A5000000A8000000
-      A91A0000AA6C0000AAA60000AAC40000AAC40000AAA60000AA6C0000A91A0000
-      A8000000A5000000A200FFFFFF00FFFFFF000000A2000000A5000000A84D0909
-      AEBF3737D0E35C5CEAF56A6AF3FD6969F2FD5B5BE9F53636CFE30909AEBF0000
-      A84D0000A5000000A200FFFFFF00FFFFFF000000A2000000A54D1010B1CD5B5B
-      E8F65F5FE7FF5B5BE3FF5B5BE3FF5B5BE3FF5B5BE3FF5F5FE7FF5858E4F60F0F
-      B0CD0000A54D0000A200FFFFFF00FFFFFF000000A11A0808A8BF5656E2F65151
-      D9FFFFFFFFFF4F4FD7FF4F4FD7FF4F4FD7FF4F4FD7FFFFFFFFFF5050D8FF4F4F
-      DCF60707A7BF0000A11AFFFFFF00FFFFFF0000009E6C3232C6E34949D1FFFFFF
-      FFFFFFFFFFFFFFFFFFFF4242CAFF4242CAFFFFFFFFFFFFFFFFFFFFFFFFFF4747
-      CFFF2A2ABDE300009E6CFFFFFF00FFFFFF0000009AA74747D3F53737BFFF2323
-      ABFFFFFFFFFFF7F7F7FFE8E8E8FFDEDEDEFFDBDBDBFFDDDDDDFF11119BFF1616
-      A0FF2727B4F500009AA7FFFFFF00FFFFFF00000096C44949D1FD3333BBFF2E2E
-      B8FF13139FFFCECECEFFD1D1D1FFD6D6D6FFDCDCDCFF11119EFF1111A1FF1111
-      A1FF1D1DACFD000096C4FFFFFF00FFFFFF00000092C44444CDFD2626B5FF1414
-      ABFF1111AAFFD1D1D1FFD6D6D6FFDCDCDCFFE2E2E2FF1111AAFF1111AAFF1111
-      AAFF1818AFFD000092C4FFFFFF00FFFFFF0000008DA72E2EC0F51212B4FF1111
-      B4FFD1D1D1FFD6D6D6FFDCDCDCFFE2E2E2FFE6E6E6FFEAEAEAFF1111B4FF1111
-      B4FF1212AFF500008DA7FFFFFF00FFFFFF000000896C1616AAE21616C1FFD1D1
-      D1FFD6D6D6FFDCDCDCFF1111ADFF1111ADFFEAEAEAFFEEEEEEFFEEEEEEFF1111
-      BEFF0909A1E30000896CFFFFFF00FFFFFF000000851A03038ABF1818C1F61212
-      B2FFDCDCDCFF1111B2FF1111C8FF1111C8FF1111B2FFEEEEEEFF1111B2FF0F0F
-      BCF6020289BF0000851AFFFFFF00FFFFFF000000830000007F4D040488CD1212
-      C4F61212B6FF1111D1FF1111D1FF1111D1FF1111D1FF1111B6FF0F0FC2F60303
-      88CD00007F4D00008300FFFFFF00FFFFFF000000830000007D0000006F4D0202
-      74BF08089DE30E0EC4F51111D4FD1111D4FD0E0EC4F508089DE3020274BF0000
-      6F4D00007D0000008300FFFFFF00FFFFFF000000830000007D0000006D000000
-      601A00005D6C00005DA600005DC400005DC400005DA600005D6C0000601A0000
-      6D0000007D0000008300FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF007F7F55007F7F55007E7E54007E7E
-      54007F7F554D7F7F55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F
-      55247C7C520079795000FFFFFF00FFFFFF007F7F55007F7F55007F7F55007C7C
-      52007C7C5268FCFCF5FFF8F8EEFFF6F6E8FFF3F3E3FFF2F2E1FFC2C2B1FF7C7C
-      52687C7C522579795000FFFFFF00FFFFFF007F7F55007F7F55007F7F55007E7E
-      540079795069FAFAF4FFF4F4ECFFF0F0E6FFEBEBDDFFE7E7D6FFB6B6A5FFFFFF
-      FFFF7979506979795025FFFFFF00FFFFFF007F7F554D7F7F55667F7F55667F7F
-      55667B7B52A6C9C9B5FFC6C6B1FFE3E3D7FFF0F0E6FFEBEBDDFFA4A493FFA4A4
-      93FFA4A493FF4949257CFFFFFF00FFFFFF007C7C5268FCFCF5FFF8F8EEFFF6F6
-      E8FFF3F3E3FFF2F2E1FFC2C2B1FFC4C4AFFFE2E2D6FFF0F0E6FFEBEBDDFFE7E7
-      D6FFF2F2E1FF7171486CFFFFFF00FFFFFF0079795069FAFAF4FFF4F4ECFFF0F0
-      E6FFEBEBDDFFE7E7D6FFB6B6A5FFFFFFFFFFC2C2AEFFE2E2D5FFF0F0E6FFEBEB
-      DDFFF4F4E3FF6C6C446EFFFFFF00FFFFFF0075754C6AFBFBF5FFF5F5EFFFF4F4
-      ECFFF0F0E6FFEBEBDDFFA4A493FFA4A493FFA4A493FFA1A18DFFF4F4ECFFF0F0
-      E6FFF6F6E8FF67674070FFFFFF00FFFFFF007171486CFCFCF7FFF7F7F1FFF5F5
-      EFFFF4F4ECFFF0F0E6FFEBEBDDFFE7E7D6FFF2F2E1FFBFBFAAFFF5F5EFFFF4F4
-      ECFFF9F9EFFF62623C72FFFFFF00FFFFFF006C6C446EFCFCF9FFF8F8F4FFF7F7
-      F1FFF5F5EFFFF4F4ECFFF0F0E6FFEBEBDDFFF4F4E3FFBCBCA9FFF7F7F1FFF5F5
-      EFFFFAFAF2FF5D5D3774FFFFFF00FFFFFF0067674070FDFDFAFFFAFAF6FFF8F8
-      F4FFF7F7F1FFF5F5EFFFF4F4ECFFF0F0E6FFF6F6E8FFBABAA7FFF8F8F4FFF7F7
-      F1FFFAFAF4FF58583276FFFFFF00FFFFFF0062623C72FEFEFCFFFBFBF8FFFAFA
-      F6FFF8F8F4FFF7F7F1FFF5F5EFFFF4F4ECFFF9F9EFFFB7B7A5FFFAFAF6FFF8F8
-      F4FFFBFBF6FF51512D78FFFFFF00FFFFFF005D5D3774FEFEFDFFFCFCFBFFFBFB
-      F8FFFAFAF6FFF8F8F4FFF7F7F1FFF5F5EFFFFAFAF2FFB5B5A3FFFDFDFAFFFCFC
-      F9FFFEFEF9FF3F3F1D7FFFFFFF00FFFFFF0058583276FFFFFEFFFDFDFCFFFCFC
-      FBFFFBFBF8FFFAFAF6FFF8F8F4FFF7F7F1FFFAFAF4FF474724BE2D2D0D872D2D
-      0D872D2D0D872F2F0F65FFFFFF00FFFFFF0051512D78FFFFFFFFFEFEFEFFFDFD
-      FCFFFCFCFBFFFBFBF8FFFAFAF6FFF8F8F4FFFBFBF6FF51512D78333312002929
-      0900292909002D2D0D00FFFFFF00FFFFFF003F3F1D7FFFFFFFFFFFFFFFFFFFFF
-      FEFFFEFEFDFFFEFEFCFFFDFDFAFFFCFCF9FFFEFEF9FF3F3F1D7F3F3F1D002E2E
-      0D00292909002D2D0D00FFFFFF00FFFFFF002F2F0F652D2D0D872D2D0D872D2D
-      0D872D2D0D872D2D0D872D2D0D872D2D0D872D2D0D872F2F0F65303010003030
-      1000292909002D2D0D00FFFFFF005555554D5555556655555566555555665555
-      5566555555665555556655555566555555665555556655555566555555665555
-      556655555566555555665555554D53535367EAEAEAFFE5E5E5FFE5E5E5FFE5E5
-      E5FFE5E5E5FFE5E5E5FFE5E5E5FFE5E5E5FFE5E5E5FFE5E5E5FFE5E5E5FFE5E5
-      E5FFE5E5E5FFEAEAEAFF5353536751515168E4E4E4FFAC7835FFBB7F33FFBB7F
-      33FFBC8034FFBE8236FFC08438FFC3873BFFC68A3EFFC98D41FFCC9044FFD094
-      48FFCC9855FFE4E4E4FF515151684E4E4E6AE1E1E1FFB97D31FFE9AD61FFE9AD
-      61FFE9AD61FFE9AD61FFE9AD61FFE9AD61FFE9AD61FFE9AD61FFE9AD61FFE9AD
-      61FFD99D51FFE1E1E1FF4E4E4E6A4B4B4B6BDEDEDEFFB4782CFFDEA256FFDEA2
-      56FFDEA256FFDEA256FFDEA256FFDEA256FFDEA256FFDEA256FFDEA256FFDEA2
-      56FFD99D51FFDEDEDEFF4B4B4B6B4747476DDADADAFFB17529FFD3974BFFD397
-      4BFFD3974BFFCF9347FFC98D41FFC4883CFFC3873AFFC5893BFFCA8E3FFFD195
-      44FFD99D4EFFDADADAFF4747476D4444446ED7D7D7FFB2762AFFCD9145FFCA8E
-      42FFC3873BFFC18538FFC5893BFFCA8E3EFFD09442FFD69A47FFDCA04CFFE2A6
-      51FFE6AA58FFD7D7D7FF4444446E40404070D3D3D3FFB67A2EFFC98D40FFC68A
-      3CFFCA8E3EFFD09442FFD69A47FFDCA04CFFE2A651FFE9AD55FFEEB259FFF3B7
-      5DFFF1B561FFD3D3D3FF404040703C3C3C72D0D0D0FFBB7F31FFD09442FFD69A
-      47FFDCA04CFFE2A651FFE9AD55FFEEB259FFF3B75DFFF8BC61FFFCC064FFFEC2
-      66FFF7BB66FFD0D0D0FF3C3C3C7238383873CDCDCDFFC18C48FFCF9343FFD69A
-      48FFDCA04EFFE2A654FFE9AD59FFEDB15EFFF2B662FFF5B965FFF7BB66FFF7BB
-      66FFEEB972FFCDCDCDFF3838387334343475CCCCCCFFCBCBCBFFCECECEFFD2D2
-      D2FFD5D5D5FFD8D8D8FFD9D9D9FFDADADAFFD9D9D9FFD6D6D6FFD3D3D3FFD0D0
-      D0FFCDCDCDFFCDCDCDFF34343475313131593030307730303077303030773030
-      3077303030779F9F9FFF9F9F9FFF9F9F9FFF9F9F9FFF30303077303030773030
-      3077303030773030307731313159303030002F2F2F002F2F2F002F2F2F002D2D
-      2D002929297AACACACFFACACACFFACACACFFACACACFF2929297A2D2D2D002F2F
-      2F002F2F2F002F2F2F0030303000303030002F2F2F002F2F2F00292929001818
-      180018181881C7C7C7FFD1D1D1FFD5D5D5FFCCCCCCFF18181881181818002929
-      29002F2F2F002F2F2F0030303000303030002F2F2F00262626000B0B0B000B0B
-      0B000B0B0B87444444A6444444A6444444A6444444A60B0B0B870B0B0B000B0B
-      0B00262626002F2F2F0030303000FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF007F7F554D7F7F55667F7F55667F7F55667F7F
-      55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F
-      55667F7F55667F7F55667F7F554D7D7D5367FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-      FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-      FFFFFFFFFFFFFFFFFFFF7D7D53677A7A5168FFFFFEFFFFCC44FFFECB43FFFDCA
-      42FFFCC941FFFAC73FFFF8C53DFFF6C33CFFF5C23AFFF3C038FFF1BE36FFF0BD
-      35FFEFBC34FFFFFFFEFF7A7A516877774E6AFEFEFCFFFFCC44FFFFEE88FFFDCA
-      42FFFCEB85FFFBEA84FFF8C53DFFF6E57FFFF4E37DFFF3C038FFF1E07AFFEFDE
-      78FFEFBC34FFFEFEFCFF77774E6A73734B6BFDFDF9FFFFCC44FFFECB43FFF5CE
-      64FFEBD285FFE9D083FFE7CE81FFE5CC80FFE4CB7EFFE2C97CFFE0C77AFFDFC6
-      79FFDEC578FFFDFDF9FF73734B6B6F6F476DFCFCF7FFFFCC44FFFFEE88FFECD2
-      86FFFCFCFAFFFCFCFAFFD6D6C5FFFCFCFAFFFCFCFAFFD1D1C0FFFCFCFAFFFCFC
-      FAFFCDCDBCFFFCFCF7FF6F6F476D6B6B446EFBFBF4FFFFCC44FFFECB43FFECD2
-      86FFDADAC9FFD8D8C7FFDEDED0FFD4D4C3FFD3D3C2FFDADACCFFCFCFBEFFCECE
-      BDFFCDCDBCFFFBFBF4FF6B6B446E67674070F9F9F1FFFFCC44FFFFEE88FFECD2
-      86FFF9F9F5FFF9F9F5FFD6D6C5FFF9F9F5FFF9F9F5FFD1D1C0FFF9F9F5FFF9F9
-      F5FFA2A2C3FF5050E4FF4444719463633C72F8F8EEFFFFCC44FFFECB43FFECD2
-      86FFDADAC9FFD8D8C7FFDDDDCEFFD4D4C3FFD3D3C2FFD9D9CAFFCFCFBEFFBDBD
-      AEFF81819EFF8080FFFF0D0DA3DD5E5E3873F7F7EBFFFFCC44FFFFEE88FFECD2
-      86FFF7F7F1FFF7F7F1FFD6D6C5FFF7F7F1FFF7F7F1FFD1D1C0FFBBE2E4FFAEAE
-      ABFFF7F7F7FF7A7A96FF3C3C5F995A5A3475F6F6E9FFFFCC44FFFECB43FFECD2
-      86FFDADAC9FFD8D8C7FFDCDCCCFFD4D4C3FFD3D3C2FFA5CCC6FF3DA8B4FF79E6
-      F7FF797971FFCFCFC4FF5A5A347555553077F5F5E6FFFFCC44FFFFEE88FFECD2
-      86FFF5F5EEFFF5F5EEFFD6D6C5FFF5F5EEFFBAE0E1FF3EA9B5FF79E6F7FF3F9C
-      ABFF9AB4ADFFF5F5E6FF555530774D4D297AF4F4E4FFFFCC44FFFECB43FFECD2
-      86FFDADAC9FFD8D8C7FFD6D6C5FFA1C8C1FF3EA9B5FF79E6F7FF36939FFF98B7
-      B0FFCDCDBCFFF4F4E4FF4D4D297A3A3A1881F9F9E9FFF3F3E2FFF3F3E2FFF3F3
-      E2FFF3F3E2FFF3F3E2FFCEE0D8FF48B2BEFF79E6F7FF3F9CA8FFB5D4CEFFF3F3
-      E2FFF3F3E2FFF9F9E9FF3A3A18812D2D0D652B2B0B872B2B0B872B2B0B872B2B
-      0B872B2B0B872B2B0B87105663C3D9F4FFFF07717FE11C4436A72B2B0B872B2B
-      0B872B2B0B872B2B0B872D2D0D652B2B0B002828080028280800282808002828
-      0800282808001E1E0600000000FF014F68AB015F773D23311800282808002828
-      080028280800282808002B2B0B007F7F554D7F7F55667F7F55667F7F55667F7F
-      55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F55667F7F
-      55667F7F55667F7F55667F7F554D7D7D5367FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-      FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-      FFFFFFFFFFFFFFFFFFFF7D7D53677A7A5168FFFFFEFFFFCC44FFFECB43FFFDCA
-      42FFFCC941FFFAC73FFFF8C53DFFF6C33CFFF5C23AFFF3C038FFF1BE36FFF0BD
-      35FFEFBC34FFFFFFFEFF7A7A516877774E6AFEFEFCFFFFCC44FFFFEE88FFFDCA
-      42FFFCEB85FFFBEA84FFF8C53DFFF6E57FFFF4E37DFFF3C038FFF1E07AFFEFDE
-      78FFEFBC34FFFEFEFCFF77774E6A73734B6BFDFDF9FFFFCC44FFFECB43FFF5CE
-      64FFEBD285FFE9D083FFE7CE81FFE5CC80FFE4CB7EFFE2C97CFFE0C77AFFDFC6
-      79FFDEC578FFFDFDF9FF73734B6B6F6F476DFCFCF7FFFFCC44FFFFEE88FFECD2
-      86FFFCFCFAFFFCFCFAFFD6D6C5FFFCFCFAFFFCFCFAFFD1D1C0FFFCFCFAFFFCFC
-      FAFFCDCDBCFFFCFCF7FF6F6F476D6B6B446EFBFBF4FFFFCC44FFFECB43FFECD2
-      86FFDADAC9FFD8D8C7FFDEDED0FFD4D4C3FFD3D3C2FFDADACCFFCFCFBEFFCECE
-      BDFFCDCDBCFFFBFBF4FF6B6B446E67674070F9F9F1FFFFCC44FFFFEE88FFECD2
-      86FFF9F9F5FFF9F9F5FFD6D6C5FFF9F9F5FFF9F9F5FFD1D1C0FFF9F9F5FFF9F9
-      F5FFCDCDBCFFF9F9F1FF6767407063633C72F8F8EEFFFFCC44FFFECB43FFECD2
-      86FFDADAC9FFD8D8C7FFDDDDCEFFD4D4C3FFD3D3C2FFD9D9CAFFCFCFBEFFCECE
-      BDFFCDCDBCFFF8F8EEFF63633C725E5E3873F7F7EBFFFFCC44FFFFEE88FFECD2
-      86FFF7F7F1FFF7F7F1FFD6D6C5FFF7F7F1FFF7F7F1FFD1D1C0FFF7F7F1FFEEC1
-      86FFD6BB8EFFF7F7EBFF5E5E38735A5A3475F6F6E9FFFFCC44FFFECB43FFECD2
-      86FFDADAC9FFD8D8C7FFDCDCCCFFD4D4C3FFD3D3C2FFD8D8C8FFCFCFBEFFDCA0
-      52FFDCA052FFEFD4ABFF5A5A347555553077F5F5E6FFFFCC44FFFFEE88FFECD2
-      86FFF5F5EEFFF5F5EEFFD6D6C5FFDFB27BFFD99D55FFD2964CFFD99D55FFD99D
-      55FFFFE597FFD99D53FF906C2FA84D4D297AF4F4E4FFFFCC44FFFECB43FFECD2
-      86FFDADAC9FFD8D8C7FFD6D6C5FFC78B43FFFFE392FFFFD56AFFFFD15DFFFFD1
-      5DFFFFD15DFFFFD873FFB77424E53A3A1881F9F9E9FFF3F3E2FFF3F3E2FFF3F3
-      E2FFF3F3E2FFF3F3E2FFF3F3E2FFD1A46CFFC18540FFC18540FFC18540FFC185
-      40FFFFC538FFC38742FF735118AF2D2D0D652B2B0B872B2B0B872B2B0B872B2B
-      0B872B2B0B872B2B0B872B2B0B872B2B0B872B2B0B872B2B0B872B2B0B879856
-      0DE798560DE764420CB32D2D0D652B2B0B002828080028280800282808002828
-      0800282808002828080028280800282808002828080028280800282808009C51
-      06999C51065C453409002B2B0B00FFFFFF00FFFFFF00FFFFFF00555555005555
-      55005555550055555500555555005555550040404000000000662B2B2B00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00555555225555
-      555955555566555555665555556655555566555555660000006655555522FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF005353535AD2D2
-      D2D3E6E6E6FFE5E5E5FFE5E5E5FFE5E5E5FFE6E6E6FFD2D2D2D35353535AFFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF0051515168E5E5
-      E5FFAD7836FFBE8236FFC18539FFC68A3EFFC38F4CFFE5E5E5FF51515168FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF004E4E4E6AE2E2
-      E2FFB77B2FFFDDA155FFDDA155FFDDA155FFCF9347FFE2E2E2FF4E4E4E6AFFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF004B4B4B6BDFDF
-      DFFFB4782CFFC68A3EFFC28639FFC28639FFCB8F42FFDFDFDFFF4B4B4B6BFFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF004747476DDCDC
-      DCFFBD8134FFD29644FFD99D4AFFE0A44FFFE2A655FFDCDCDCFF4747476DFFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF004444446ED9D9
-      D9FFCD9853FFDFA351FFE8AC59FFEEB25FFFEBB770FFD9D9D9FF4444446EFFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF0040404070D6D6
-      D6FFD4D4D4FFD6D6D6FFD6D6D6FFD6D6D6FFD4D4D4FFD6D6D6FF40404070FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF003C3C3C72D3D3
-      D3FF999999FFCACACAFF999999FFCACACAFF999999FFD3D3D3FF3C3C3C72FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF0038383873D0D0
-      D0FFCFCFCFFFC7C7C7FFCFCFCFFFC7C7C7FFCFCFCFFFD0D0D0FF38383873FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF0034343475CDCD
-      CDFF929292FFC4C4C4FF929292FFC4C4C4FF929292FFCDCDCDFF34343475FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF0030303077CACA
-      CAFFC9C9C9FFC1C1C1FFC9C9C9FFC1C1C1FFC9C9C9FFCACACAFF30303077FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF002929297AC9C9
-      C9FF8A8A8AFFBFBFBFFF8A8A8AFFBFBFBFFF8A8A8AFFC9C9C9FF2929297AFFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF0018181871A8A8
-      A8DBCECECEFFC5C5C5FFCECECEFFC5C5C5FFCECECEFFA8A8A8DB18181871FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF000D0D0D2C0B0B
-      0B760B0B0B870B0B0B870B0B0B870B0B0B870B0B0B870B0B0B760D0D0D2CFFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00
+      4C7A1D00000010000000100000002C2700000000000078DAED9D075814C9D6F7
+      6B5CB36B5CD7AB6C72CD11C58891202A4A30A2A89815139845C404184057CC09
+      138A0A289851145082208843122488886430802859F07CE734D3E3300CC3E0DE
+      E7FDDE7BDF9DE7F93F5D5D757E55D53D7D2A74D7F400000314B315CE475929A8
+      F9CCE6192301CFDB84ECB04DC887797ED930D7E72D5846E5C399D47270CC804A
+      727A8BC6688B22E61BBF2B78975B1E806BEE57389A520C2B833FC0A8130F60BF
+      8767251DF1F6825F76DE3C3ED2CA8E8DD8BEEF1BBF33D0E64A4E395CCA2EE374
+      15C3A63742A1B838070A0BB3E0F3E754F8F42919FCFD6FC198EDBBEE6FD932B9
+      F3A64D13BFF1D6FE7B9DDE95C1858C2F9C28BCC0E529E4E7BF878F1F33E0DDBB
+      44C8CC8C817BF72E037D905D86EA2CE6B7FBD85DCCFA0267534B3851D8D0C11F
+      0A0A722BE571E9D211B1C68DEBBC45CC6FF53A782EBD044E261572A2F0B4333E
+      50549457250FAA071DCB9A35DA26627EF3FDA3A7938BE0287E07240A4FB6F7C6
+      E3CF9799477E7E2A989868AD14F3E6EE274EBC2E8483719F385178C2F1FB505A
+      5A28330F3AA74B96A8AF16F366374F1F7E990F7F457FE44461DDC3F7E0CB9762
+      99799494E4C28205C3D78AF9756EE7F6C77C029B880F9C28AC7DE03694957D91
+      994769E927983D7BF07A31BFCAF9D2DEA88F601DFA8E1385C7FC7503CACBCB64
+      E6515A9A0F8686FDCCC4BCB1FD6D9BC85CD81E92CDC9262217B4F6B8C1D7AF5F
+      65E6F1E54B214C9AD4DB5CCCCFB1DB3FF0D0C3BCA5F7134BAD9EBD879D6139A0
+      B1DB052A3E5F319F725419E6558A799560B804D4D47EDB2EE667EF636CB1FD44
+      B6E884FDAF16577C275F0E7DD360EAC694DEBD9BDA54A78E1D9B2CAFC42F3AC1
+      D882235897FD7D99D1BE2DCC70E731C698921CB5E4F9EDDB0DF450C635A8D3D6
+      AD539885C52446BE23E93F18BFA4ACAC80FB5E0B0BDFE2779C8E3E97C25DA7BC
+      DF910DAAB32C1EE39696967EE6AE8DBCBC4C78FF3E09B2B2E22123E305A4A747
+      8BFD8EEC509DA5F98D1BF597D1775A509023330F69BF433112CFAF5FAFBB82BE
+      D3C2C28FD5E641F5A063215B1431629E7CB1ACAC08AFAD4F72F3E0FD16458C98
+      37351D6D5A56562CBA3EABCF83CE29D9A28811F3CB9669AEA26BEBDB352E3B0F
+      FA5EC816458C985FBC78E49AF272693FA99A4751D15B205B1431627EFEFCA16B
+      E9FAA66BBBBA3C5606CD81510FFA82F2E1D6416AD67FB2A196BF8B7923A3C1EB
+      C947A80ED5E5A1E1DE1736E42C825FCED64FFDD9A10E6B7596897943C3FE66E4
+      67E4ABD279ACF45F00EA37FA821ACAF89D01B43B5E2F0D5961AB33CC9EE7A74E
+      EDB391F3D4AF55F350BBAA02933335AAA8C53126E4F971E3BA6C06DEDBA5F230
+      7DB0104638AA5428A517B4DE5537BDD93E266C66F7AD7C55D57F5943A58F649B
+      F1856B37869FEE073D9394A0A5C50F19CD760B18E6213EFE5EBD7E5CDCA34713
+      1B796A695037A2D1FC3A998D17D7B9DE64591D8E5F7CD5866DDB36B5D6FE2FBE
+      6E903771D85C6BFF97E07D51509D763D3825D3FF797E9EB3D46993FA50BA2CFF
+      175F37172DA00CCF316D49CF3312C0CAF31448C6CBF27F9E9FE8B0168ACB8B81
+      B6C2B417DC966471EF88385E96FFF3FCD853CB20BF2C1F9EBC09030A074A6C29
+      9EC2B2FC9FE7471C9F0BB9A5B9B0F49A355098E49318047C3C6D65F93FCF0F38
+      340DDE95BC033BFF7362511C1F4F5B59FE2FBEEEECF4E17DD97BC82ACEAA228A
+      A774C93684AE0F6A2B78BEEBDE71BE5DF66A43759AE5B48EF37F0B0B0B4ED4EF
+      535BC1F368C354B66AC8F57F6A430E1D3A082B57AE04EA632A6C2BF8E12B8791
+      EFCBF57F3E8F850B17E27E01886C79BFE755ADFF531ED6D656101919C68D1B44
+      B6BCDFF3AAD1FFA97FA07183C896E3711CC04911FFE745B63CCFCBC0C0400F65
+      ACA0C8961831AFAFAF6FFCF6ED5B484A4A82989818887AFE1C821E3E84407777
+      08F3F68684A74F213B36168A3232006D974F9A34899124F90C4C8B88888087C8
+      793E7800D72E5E04D733A7E1BEB313843CB80F89C267F029255971FE12F1A7E0
+      9ECB6508F6F4800461087C4C79A330EF86FC95B3F670D7E5123CF1BC0771C2A7
+      F02125A93ABEBF8989C99DD3A74F83BDBD3D1C387000B66CD902E6E6E6606969
+      09FBF6ED034ADBB0618307DA0E9255BEF4F90B7CE40D3EF76E41E0430F880879
+      0CAFE39EC3FB0CC5EBEF7AD9112E3B9C80EB57CFC323AFDBE074F92257B7E1C3
+      872FEBDEBD3B23C9E3AF3A39C24587E3E07AD501BCBC6FC2B163C72031271104
+      02C10A940A4A2EEF74E93C9C3E7514EC4F1D8363C78FC2C1830721242684CF63
+      0DAABFBCF3B777DF5E387DE13478067842547214C749AA4E9D3A623FD4D5D5AD
+      72FEBC3CDCC1C9C9014E62F9FBECFE829D3B7742507410C7FEF0C30F5B51AA3C
+      AFAEAEBE58B2FE0FB0FE2E2E8E70D6F1085C743B05B71E5E856DDBB6F1EC0ED4
+      3014FBE687BD97C9E2CF207FE19A3DDC787405F6EEDF83F3C64DD0B163C7B56D
+      DAB461249E5752525A275D7F7F5F6F70BFEF06777DAEC3A3670FE0695C10C466
+      C400D9A28811F33FFEF8E3BC860D1B5AD5AB57CFAA6EDDBA246BD40EDCDF51BF
+      7EFD1D98B6A351A346D68D1B37B66EDAB4E9BC66CD9A31D23FFDFF3FFDFF7F42
+      FFCFE7F1BDFD3F9FC7DFE9FF298FEFEDFF25EF1BFC6FEAFF870E1BC6447D79AD
+      FA7F497EDCB871B5EEFF797EE0A0C1BE9807D4A4D9336656EAFF79BEF18FCDC1
+      D5B5E23E8D6498B6B4CFC79324FB7F9E6F50AF0ED6351234D44702850B0B0B65
+      6E4992FDBFF8FAFBA505CC9C3C0EC2B06E147EFFFEBDCC2D49B2FFE7F90943BB
+      404A4A0ADCBE7A11284C5BC97D0A93282CD9FF8BEF3B4C55F5DD307D28482B31
+      31B1D2FEEED58610111A08E9290995784C63EB666955EABF6FB99C870B07B7C3
+      85637B2AF5FFA1A10158979795F8C5D3B4B9EB47E6F8C1D9112E9C3F06575CCF
+      C17DEF1B1012EA0F49297195787E1C59DBF113CF4F99328593ACFEFF31F69FF7
+      3DAE81E7A35BF038C41B22E242E075463CA0ADB8FC3163C67052A4FFF70F7B04
+      B129D1A0A1A1B184E75554543829D2FFFB863D84172951A0ACAC2C2EFF975F7E
+      E154DBFE9FE7F97EBCB6FDFF3FE3FFFF7BE37F49FF5784971EFF4BFABF42BC94
+      FF1B79E8C188BB3DA19B9DD2E3419B7AB37E1BBBD7EAFCF571FC83BBFFF7AFF3
+      75637FBAC02ADDFF93E7FF33AFEBC040E72EA07AA53B77FFAFEDF186C9D2F7FF
+      E4F9BFF2A93F6ABCFF27CFFFB5ED4780F2F10ED0EF5417EEFE5FCB9DF552A4EF
+      FF29E2FFFD8E76E3EEFF3535FF21B5E9AECAF7FF14F1FFFAE37F08AB3F4790D1
+      60411DB786C6752AF1DFDBFF7FAFFFCBE26BE3FF0AF172FC5F115E9EFFCBE0BF
+      ABFFFA5EFF57A4FEF2FC5F115E9EFF2BC42BD0FFFFBBCEDFF7F6FFB599FFCBEA
+      FF6B33FF97D5FF7FEFFC5F9AFFDEFE9FE6FEB598FF4B4B8FEE0788B4046AF921
+      86EE0588B494E63C20D482AFCF4641D9530DF812AC0E254F4642E1E36190EF37
+      043EF90C86BC478320D77B00373F2266E3467D26D2729A2B110F39B615FCDB9D
+      5092650D85E9DB393EEF8D05E4BE36E778B22566DD3A1D26D28AF2F21271F9F9
+      610BE16DE44EC80AB78674E176480DD90AC9C19BE14D9005BC0E3407B22566D5
+      AAB14C24537AFEC797FFEEF92E9CAF958AF5FCB99F381C1AEA0D644BCCECD9AA
+      6CC50A2DD2CA2F5FF221E4E101F0F6BC043121E7213E3E1862639F4074F46348
+      4808C56BCB07C2C31F713CD912A3AFDF834D9FDE8FD1B3F892923CB879D3813B
+      B78F1E9C83ECEC649C6F1770A2F2F930F1644B8C9E5EF75998C726928BCB0920
+      6567A771F5F4F3BB099191BE5CF92F5F3EAB543EADAB58B870F8DA51A3DA6FAB
+      FACD7EE5E6BCA492928AE7ED543E6D49C41715BD83397354D70D1DDA76C19021
+      FFB2269D3C6903A48C8C649C2F1781A7E715AE4C2A3F3EFE69A5F20B0BB361E6
+      CC011B90632347FE82FD57DF8D05051970E8902537E77376DC0DAF5F4773F70C
+      48543E1F269E6C89D1D0F89DE1392059E4E7A7C19533A67070BF393CF13A58E9
+      FC132F593ED91283F567225995946473F7671411D912A3ACDC8C91700EBFB867
+      CF2636B51131D2ED406DF5373EDAA8D0EF64C7A1C24479286A1F2EDA4A8615F9
+      8C4745AE58B1820E3652A4710A3051BC962C590238C70423232310C58DAF81ED
+      817D192C58B000A64D9B86D7891E8C1E3D1AB4B4B400C7CC9447B41C3E76F9F2
+      E564D393D8DEBD7A41BB76EDE0E7D6AD01FB188A8F45E9CAE1E3F57475A98F25
+      DBE9EA6A6AD0B14307E8DAB933EDC7D7C0EAA112D4870F87FECACAA08D75C67D
+      C311438640FF3E7D289C2087D54725CE9A3E1D34860E05D5BE7D61E4A041A0AD
+      A9495C2F75CC83D2E5F06FE6E3F9D5C3733416CB27E98E1AC5EDEBE116D37BA3
+      26C8E1292D65E1CC9960A0AD0DB3F1FBA27D094DA8E13B9F844A2719631EA2F0
+      4405AFB129A8B7A8C922F161453ED3509F5106DFE94B5FE83B62FF331FDEE7B5
+      BFC3FF39BF5DB56A1588FC375C413F7CCECBD4D494F3417A0E2B8A1B5F03FF62
+      DDBA75B06CD93298376F1E4CC76B73C2840934FEE3FC99D26BE0C957E289277B
+      1D1D1DD0C66B6BE2C4898AF892A44F25CEC46B6ADCB8719C447EA02787E985DA
+      2C756D2753DDA97C0ACB692317A1B688F290BEBEB3C68E1D4B7C960C3ED2D8D8
+      986F2317CBB9568B445BE94FF444ACDF340303BE7DD311C593DF5A2A709E6347
+      615B3500DB997163C6F0EDDC529495280FB96DD6BCD9B34173D830AEDD1981ED
+      CE68CC4BD45E2DAFA1ECA4C5D84EEB635BC7B73B3A1A1A301E35AE228FA41A78
+      6A235217CE9AC5B53B4615ED7BAA84262AD0766493161B1A82283CA9167E552C
+      FA3EA6498415FED01A2E1A7FE07882FDFE7B7DD6B8719D4AE9BFFDF61BC3EB9D
+      617FD61DE7636B6C6C6CBADADADA325E357D88C7BEA8E7DCB9733726BF7C09B8
+      DD307FFE7C6665655513CFB52FBFFEFAEB224D4DCDAD71A1A1D0B76FDF5D4386
+      0CE985FE8FF395EDF2F82534BE20DFA76D84BF3FFCFEFBEF47BB75EBD60F7DB8
+      D2B1C8607BB76DDB369ADA9AC58B1703F5E3181781F32BD32E5DBA54391619FC
+      56ECEB73A88D9A3A752AD75ED13880C60D782CC6D2C72283779B31634611F93A
+      8D1BA8CD193F7E3C8CA9F0891792C7A2AAAA2AEBD89F625B534EED0CCE53A157
+      8F1EF0FBAFBF42F7AE5DA177CF9E94471C1ECBAAD6AD5B33AC8F4C5FA27A0FC3
+      FEBA17323D3A75124B05C7227D30BF6AC601D4FFBFA67696C60F435454385FE4
+      356CC0004E6423B295FE24133B06C70B63478C10F7FFDAEAEA5FD5060F2EEDDD
+      B56B7EB31F7F247F5A5DCD777E88FAEC0595FB7FEAC36350F7513628956AD899
+      289C0F706D578EA8FFCF11F9664D1F49967402554A632F055D50929DF91D7DF2
+      4C45D8C183078B7D465202C1137581E0F58D9E3DCF0EA1FBF9828B5E4CA0A5AF
+      B0FF0B04B7FC2C2D015455576DC1EBA6932C5EBEFF3B8C51521AB3BFA8A888AE
+      731381A3A79A8857D0FFCFB056AD5A2977E8D061EBA68C22109CB87957A0336D
+      9FE2FE7F86356FDE9C35D4D4D3106C3BF688F268B071EFE7C9E6DB14F47F11AF
+      8EDDDDDA3D5A0253CBD794C76FB6F6A06E6CAA80FFEBB3860D1BB2BAEDBB30A6
+      AAC558E75E5EFFDAB0FB2BE5F12FEB23A03ED9B0D6FEAF3E6F71F94FABAD203E
+      1FA08DCEECEFF2FFDE6AA3A1B926E743FFF8FF7F81FF57F7E19FE3490ABF7F36
+      79F264B170BF15C66BA3E69144BF1DE09EBBAAA9A9E9E1D618A5C73F8B2586DA
+      0C12CE775BA1BF2FF1F2F67E989E9E9EF7F3CF3F53DFAC84D73E678B1FE30F1F
+      3EC0A2458BCC707ECC287ED0A0410CFB3E5EE3EFB8BB3F8A477F1BACAA6A47EC
+      C0810319FAF12FC8533DF43A77EE6C161C1C1C69686868466CCF9E3DE97E2EB7
+      2E01B5382C22E2D3B2E5CBEFA06D7F2A107DE9178C37C1BC17F2E7A153A74E66
+      BEBEBE9198AF59D7AE5D19FA17435F6558A79521CF9E0169C0C081547EFFE52B
+      561C4E4B4BFB84C7BE4CF25C76ECD8D1CCC3C32372C4881166386767E89F8291
+      2347AE097CF204EE7B7A7279E05CE20E1D8BABAB6B20CEE7A74A7F1FD88E99DD
+      B8712312DB0733D4E4E1C3876FF0F4F202CA234428A43CF2CF9C39138CEC166C
+      5BDBC8FA4EFFFCF34FB3356B1C629B3409885AB53A0AF0D8ACD0E76D44DA8A9A
+      8D6DD6BF68FD5983060DD84F3FFDC4A8BE7FFCF107C373C9F0F80D1A34B89961
+      6B0B50AFDE8DF4B66D37ADAC576F0D6BD4A89158D4E6114FCF9E25792C6B121E
+      FF9E79737DA17EFDBD99FAFA59850241DC2D812076BD4010C1EAD55B5A2D8FED
+      DA140D75F5C3CFF05855070FDED7B2A5C11AC6EE0A8D8DF30159778120DC4C20
+      08C23EE721AB5B77176BD2648E98C731DB542D4DCD53D1788E870F1B76544949
+      696AF3E674A9DDDCC5D80DE1EAD5D83708823CB0BF33279EB1ABA8CB3C3F6DCC
+      A85117129F3F07F59123CF62DB388DEA53C1DF205BCCE38AD0C2A214F378E82D
+      10786F96E0A78FD6D0B8941117079A6A6A17F1B8A6F3C7F38DBF82BA8879380A
+      ADADCBD157AF3E66CCC592F8C68D1BDBBE7BF50A34478E746AD2A4C90CC9F351
+      9977449DC33CCE0AE97B61ECD433147D7F23EBD7AFBF07B733312FEE78949595
+      19CEE598A5A5259B376F1F6BDFDE41C49F45D9631E27858C1D3342B1BF7BFF90
+      14305F8D459AEAB0E42D33D9DB9D0BDABFDFBDC80615812A1089C23694463664
+      4B8C349F6461382F75E7A277B91E97A0342D11BE961471A230C5511AD9C8E2C3
+      578C9B17BB7D7E4961EA2B282B2B832F5FBE5412C5511AD990AD24EF6334B47D
+      E092B1EF3E25C543717131D05884E4377B18277E9FD2C8866C89E1F93B137ADB
+      449FDD0B050505F0F9F367B1309E93641CD9449FD943F1363CEF3AA653C4DB17
+      A1F0F1E347B1DEBD7B07D9D9D990999101CF2323212C2C8C13855F05F902313C
+      7F4DAB43417EEE07C8C9C9017A86F42A2101A2D00EE3393D8F88A8A4A4B8588A
+      2FE0790FED2E05F9391F20333D1D5EC6C4405C7434278CE7C4EFF34A8E8BA178
+      311F385139E26D4430D098E84D7CBC5818CF49328E941CF090E2C5F58F9931D8
+      261DCFDFDB9414C84C4A120BE33949C665BD7903C9277652BCF8FCA5CE1BD93E
+      63F9F8779FA3F01CE231E4A6A5714A9FAFC689DFE7141A04644B0CCF672DD4C0
+      4E5F6B5EAED98C92A2E83028C2F35E94950565F9F99C284C71859121906B6658
+      42B6C448F11579AC9AF0AEC0F10094A26D59663A9465A44349E453C8BFB01F72
+      57EABF231BB2AD8627B547D9A0225005224588E2DAF37692FC7F831873A67616
+      C7FC5785155BDABF2852D534193CC50B376EA41D6761C5BE98E7D256AF2E16A7
+      55E52F0ACDCCBE82AE6E34AC5D5B0AB48FD21649B860C15B2ECDC8288D4BABCA
+      5F40BBF3C2254B7261D0A04730674E06D03E69C284582E6EF4E85051DC0519E5
+      9FA7B90CE6715A38654A02282B7BC088114F4045C5137EFED901C7FC2E406915
+      36E7996CFE34EA24A69F1076EEEC0E2D5B3A726ADDFA32505C45DA69269BA7E1
+      310D6F0EA1CD61E1CF3FDF40D64D2C8AAB48B3E36C65F3FB285DD8B2E57D9025
+      4AABB091C9533CB201C08BF6AB899371FEACD12E0278D13E633BB42B5435AD2A
+      BF01EDD6A25D1CD0B662DF9A55A86A5A557E2D6A3EDACD15566CD7B26F7CD5B4
+      FF26DFC5393137D6A7F13CCE159AE21C61306A0A6A8148141E4C696443B6C4C8
+      E0BB2D58306F9983C3F1ABB1B1C2A4F7EFD38B4914A6384A239B6AF86E4B972E
+      360F0BF349CDCC4C80BCBC77E0E7F788DB92288ED2962D3336275B491EE701CD
+      66CF9E65121AEA93FAE64D04F6BFD91C436B4E789EE2282D3CDC3F75CE1C239A
+      3B34E3799C9F0F3D75EAA05B62A21032325E8A19FABD091F26515A5252189C3D
+      7BDC8D188935A8339F3D7B984CBCA4E8DE81741CE9F9F3A06462781EE7292B12
+      1284C57C3A5F1EDD43942C3F3737934B4F4989292686E7718E629A9818562CC9
+      E21C0B3662634ACF1B687E4AF730E8F77357AE9C87F4F4F86262C46BC0870E9D
+      1316E69F22C92725BD029CFF70DB6F4A80F87821C4C686A710235E033E70A0DA
+      D1A3FBEFD0F9A53A4AE6215DFF949428387DDAFE0E313CDFAF5FBF165A5AA336
+      464787647CF890568991D4870F38BE79F92263F4E8D11B89E1799C67B15EBD7A
+      F5D1D119BF87D23F7FCEA9C252DCEBD70919BABABA7BC8961849BE478F1E743F
+      A55F9F3E7DACECECF679C5C7C7623EB9259F3F7F2C79F9322E63FFFEFD5E6867
+      4536642B8BA7DFF3E0FCA115CECFC6A3D6A2768B44E1F1944636D2FC7FAAFFF3
+      3EF8BDFE2FC5D7DAFF79FE7BFD1FAF85BFE5FFA8BFE5FFB46EFDEFF83FDDDFF8
+      3BFE8FAAB5FF27DDDE08098F8E671183AAB5FFBFB9341DE24E6A7FB4371DB47D
+      E7DC7E35FAFFEB5B9B20EECC544EB1A7A740F409BD52483F0111BB95C32376F5
+      36AAC9FF85877400520F03BC580E1039FB9BE2D6C1E34D1D8535F97F84E3EA72
+      EFEDC34B6FADEDFDC979D12F19D78DDBC640A02ADC5DDE56E861D2CEA8B6FEEF
+      6CD45448BA32A79911E621ABFDA8749F4652D3549AB03393EADBA38C300F46FC
+      77AEFB935CFF57EB757F52EBFF2AADFB2B0FD1E4D6EE9506A94171E008287C3C
+      1C0AFC87C2675F556EEDDFC78703A5D7FF555AF7C7F1EF76716BFF389ED6FEA5
+      6EADE065AFFFABB4EEAF206C11B7762F3B620764865941BAD012D29E6D8394A7
+      5BB8B57F494F3649AFFFABB4EEEFFDF3DDE2757E313181E230ADA393B5FE8F5F
+      F7C7974FFCCB974F212E2E08FB9B086EED5954943FC609B9B56761610F2BADFF
+      E3D7FD4996CFAFF3A3F2F930952F6BFD1FADE1A3B57CB2CAC736415C7E7C7C48
+      A5F2F9F57FB4868FD6F24996CFAFF3A3F2F930952F6BFD1FADE1A3B57CB2CA7F
+      F54A282E3F2E2EB852F9FCFA3F7EDD9F64F9FC3A3F2A9F0F53F9B2D6FFF1EBFE
+      64954F3C5F3EF192E54BACFFABD5BA3FE9F57FDFB3EEEFDFB9FEEFDFA1578706
+      B2E4E34358FAA9112CEBAC5A8BEC73EA7AA87D283F9410E58432C134A58CD323
+      18868D50F632F80E990EA3CCF31E2C722A0DB70CFFFA727F1E0A4AC3AD0AF2BC
+      16A7669ED3F4419B5D282149927F736C48BBB473A3E696C5D91D2C0DDFE5FE25
+      62774C59F49E3C146018F3C036216A0F6039C2AF8987B92DCFBF3C30A07EE2D1
+      A1A38A9FEF31CD0FDC7A303FC8E276BACB64CF848303FC50420CBF2A0ADD059F
+      FC2DA018F3A030C5F37CF49EBEED529C0DF43F789B99E63C5A7F08F76D5FEC55
+      191FBFBF3F8BB2ED43E94751C2FCD09DF0D6632DE43DD906B4CFF3A1D63D3A67
+      DC329E9A7577B549DC492DF3B01D3DFB85EFECC59E59766342ABEE46982EFC8C
+      ECFB871B397D0CDC0614C7F34F3677699F757F955A86BB897AA045E7FEFEE61D
+      98CF86F6CCCFEC4F4AB3C738A1B4289EE71FAEFDDDFED1BA3F84D2A2785FCCE7
+      B17947B26118D73FFDE67CF54C776335DC17DF3FBBB7A29DF0DDFDF99079733A
+      A71C9FE540711E264A5C1F7563516BEC6BDAF50BDAA9629EEAA26FF2CA51772A
+      A68B7FC38DE9C2F7B7C641C6C50190E33119681F75F4DA8256ECEADCE6ECFAC2
+      9FC6E3BE6D9AB3D6A12C9761A621B62AFAB8DF8EE75D6637137EBA33043EDFD7
+      821C974E40E1C7DB3ABEA278949FFFB60E9E995706DFCE75ED71F0F3FD51A6D7
+      16B61A75654EF3FA3CEF38BDB1B0C4471D685B74B70714DEFC158A6EFD0EC577
+      BB92F2301C8371EEC59E030EBA2E6831F7A26193764EB39A8AAFFF3393EA0945
+      DA75D1B0BE4FF04EA5D4B7CE7F14943D680FA8BCB74E7F840759B773BA38A391
+      F9D9C9F53B60394C92B7D7FFC11E65747A625D0A2B9DD4AB6382724209517EA8
+      7D283D4C6B81653069FEFFB7C897457E2E2D8A6F8FEA8C6A87FE5F9FDA08F275
+      F2599EC736C188F3E7747BF89A709013BC390614F7F5D521B5E2D0AD53F31E2C
+      D4C7B64113E3DA49F3B48FDA493E5DFEFA089408ADA12C7E3FE7E3185647AD40
+      FF37C534D33407ADB9D8567490E4D1FF955E1D19E25312BD97F3F1726C1F284C
+      3E8EEA9FE230CE3CC773D5A1CF015B0E96251C3A98787C9839322D24FCDF24F3
+      D6DCD49C47E650186153E1DB782CB48DB3EBC7B02DE8476D42E6CDA5B7D1C63D
+      E3C66C27DCD793F07FE7F73EEB0AD0FF21E1ECF857B87F94FC5B24CA9F619B30
+      3EFAA09A57DAB56531681B8EF1FBC4F7DFD19F3FF89A418AEB42A0F0D36D5DC9
+      EF8DC8C783B674614FB77563C15BBB929D5FD2E53979689B47619E275FCF7EB0
+      025E3B4E010A7BADFE8DF96EF893ECB9AD87A912A3384A231BB2A5B084FF3B27
+      5F995A9072491B827628BF425F9F493E7FCBB835E7BF22FF9F49696443B6C448
+      F8BF49E8BEFEA9E8DB90E1A65344FE8F3E3F935891FF537E424A231BB22586E7
+      D19795AE2D6A159E7747153EBAF584B7B7C71605ECE8CDFBBF90C21447696443
+      B6C4F03CF912FAB4DEB585CD9E17DDFE130AAFB785A2BB5DA0C47B10270A7371
+      984636642BE97F14269F44DFD643FF0F0FDED62435FBFC8F0565B71B0389C214
+      47696423EDBF3C4FBE2DC3FF85A2B009A5FD6FF37FC1C263A8A34CB0E00813CC
+      3F5CB125611C7D04FD759960F109265874BC226EE83EC6461ED666C30F08D9E0
+      BDDA0AF043048B8F9F112C3A7606E346B2217F69B341B6C2C9BB9E0253DE26AC
+      81EF446B016D858960F32C1104F30EDD607D2D856A6BEF01EBBA5EC83AADAEAE
+      FC162853649725BE7A05478F1E85D5EE31601990000223BBDB4C69A190FD64A8
+      CD3AACA4E3AF877C6BB4EF86BC066A630B9353AE3AA73D13363D785176E8D021
+      888F8E063B3B3B58EA1606EBEF4783C0D0C65D306DB7BAC0602795B5A395E9E9
+      FBEDCD1D1FF7DFE51A61E8E89BB9FE41E497956E42303E1B0C3B825E82ADAD2D
+      448584C08E1D3B60DEA527B0D0F92908A6585F164CB662784C2305730EDC5A7E
+      FD2918BB04C2B4C3F741C7F206CC3EE1031B1F3CE7F2D8ECF9827B774D98AF2F
+      F7FE19035B2F104CD8E624D0DFCA04730F32D6D3401B25ECBFF4244CDC770796
+      B906C312E727A0677907D6DC0A83955742C1E46218D09AC8ABF6F6F4EE9ECB02
+      5D0B4D818E05CF33C1741B3581C1AE7B732FF882DAA68BA069EE0CC64E8130FF
+      AC3FCC39E607EBDD2361F1C967C4BAA2860B7436B14AFCB4DDE27A4CB0BB83E7
+      2A18B42DDD60A2CD1D587E3598AB33D358E9C7462ED7A2F70E55C33381DE160D
+      4CF31ABAC60154579D85B90EBE30DADC15D8E0854FD8C07963D8F0A54C2EAFBB
+      595C8FA9473D60C0925338C19E19C27AE3F7DD7F0E5390674CC5682CEB3D5DC8
+      7A4D1372F9F59ACE64F1FFE9F7FEFFF1FFFF0CFF9F78E40C8CBE1F0CBA074ED6
+      DAFF575C0D859ED742E1746A36685EF50441A3C62EB5F17FB5937E300BBF03D7
+      823250BFEE9D2330DDB25AB0F53C136CBD50A3FFEBA3FFF7BC1604B629B9DC7D
+      C8ED29B99FEA5C7B7256E01A501755A3FFEB383F8621B79EC196B43C6E8DDDD2
+      B84CE8785F182C70F11D2570F6A9D1FFDBFC751D6684C67F1913150B1BDCEF82
+      7AC473181612F95E70C9FBA4C0D15320CFFF05E356C5B63A71235F33FE0DF47F
+      91C8954FDB01A8A66E7E418273F7860A363B3036DF9A09369EAAD8AE3DC66DD9
+      22BC36EC6F9DE9F8F46576F7846CE8F6321B367D28E0B6A45F83E2B3299DD95D
+      62D5EA2FC7A36CCFF927D50AD3FF3DCFEE1DB9B5508CB9D05A2525C6AE9AA09C
+      5001223955C4519A8BC8D65116AFD7A8D1759FC18323528D8CDE162C5FFEB97C
+      D9B24FE5B36665170C1A149E4A6964530DAFD7A2C5ADD059B3B20AE7CECD8459
+      B3522B89E20C0DD30A9B37BF194AB695F90B4A0D1BBAF84C9B96523869523C77
+      6F929ED94B8A3E1327C661F85561830678E120F38D3F67D2AFDF93D471E3222B
+      DDDFD4D40CE124F9193B361C7AF478984ACC37FE94F3D8B151058307FB40C78E
+      AE9C1DAD37CACACA82D7AF5F43424202F73E9F962D4F439B36E7A16B57F70262
+      BEF1C703B0ECF2FEFDBD4059F93EFCF49303B75628323292FB2DF92B6CC35AB6
+      3C87BAC0E9B7DFDCCA89F9C61F0ED0D20A2DEFD2E52EB46EED8A36572BB1F4FE
+      218AE3D5B6ED8D7262BEF176CECACABE05AD5AD19A03F72A2CFD2E9ED625511A
+      A955AB1B05C47CE3F798B4697335A54D1B3FA93A5FE3442CAD6D22B56CF9081A
+      35BA904ACC377E97D20F3FECF569DBD6AFB055ABDB22F6362A58A4DB22F63634
+      6FEE5D58A7CE1E1F62BEF13B50DBF5EAD6B50D6DD52A00F3B887B69152BA87AC
+      7FE10F3FD886922D3195F9ADA8557A75EAACF769D8F06C6AB36601052D5B4697
+      93284C7194463615B6B278EA72E6A18FCC465F998D3E333B4024A78A384A3365
+      D2FCDFD5F6ED069C147C1740A72D5B26577AF736CF93280DB594DE0528EBDDFB
+      9426FDEE7D499ECAA777EBD3BBBC157DF7BE747D376F9EECF4F4E95D78F2E416
+      A4A6C6D6F8EE7D79F50D08B841CFCBE4BE7BBFA6FAFAFB5FC73C5E54FBEEFD0D
+      1B7497D37BE5E4FD57C0850B76D5BE7BFFDBBBC7ABFFAF001F9FABD5BE7B9FEA
+      42EFA993F75F01DEDE57AA7DF73ED5A5F2BBC7ABFE5780A7A773B5EFDEA7BAD0
+      F31879FF15E0E171B9DA77EF535DE85D79F2FE2BE0EEDD8BD5BE7BBFA22E5FE5
+      FE57C0D8B19D1E49BE7BBF4F9FE6E27BEFA2BAD4F85F01FDFBB762DDBB37E244
+      EFECE379515D6AFCAF001453566E5A85A7BAC8FB9F00BEBE7DFBB6602449BE96
+      EFFDA9F21EA02953A62CA1F6393D3DBD562286D84993262D4D4B4B0337F381E0
+      B5BD3F276FCB01F0C87A10F8EE5485C736C3E0C9DE91F0D44E038407B520E2A8
+      36084F1A0031C4D2BB64929393E1C15615C8BE365F21C59F9D04C410ABA3A3B3
+      82FA5877F35EF0DA719A42229E1862C78E1D6BFAF2E54BB8B5A13B449DD0112B
+      FCC858AECE01B6C3F1188642E09E6110B25F0D228F6921AF0FC4104BBF2F888D
+      8D85DB663D20F4D068B4D1E48ED96F97AA881989C7AC0931A7C6C2ABF3BA90E2
+      340932AE1A0231C4AAABABAF8E8A8A827B16CA589E3A9EABE13299EC6B069073
+      7B067CF6980D7977E70331C40E1F3E7C2DBDB3C66BBB8A5CA6D87B3E94F92E82
+      AFFEC650E465CCBDE786585555D575A1A1A1E0B74F1B8F7914F2DAC8EB233F15
+      F919F0E1D61CF8746F01143C58CC71A49C076B811862070C18B0412814C2B367
+      CF2AD6373F7F0E2F5EBC80B8B838888F8FE7CE136DB977E2609DA95C6249C4AA
+      A8A8CCE8DBB7EF466939383880A464D98858F49F3E62F5EEDD9BDE8B6CE1E6E6
+      0692A2384A93B4255692A7F729B76DDB9664151414C48D65E858E8F8288ED2C8
+      46164FBF2D6BD2A4092F1BFC6E9D2445717C3AD9F2FCBFA1EFFFE7F9FFFFB1E7
+      FF8E8E8F712E9386EDC79AA3B57DFEFFF0E175B0B23A07F49BCFA64D2F26D6E6
+      F9BF574A1A5CBFEECACD6D2C2C8E63FB31D75ED1E7FF97854F60848B3BD0EF22
+      376D5A83750950F8F9BFE79B641879E52EC7AA9D718553EED7147EFE7F21D84F
+      CC0E3AE200273D6E2AFCFC3FEC4D1C68DF7E242AD705EE4687D5EAF97F8B690B
+      1FD36F381BACD99EFCABD6206759CFFFE977FBDDBA35AC22FA2D3FDD6F104C58
+      EA2A98BB71444795B6556C88FDC7FFFF59FFF33FB9FE27C76F37C478EDFFEEF5
+      3FAFCE4FE6941BEDAA90FF27DDDE8CE32D03787E5C97DB9268FD5FFCD92970D0
+      A48F4B4DFE1FF4D7A86AD7FF79ACEF945ED3FA9FC84B26389653AF245AFFF7D8
+      4613D64D6A7BA3B6EB7F4E4E6B9A495AA4F9E31D79FE5F9DF8F57FA30734E2FC
+      5FEA1DC03245BFA5A5DFE9D2EF6AE58D25D0B6036A86ACB902F1942E8FC7F9C0
+      4C1CFF45D1FD22C9B902ED533CA5CBE3693E40F6D7CC0771F307BF5D43B8B9C3
+      E303BA5C3E945EC33AE6E574BFCA63731F48BC6020168DE5295ED67B2B2545F3
+      017A7F23CD25A85CFFDD43383D3BA0C9BDD791D2E5F1341FA07B570FAD06E0F5
+      4AF384F1F0E6D2041C4B1B70F7B4285D1E4FF3011A2B879E9C024917274196DB
+      0C1CBFCF85771EABB93134A5CBE3693E40E3ECE8E8686EBCCD8BDFA774793CCD
+      07688C4EEFEF0C0909A9B4A5784A97C7D37C80C6F7E1E1E140E367C92DC553BA
+      3C9EE603342F387CF83004040454DAF2F305793CCD09A8BE4F9F3E053F3FBF4A
+      5B8AA774793CCD11C876EFDEBDE0E3E353694BF1942E8FC7F9C11A171797049A
+      0705060682E496E2295D1EDFB469D35E383F3013CD15A46546E9D2CCFF035809
+      80A8
     }
+  end
+  object DataPortHTTP1: TDataPortHTTP
+    Method = httpPost
+    SafeMode = False
+    Active = False
+    OnDataAppear = DataPortHTTP1DataAppear
+    OnError = DataPortHTTP1Error
+    Left = 552
+    Top = 684
+  end
+  object DataPortHTTPTelegramBot: TDataPortHTTP
+    Method = httpPost
+    SafeMode = False
+    Active = False
+    OnDataAppear = DataPortHTTPTelegramBotDataAppear
+    OnError = DataPortHTTPTelegramBotError
+    Left = 456
+    Top = 216
   end
 end
