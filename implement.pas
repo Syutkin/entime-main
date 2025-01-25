@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Controls, rxdbgrid, Sqlite3DS, i18n, Dialogs,
   ComCtrls, StdCtrls, strutils, sqldb, sqlite3conn, LazUTF8, Forms,
   ButtonPanel, Math, fileutil, LazFileUtils, DB, dateutils, DateTimePicker,
-  csvdocument, opensslsockets, fphttpclient;
+  csvdocument, opensslsockets, fphttpclient, nsCore, chsdIntf;
 
 type
   TMyDBGrid = class(TRxDBGrid);
@@ -1750,6 +1750,10 @@ var
   legendItem: string;
   legendMap: TLegend;
   sql: string;
+  about: rAboutHolder;
+  fileStream: TFilestream;
+  Info: rCharsetInfo;
+  S: PChar;
 begin
   if dbopen then
   begin
@@ -1764,7 +1768,23 @@ begin
         SQLTransaction.Commit;
         Close;
       end;
-      // TODO: Somewhere memory leak
+      csd_GetAbout(about);
+      Print(about.About);
+      fileStream := TFilestream.Create(FileName, fmOpenRead);
+      try
+        S := AllocMem(fileStream.Size);
+        fileStream.ReadBuffer(S^, fileStream.Size);
+        csd_Reset;
+        csd_HandleData(S, fileStream.Size);
+        if not csd_Done then csd_DataEnd;
+        Info := csd_GetDetectedCharset();
+        Print('Open startlist file: ' + FileName);
+        Print('Codepage: ' + Info.Name);
+      finally
+        FreeMem(S);
+        fileStream.Free;
+      end;
+
       ocsvStrings := TStringList.Create;
       legend := TStringList.Create;
       legend.Delimiter := ';';
@@ -1774,15 +1794,13 @@ begin
       item.StrictDelimiter := True;
       legendMap := TLegend.Create;
       startItems := TList.Create;
+
       try
         ocsvStrings.LoadFromFile(FileName);
-        {$IFDEF Windows}
-        ocsvStrings.Text:= WinCPToUTF8(ocsvStrings.Text);
-        {$ENDIF}
+        if ContainsText(Info.Name, 'windows') then
+          ocsvStrings.Text := WinCPToUTF8(ocsvStrings.Text);
 
-        //-----
         legend.DelimitedText := ocsvStrings[0];
-        //for item in legend do Print(item);
         for i := 1 to ocsvStrings.Count - 1 do
         begin
           item.DelimitedText := ocsvStrings[i];
@@ -1790,49 +1808,27 @@ begin
           for legendItem in legend do
           begin
             if legendMap.number.IndexOf(legendItem.ToLower) >= 0 then
-            begin
-              startItem.number := item[legend.IndexOf(legendItem)].ToInteger;
-            end
+              startItem.number := item[legend.IndexOf(legendItem)].ToInteger
             else if legendMap.Name.IndexOf(legendItem.ToLower) >= 0 then
-            begin
-              startItem.Name := item[legend.IndexOf(legendItem)];
-            end
+              startItem.Name := item[legend.IndexOf(legendItem)]
             else if legendMap.category.IndexOf(legendItem.ToLower) >= 0 then
-            begin
-              startItem.category := item[legend.IndexOf(legendItem)];
-            end
+              startItem.category := item[legend.IndexOf(legendItem)]
             else if legendMap.nickname.IndexOf(legendItem.ToLower) >= 0 then
-            begin
-              startItem.nickname := item[legend.IndexOf(legendItem)];
-            end
+              startItem.nickname := item[legend.IndexOf(legendItem)]
             else if legendMap.birthday.IndexOf(legendItem.ToLower) >= 0 then
-            begin
-              startItem.birthday := item[legend.IndexOf(legendItem)];
-            end
+              startItem.birthday := item[legend.IndexOf(legendItem)]
             else if legendMap.team.IndexOf(legendItem.ToLower) >= 0 then
-            begin
-              startItem.team := item[legend.IndexOf(legendItem)];
-            end
+              startItem.team := item[legend.IndexOf(legendItem)]
             else if legendMap.city.IndexOf(legendItem.ToLower) >= 0 then
-            begin
-              startItem.city := item[legend.IndexOf(legendItem)];
-            end
+              startItem.city := item[legend.IndexOf(legendItem)]
             else if legendMap.phone.IndexOf(legendItem.ToLower) >= 0 then
-            begin
-              startItem.phone := item[legend.IndexOf(legendItem)];
-            end
+              startItem.phone := item[legend.IndexOf(legendItem)]
             else if legendMap.email.IndexOf(legendItem.ToLower) >= 0 then
-            begin
-              startItem.email := item[legend.IndexOf(legendItem)];
-            end
+              startItem.email := item[legend.IndexOf(legendItem)]
             else if legendMap.comment.IndexOf(legendItem.ToLower) >= 0 then
-            begin
-              startItem.comment := item[legend.IndexOf(legendItem)];
-            end
+              startItem.comment := item[legend.IndexOf(legendItem)]
             else
-            begin
               startItem.startTimes.Add(item[legend.IndexOf(legendItem)]);
-            end;
           end;
           startItems.Add(startItem);
         end;
@@ -1955,71 +1951,16 @@ begin
       finally
         begin
           ocsvStrings.Free;
-          legend.Free;
+          legend.Destroy;
           item.Free;
           legendMap.Free;
+          for i := 0 to startItems.Count - 1 do
+          begin
+            TStartItemModel(startItems[i]).Destroy;
+          end;
           startItems.Free;
-          startItem.Free;
-
         end;
       end;
-      //-----
-      //  MainForm.SQLQuery1.SQL.Clear;
-      //  MainForm.SQLQuery1.SQL.Add(
-      //    'INSERT INTO load (category, number, name, nickname, age, team, city, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6)');
-      //  MainForm.SQLQuery1.SQL.Add('VALUES');
-      //  for i := 1 to ocsvStrings.Count - 1 do
-      //    //от 1 чтобы убрать заголовки в файле
-      //  begin
-      //    //ocsvStrings.ValueFromIndex[i] := WinCPToUTF8(ocsvStrings.ValueFromIndex[i]);
-      //    k := CountOccurrences(';', ocsvStrings.ValueFromIndex[i]);
-      //    //считаем кол-во разделителей(;), чтобы понять сколько стартовых времён
-      //    //ToDo: добавить проверку чтобы значений было не больше 12
-      //    if k < 13 then
-      //    begin
-      //      for k := 12 - k downto 1 do
-      //      begin
-      //        ocsvStrings.ValueFromIndex[i] :=
-      //          ocsvStrings.ValueFromIndex[i] + ';';
-      //        //если стартов не 6, то ставим ';', т.е. заполняем отсутствующие времена стартов (null) на оставшиеся СУ
-      //      end;
-      //      ocsvStrings.ValueFromIndex[i] :=
-      //        ReplaceStr(ocsvStrings.ValueFromIndex[i], '''', '''''');
-      //      //экранируем ' в SQL запросе
-      //      ocsvStrings.ValueFromIndex[i] :=
-      //        ReplaceStr(ocsvStrings.ValueFromIndex[i], ';', ''',''');
-      //    end;
-      //    MainForm.SQLQuery1.SQL.Add('(''' + ocsvStrings.ValueFromIndex[i] + ''')');
-      //    if i <> ocsvStrings.Count - 1 then
-      //      MainForm.SQLQuery1.SQL.Add(',');
-      //    //если строка не последняя ставим запятую
-      //  end;
-      //  MainForm.SQLQuery1.SQL.Add(';');
-      //  //{$IFDEF Windows}
-      //  //MainForm.SQLQuery1.SQL.Text :=
-      //  //WinCPToUTF8(MainForm.SQLQuery1.SQL.Text);
-      //  //{$ENDIF}
-      //  try
-      //    MainForm.SQLQuery1.Close;
-      //    MainForm.SQLQuery1.ExecSQL;
-      //    MainForm.SQLQuery1.SQLTransaction.Commit;
-      //  except
-      //    On E: Exception do
-      //    begin
-      //      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      //      Log(sDatabaseOpenError + E.Message);
-      //    end;
-      //  end;
-      //  MainForm.SQLQuery1.Close;
-      //finally
-      //  ocsvStrings.Free;
-      //  legend.Free;
-      //  item.Free;
-      //  legendMap.Free;
-      //  startItems.Free;
-      //  startItem.Free;
-      //end;
-
     except
       On E: Exception do
       begin

@@ -27,8 +27,8 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="7"/>
-      <RevisionNr Value="13"/>
-      <BuildNr Value="70"/>
+      <RevisionNr Value="14"/>
+      <BuildNr Value="71"/>
       <Language Value="0419"/>
       <CharSet Value="04B0"/>
       <Attributes pvaDebug="True"/>
@@ -155,7 +155,7 @@
         <Mode0 Name="default"/>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="12">
+    <RequiredPackages Count="13">
       <Item1>
         <PackageName Value="FCL"/>
       </Item1>
@@ -192,6 +192,9 @@
       <Item12>
         <PackageName Value="HistoryLazarus"/>
       </Item12>
+      <Item13>
+        <PackageName Value="chsdet"/>
+      </Item13>
     </RequiredPackages>
     <Units Count="10">
       <Unit0>
