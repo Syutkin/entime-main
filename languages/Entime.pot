@@ -604,20 +604,6 @@ msgid ""
 "с другим соревнованием/днём соревнования"
 msgstr ""
 
-#: tmainform.fileexportbdstartlist.caption
-msgid "Экспорт стартового протокола ..."
-msgstr ""
-
-#: tmainform.fileexportbdstartlist.dialog.title
-msgctxt "tmainform.fileexportbdstartlist.dialog.title"
-msgid "Создать файл для стартовых ворот"
-msgstr ""
-
-#: tmainform.fileexportbdstartlist.hint
-msgctxt "tmainform.fileexportbdstartlist.hint"
-msgid "Создать файл для стартовых ворот"
-msgstr ""
-
 #: tmainform.fileexportcsvstartlist.caption
 msgid "Экспорт стартового протокола..."
 msgstr ""

@@ -3843,10 +3843,6 @@ object MainForm: TMainForm
         Action = FileOpenCSVResult
         ShortCut = 16457
       end
-      object MenuItemExportBDStartList: TMenuItem
-        Action = FileExportBDStartlist
-        OnClick = MenuItemExportBDStartListClick
-      end
       object MenuItemExportCSVStartList: TMenuItem
         Action = FileExportCSVStartlist
       end
@@ -4271,17 +4267,6 @@ object MainForm: TMainForm
       Hint = 'Формирование сквозного протокола в виде электронной таблицы'
       ImageIndex = 4
       OnAccept = FileExportThruAccept
-    end
-    object FileExportBDStartlist: TFileSaveAs
-      Category = 'File'
-      OnUpdate = CheckDBOpen
-      Caption = 'Экспорт стартового протокола ...'
-      Dialog.Title = 'Создать файл для стартовых ворот'
-      Dialog.DefaultExt = '.sqlite'
-      Dialog.Filter = 'SQLite database|*.sqlite;*.db|All files|*'
-      Hint = 'Создать файл для стартовых ворот'
-      ImageIndex = 28
-      OnAccept = FileExportBDStartlistAccept
     end
     object FileExportCSVStartlist: TFileSaveAs
       Category = 'File'

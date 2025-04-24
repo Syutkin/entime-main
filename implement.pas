@@ -57,7 +57,6 @@ procedure ExportSumDays(FileName: string);
 procedure GetFinishTime(FinishTime: TDateTime);
 procedure SetLoRaTime(StartTime: TDateTime; correction: string);
 procedure GenerateStartlistFromQualifier(FileName: string);
-procedure ExportBDStartList(FileName: string);
 procedure ExportCSVStartList(FileName: string);
 procedure ParseSerial(Str: string);
 procedure SQLQueryToCSV(FileName: string; Query: TSQLQuery; headers: boolean = False);
@@ -2574,79 +2573,6 @@ begin
   else
     MessageDlg(sFilesAreEqual, mtError, [mbOK], 0);
 end;
-
-procedure ExportBDStartList(FileName: string);
-var
-  bdfilename: string;
-begin
-  if fName <> FileName then
-  begin
-    if FileExists(FileName) then
-    begin
-      if MessageDlg(sStartListFileExists, mtWarning, [mbYes, mbNo], 0) = mrYes then
-      begin
-        if not DeleteFile(FileName) then
-        begin
-          MessageDlg(sStartFileCopyError + ':' + #13#10 + sCanNotDeleteFile,
-            mtError, [mbOK], 0);
-          exit;
-        end;
-      end
-      else
-        exit;
-    end;
-    //запоминаем текущее имя бд
-    bdfilename := fName;
-    //закрываем текущее соревнование
-    MainForm.FileCloseExecute(nil);
-    SetfName('');
-    //копируем файл
-    try
-      CopyFile(fName, FileName, False, True);
-      //открываем новый файл
-      //fName := FileName;
-      //SetfName(fName);
-      //OpenDB;
-      InitDB(FileName);
-      //создаём starttime и gotime
-      with MainForm.SQLQuery1 do
-      begin
-        //удаляем всё из "start"
-        SQL.Text := 'DELETE from start';
-        Close;
-        ExecSQL;
-        //копируем number, starttime(текущий) в start table
-        SQL.Text :=
-          'INSERT INTO start (number, starttime) ' + 'SELECT number, starttime' +
-          IntToStr(CurrentStage) + ' FROM main WHERE true ' +
-          'ON CONFLICT(number) DO UPDATE SET starttime = excluded.starttime;';
-        Close;
-        ExecSQL;
-        SQLTransaction.Commit;
-        Close;
-      end;
-      //удаляем результаты
-      ClearResults(True);
-      //открываем прежднюю дб
-      MainForm.FileCloseExecute(nil);
-      //fName := bdfilename;
-      //OpenDB;
-      InitDB(bdfilename);
-      //уведомление что стартовый протокол для телефона создан
-      MessageDlg(sStartFileCreated + ': ' + FileName,
-        mtInformation, [mbOK], 0);
-    except
-      on E: Exception do
-      begin
-        MessageDlg(sStartFileCopyError + ':' + #13#10 + E.Message,
-          mtError, [mbOK], 0);
-      end;
-    end;
-  end
-  else
-    MessageDlg(sFilesAreEqual, mtError, [mbOK], 0);
-end;
-
 
 procedure ExportCSVStartList(FileName: string);
 var

@@ -64,7 +64,6 @@ type
     ButtonLoRaClear: TButton;
     DataSourceLoRa: TDataSource;
     FileGenerateFinal: TFileSaveAs;
-    FileExportBDStartlist: TFileSaveAs;
     MainDataset1comment: TStringField;
     MainDataset1email: TStringField;
     MainDataset1phone: TStringField;
@@ -94,7 +93,6 @@ type
     N7: TMenuItem;
     MenuItemMonitorMode: TMenuItem;
     MenuItem4: TMenuItem;
-    MenuItemExportBDStartList: TMenuItem;
     MenuItemGenerateStartTime: TMenuItem;
     MenuItemCompetition: TMenuItem;
     MenuItemDebug: TMenuItem;
@@ -364,7 +362,6 @@ type
     procedure EditCopy2Execute(Sender: TObject);
     procedure EmptyExecute(Sender: TObject);
     procedure FileExportAllResultsAccept(Sender: TObject);
-    procedure FileExportBDStartlistAccept(Sender: TObject);
     procedure FileCloseExecute(Sender: TObject);
     procedure FileExportStageResultsAccept(Sender: TObject);
     procedure FileExportThruAccept(Sender: TObject);
@@ -652,11 +649,6 @@ end;
 procedure TMainForm.FileExportAllResultsAccept(Sender: TObject);
 begin
   ExportAllResults(FileExportAllResults.Dialog.FileName);
-end;
-
-procedure TMainForm.FileExportBDStartlistAccept(Sender: TObject);
-begin
-  ExportBDStartList(FileExportBDStartlist.Dialog.FileName);
 end;
 
 procedure TMainForm.FileExportCSVStartlistAccept(Sender: TObject);
