@@ -7,12 +7,13 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Dialogs, StdCtrls, LazSerial,
-  lazserialsetup, synaser, HistoryFiles, DataPortHTTP, ComCtrls, ExtCtrls, LCLType,
-  LResources, Menus, ActnList, StdActns, Grids, rxdbgrid, rxlookup, rxdbcomb,
-  rxtoolbar, RxTimeEdit, RxIniPropStorage, rxspin, RxAboutDialog,
-  RxDBGridExportSpreadSheet, DB, Sqlite3DS, sqlite3conn, sqldb, dateutils,
-  Controls, DBGrids, Graphics, i18n, LCLTranslator, VersionSupport, LazUTF8,
-  PropertyStorage, Buttons, DBCtrls, translations, Types, Clipbrd, lclintf, DataPort;
+  lazserialsetup, synaser, HistoryFiles, DataPortHTTP, ComCtrls, ExtCtrls,
+  LCLType, LResources, Menus, ActnList, StdActns, Grids, rxdbgrid, rxlookup,
+  rxdbcomb, rxtoolbar, RxTimeEdit, RxIniPropStorage, rxspin, RxAboutDialog,
+  RxDBGridExportSpreadSheet, DB, Sqlite3DS, sqlite3conn, sqldb, fpcsvexport,
+  dateutils, Controls, DBGrids, Graphics, i18n, LCLTranslator, VersionSupport,
+  LazUTF8, PropertyStorage, Buttons, DBCtrls, translations, Types, Clipbrd,
+  lclintf, DataPort, fpDBExport;
 
 type
 
@@ -42,7 +43,10 @@ type
     AcSetStarttime: TAction;
     AcLEDPanel: TAction;
     AcTelegramBot: TAction;
+    CSVStartListExporter: TCSVExporter;
     DataPortHTTP1: TDataPortHTTP;
+    DataPortHTTPTelegramBot: TDataPortHTTP;
+    FileExportCSVStartlist: TFileSaveAs;
     GenerateSumDays: TAction;
     EditCopy1: TEditCopy;
     EditCopy2: TEditCopy;
@@ -61,7 +65,11 @@ type
     DataSourceLoRa: TDataSource;
     FileGenerateFinal: TFileSaveAs;
     FileExportBDStartlist: TFileSaveAs;
+    MainDataset1comment: TStringField;
+    MainDataset1email: TStringField;
+    MainDataset1phone: TStringField;
     MenuItem10: TMenuItem;
+    MenuItemExportCSVStartList: TMenuItem;
     MenuItemTelegramBot: TMenuItem;
     N14: TMenuItem;
     MenuItemLED: TMenuItem;
@@ -320,12 +328,15 @@ type
     procedure AcLoRaClearExecute(Sender: TObject);
     procedure AcTelegramBotExecute(Sender: TObject);
     procedure AcSetStarttimeExecute(Sender: TObject);
+    procedure CSVStartListExporterExportRow(Sender: TObject;
+      var AllowExport: Boolean);
     procedure DataPortHTTP1DataAppear(Sender: TObject);
     procedure DataPortHTTP1Error(Sender: TObject; const AMsg: string);
     procedure DataPortHTTPTelegramBotClose(Sender: TObject);
     procedure DataPortHTTPTelegramBotDataAppear(Sender: TObject);
     procedure DataPortHTTPTelegramBotError(Sender: TObject;
       const AMsg: AnsiString);
+    procedure FileExportCSVStartlistAccept(Sender: TObject);
     procedure GenerateSumDaysExecute(Sender: TObject);
     procedure ComboBox1CategoryEditingDone(Sender: TObject);
     procedure COMStatus(Sender: TObject);
@@ -380,6 +391,7 @@ type
     procedure CheckPenaltySetText(Sender: TField; const aText: string);
     procedure HideZeroHour(Sender: TField; var aText: string; DisplayText: boolean);
     procedure MainDataSource1StateChange(Sender: TObject);
+    procedure MenuItemExportBDStartListClick(Sender: TObject);
     procedure MenuItemMonitorModeClick(Sender: TObject);
     procedure MenuItem5Click(Sender: TObject);
     procedure RecalcResultsAfterPenaltyChange(Sender: TField);
@@ -647,6 +659,11 @@ begin
   ExportBDStartList(FileExportBDStartlist.Dialog.FileName);
 end;
 
+procedure TMainForm.FileExportCSVStartlistAccept(Sender: TObject);
+begin
+  ExportCSVStartList(FileExportCSVStartlist.Dialog.FileName);
+end;
+
 procedure TMainForm.FileCloseExecute(Sender: TObject);
 var
   n: integer;
@@ -892,6 +909,12 @@ end;
 procedure TMainForm.AcSetStarttimeExecute(Sender: TObject);
 begin
   SetStarttimeFromPopup;
+end;
+
+procedure TMainForm.CSVStartListExporterExportRow(Sender: TObject;
+  var AllowExport: Boolean);
+begin
+
 end;
 
 procedure TMainForm.DataPortHTTP1DataAppear(Sender: TObject);
@@ -1510,6 +1533,11 @@ begin
   //if TDataSource(Sender).DataSet.State = dsInsert then Memo.Lines.Add('dsInsert');
   //if TDataSource(Sender).DataSet.State = dsBrowse then Memo.Lines.Add('dsBrowse');
   //if TDataSource(Sender).DataSet.State = dsInsert then Memo.Lines.Add('dsInsert');
+end;
+
+procedure TMainForm.MenuItemExportBDStartListClick(Sender: TObject);
+begin
+
 end;
 
 procedure TMainForm.MenuItemMonitorModeClick(Sender: TObject);

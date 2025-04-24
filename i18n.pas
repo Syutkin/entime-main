@@ -100,7 +100,7 @@ resourcestring
   sFinishTimeOpenError = 'Неверный формат файла с результатами СУ';
   sCanNotBackup = 'Не удалось сделать бэкап, продолжить загрузку результатов?';
   sFinalFileExists = 'Файл финала уже существует. Перезаписать?';
-  sBDStartListFileExists = 'Файл стартового протокола уже существует. Перезаписать?';
+  sStartListFileExists = 'Файл стартового протокола уже существует. Перезаписать?';
   sCanNotDeleteFile = 'Не удалось перезаписать файл';
   sTimeToStart = 'Время старта';
   sEnterStartTime = 'Введите новое время старта для номера';

@@ -27,8 +27,8 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="7"/>
-      <RevisionNr Value="14"/>
-      <BuildNr Value="71"/>
+      <RevisionNr Value="15"/>
+      <BuildNr Value="72"/>
       <Language Value="0419"/>
       <CharSet Value="04B0"/>
       <Attributes pvaDebug="True"/>
@@ -110,15 +110,15 @@
           </Linking>
         </CompilerOptions>
       </Item3>
-      <Item4 Name="gtk2">
+      <Item4 Name="qt6">
         <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="gtk2"/>
+          <Macro1 Name="LCLWidgetType" Value="qt6"/>
         </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="gtk2\$NameOnly($(ProjFile))"/>
+            <Filename Value="qt6\$NameOnly($(ProjFile))"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -142,8 +142,8 @@
         </CompilerOptions>
       </Item4>
       <SharedMatrixOptions Count="2">
-        <Item1 ID="187828900892" Modes="gtk2" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk2"/>
-        <Item2 ID="632222319267" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
+        <Item1 ID="448058882254" Modes="qt6" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt6"/>
+        <Item2 ID="406948301439" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>
@@ -155,7 +155,7 @@
         <Mode0 Name="default"/>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="13">
+    <RequiredPackages Count="14">
       <Item1>
         <PackageName Value="FCL"/>
       </Item1>
@@ -190,11 +190,14 @@
         <PackageName Value="rxdbgrid_export_spreadsheet"/>
       </Item11>
       <Item12>
-        <PackageName Value="HistoryLazarus"/>
+        <PackageName Value="lazdbexport"/>
       </Item12>
       <Item13>
-        <PackageName Value="chsdet"/>
+        <PackageName Value="HistoryLazarus"/>
       </Item13>
+      <Item14>
+        <PackageName Value="chsdet"/>
+      </Item14>
     </RequiredPackages>
     <Units Count="10">
       <Unit0>

@@ -10,7 +10,7 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   LazSerialPort,
   rxnew,
   sqlite3laz,
-  lazcontrols, datetimectrls,
+  lazcontrols, datetimectrls, lazdbexport,
   Result,
   HistoryLazarus, startitemmodel;
 

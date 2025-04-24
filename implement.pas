@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Controls, rxdbgrid, Sqlite3DS, i18n, Dialogs,
   ComCtrls, StdCtrls, strutils, sqldb, sqlite3conn, LazUTF8, Forms,
   ButtonPanel, Math, fileutil, LazFileUtils, DB, dateutils, DateTimePicker,
-  csvdocument, opensslsockets, fphttpclient, nsCore, chsdIntf;
+  csvdocument, opensslsockets, fphttpclient, nsCore, chsdIntf, fpcsvexport;
 
 type
   TMyDBGrid = class(TRxDBGrid);
@@ -58,6 +58,7 @@ procedure GetFinishTime(FinishTime: TDateTime);
 procedure SetLoRaTime(StartTime: TDateTime; correction: string);
 procedure GenerateStartlistFromQualifier(FileName: string);
 procedure ExportBDStartList(FileName: string);
+procedure ExportCSVStartList(FileName: string);
 procedure ParseSerial(Str: string);
 procedure SQLQueryToCSV(FileName: string; Query: TSQLQuery; headers: boolean = False);
 procedure AddDayResult(FileName: string);
@@ -737,17 +738,19 @@ begin
         MainForm.SQLTransaction1.Active := True;
         MainForm.SQLite3Connection1.ExecuteDirect('CREATE TABLE "main" (' +
           ' "id"	    INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,' +
-          ' "category"	    VARCHAR,' + ' "sumplace"	    INTEGER,' +
-          ' "number"	  INTEGER NOT NULL UNIQUE,' + ' "rfid"   INTEGER,' +
-          ' "name"          VARCHAR,' + ' "nickname"	  VARCHAR,' +
-          ' "age"           VARCHAR,' + ' "team"          VARCHAR,' +
-          ' "city"          VARCHAR,' + ' "starttime1"	  VARCHAR,' +
+          ' "category"	    VARCHAR,' + ' "sumplace"	  INTEGER,' +
+          ' "number"	    INTEGER NOT NULL UNIQUE,' +
+          ' "rfid"          INTEGER,' + ' "name"          VARCHAR,' +
+          ' "nickname"	    VARCHAR,' + ' "age"           VARCHAR,' +
+          ' "team"          VARCHAR,' + ' "city"          VARCHAR,' +
+          ' "phone"         VARCHAR,' + ' "email"         VARCHAR,' +
+          ' "comment"       VARCHAR,' + ' "starttime1"    VARCHAR,' +
           ' "correction1"   INTEGER,' + ' "finishtime1"   VARCHAR,' +
-          ' "penalty1"	    VARCHAR,' + ' "result1"	    VARCHAR,' +
+          ' "penalty1"	    VARCHAR,' + ' "result1"	  VARCHAR,' +
           ' "diffleader1"   VARCHAR,' + ' "place1"	  INTEGER,' +
           ' "status1"       VARCHAR,' + ' "starttime2"	  VARCHAR,' +
           ' "correction2"   INTEGER,' + ' "finishtime2"   VARCHAR,' +
-          ' "penalty2"	  VARCHAR,' + ' "result2"	  VARCHAR,' +
+          ' "penalty2"	    VARCHAR,' + ' "result2"	  VARCHAR,' +
           ' "diffleader2"   VARCHAR,' + ' "place2"        INTEGER,' +
           ' "status2"       VARCHAR,' + ' "starttime3"    VARCHAR,' +
           ' "correction3"   INTEGER,' + ' "finishtime3"   VARCHAR,' +
@@ -759,7 +762,7 @@ begin
           ' "diffleader4"   VARCHAR,' + ' "place4"        INTEGER,' +
           ' "status4"       VARCHAR,' + ' "starttime5"	  VARCHAR,' +
           ' "correction5"   INTEGER,' + ' "finishtime5"   VARCHAR,' +
-          ' "penalty5"	  VARCHAR,' + ' "result5"	  VARCHAR,' +
+          ' "penalty5"	    VARCHAR,' + ' "result5"	  VARCHAR,' +
           ' "diffleader5"   VARCHAR,' + ' "place5"        INTEGER,' +
           ' "status5"       VARCHAR,' + ' "starttime6"    VARCHAR,' +
           ' "correction6"   INTEGER,' + ' "finishtime6"   VARCHAR,' +
@@ -772,13 +775,14 @@ begin
         MainForm.SQLTransaction1.Commit;
 
         MainForm.SQLite3Connection1.ExecuteDirect('CREATE TABLE "load" (' +
-          ' "category"	 VARCHAR,' + ' "number"	 INTEGER,' +
+          ' "category"	 VARCHAR,' + ' "number"	    INTEGER,' +
           ' "name"	 VARCHAR,' + ' "nickname"   VARCHAR,' +
           ' "age"        VARCHAR,' + ' "team"	    VARCHAR,' +
-          ' "city"       VARCHAR,' + ' "starttime1" VARCHAR,' +
-          ' "starttime2" VARCHAR,' + ' "starttime3" VARCHAR,' +
-          ' "starttime4" VARCHAR,' + ' "starttime5" VARCHAR,' +
-          ' "starttime6" VARCHAR);');
+          ' "city"       VARCHAR,' + ' "phone"      VARCHAR,' +
+          ' "email"      VARCHAR,' + ' "comment"    VARCHAR,' +
+          ' "starttime1" VARCHAR,' + ' "starttime2" VARCHAR,' +
+          ' "starttime3" VARCHAR,' + ' "starttime4" VARCHAR,' +
+          ' "starttime5" VARCHAR,' + ' "starttime6" VARCHAR);');
         MainForm.SQLTransaction1.Commit;
 
         MainForm.SQLite3Connection1.ExecuteDirect(
@@ -1835,7 +1839,7 @@ begin
 
         MainForm.SQLQuery1.SQL.Clear;
         MainForm.SQLQuery1.SQL.Add(
-          'INSERT INTO load (category, number, name, nickname, age, team, city, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6)');
+          'INSERT INTO load (category, number, name, nickname, age, team, city, phone, email, comment, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6)');
         MainForm.SQLQuery1.SQL.Add('VALUES');
         for i := 0 to startItems.Count - 1 do
         begin
@@ -1850,6 +1854,9 @@ begin
           item.add(TStartItemModel(startItems[i]).birthday);
           item.add(TStartItemModel(startItems[i]).team);
           item.add(TStartItemModel(startItems[i]).city);
+          item.add(TStartItemModel(startItems[i]).phone);
+          item.add(TStartItemModel(startItems[i]).email);
+          item.add(TStartItemModel(startItems[i]).comment);
 
           //считаем кол-во стартовых времён
           k := TStartItemModel(startItems[i]).startTimes.Count;
@@ -1888,12 +1895,12 @@ begin
           begin
             SQL.Clear;
             SQL.Add(
-              'INSERT into main (category, number, name, nickname, age, team, city, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6)');
+              'INSERT into main (category, number, name, nickname, age, team, city, phone, email, comment, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6)');
             SQL.Add(
-              'SELECT category, number, name, nickname, age, team, city, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6 FROM load WHERE number NOTNULL AND number != ""');
+              'SELECT category, number, name, nickname, age, team, city, phone, email, comment, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6 FROM load WHERE number NOTNULL AND number != ""');
             SQL.Add('ON CONFLICT(number) DO UPDATE SET');
             SQL.Add(
-              'category = excluded.category, name = excluded.name, nickname = excluded.nickname, age = excluded.age, team = excluded.team, city = excluded.city, starttime1 = excluded.starttime1,');
+              'category = excluded.category, name = excluded.name, nickname = excluded.nickname, age = excluded.age, team = excluded.team, city = excluded.city, phone = excluded.phone, email = excluded.email, comment = excluded.comment, starttime1 = excluded.starttime1,');
             SQL.Add(
               'starttime2 = excluded.starttime2, starttime3 = excluded.starttime3, starttime4 = excluded.starttime4, starttime5 = excluded.starttime5, starttime6 = excluded.starttime6;');
             Close;
@@ -1951,12 +1958,12 @@ begin
       finally
         begin
           ocsvStrings.Free;
-          legend.Destroy;
+          legend.Free;
           item.Free;
           legendMap.Free;
           for i := 0 to startItems.Count - 1 do
           begin
-            TStartItemModel(startItems[i]).Destroy;
+            TStartItemModel(startItems[i]).Free;
           end;
           startItems.Free;
         end;
@@ -2576,7 +2583,7 @@ begin
   begin
     if FileExists(FileName) then
     begin
-      if MessageDlg(sBDStartListFileExists, mtWarning, [mbYes, mbNo], 0) = mrYes then
+      if MessageDlg(sStartListFileExists, mtWarning, [mbYes, mbNo], 0) = mrYes then
       begin
         if not DeleteFile(FileName) then
         begin
@@ -2638,6 +2645,48 @@ begin
   end
   else
     MessageDlg(sFilesAreEqual, mtError, [mbOK], 0);
+end;
+
+
+procedure ExportCSVStartList(FileName: string);
+var
+  i, k, fieldIndex: integer;
+  fieldName: string = 'starttime';
+  csvfilename: string;
+begin
+  csvfilename := FileName;
+
+  if FileExists(FileName) then
+  begin
+    if MessageDlg(sStartListFileExists, mtWarning, [mbYes, mbNo], 0) <> mrYes then
+      exit;
+  end;
+
+  with MainForm.CSVStartListExporter do
+  begin
+    Dataset := MainForm.MainDataSource1.DataSet;
+    FileName := csvfilename;
+    for i := 1 to 6 do
+    begin
+      if (stage[i]) then
+        // Эта хрень с добавлением/удалением из-за того,
+        // что почему-то экспортируются задизейбленные поля
+      begin
+        ExportFields.AddField(fieldName + IntToStr(i));
+        fieldIndex := ExportFields.IndexOfField(fieldName + IntToStr(i));
+        ExportFields.Fields[fieldIndex].ExportedName := sname[i];
+      end;
+    end;
+
+    try
+      Execute;
+    finally
+      begin
+        for k := ExportFields.Count - 1 downto 10 do
+          ExportFields.Delete(k);
+      end;
+    end;
+  end;
 end;
 
 procedure ParseSerial(Str: string);
