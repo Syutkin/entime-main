@@ -17,6 +17,16 @@ resourcestring
   sdiffleader = 'Отставание';
   splace = 'Место';
   stotal = 'Общий';
+  ssumresult = 'Итог';
+  ssumstages = 'Кол-во СУ';
+
+  sNumber = 'Номер';
+  sNumberu = 'Номеру';
+  sName = 'Имя';
+  sNickname = 'Ник';
+  sAge = 'ГР';
+  sTeam = 'Команда';
+  sCity = 'Город';
 
   //имена СУ по умолчанию
   sSU  = 'СУ';
@@ -39,6 +49,10 @@ resourcestring
   sRussian = 'Русский';
   sEnglish = 'English';
 
+  //экспорт
+  sFinishProtocol = 'Результаты';
+  sFinishThruProtocol = 'Сквозной протокол';
+
   //остальное
   sIncorrectCorrection = 'Некорректное значение поправки, введите верное значение';
   sUpdateError = 'Ошибка обновления результатов: ';
@@ -49,8 +63,6 @@ resourcestring
   sNewFileExistUnknow = 'Не удалось проверить существование указанного файла';
   sClearResults = 'Действительно удалить все результаты?';
   sUpdateFinishTime = 'Обновить финишное время для номера';
-  sNumber = 'Номер';
-  sNumberu = 'Номеру';
   sDoNotExist = 'не существует';
   sSetIntervalWarning = 'Интервал задаётся как целое неотрицательное число миллисекунд';
   sPenaltyTimeFormat = 'Штрафное время вводится в формате мм:сс или чч:мм:сс';
@@ -99,6 +111,7 @@ resourcestring
   sCOMOpenError = 'Не удалось открыть порт';
   sFinishTimeOpenError = 'Неверный формат файла с результатами СУ';
   sCanNotBackup = 'Не удалось сделать бэкап, продолжить загрузку результатов?';
+  sFileExists = 'Файл уже существует. Перезаписать?';
   sFinalFileExists = 'Файл финала уже существует. Перезаписать?';
   sStartListFileExists = 'Файл стартового протокола уже существует. Перезаписать?';
   sCanNotDeleteFile = 'Не удалось перезаписать файл';
@@ -106,7 +119,6 @@ resourcestring
   sEnterStartTime = 'Введите новое время старта для номера';
   sAddDayResults = 'Добавить результаты дня';
   sSaveResults = 'Сохранить результаты?';
-
 
 implementation
 

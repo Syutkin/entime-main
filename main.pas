@@ -327,13 +327,12 @@ type
     procedure AcTelegramBotExecute(Sender: TObject);
     procedure AcSetStarttimeExecute(Sender: TObject);
     procedure CSVStartListExporterExportRow(Sender: TObject;
-      var AllowExport: Boolean);
+      var AllowExport: boolean);
     procedure DataPortHTTP1DataAppear(Sender: TObject);
     procedure DataPortHTTP1Error(Sender: TObject; const AMsg: string);
     procedure DataPortHTTPTelegramBotClose(Sender: TObject);
     procedure DataPortHTTPTelegramBotDataAppear(Sender: TObject);
-    procedure DataPortHTTPTelegramBotError(Sender: TObject;
-      const AMsg: AnsiString);
+    procedure DataPortHTTPTelegramBotError(Sender: TObject; const AMsg: ansistring);
     procedure FileExportCSVStartlistAccept(Sender: TObject);
     procedure GenerateSumDaysExecute(Sender: TObject);
     procedure ComboBox1CategoryEditingDone(Sender: TObject);
@@ -374,7 +373,8 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
     procedure FormResize(Sender: TObject);
-    procedure HistoryFiles1ClickHistoryItem(Sender: TObject; Item: TMenuItem; const Filename: string);
+    procedure HistoryFiles1ClickHistoryItem(Sender: TObject; Item: TMenuItem;
+      const Filename: string);
     procedure LoRaPopupDefaultExecute(Sender: TObject);
     procedure LoRaPopupHideSelectedExecute(Sender: TObject);
     procedure LoRaPopupHideSelectedUpdate(Sender: TObject);
@@ -392,37 +392,49 @@ type
     procedure MenuItemMonitorModeClick(Sender: TObject);
     procedure MenuItem5Click(Sender: TObject);
     procedure RecalcResultsAfterPenaltyChange(Sender: TField);
-    procedure MainDataset1statusGetText(Sender: TField; var aText: string; DisplayText: boolean);
+    procedure MainDataset1statusGetText(Sender: TField; var aText: string;
+      DisplayText: boolean);
     procedure MenuItemAboutClick(Sender: TObject);
     procedure RaceModeClick(Sender: TObject);
     procedure RadioCurClick(Sender: TObject);
     procedure RxDBGrid1EditingDone(Sender: TObject);
-    procedure RxDBGrid1KeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
+    procedure RxDBGrid1KeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
     procedure RxDBGrid1KeyPress(Sender: TObject; var Key: char);
-    procedure RxDBGrid1SelectEditor(Sender: TObject; Column: TColumn; var Editor: TWinControl);
+    procedure RxDBGrid1SelectEditor(Sender: TObject; Column: TColumn;
+      var Editor: TWinControl);
     procedure RxDBGridLoRaDblClick(Sender: TObject);
     procedure RxDBGridCorrectionEditingDone(Sender: TObject);
     procedure RxDBSpinEdit1EditingDone(Sender: TObject);
     procedure RxIniPropStorage1RestoreProperties(Sender: TObject);
     procedure RxIniPropStorage1SavingProperties(Sender: TObject);
-    procedure RxIniPropStorage1StoredValues0Restore(Sender: TStoredValue; var Value: TStoredType);
-    procedure RxIniPropStorage1StoredValues0Save(Sender: TStoredValue; var Value: TStoredType);
-    procedure RxIniPropStorage1StoredValues1Restore(Sender: TStoredValue; var Value: TStoredType);
-    procedure RxIniPropStorage1StoredValues1Save(Sender: TStoredValue; var Value: TStoredType);
-    procedure RxIniPropStorage1StoredValues2Restore(Sender: TStoredValue; var Value: TStoredType);
-    procedure RxIniPropStorage1StoredValues2Save(Sender: TStoredValue; var Value: TStoredType);
-    procedure RxIniPropStorage1StoredValues3Restore(Sender: TStoredValue; var Value: TStoredType);
-    procedure RxIniPropStorage1StoredValues3Save(Sender: TStoredValue; var Value: TStoredType);
-    procedure RxIniPropStorage1StoredValues4Restore(Sender: TStoredValue; var Value: TStoredType);
-    procedure RxIniPropStorage1StoredValues4Save(Sender: TStoredValue; var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues0Restore(Sender: TStoredValue;
+      var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues0Save(Sender: TStoredValue;
+      var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues1Restore(Sender: TStoredValue;
+      var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues1Save(Sender: TStoredValue;
+      var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues2Restore(Sender: TStoredValue;
+      var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues2Save(Sender: TStoredValue;
+      var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues3Restore(Sender: TStoredValue;
+      var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues3Save(Sender: TStoredValue;
+      var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues4Restore(Sender: TStoredValue;
+      var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues4Save(Sender: TStoredValue;
+      var Value: TStoredType);
     procedure RxIniPropStorage1StoredValues5Restore(Sender: TStoredValue;
       var Value: TStoredType);
     procedure RxIniPropStorage1StoredValues5Save(Sender: TStoredValue;
       var Value: TStoredType);
-    procedure sGridResultDrawCell(Sender: TObject; aCol, aRow: integer; aRect: TRect; aState: TGridDrawState);
-    procedure sGridResultValidateEntry(Sender: TObject; aCol, aRow: integer; const OldValue: string;
-      var NewValue: string);
+    procedure sGridResultDrawCell(Sender: TObject; aCol, aRow: integer;
+      aRect: TRect; aState: TGridDrawState);
+    procedure sGridResultValidateEntry(Sender: TObject; aCol, aRow: integer;
+      const OldValue: string; var NewValue: string);
     procedure TabSheet2Show(Sender: TObject);
     procedure TimerMonitorTimer(Sender: TObject);
     procedure SyncButtonClick(Sender: TObject);
@@ -431,7 +443,8 @@ type
     procedure ResultClearClick(Sender: TObject);
     procedure SerialRxData(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure SerialStatus(Sender: TObject; Reason: THookSerialReason; const Value: string);
+    procedure SerialStatus(Sender: TObject; Reason: THookSerialReason;
+      const Value: string);
     procedure Timer1Timer(Sender: TObject);
     procedure CheckDBOpen(Sender: TObject);
     //functions
@@ -455,29 +468,30 @@ const
   commoncols: integer = 9;
   //первые девять колонок с информацией об участнике
   stagecols: integer = 7;
-//количество колонок в СУ
+  //количество колонок в СУ
 
 
 
 var
-  //значения по умолчанию
+
   MainForm: TMainForm;
-  fName: string = '';
+  //значения по умолчанию
   //имя файла БД
-  lang: string = 'ru';
+  fName: string = '';
   //язык программы
-  astage: string = '1';
+  lang: string = 'ru';
   //номер СУ, результаты которого будут выводиться в отдельно окно
-  cat: array[1..6] of string;
+  astage: string = '1';
   //список категорий, которые будут выводиться в отдельно окно
+  cat: array[1..6] of string;
   prevTime: TDateTime;
-  checkinterval: integer = 250;
   //задержка в мс между приёмом нового значения финиша
+  checkinterval: integer = 250;
   NAME_VERSION: string;
-  stage: array[1..6] of boolean;
   //активные СУ
-  sname: array[1..6] of string;
+  stage: array[1..6] of boolean;
   //имена СУ
+  stageName: array[1..6] of string;
   //timemark: string;
   //режим работы со временем, str or mark
   //timemarkstr: string;
@@ -501,15 +515,15 @@ var
   telegrambotadress: string;
 
 
-//CatList: TStringList;
+  //CatList: TStringList;
 
 implementation
 
 uses Result, Settings, Startlist, rxapputils, Implement, exsortsqlite, LoRa;
 
-{$R *.lfm}
+  {$R *.lfm}
 
-{ TMainForm }
+  { TMainForm }
 
 procedure TMainForm.FormCreate(Sender: TObject);
 var
@@ -550,10 +564,12 @@ begin
     //шесть категорий для вывода на окно результатов
     c := FindComponent('ResultDataset' + IntToStr(i));
     TSqlite3Dataset(c).SQL :=
-      'SELECT category, place' + IntToStr(i) + ', number, name, penalty' + IntToStr(i) +
-      ', result' + IntToStr(i) + ', diffleader' + IntToStr(i) + ', CASE status WHEN ''3'' THEN ''3'' ELSE status' +
-      IntToStr(i) + ' END status' + IntToStr(i) + ' from main where result' + IntToStr(i) +
-      ' NOTNULL ORDER BY category, status' + IntToStr(i) + ', place' + IntToStr(i);
+      'SELECT category, place' + IntToStr(i) + ', number, name, penalty' +
+      IntToStr(i) + ', result' + IntToStr(i) + ', diffleader' +
+      IntToStr(i) + ', CASE status WHEN ''3'' THEN ''3'' ELSE status' +
+      IntToStr(i) + ' END status' + IntToStr(i) + ' from main where result' +
+      IntToStr(i) + ' NOTNULL ORDER BY category, status' + IntToStr(i) +
+      ', place' + IntToStr(i);
   end;
 
   {$IFDEF DEBUG}
@@ -629,7 +645,8 @@ procedure TMainForm.EditCopy1Execute(Sender: TObject);
 begin
   if dbopen and not MainDataset1.IsEmpty then
   begin
-    Clipboard.AsText := MainDataset1.FieldByName(RxDBGrid1.SelectedColumn.FieldName).AsString;
+    Clipboard.AsText := MainDataset1.FieldByName(
+      RxDBGrid1.SelectedColumn.FieldName).AsString;
   end;
 end;
 
@@ -637,7 +654,8 @@ procedure TMainForm.EditCopy2Execute(Sender: TObject);
 begin
   if dbopen and not DatasetLoRa.IsEmpty then
   begin
-    Clipboard.AsText := DatasetLoRa.FieldByName(RxDBGridLoRa.SelectedColumn.FieldName).AsString;
+    Clipboard.AsText := DatasetLoRa.FieldByName(
+      RxDBGridLoRa.SelectedColumn.FieldName).AsString;
   end;
 end;
 
@@ -892,10 +910,10 @@ end;
 
 procedure TMainForm.AcTelegramBotExecute(Sender: TObject);
 begin
-    //if AcTelegramBot.Checked then
-    //DataPortHTTPTelegramBot.Open()
-    //else
-    //DataPortHTTPTelegramBot.Close();
+  //if AcTelegramBot.Checked then
+  //DataPortHTTPTelegramBot.Open()
+  //else
+  //DataPortHTTPTelegramBot.Close();
 end;
 
 procedure TMainForm.AcSetStarttimeExecute(Sender: TObject);
@@ -904,7 +922,7 @@ begin
 end;
 
 procedure TMainForm.CSVStartListExporterExportRow(Sender: TObject;
-  var AllowExport: Boolean);
+  var AllowExport: boolean);
 begin
 
 end;
@@ -931,7 +949,7 @@ begin
 end;
 
 procedure TMainForm.DataPortHTTPTelegramBotError(Sender: TObject;
-  const AMsg: AnsiString);
+  const AMsg: ansistring);
 begin
   Print('Telegram Bot error: ' + AMsg);
 end;
@@ -955,7 +973,8 @@ begin
       Close;
     end;
 
-    while MessageDlg(sAddDayResults + ' ' + IntToStr(i) + '?', mtConfirmation, [mbYes, mbNo], 0) = mrYes do
+    while MessageDlg(sAddDayResults + ' ' + IntToStr(i) + '?',
+        mtConfirmation, [mbYes, mbNo], 0) = mrYes do
     begin
       if FileOpenCSVSum.Dialog.Execute then
       begin
@@ -966,7 +985,8 @@ begin
 
     //Print('i = ' + IntToStr(i));
 
-    if (i > 2) and (MessageDlg(sSaveResults, mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+    if (i > 2) and (MessageDlg(sSaveResults, mtConfirmation, [mbYes, mbNo], 0) =
+      mrYes) then
     begin
       //ставим итоговые места
       with MainForm.SQLQuery1 do
@@ -1050,7 +1070,8 @@ begin
   Height := MulDiv(Height, 96, Screen.PixelsPerInch);
 end;
 
-procedure TMainForm.RxIniPropStorage1StoredValues0Restore(Sender: TStoredValue; var Value: TStoredType);
+procedure TMainForm.RxIniPropStorage1StoredValues0Restore(Sender: TStoredValue;
+  var Value: TStoredType);
 begin
   if (Value = 'true') and (HistoryFiles1.Count > 0) then
   begin
@@ -1059,7 +1080,8 @@ begin
   end;
 end;
 
-procedure TMainForm.RxIniPropStorage1StoredValues0Save(Sender: TStoredValue; var Value: TStoredType);
+procedure TMainForm.RxIniPropStorage1StoredValues0Save(Sender: TStoredValue;
+  var Value: TStoredType);
 begin
   if dbopen then
     Value := 'true'
@@ -1067,7 +1089,8 @@ begin
     Value := 'false';
 end;
 
-procedure TMainForm.RxIniPropStorage1StoredValues1Restore(Sender: TStoredValue; var Value: TStoredType);
+procedure TMainForm.RxIniPropStorage1StoredValues1Restore(Sender: TStoredValue;
+  var Value: TStoredType);
 begin
   if Value <> '' then
   begin
@@ -1083,12 +1106,14 @@ begin
   //  TranslateUnitResourceStrings('rxdconst',NormalizeDirectoryName('../../../languages/rxdconst.%s.po'), Lang, FallbackLang);
 end;
 
-procedure TMainForm.RxIniPropStorage1StoredValues1Save(Sender: TStoredValue; var Value: TStoredType);
+procedure TMainForm.RxIniPropStorage1StoredValues1Save(Sender: TStoredValue;
+  var Value: TStoredType);
 begin
   Value := lang;
 end;
 
-procedure TMainForm.RxIniPropStorage1StoredValues2Restore(Sender: TStoredValue; var Value: TStoredType);
+procedure TMainForm.RxIniPropStorage1StoredValues2Restore(Sender: TStoredValue;
+  var Value: TStoredType);
 begin
   if Value <> '' then
   begin
@@ -1096,29 +1121,34 @@ begin
   end;
 end;
 
-procedure TMainForm.RxIniPropStorage1StoredValues2Save(Sender: TStoredValue; var Value: TStoredType);
+procedure TMainForm.RxIniPropStorage1StoredValues2Save(Sender: TStoredValue;
+  var Value: TStoredType);
 begin
   Value := IntToStr(checkinterval);
 end;
 
-procedure TMainForm.RxIniPropStorage1StoredValues3Restore(Sender: TStoredValue; var Value: TStoredType);
+procedure TMainForm.RxIniPropStorage1StoredValues3Restore(Sender: TStoredValue;
+  var Value: TStoredType);
 begin
   if Value <> '' then
     zerohour := StrToBool(Value);
 end;
 
-procedure TMainForm.RxIniPropStorage1StoredValues3Save(Sender: TStoredValue; var Value: TStoredType);
+procedure TMainForm.RxIniPropStorage1StoredValues3Save(Sender: TStoredValue;
+  var Value: TStoredType);
 begin
   Value := BoolToStr(zerohour);
 end;
 
-procedure TMainForm.RxIniPropStorage1StoredValues4Restore(Sender: TStoredValue; var Value: TStoredType);
+procedure TMainForm.RxIniPropStorage1StoredValues4Restore(Sender: TStoredValue;
+  var Value: TStoredType);
 begin
   ledpaneladress := Value;
   DataPortHTTP1.Url := 'http://' + ledpaneladress + '/post';
 end;
 
-procedure TMainForm.RxIniPropStorage1StoredValues4Save(Sender: TStoredValue; var Value: TStoredType);
+procedure TMainForm.RxIniPropStorage1StoredValues4Save(Sender: TStoredValue;
+  var Value: TStoredType);
 begin
   Value := ledpaneladress;
 end;
@@ -1136,7 +1166,8 @@ begin
   Value := telegrambotadress;
 end;
 
-procedure TMainForm.sGridResultDrawCell(Sender: TObject; aCol, aRow: integer; aRect: TRect; aState: TGridDrawState);
+procedure TMainForm.sGridResultDrawCell(Sender: TObject; aCol, aRow: integer;
+  aRect: TRect; aState: TGridDrawState);
 begin
   if (aCol = 0) and ((Sender as TStringGrid).Cells[2, aRow] = 'manual') then
   begin
@@ -1147,8 +1178,8 @@ begin
   end;
 end;
 
-procedure TMainForm.sGridResultValidateEntry(Sender: TObject; aCol, aRow: integer;
-  const OldValue: string; var NewValue: string);
+procedure TMainForm.sGridResultValidateEntry(Sender: TObject;
+  aCol, aRow: integer; const OldValue: string; var NewValue: string);
 var
   number: integer;
 begin
@@ -1189,24 +1220,30 @@ begin
 end;
 
 
+//procedure TMainForm.FileExportFullAccept(Sender: TObject);
+//var
+//  sql: string;
+//begin
+//  MainDataset1.Close;
+//  //sql запрос для выдачи итоговой таблицы
+//  sql := MainDataset1.SQL;
+//  //сортирует по категории, а внутри неё по результату
+//  MainDataset1.SQL :=
+//    'SELECT * from main ORDER BY category, IFNULL(sumplace,''toend''), IFNULL(sumresult,''toend'');';
+//  //манёвр с 'toend' чтобы результат NULL был в конце
+//  MainDataset1.Open;
+//  ExportSpreadSheet1.FileName := FileExportFull.Dialog.FileName;
+//  ExportSpreadSheet1.Execute;
+//  MainDataset1.Close;
+//  MainDataset1.SQL := sql;
+//  MainDataset1.Open;
+//  Log(sResultsExportedToFile + ' ' + FileExportFull.Dialog.FileName);
+//end;
+
+
 procedure TMainForm.FileExportFullAccept(Sender: TObject);
-var
-  sql: string;
 begin
-  MainDataset1.Close;
-  //sql запрос для выдачи итоговой таблицы
-  sql := MainDataset1.SQL;
-  //сортирует по категории, а внутри неё по результату
-  MainDataset1.SQL :=
-    'SELECT * from main ORDER BY category, IFNULL(sumplace,''toend''), IFNULL(sumresult,''toend'');';
-  //манёвр с 'toend' чтобы результат NULL был в конце
-  MainDataset1.Open;
-  ExportSpreadSheet1.FileName := FileExportFull.Dialog.FileName;
-  ExportSpreadSheet1.Execute;
-  MainDataset1.Close;
-  MainDataset1.SQL := sql;
-  MainDataset1.Open;
-  Log(sResultsExportedToFile + ' ' + FileExportFull.Dialog.FileName);
+  ExportAllResultsToXLSX(FileExportFull.Dialog.FileName);
 end;
 
 
@@ -1245,7 +1282,8 @@ end;
 //  else Memo.Lines.Add(Str);
 //end;
 
-procedure TMainForm.SerialStatus(Sender: TObject; Reason: THookSerialReason; const Value: string);
+procedure TMainForm.SerialStatus(Sender: TObject; Reason: THookSerialReason;
+  const Value: string);
 begin
   case Reason of
     HR_SerialClose: StatusBarLeft.Panels[2].Text :=
@@ -1297,8 +1335,9 @@ var
   h, k: integer;
 begin
   h := Splitter1.Top;
-  k := PageControl1.Height - Splitter1.Height - sGridResult.Height - sGridResult.BorderSpacing.Bottom -
-    ResultClear.Height - ResultClear.BorderSpacing.Bottom;
+  k := PageControl1.Height - Splitter1.Height - sGridResult.Height -
+    sGridResult.BorderSpacing.Bottom - ResultClear.Height -
+    ResultClear.BorderSpacing.Bottom;
   if h > k then
   begin
     h := k;
@@ -1309,7 +1348,8 @@ begin
   end;
 end;
 
-procedure TMainForm.HistoryFiles1ClickHistoryItem(Sender: TObject; Item: TMenuItem; const Filename: string);
+procedure TMainForm.HistoryFiles1ClickHistoryItem(Sender: TObject;
+  Item: TMenuItem; const Filename: string);
 begin
   if dbopen then
     FileCloseExecute(nil);
@@ -1383,7 +1423,8 @@ procedure TMainForm.LoRaPopupShow15minExecute(Sender: TObject);
 begin
   MainForm.DatasetLoRa.Close;
   MainForm.DatasetLoRa.SQL :=
-    'SELECT * FROM lora WHERE starttime > "' + FormatDateTime('hh:nn:ss', (Now - 15 / 24 / 60)) + '";';
+    'SELECT * FROM lora WHERE starttime > "' +
+    FormatDateTime('hh:nn:ss', (Now - 15 / 24 / 60)) + '";';
   try
     MainForm.DatasetLoRa.Open;
     MainForm.LoRaPopupDefault.Checked := False;
@@ -1514,7 +1555,8 @@ begin
   end;
 end;
 
-procedure TMainForm.HideZeroHour(Sender: TField; var aText: string; DisplayText: boolean);
+procedure TMainForm.HideZeroHour(Sender: TField; var aText: string;
+  DisplayText: boolean);
 begin
   aText := HideLeadingZeroHour(Sender);
 end;
@@ -1570,7 +1612,7 @@ begin
   //DataPortHTTPTelegramBot.Params.Add('upperline=upperline123');
   //DataPortHTTPTelegramBot.Params.Add('bottomline=bottomline123');
   //DataPortHTTPTelegramBot.Open();
-  //
+
   //Print(DataPortHTTPTelegramBot.Url);
   //DataPortHTTPTelegramBot.Push('');
   //s := TFPCustomHTTPClient.SimpleGet('http://192.168.1.136/get?upperline=1%20%2010:10,123&bottomline=Фамилия');
@@ -1583,7 +1625,8 @@ begin
   UpdateResults;
 end;
 
-procedure TMainForm.MainDataset1statusGetText(Sender: TField; var aText: string; DisplayText: boolean);
+procedure TMainForm.MainDataset1statusGetText(Sender: TField;
+  var aText: string; DisplayText: boolean);
 begin
   if Sender.AsString = '1' then
     aText := 'DNF';
@@ -1627,12 +1670,15 @@ begin
       CorrectionDatasetcorrection.FieldName := 'correction' + IntToStr(i);
       RxDBGridCorrection.Columns[1].FieldName := 'correction' + IntToStr(i);
       CorrectionDataset.SQL :=
-        'SELECT * from main where correction' + IntToStr(i) + ' ISNULL AND status' +
-        IntToStr(i) + ' ISNULL AND starttime' + IntToStr(i) + ' NOTNULL ORDER BY starttime' + IntToStr(i);
+        'SELECT * from main where correction' + IntToStr(i) +
+        ' ISNULL AND status' + IntToStr(i) + ' ISNULL AND starttime' +
+        IntToStr(i) + ' NOTNULL ORDER BY starttime' + IntToStr(i);
       StatDataset2.SQL := 'SELECT number, name, starttime' + IntToStr(i) +
         ' as starttime, strftime(''%H:%M:%S'',julianday(time(''now'', ''localtime'')) - julianday(time(starttime'
-        +
-        IntToStr(i) + ')) + 0.5) as timeontrack from main where julianday(time(''now'', ''localtime'')) > julianday(time(starttime' + IntToStr(i) + ')) AND finishtime' + IntToStr(i) + ' ISNULL AND status' + IntToStr(i) + ' ISNULL ORDER BY starttime';
+        + IntToStr(i) +
+        ')) + 0.5) as timeontrack from main where julianday(time(''now'', ''localtime'')) > julianday(time(starttime'
+        + IntToStr(i) + ')) AND finishtime' + IntToStr(i) +
+        ' ISNULL AND status' + IntToStr(i) + ' ISNULL ORDER BY starttime';
       if dbopen then
       begin
         ;
@@ -1683,7 +1729,8 @@ begin
   end;
 end;
 
-procedure TMainForm.RxDBGrid1SelectEditor(Sender: TObject; Column: TColumn; var Editor: TWinControl);
+procedure TMainForm.RxDBGrid1SelectEditor(Sender: TObject; Column: TColumn;
+  var Editor: TWinControl);
 begin
   if Column.FieldName = 'category' then
   begin

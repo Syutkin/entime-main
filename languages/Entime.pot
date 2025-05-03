@@ -5,6 +5,10 @@ msgstr "Content-Type: text/plain; charset=UTF-8"
 msgid "Добавить результаты дня"
 msgstr ""
 
+#: i18n.sage
+msgid "ГР"
+msgstr ""
+
 #: i18n.scannotbackup
 msgid "Не удалось сделать бэкап, продолжить загрузку результатов?"
 msgstr ""
@@ -36,6 +40,11 @@ msgstr ""
 
 #: i18n.scat6
 msgid "Электро"
+msgstr ""
+
+#: i18n.scity
+msgctxt "i18n.scity"
+msgid "Город"
 msgstr ""
 
 #: i18n.sclearallstatus
@@ -145,12 +154,25 @@ msgstr ""
 msgid "Ошибка создания файла финала"
 msgstr ""
 
+#: i18n.sfileexists
+msgid "Файл уже существует. Перезаписать?"
+msgstr ""
+
 #: i18n.sfilesareequal
 msgid "Имя файла финала должно отличаться от имени файла квалификации"
 msgstr ""
 
 #: i18n.sfinalfileexists
 msgid "Файл финала уже существует. Перезаписать?"
+msgstr ""
+
+#: i18n.sfinishprotocol
+msgctxt "i18n.sfinishprotocol"
+msgid "Результаты"
+msgstr ""
+
+#: i18n.sfinishthruprotocol
+msgid "Сквозной протокол"
 msgstr ""
 
 #: i18n.sfinishtime
@@ -201,6 +223,11 @@ msgstr ""
 msgid "Загрузка настроек из файла"
 msgstr ""
 
+#: i18n.sname
+msgctxt "i18n.sname"
+msgid "Имя"
+msgstr ""
+
 #: i18n.snewfilecreated
 msgid "Файл соревнований создан"
 msgstr ""
@@ -211,6 +238,10 @@ msgstr ""
 
 #: i18n.snewfilenotcreated
 msgid "Не удалось создать файл соревнований"
+msgstr ""
+
+#: i18n.snickname
+msgid "Ник"
 msgstr ""
 
 #: i18n.snumber
@@ -349,8 +380,22 @@ msgctxt "i18n.ssu6"
 msgid "СУ 6"
 msgstr ""
 
+#: i18n.ssumresult
+msgctxt "i18n.ssumresult"
+msgid "Итог"
+msgstr ""
+
+#: i18n.ssumstages
+msgid "Кол-во СУ"
+msgstr ""
+
 #: i18n.ssurewithnumber
 msgid "Уверены, что участник под номером"
+msgstr ""
+
+#: i18n.steam
+msgctxt "i18n.steam"
+msgid "Команда"
 msgstr ""
 
 #: i18n.stelegrambotsendingerror
@@ -1474,10 +1519,12 @@ msgid "Возраст"
 msgstr ""
 
 #: tmainform.rxdbgrid1.columns[8].title.caption
+msgctxt "tmainform.rxdbgrid1.columns[8].title.caption"
 msgid "Команда"
 msgstr ""
 
 #: tmainform.rxdbgrid1.columns[9].title.caption
+msgctxt "tmainform.rxdbgrid1.columns[9].title.caption"
 msgid "Город"
 msgstr ""
 

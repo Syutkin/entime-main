@@ -52,6 +52,7 @@ type
     FPhone: TStringList;
     FEmail: TStringList;
     FComment: TStringList;
+    FStageNames: TStringList;
 
   public
     constructor Create;
@@ -66,6 +67,7 @@ type
     property phone: TStringList read FPhone;
     property email: TStringList read FEmail;
     property comment: TStringList read FComment;
+    property stageNames: TStringList read FStageNames write FStageNames;
   end;
 
 implementation
@@ -145,6 +147,8 @@ begin
   FComment.add('комментарий');
   FComment.add('comment');
 
+  FStageNames := TStringList.Create;
+
 end;
 
 destructor TLegend.Destroy;
@@ -159,6 +163,7 @@ begin
   FPhone.Free;
   FEmail.Free;
   FComment.Free;
+  FStageNames.Free;
 end;
 
 

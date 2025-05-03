@@ -2,7 +2,8 @@ program Entime;
 
 {$mode objfpc}{$H+}
 
-uses {$IFDEF UNIX} {$IFDEF UseCThreads}
+uses
+  {$IFDEF UNIX} {$IFDEF UseCThreads}
   cthreads, {$ENDIF} {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms,
@@ -10,15 +11,17 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   LazSerialPort,
   rxnew,
   sqlite3laz,
-  lazcontrols, datetimectrls, lazdbexport,
+  lazcontrols,
+  datetimectrls,
+  lazdbexport,
   Result,
-  HistoryLazarus, startitemmodel;
+  HistoryLazarus;
 
-{$R *.res}
+  {$R *.res}
 
 begin
   RequireDerivedFormResource := True;
-  Application.Scaled:=True;
+  Application.Scaled := True;
   Application.Initialize;
   Application.CreateForm(TMainForm, MainForm);
   Application.CreateForm(TResultsForm, ResultsForm);

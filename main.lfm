@@ -1,7 +1,7 @@
 object MainForm: TMainForm
-  Left = 607
+  Left = 568
   Height = 1002
-  Top = 60
+  Top = 42
   Width = 1644
   ClientHeight = 1002
   ClientWidth = 1644
@@ -4251,8 +4251,8 @@ object MainForm: TMainForm
       OnUpdate = CheckDBOpen
       Caption = 'Экспорт финишного протокола ...'
       Dialog.Title = 'Экспорт финишного протокола'
-      Dialog.DefaultExt = '.ods'
-      Dialog.Filter = 'LibreOffice/OpenOffice spreadsheet (*.ods)|*.ods'
+      Dialog.DefaultExt = '.xlsx'
+      Dialog.Filter = 'Microsoft Office Open XML (*.xlsx)|*.xlsx|LibreOffice/OpenOffice spreadsheet (*.ods)|*.ods'
       Hint = 'Формирование финишного протокола в виде электронной таблицы'
       ImageIndex = 4
       OnAccept = FileExportFullAccept
@@ -4263,7 +4263,7 @@ object MainForm: TMainForm
       Caption = 'Экспорт сквозного протокола ...'
       Dialog.Title = 'Экспорт сквозного протокола'
       Dialog.DefaultExt = '.ods'
-      Dialog.Filter = 'LibreOffice/OpenOffice spreadsheet (*.ods)|*.ods'
+      Dialog.Filter = 'Microsoft Office Open XML (*.xlsx)|*.xlsx|LibreOffice/OpenOffice spreadsheet (*.ods)|*.ods'
       Hint = 'Формирование сквозного протокола в виде электронной таблицы'
       ImageIndex = 4
       OnAccept = FileExportThruAccept

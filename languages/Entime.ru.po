@@ -15,6 +15,10 @@ msgstr ""
 msgid "Добавить результаты дня"
 msgstr ""
 
+#: i18n.sage
+msgid "ГР"
+msgstr ""
+
 #: i18n.scannotbackup
 msgid "Не удалось сделать бэкап, продолжить загрузку результатов?"
 msgstr ""
@@ -47,6 +51,12 @@ msgstr "Элита"
 #: i18n.scat6
 msgid "Электро"
 msgstr "Электро"
+
+#: i18n.scity
+#, fuzzy
+msgctxt "i18n.scity"
+msgid "Город"
+msgstr "Город"
 
 #: i18n.sclearallstatus
 msgid "Действительно убрать DNS/DNF/DSQ с участника номер"
@@ -156,6 +166,10 @@ msgctxt "i18n.sfilecopyerror"
 msgid "Ошибка создания файла финала"
 msgstr ""
 
+#: i18n.sfileexists
+msgid "Файл уже существует. Перезаписать?"
+msgstr ""
+
 #: i18n.sfilesareequal
 msgctxt "i18n.sfilesareequal"
 msgid "Имя файла финала должно отличаться от имени файла квалификации"
@@ -163,6 +177,16 @@ msgstr ""
 
 #: i18n.sfinalfileexists
 msgid "Файл финала уже существует. Перезаписать?"
+msgstr ""
+
+#: i18n.sfinishprotocol
+#, fuzzy
+msgctxt "i18n.sfinishprotocol"
+msgid "Результаты"
+msgstr "Результаты"
+
+#: i18n.sfinishthruprotocol
+msgid "Сквозной протокол"
 msgstr ""
 
 #: i18n.sfinishtime
@@ -221,6 +245,12 @@ msgstr ""
 msgid "Загрузка настроек из файла"
 msgstr "Загрузка настроек из файла"
 
+#: i18n.sname
+#, fuzzy
+msgctxt "i18n.sname"
+msgid "Имя"
+msgstr "Имя"
+
 #: i18n.snewfilecreated
 msgid "Файл соревнований создан"
 msgstr "Файл соревнований создан"
@@ -232,6 +262,10 @@ msgstr "Не удалось проверить существование ука
 #: i18n.snewfilenotcreated
 msgid "Не удалось создать файл соревнований"
 msgstr "Не удалось создать файл соревнований"
+
+#: i18n.snickname
+msgid "Ник"
+msgstr ""
 
 #: i18n.snumber
 msgctxt "i18n.snumber"
@@ -372,9 +406,24 @@ msgctxt "i18n.ssu6"
 msgid "СУ 6"
 msgstr "СУ 6"
 
+#: i18n.ssumresult
+msgctxt "i18n.ssumresult"
+msgid "Итог"
+msgstr ""
+
+#: i18n.ssumstages
+msgid "Кол-во СУ"
+msgstr ""
+
 #: i18n.ssurewithnumber
 msgid "Уверены, что участник под номером"
 msgstr "Уверены, что участник под номером"
+
+#: i18n.steam
+#, fuzzy
+msgctxt "i18n.steam"
+msgid "Команда"
+msgstr "Команда"
 
 #: i18n.stelegrambotsendingerror
 msgid "Ошибка отправки данных в телеграм бота: "
@@ -1622,10 +1671,12 @@ msgid "Возраст"
 msgstr "Возраст"
 
 #: tmainform.rxdbgrid1.columns[8].title.caption
+msgctxt "tmainform.rxdbgrid1.columns[8].title.caption"
 msgid "Команда"
 msgstr "Команда"
 
 #: tmainform.rxdbgrid1.columns[9].title.caption
+msgctxt "tmainform.rxdbgrid1.columns[9].title.caption"
 msgid "Город"
 msgstr "Город"
 

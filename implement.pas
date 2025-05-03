@@ -8,7 +8,8 @@ uses
   Classes, SysUtils, Controls, rxdbgrid, Sqlite3DS, i18n, Dialogs,
   ComCtrls, StdCtrls, strutils, sqldb, sqlite3conn, LazUTF8, Forms,
   ButtonPanel, Math, fileutil, LazFileUtils, DB, dateutils, DateTimePicker,
-  csvdocument, opensslsockets, fphttpclient, nsCore, chsdIntf, fpcsvexport;
+  csvdocument, opensslsockets, fphttpclient, nsCore, chsdIntf, fpcsvexport,
+  fpstypes, fpspreadsheet, LCLIntf;
 
 type
   TMyDBGrid = class(TRxDBGrid);
@@ -54,6 +55,7 @@ procedure LoadFinishTime(FileName: string);
 procedure ExportFinishTime(FileName: string);
 procedure ExportAllResults(FileName: string);
 procedure ExportSumDays(FileName: string);
+procedure ExportAllResultsToXLSX(FileName: string);
 procedure GetFinishTime(FinishTime: TDateTime);
 procedure SetLoRaTime(StartTime: TDateTime; correction: string);
 procedure GenerateStartlistFromQualifier(FileName: string);
@@ -68,10 +70,12 @@ function CatStartList: TStringList;
 function GetAllStageStatus(stage: integer): TStringList;
 function CountOccurrences(ASubString: string; AString: string): integer;
 function CheckPenaltyInput(key: char): char;
+function CountActiveStages: integer;
 function SelectedStage: integer;
 function CurrentStage: integer;
 function BackupBD: boolean;
 function HideLeadingZeroHour(Sender: TField): string;
+function HideLeadingZeroHour(time: string): string;
 function FormatNumber(number: integer): string;
 function FormatTime(time: string): string;
 function FormatDiff(diff: string; diffsign: string = ' '): string;
@@ -186,7 +190,7 @@ begin
         MainForm.SQLQuery1.SQL.Text :=
           'SELECT * FROM config WHERE key = "stagename' + IntToStr(i) + '";';
         MainForm.SQLQuery1.Open();
-        sname[i] := MainForm.SQLQuery1.FieldByName('value').AsString;
+        stageName[i] := MainForm.SQLQuery1.FieldByName('value').AsString;
       end;
       MainForm.SQLQuery1.Close;
       MainForm.SQLQuery1.SQL.Text :=
@@ -225,27 +229,27 @@ begin
 
   //  RxIniPropStorage1.Restore;
 
-  if sname[1] = '' then
-    sname[1] := sSU1;
-  if sname[2] = '' then
-    sname[2] := sSU2;
-  if sname[3] = '' then
-    sname[3] := sSU3;
-  if sname[4] = '' then
-    sname[4] := sSU4;
-  if sname[5] = '' then
-    sname[5] := sSU5;
-  if sname[6] = '' then
-    sname[6] := sSU6;
+  if stageName[1] = '' then
+    stageName[1] := sSU1;
+  if stageName[2] = '' then
+    stageName[2] := sSU2;
+  if stageName[3] = '' then
+    stageName[3] := sSU3;
+  if stageName[4] = '' then
+    stageName[4] := sSU4;
+  if stageName[5] = '' then
+    stageName[5] := sSU5;
+  if stageName[6] = '' then
+    stageName[6] := sSU6;
 
   for i := 1 to maxstages do
   begin
     c := MainForm.FindComponent('SheetStage' + IntToStr(i));
-    TTabSheet(c).Caption := sname[i];
+    TTabSheet(c).Caption := stageName[i];
 
     with MainForm.GridResult8 do
     begin
-      ColumnByFieldName('result' + IntToStr(i)).Title.Caption := sname[i];
+      ColumnByFieldName('result' + IntToStr(i)).Title.Caption := stageName[i];
       if stage[i] then
       begin
         ColumnByFieldName('result' + IntToStr(i)).Visible := True;
@@ -260,19 +264,19 @@ begin
     begin
       //ставим названия
       ColumnByFieldName('correction' + IntToStr(i)).Title.Caption :=
-        sname[i] + '|' + scorrection;
+        stageName[i] + '|' + scorrection;
       ColumnByFieldName('starttime' + IntToStr(i)).Title.Caption :=
-        sname[i] + '|' + sstarttime;
+        stageName[i] + '|' + sstarttime;
       ColumnByFieldName('finishtime' + IntToStr(i)).Title.Caption :=
-        sname[i] + '|' + sfinishtime;
+        stageName[i] + '|' + sfinishtime;
       ColumnByFieldName('penalty' + IntToStr(i)).Title.Caption :=
-        sname[i] + '|' + spenalty;
+        stageName[i] + '|' + spenalty;
       ColumnByFieldName('result' + IntToStr(i)).Title.Caption :=
-        sname[i] + '|' + sresult;
+        stageName[i] + '|' + sresult;
       ColumnByFieldName('diffleader' + IntToStr(i)).Title.Caption :=
-        sname[i] + '|' + sdiffleader;
+        stageName[i] + '|' + sdiffleader;
       ColumnByFieldName('place' + IntToStr(i)).Title.Caption :=
-        sname[i] + '|' + splace;
+        stageName[i] + '|' + splace;
     end;
     //скрываем неиспользуемые СУ
     if stage[i] then
@@ -369,7 +373,7 @@ begin
     astage + ' as place from main WHERE finishtime' + astage +
     ' > 0 AND status ISNULL ORDER BY finishtime' + astage + ' DESC';
   ResultsForm.GroupBoxResults.Caption :=
-    sCurrentResults + ': ' + sname[StrToInt(astage)];
+    sCurrentResults + ': ' + stageName[StrToInt(astage)];
 end;
 
 procedure SetfName(fName: string);
@@ -480,7 +484,7 @@ begin
       end
       else
       begin
-        if sSU + ' ' + IntToStr(i) = sname[i] then
+        if sSU + ' ' + IntToStr(i) = stageName[i] then
         begin
           d := sSureWithNumber + ' ' + n + ' ' + logstatus + ' ' +
             sOnStage + ' ' + IntToStr(i) + '?';
@@ -490,9 +494,9 @@ begin
         else
         begin
           d := sSureWithNumber + ' ' + n + ' ' + logstatus + ' ' +
-            sOnStage + ' ' + IntToStr(i) + ': ' + sname[i] + '?';
+            sOnStage + ' ' + IntToStr(i) + ': ' + stageName[i] + '?';
           l := sParticipantWithNumber + ' ' + n + ' ' + logstatus +
-            ' ' + sOnStage + ' ' + IntToStr(i) + ': ' + sname[i];
+            ' ' + sOnStage + ' ' + IntToStr(i) + ': ' + stageName[i];
         end;
       end;
       if MessageDlg(d, mtWarning, [mbYes, mbNo], 0) = mrYes then
@@ -679,7 +683,7 @@ begin
       else
       begin
         i := SelectedStage;
-        if sSU + ' ' + IntToStr(i) = sname[i] then
+        if sSU + ' ' + IntToStr(i) = stageName[i] then
         begin
           d := sClearStatus + ' ' + n + ' ' + sOnStage + ' ' + IntToStr(i) + '?';
           l := sClearStatusLog + ' ' + n + ' ' + sOnStage + ' ' + IntToStr(i);
@@ -687,9 +691,9 @@ begin
         else
         begin
           d := sClearStatus + ' ' + n + ' ' + sOnStage + ' ' +
-            IntToStr(i) + ': ' + sname[i] + '?';
+            IntToStr(i) + ': ' + stageName[i] + '?';
           l := sClearStatusLog + ' ' + n + ' ' + sOnStage + ' ' +
-            IntToStr(i) + ': ' + sname[i];
+            IntToStr(i) + ': ' + stageName[i];
         end;
         if MessageDlg(d, mtWarning, [mbYes, mbNo], 0) = mrYes then
         begin
@@ -1704,7 +1708,7 @@ begin
     n := MainForm.MainDataset1.FieldByName('number').AsString;
     st := SelectedStage;
     t := InputDateTime(sTimeToStart, sEnterStartTime + ' ' + n + ' ' +
-      sOnStage + ': ' + sname[st]);
+      sOnStage + ': ' + stageName[st]);
     if t > 0 then
     begin
       with MainForm.SQLQuery1 do
@@ -1804,6 +1808,46 @@ begin
           ocsvStrings.Text := WinCPToUTF8(ocsvStrings.Text);
 
         legend.DelimitedText := ocsvStrings[0];
+
+        // Собираем названия СУ
+        for legendItem in legend do
+        begin
+          if (legendMap.number.IndexOf(legendItem.ToLower) < 0) and
+            (legendMap.Name.IndexOf(legendItem.ToLower) < 0) and
+            (legendMap.category.IndexOf(legendItem.ToLower) < 0) and
+            (legendMap.nickname.IndexOf(legendItem.ToLower) < 0) and
+            (legendMap.birthday.IndexOf(legendItem.ToLower) < 0) and
+            (legendMap.team.IndexOf(legendItem.ToLower) < 0) and
+            (legendMap.city.IndexOf(legendItem.ToLower) < 0) and
+            (legendMap.phone.IndexOf(legendItem.ToLower) < 0) and
+            (legendMap.email.IndexOf(legendItem.ToLower) < 0) and
+            (legendMap.comment.IndexOf(legendItem.ToLower) < 0) then
+          begin
+            legendMap.stageNames.add(legendItem);
+          end;
+        end;
+
+        if (legendMap.stageNames.Count > 0) then
+        begin
+          with MainForm.SQLQuery1 do
+          begin
+            SQL.Clear;
+            SQL.Add('INSERT INTO config (key, value) VALUES ');
+            for i := 0 to legendMap.stageNames.Count - 1 do
+            begin
+              SQL.Add('("stagename' + IntToStr(i + 1) + '", "' +
+                legendMap.stageNames[i] + '"),');
+              SQL.Add('("stage' + IntToStr(i + 1) + '", "True")');
+              SQL.Add(',');
+            end;
+            SQL.Delete(SQL.Count - 1);
+            SQL.Add('ON CONFLICT(key) DO UPDATE SET value = excluded.value;');
+            ExecSQL;
+            SQLTransaction.Commit;
+            Close;
+          end;
+        end;
+
         for i := 1 to ocsvStrings.Count - 1 do
         begin
           item.DelimitedText := ocsvStrings[i];
@@ -1941,6 +1985,7 @@ begin
               SQLTransaction.Commit;
               Close;
             end;
+            LoadIni;
             LoadIniCategory;
           end;
           RefreshAll;
@@ -1993,7 +2038,7 @@ end;
 //    c := MainForm.FindComponent('RadioCur' + IntToStr(i));
 //    if TRadioButton(c).Enabled then
 //    begin
-//      strlst.add(sname[i]);
+//      strlst.add(stageName[i]);
 //      if TRadioButton(c).Checked then
 //      begin
 //        k := strlst.Count - 1;
@@ -2061,7 +2106,7 @@ end;
 //        end;
 //        UpdateResults;
 //        Log(sImportFinishtime + ' ' + IntToStr(importfinish) +
-//          ': ' + sname[importfinish] + ' ' + sLoaded);
+//          ': ' + stageName[importfinish] + ' ' + sLoaded);
 //      except
 //        On E: Exception do
 //        begin
@@ -2095,7 +2140,7 @@ begin
       c := MainForm.FindComponent('RadioCur' + IntToStr(i));
       if TRadioButton(c).Enabled then
       begin
-        strlst.add(sname[i]);
+        strlst.add(stageName[i]);
         if TRadioButton(c).Checked then
         begin
           k := strlst.Count - 1;
@@ -2217,7 +2262,7 @@ begin
               RecalculateStatus(GetAllStageStatus(importfinish));
               UpdateResults;
               Log(sImportFinishtime + ' ' + IntToStr(importfinish) +
-                ': ' + sname[importfinish] + ' ' + sLoaded_o);
+                ': ' + stageName[importfinish] + ' ' + sLoaded_o);
             end
             //если значений 3 (number, starttime, correction)
             //то загрузка из стартового телефона
@@ -2313,7 +2358,7 @@ begin
               //SetGlobalStatus(n);
               UpdateResults;
               Log(sImportStarttime + ' ' + IntToStr(importfinish) +
-                ': ' + sname[importfinish] + ' ' + sLoaded);
+                ': ' + stageName[importfinish] + ' ' + sLoaded);
             end
             //если значений 2 (number, finishtime)
             //то загрузка из финишного телефона
@@ -2403,7 +2448,7 @@ begin
               //SetGlobalStatus(n);
               UpdateResults;
               Log(sImportFinishtime + ' ' + IntToStr(importfinish) +
-                ': ' + sname[importfinish] + ' ' + sLoaded_o);
+                ': ' + stageName[importfinish] + ' ' + sLoaded_o);
             end
             else
               MessageDlg(sFinishTimeOpenError, mtError, [mbOK], 0);
@@ -2448,6 +2493,257 @@ begin
   MainForm.SQLQuery1.SQL.Text :=
     'SELECT main.category, sumdays.place, sumdays.number, main.name, main.nickname, main.age, main.team, main.city, sumdays.sumresult, sumdays.sumstages, sumdays.status ' + 'FROM sumdays, main WHERE sumdays.number = main.number ORDER BY category, sumdays.sumstages DESC, sumdays.sumresult;';
   SQLQueryToCSV(FileName, MainForm.SQLQuery1, True);
+end;
+
+procedure ExportAllResultsToXLSX(FileName: string);
+var
+  //sql: string;
+  //fileName: string;
+  MyWorkbook: TsWorkbook;
+  MyWorksheet: TsWorksheet;
+  c, i, j: integer;
+  stageColumnCount: integer = 3;
+  categories, exportColumns, ColumnstageName, stageNames: TStringList;
+  normalFont, categoryFont, legendFont: TsFont;
+  inormalFont, icategoryFont, ilegendFont: integer;
+  showPenalty: boolean = False;
+begin
+  if not FileExists(FileName) or
+    (MessageDlg(sFileExists, mtWarning, [mbOK, mbCancel], 0) = mrOk) then
+  begin
+    // Create the spreadsheet
+    MyWorkbook := TsWorkbook.Create;
+    MyWorksheet := MyWorkbook.AddWorksheet(sFinishProtocol);
+
+    // Шрифты
+    normalFont := TsFont.Create;
+    normalFont.FontName := 'Arial';
+    normalFont.Size := 10.0;
+    legendFont := TsFont.Create;
+    legendFont.CopyOf(normalFont);
+    legendFont.Style := [TsFontStyle.fssBold];
+    categoryFont := TsFont.Create;
+    categoryFont.CopyOf(legendFont);
+    categoryFont.Size := 14.0;
+    inormalFont := MyWorkbook.AddFont(normalFont);
+    ilegendFont := MyWorkbook.AddFont(legendFont);
+    icategoryFont := MyWorkbook.AddFont(categoryFont);
+
+
+    categories := TStringList.Create;
+    exportColumns := TStringList.Create;
+    ColumnstageName := TStringList.Create;
+    stageNames := TStringList.Create;
+
+    // Формируем список колонок для экспорта
+    exportColumns.add('sumplace');
+    exportColumns.add('number');
+    exportColumns.add('name');
+    exportColumns.add('nickname');
+    exportColumns.add('age');
+    exportColumns.add('team');
+    exportColumns.add('city');
+
+    ColumnstageName.add(splace);
+    ColumnstageName.add(sNumber);
+    ColumnstageName.add(sName);
+    ColumnstageName.add(sNickname);
+    ColumnstageName.add(sAge);
+    ColumnstageName.add(sTeam);
+    ColumnstageName.add(sCity);
+
+    // Если есть штрафы в таблице, заносим их в результаты,
+    // в противном случае не показываем эти столбцы
+    with MainForm.SQLQuery1 do
+    begin
+      Close;
+      SQL.Text := 'SELECT COUNT(*) FROM main ' +
+        'GROUP BY penalty1, penalty2, penalty3, penalty4, penalty5, penalty6;';
+      Open();
+      First;
+      i := 0;
+      while not EOF do
+      begin
+        Inc(i);
+        Next;
+      end;
+    end;
+    print(IntToStr(i));
+    if (i > 1) then
+    begin
+      showPenalty := True;
+      stageColumnCount := 4;
+    end;
+
+    if (CountActiveStages > 1) then
+    begin
+      // Колонки для активных СУ
+      for i := 1 to maxstages do
+      begin
+        if stage[i] then
+        begin
+          exportColumns.add('result' + IntToStr(i));
+          ColumnstageName.add(sresult);
+          exportColumns.add('diffleader' + IntToStr(i));
+          ColumnstageName.add(sdiffleader);
+          if (showPenalty) then
+          begin
+            exportColumns.add('penalty' + IntToStr(i));
+            ColumnstageName.add(spenalty);
+          end;
+          exportColumns.add('place' + IntToStr(i));
+          ColumnstageName.add(splace);
+          stageNames.add(stageName[i]);
+        end;
+      end;
+    end;
+
+    exportColumns.add('sumresult');
+    exportColumns.add('sumdiffleader');
+
+    ColumnstageName.add(ssumresult);
+    ColumnstageName.add(sdiffleader);
+
+    if (CountActiveStages > 1) then
+    begin
+      exportColumns.add('sumstages');
+      ColumnstageName.add(ssumstages);
+    end;
+
+    // Создаём список категорий
+    with MainForm.SQLQuery1 do
+    begin
+      Close;
+      SQL.Text := 'SELECT category FROM main GROUP BY category ORDER BY starttime1;';
+      Open();
+      while not MainForm.SQLQuery1.EOF do
+      begin
+        Categories.Add(Fields[0].AsString);
+        Next;
+      end;
+      Close;
+    end;
+
+    j := 0;
+    for c := 0 to Categories.Count - 1 do
+    begin
+      with MainForm.SQLQuery1 do
+      begin
+        Close;
+        SQL.Text :=
+          'SELECT ' + exportColumns.CommaText + ' FROM main ' +
+          'WHERE category IS :CATEGORY ' +
+          //манёвр с 'toend' чтобы результат NULL был в конце
+          'ORDER BY IFNULL(sumplace,''toend''), IFNULL(sumresult,''toend'');';
+        ParamByName('CATEGORY').AsString := Categories[c];
+        Open();
+
+        // Запись категории
+        MyWorksheet.WriteText(j, 0, Categories[c]);
+        MyWorksheet.WriteFont(j, 0, icategoryFont);
+        Inc(j);
+
+        // Отдельной строкой название СУ если их больше одного
+        if (CountActiveStages > 1) then
+        begin
+          for i := 0 to CountActiveStages - 1 do
+          begin
+            // 7 - количество столбцов до отдельных результатов СУ
+            // 4 - кол-во столбцов на СУ
+            MyWorksheet.WriteText(j, 7 + stageColumnCount * i, stageNames[i]);
+            MyWorksheet.WriteFont(j, 7 + stageColumnCount * i, ilegendFont);
+            MyWorksheet.WriteHorAlignment(j, 7 + stageColumnCount * i, haCenter);
+            MyWorksheet.MergeCells(j, 7 + stageColumnCount * i, j,
+              7 + stageColumnCount * i + stageColumnCount - 1);
+          end;
+          Inc(j);
+        end;
+
+        // Запись имён столбцов
+        for i := 0 to Fields.Count - 1 do
+        begin
+          MyWorksheet.WriteText(j, i, ColumnstageName[i]);
+          MyWorksheet.WriteFont(j, i, ilegendFont);
+          MyWorksheet.WriteHorAlignment(j, i, haCenter);
+        end;
+        Inc(j);
+
+        // Запись результатов категории в worksheet
+        First;
+        while not EOF do
+        begin
+          for i := 0 to Fields.Count - 1 do
+          begin
+            // Если содержит 'place'
+            if ((pos('place', exportColumns[i]) > 0) and
+              (Fields[i].AsString <> '')) or (exportColumns[i] = 'number') or
+              (exportColumns[i] = 'sumstages') then
+            begin
+              MyWorksheet.WriteNumber(j, i, Fields[i].AsInteger);
+              MyWorksheet.WriteHorAlignment(j, i, haCenter);
+            end
+            else if (pos('result', exportColumns[i]) > 0) or
+              (pos('diff', exportColumns[i]) > 0) or
+              (pos('penalty', exportColumns[i]) > 0) then
+            begin
+              MyWorksheet.WriteText(j, i, HideLeadingZeroHour(Fields[i].AsString));
+              MyWorksheet.WriteHorAlignment(j, i, haRight);
+              if (exportColumns[i] = 'sumresult') then
+                MyWorksheet.WriteFont(j, i, ilegendFont);
+            end
+            else
+            begin
+              MyWorksheet.WriteText(j, i, Fields[i].AsString);
+              MyWorksheet.WriteFont(j, i, inormalFont);
+            end;
+
+            // Изменяем ширину столбцов (да, в каждой категории :( )
+            if pos('number', exportColumns[i]) > 0 then
+              MyWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints);
+            if pos('place', exportColumns[i]) > 0 then
+              MyWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints);
+            if exportColumns[i] = 'name' then
+              MyWorksheet.WriteColWidth(i, 125, TsSizeUnits.suPoints);
+            if exportColumns[i] = 'age' then
+              MyWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints);
+            if pos('penalty', exportColumns[i]) > 0 then
+              MyWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints);
+            if exportColumns[i] = 'sumstages' then
+              MyWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints);
+          end;
+          Next;
+          Inc(j);
+        end;
+
+        // Пустая строка между категориями
+        Inc(j);
+      end;
+    end;
+
+    // Изменяем ширину столбцов
+    // 0 - Номер
+    //MyWorksheet.WriteColWidth(0,50,TsSizeUnits.suPoints);
+
+    // Save the spreadsheet to a file
+    try
+      begin
+        //MyWorkbook.WriteToFile(MyDir + 'test' + STR_EXCEL_EXTENSION, OUTPUT_FORMAT);
+        MyWorkbook.WriteToFile(FileName, True);
+        Log(sResultsExportedToFile + ' ' + FileName);
+        OpenDocument(FileName);
+      end;
+    finally
+      begin
+        MainForm.SQLQuery1.Close;
+        MainForm.SQLTransaction1.Active := False;
+        MyWorkbook.Free;
+        Categories.Free;
+        exportColumns.Free;
+        ColumnstageName.Free;
+        stageNames.Free;
+      end;
+    end;
+  end;
 end;
 
 procedure GetFinishTime(FinishTime: TDateTime);
@@ -2600,7 +2896,7 @@ begin
       begin
         ExportFields.AddField(fieldName + IntToStr(i));
         fieldIndex := ExportFields.IndexOfField(fieldName + IntToStr(i));
-        ExportFields.Fields[fieldIndex].ExportedName := sname[i];
+        ExportFields.Fields[fieldIndex].ExportedName := stageName[i];
       end;
     end;
 
@@ -2962,6 +3258,16 @@ begin
   end;
 end;
 
+function CountActiveStages: integer;
+var
+  i: integer;
+begin
+  Result := 0;
+  for i := 1 to maxstages do
+    if stage[i] then
+      Inc(Result);
+end;
+
 function SelectedStage: integer;
   //высчитываем номер СУ, где стоит выделение
 var
@@ -3045,6 +3351,15 @@ begin
     end;
   end;
   Result := aText;
+end;
+
+function HideLeadingZeroHour(time: string): string;
+begin
+  Result := time;
+  if Pos('00:', Result) = 1 then
+  begin
+    Delete(Result, 1, 3);
+  end;
 end;
 
 function FormatNumber(number: integer): string;

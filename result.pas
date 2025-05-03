@@ -104,9 +104,9 @@ implementation
 
 uses Main, Implement;
 
-{$R *.lfm}
+  {$R *.lfm}
 
-{ TResultsForm }
+  { TResultsForm }
 
 procedure TResultsForm.FormCreate(Sender: TObject);
 begin

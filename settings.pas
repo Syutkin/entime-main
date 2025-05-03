@@ -117,11 +117,11 @@ implementation
 
 uses Main, Implement, LazSerialSetup;
 
-{$R *.lfm}
+  {$R *.lfm}
 
-{--------------копия из lazSerialSetup начало----------------------------------}
+  {--------------копия из lazSerialSetup начало----------------------------------}
 const
-{$IFDEF UNIX}
+  {$IFDEF UNIX}
   BaudRateStrings: array[TBaudRate] of string =
     ('0', '50', '75', '110', '134', '150', '200', '300', '600', '1200', '1800',
     '2400', '4800', '9600', '19200', '38400', '57600', '115200', '230400'
@@ -129,11 +129,11 @@ const
     , '460800', '500000', '576000', '921600', '1000000', '1152000', '1500000',
     '2000000', '2500000', '3000000', '3500000', '4000000'
     {$ENDIF}  );
-{$ELSE}// MSWINDOWS
+  {$ELSE}// MSWINDOWS
   BaudRateStrings: array[TBaudRate] of string = ('110', '300', '600',
     '1200', '2400', '4800', '9600', '14400', '19200', '38400', '56000', '57600',
     '115200', '128000', '230400', '256000', '460800', '921600');
-{$ENDIF}
+  {$ENDIF}
   StopBitsStrings: array[TStopBits] of string = ('1', '1.5', '2');
   DataBitsStrings: array[TDataBits] of string = ('8', '7', '6', '5');
   ParityBitsStrings: array[TParity] of string = ('None', 'Odd', 'Even',
@@ -163,7 +163,7 @@ begin
     c := FindComponent('Edit' + IntToStr(i));
     TEdit(c).Text := cat[i];
     c := FindComponent('SUEdit' + IntToStr(i));
-    TEdit(c).Text := sname[i];
+    TEdit(c).Text := stageName[i];
   end;
   DelayEdit.Text := IntToStr(checkinterval);
   if lang = 'ru' then
@@ -268,7 +268,7 @@ begin
           else
 
             stage[i] := False;
-          sname[i] := (FindComponent('SUEdit' + IntToStr(i)) as TEdit).Text;
+          stageName[i] := (FindComponent('SUEdit' + IntToStr(i)) as TEdit).Text;
         end;
         for i := 1 to visiblecat do
         begin
@@ -295,7 +295,7 @@ begin
             begin
               SQL.Add('("stage' + IntToStr(i) + '", "' +
                 BoolToStr(stage[i], True) + '"),');
-              SQL.Add('("stagename' + IntToStr(i) + '", "' + sname[i] + '"),');
+              SQL.Add('("stagename' + IntToStr(i) + '", "' + stageName[i] + '"),');
             end;
             SQL.Add('("activestage", "' + astage + '")');
             //SQL.Add('("timemark", "'+timemark+'"),');
@@ -382,51 +382,51 @@ begin
   l := TStringStream.Create('');
   http := tfphttpclient.Create(nil);
   with http do
-    try
-      QueryParams := TStringList.Create;
-      //AddHeader('Authorization', 'AccessToken MjtAFOrgYUrsfCC7KPLpAi03N4Od17Bh');
-      //AddHeader('X-User-Authorization', 'Basic aW5mb0BzcG1hc2gucnU6NTE0NzU4');
-      //AddHeader('Content-Type', 'text/html;charset=UTF-8');
-      with QueryParams do
-      begin
-        if not string(TelegramNumber.Text).IsEmpty then
-          Values['number'] := EncodeURLElement(TelegramNumber.Text);
-        if not string(TelegramName.Text).IsEmpty then
-          Values['name'] := EncodeURLElement(TelegramName.Text);
-        if not string(TelegramCategory.Text).IsEmpty then
-          Values['category'] := EncodeURLElement(TelegramCategory.Text);
-        if not string(TelegramResult.Text).IsEmpty then
-          Values['result'] := EncodeURLElement(TelegramResult.Text);
-        if not string(TelegramDiff.Text).IsEmpty then
-          Values['diff'] := EncodeURLElement(TelegramDiff.Text);
-        if not string(TelegramPlace.Text).IsEmpty then
-          Values['place'] := EncodeURLElement(TelegramPlace.Text);
-      end;
-      AURL := telegrambotadress;
-      for item in QueryParams do
-        s := s + '&' + item;
-      AURL := AURL + '?' + s.Substring(1);
-
-      try
-        httpmethod('GET', AURL, l, []);
-      except
-        On E: Exception do
-        begin
-          Log(sTelegramBotSendingError + E.Message);
-        end;
-
-      end;
-      MainForm.Memo.Lines.Append(IntToStr(ResponseStatusCode) + ' ' +
-        ResponseStatusText);
-      MainForm.Memo.Lines.Append(ResponseHeaders.Text);
-      MainForm.Memo.Lines.Append(l.DataString);
-
-    finally
-      MainForm.Memo.Lines.Append(AURL);
-      Free;
-      QueryParams.Free;
-      l.Free;
+  try
+    QueryParams := TStringList.Create;
+    //AddHeader('Authorization', 'AccessToken MjtAFOrgYUrsfCC7KPLpAi03N4Od17Bh');
+    //AddHeader('X-User-Authorization', 'Basic aW5mb0BzcG1hc2gucnU6NTE0NzU4');
+    //AddHeader('Content-Type', 'text/html;charset=UTF-8');
+    with QueryParams do
+    begin
+      if not string(TelegramNumber.Text).IsEmpty then
+        Values['number'] := EncodeURLElement(TelegramNumber.Text);
+      if not string(TelegramName.Text).IsEmpty then
+        Values['name'] := EncodeURLElement(TelegramName.Text);
+      if not string(TelegramCategory.Text).IsEmpty then
+        Values['category'] := EncodeURLElement(TelegramCategory.Text);
+      if not string(TelegramResult.Text).IsEmpty then
+        Values['result'] := EncodeURLElement(TelegramResult.Text);
+      if not string(TelegramDiff.Text).IsEmpty then
+        Values['diff'] := EncodeURLElement(TelegramDiff.Text);
+      if not string(TelegramPlace.Text).IsEmpty then
+        Values['place'] := EncodeURLElement(TelegramPlace.Text);
     end;
+    AURL := telegrambotadress;
+    for item in QueryParams do
+      s := s + '&' + item;
+    AURL := AURL + '?' + s.Substring(1);
+
+    try
+      httpmethod('GET', AURL, l, []);
+    except
+      On E: Exception do
+      begin
+        Log(sTelegramBotSendingError + E.Message);
+      end;
+
+    end;
+    MainForm.Memo.Lines.Append(IntToStr(ResponseStatusCode) + ' ' +
+      ResponseStatusText);
+    MainForm.Memo.Lines.Append(ResponseHeaders.Text);
+    MainForm.Memo.Lines.Append(l.DataString);
+
+  finally
+    MainForm.Memo.Lines.Append(AURL);
+    Free;
+    QueryParams.Free;
+    l.Free;
+  end;
 end;
 
 procedure TSettingsForm.ComboBoxLanguageChange(Sender: TObject);
