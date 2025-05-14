@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
   i18n, rxspin, LCLTranslator, Buttons, DBCtrls, ButtonPanel, ComCtrls, Spin,
   LazSerial, Lazsynaser, DataPortHTTP, DividerBevel, CheckBoxThemed,
-  translations, opensslsockets, fphttpclient;
+  translations, opensslsockets, fphttpclient, rxdbgrid;
 
 type
 
@@ -41,8 +41,10 @@ type
     Edit4: TComboBox;
     Edit5: TComboBox;
     Edit6: TComboBox;
+    NameEdit: TEdit;
     EditCOMSetStr: TEdit;
     EditCOMSetTime: TEdit;
+    GroupBoxName: TGroupBox;
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
@@ -58,6 +60,7 @@ type
     LabelUpperline: TLabel;
     LabelBottomline: TLabel;
     LabelNumber: TLabel;
+    LeftPanel: TPanel;
     TelegramResult: TEdit;
     TelegramDiff: TEdit;
     TelegramPlace: TEdit;
@@ -102,7 +105,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure Label1Click(Sender: TObject);
     procedure Page2ViewBeforeShow(ASender: TObject; ANewPage: TPage; ANewIndex: integer);
-    procedure RunSettings;
+    procedure RunSettings(ActivePage: integer = 1);
     procedure TreeView1Change(Sender: TObject; Node: TTreeNode);
   private
 
@@ -158,6 +161,7 @@ var
   c: TComponent;
   i: integer;
 begin
+  NameEdit.Text := raceName;
   for i := 1 to maxstages do
   begin
     c := FindComponent('Edit' + IntToStr(i));
@@ -219,13 +223,14 @@ begin
 end;
 
 //разбить запись на процедуры?
-procedure TSettingsForm.RunSettings;
+procedure TSettingsForm.RunSettings(ActivePage: integer = 1);
 var
   i: integer;
 begin
   with TSettingsForm.Create(nil) do
   begin
     try
+      Notebook1.PageIndex := ActivePage;
       ShowModal;
       if ModalResult = mrOk then
       begin
@@ -248,6 +253,7 @@ begin
         //timemarkstr := EditCOMSetStr.Text;
         //timemarkformat := EditCOMSetTime.Text;
 
+        raceName := NameEdit.Text;
         astage := ComboBoxAStage.Text;
         if astage = '' then
           astage := '1';
@@ -266,7 +272,6 @@ begin
           if CheckGroup1.Checked[i - 1] then
             stage[i] := True
           else
-
             stage[i] := False;
           stageName[i] := (FindComponent('SUEdit' + IntToStr(i)) as TEdit).Text;
         end;
@@ -287,6 +292,8 @@ begin
           begin
             SQL.Clear;
             SQL.Add('INSERT INTO config (key, value) VALUES');
+            SQL.Add('("racename", :RACENAME),');
+            ParamByName('RACENAME').AsString := raceName;
             for i := 1 to visiblecat do
             begin
               SQL.Add('("catname' + IntToStr(i) + '", "' + cat[i] + '"),');
@@ -307,7 +314,7 @@ begin
             Close;
           end;
         end;
-        LoadIni;
+        LoadConfig;
         LoadIniCategory;
         if dbopen then
         begin

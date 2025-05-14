@@ -27,8 +27,8 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="7"/>
-      <RevisionNr Value="17"/>
-      <BuildNr Value="77"/>
+      <RevisionNr Value="18"/>
+      <BuildNr Value="82"/>
       <Language Value="0419"/>
       <CharSet Value="04B0"/>
       <Attributes pvaDebug="True"/>
@@ -155,7 +155,7 @@
         <Mode0 Name="default"/>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="14">
+    <RequiredPackages Count="15">
       <Item1>
         <PackageName Value="FCL"/>
       </Item1>
@@ -184,20 +184,23 @@
         <PackageName Value="LazSerialPort"/>
       </Item9>
       <Item10>
-        <PackageName Value="rxnew"/>
+        <PackageName Value="laz_fpspreadsheet"/>
       </Item10>
       <Item11>
-        <PackageName Value="rxdbgrid_export_spreadsheet"/>
+        <PackageName Value="rxnew"/>
       </Item11>
       <Item12>
-        <PackageName Value="lazdbexport"/>
+        <PackageName Value="rxdbgrid_export_spreadsheet"/>
       </Item12>
       <Item13>
-        <PackageName Value="HistoryLazarus"/>
+        <PackageName Value="lazdbexport"/>
       </Item13>
       <Item14>
-        <PackageName Value="chsdet"/>
+        <PackageName Value="HistoryLazarus"/>
       </Item14>
+      <Item15>
+        <PackageName Value="chsdet"/>
+      </Item15>
     </RequiredPackages>
     <Units Count="10">
       <Unit0>

@@ -120,7 +120,7 @@ begin
   end
   else
   begin
-    LoadIni;
+    LoadConfig;
     LoadIniCategory;
   end;
   FormResize(Sender);

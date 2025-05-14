@@ -9,7 +9,7 @@ uses
   ComCtrls, StdCtrls, strutils, sqldb, sqlite3conn, LazUTF8, Forms,
   ButtonPanel, Math, fileutil, LazFileUtils, DB, dateutils, DateTimePicker,
   csvdocument, opensslsockets, fphttpclient, nsCore, chsdIntf, fpcsvexport,
-  fpstypes, fpspreadsheet, LCLIntf;
+  fpstypes, fpspreadsheet, LCLIntf, LConvEncoding;
 
 type
   TMyDBGrid = class(TRxDBGrid);
@@ -25,7 +25,7 @@ type
 
 procedure RefreshAll;
 procedure RefreshResults;
-procedure LoadIni;
+procedure LoadConfig;
 procedure LoadIniCategory;
 procedure SetfName(fName: string);
 procedure Log(msglog: string);
@@ -52,7 +52,7 @@ procedure SetStarttimeFromPopup;
 procedure SetDNFFromOnTrace;
 procedure LoadParticipantsList(FileName: string);
 procedure LoadFinishTime(FileName: string);
-procedure ExportFinishTime(FileName: string);
+procedure ExportFinishTime(FileName: string; stageIndex: integer);
 procedure ExportAllResults(FileName: string);
 procedure ExportSumDays(FileName: string);
 procedure ExportAllResultsToXLSX(FileName: string);
@@ -60,19 +60,21 @@ procedure GetFinishTime(FinishTime: TDateTime);
 procedure SetLoRaTime(StartTime: TDateTime; correction: string);
 procedure GenerateStartlistFromQualifier(FileName: string);
 procedure ExportCSVStartList(FileName: string);
+procedure ExportCSVResults(FileName: string);
 procedure ParseSerial(Str: string);
 procedure SQLQueryToCSV(FileName: string; Query: TSQLQuery; headers: boolean = False);
 procedure AddDayResult(FileName: string);
 procedure Print(Str: string);
 
 
+function InputComboSelectStage: integer;
 function CatStartList: TStringList;
 function GetAllStageStatus(stage: integer): TStringList;
 function CountOccurrences(ASubString: string; AString: string): integer;
 function CheckPenaltyInput(key: char): char;
 function CountActiveStages: integer;
 function SelectedStage: integer;
-function CurrentStage: integer;
+function ActiveStage: integer;
 function BackupBD: boolean;
 function HideLeadingZeroHour(Sender: TField): string;
 function HideLeadingZeroHour(time: string): string;
@@ -161,16 +163,22 @@ begin
   end;
 end;
 
-procedure LoadIni;
+procedure LoadConfig;
 var
   c: TComponent;
   i: integer;
 begin
   Screen.Cursor := crHourGlass;
   try
+    //пока датасеты закрыты, проверяем наличие файла соревнований
     if FileExists(fName) then
     begin
-      //пока датасеты закрыты, проверяем наличие файла соревнований
+      MainForm.SQLQuery1.Close;
+      MainForm.SQLQuery1.SQL.Text :=
+        'SELECT * FROM config WHERE key = "racename";';
+      MainForm.SQLQuery1.Open();
+      raceName := MainForm.SQLQuery1.FieldByName('value').AsString;
+
       for i := 1 to visiblecat do
       begin
         MainForm.SQLQuery1.Close;
@@ -349,6 +357,15 @@ begin
     MainForm.RxDBGrid1.ColumnByFieldName('sumdiffleader').Visible := True;
     MainForm.SheetStageSum.TabVisible := True;
   end;
+
+  // Если активных СУ больше одного, выключаем показ кол-ва пройденных СУ
+  // в сквозном протоколе
+  if CountActiveStages > 1 then
+    (MainForm.FindComponent('GridResult7') as
+      TRxDBGrid).ColumnByFieldName('sumstages').Visible := True
+  else
+    (MainForm.FindComponent('GridResult7') as
+      TRxDBGrid).ColumnByFieldName('sumstages').Visible := False;
   Screen.Cursor := crDefault;
 end;
 
@@ -425,7 +442,7 @@ end;
 //begin
 //  //присваиваем имя файла дб датасетам
 //  //SetfName(fName);
-//  LoadIni;
+//  LoadConfig;
 //  LoadIniCategory;
 //  // --> close-open dataset в Main и затем в settings (RefreshResults)
 //  RefreshAll;
@@ -773,7 +790,7 @@ begin
           ' "diffleader6"   VARCHAR,' + ' "place6"        INTEGER,' +
           ' "status6"       VARCHAR,' + ' "sumresult"     VARCHAR,' +
           ' "sumdiffleader" VARCHAR,' + ' "sumstages"     INTEGER,' +
-          ' "thrudiff"      VARCHAR,' + ' "thruplace"     VARCHAR,' +
+          ' "thrudiff"      VARCHAR,' + ' "thruplace"     INTEGER,' +
           ' "status"	    VARCHAR);');
         MainForm.SQLTransaction1.Commit;
 
@@ -836,8 +853,21 @@ begin
           sCat5 + '")' + ';');
         MainForm.SQLTransaction1.Commit;
 
+        with MainForm.SQLQuery1 do
+        begin
+          SQL.Clear;
+          SQL.Add('INSERT INTO config (key, value) VALUES');
+          SQL.Add('("racename", :RACENAME)');
+          SQL.Add('ON CONFLICT(key) DO UPDATE SET value = excluded.value;');
+          ParamByName('RACENAME').AsString := ExtractFileNameOnly(fName);
+          Close;
+          ExecSQL;
+        end;
+        MainForm.SQLTransaction1.Commit;
+        MainForm.SQLTransaction1.Active := False;
         Log(sNewFileCreated + ': ' + fName);
       except
+        MainForm.SQLTransaction1.Active := False;
         MessageDlg(sNewFileNotCreated, mtError, [mbOK], 0);
         Log(sNewFileNotCreated);
         Screen.Cursor := crDefault;
@@ -848,7 +878,7 @@ begin
     end;
 
     //OpenDB;
-    LoadIni;
+    LoadConfig;
     LoadIniCategory;
     // --> close-open dataset в Main и затем в settings (RefreshResults)
     RefreshAll;
@@ -936,7 +966,7 @@ begin
             //сначала определяем номер и результат текущего лидера категории для LED панели или телеграм бота
             if Mainform.AcLEDPanel.Checked or Mainform.AcTelegramBot.Checked then
             begin
-              st := IntToStr(CurrentStage);
+              st := IntToStr(ActiveStage);
               currentcategory := MainForm.SQLQuery1.FieldByName('category').AsString;
               Name := MainForm.SQLQuery1.FieldByName('name').AsString;
               MainForm.SQLQuery1.Active := False;
@@ -1213,7 +1243,7 @@ begin
         //проверяем что номер есть в таблице результатов
         if FieldByName('number').AsString = n then
         begin
-          if FieldByName('correction' + IntToStr(CurrentStage)).AsString = '' then
+          if FieldByName('correction' + IntToStr(ActiveStage)).AsString = '' then
             //если поправки нет
           begin
             setcorrection := True;
@@ -1230,7 +1260,7 @@ begin
           if setcorrection then
           begin
             Close;
-            SQL.Text := 'UPDATE main SET correction' + IntToStr(CurrentStage) +
+            SQL.Text := 'UPDATE main SET correction' + IntToStr(ActiveStage) +
               ' = ' + correction + ' WHERE number = ' + n + ';';
             Close;
             ExecSQL;
@@ -1578,10 +1608,13 @@ begin
       Close;
       ExecSQL;
       SQLTransaction.Commit;
+      SQLTransaction.Active := False;
     end;
   except
     On E: Exception do
     begin
+      MainForm.SQLQuery1.Close;
+      MainForm.SQLQuery1.SQLTransaction.Active := False;
       MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
       Log(sDatabaseOpenError + E.Message);
     end;
@@ -1604,7 +1637,7 @@ begin
       //обновляем места
       SQL.Add('INSERT into main (number, thruplace)');
       SQL.Add(
-        'SELECT number, row_number() over(ORDER BY sumresult) as thruplace FROM main WHERE sumresult > 0 AND status ISNULL ORDER BY thruplace');
+        'SELECT number, row_number() over(ORDER BY sumstages DESC, sumresult) as thruplace FROM main WHERE sumresult > 0 AND status ISNULL ORDER BY thruplace');
       SQL.Add('ON CONFLICT(number) DO UPDATE SET thruplace = excluded.thruplace;');
       Close;
       ExecSQL;
@@ -1624,12 +1657,29 @@ begin
       SQL.Add('ON CONFLICT(number) DO UPDATE SET thrudiff= excluded.thrudiff;');
       Close;
       ExecSQL;
-      SQLTransaction.Commit;
+      SQL.Clear;
+
+      //ставим отставание в количестве СУ
+      SQL.Add('WITH');
+      SQL.Add('t1(sumstages1, num1) AS');
+      SQL.Add('(SELECT sumstages, number FROM main WHERE thruplace = 1),');
+      SQL.Add('t2(current, num2) AS');
+      SQL.Add(
+        '(SELECT sumstages, number FROM main WHERE sumplace IS NULL AND sumstages NOT NULL AND (status < 3 OR status IS NULL))');
+      SQL.Add('INSERT into main (thrudiff, number)');
+      SQL.Add('SELECT ''+'' || (t1.sumstages1 - t2.current) || ''' +
+        ' ' + sSU + ''', t2.num2 from t1, t2 WHERE TRUE');
+      SQL.Add('ON CONFLICT(number) DO UPDATE SET thrudiff= excluded.thrudiff;');
       Close;
+      ExecSQL;
+      SQLTransaction.Commit;
+      SQLTransaction.Active := False;
     end;
   except
     On E: Exception do
     begin
+      MainForm.SQLQuery1.Close;
+      MainForm.SQLQuery1.SQLTransaction.Active := False;
       MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
       Log(sDatabaseOpenError + E.Message);
     end;
@@ -1760,7 +1810,7 @@ var
   about: rAboutHolder;
   fileStream: TFilestream;
   Info: rCharsetInfo;
-  S: PChar;
+  S: pchar;
 begin
   if dbopen then
   begin
@@ -1805,7 +1855,18 @@ begin
       try
         ocsvStrings.LoadFromFile(FileName);
         if ContainsText(Info.Name, 'windows') then
-          ocsvStrings.Text := WinCPToUTF8(ocsvStrings.Text);
+        begin
+          if ContainsText(Info.Name, '1251') then
+            ocsvStrings.Text := CP1251ToUTF8(ocsvStrings.Text)
+          else if ContainsText(Info.Name, '1252') then
+            ocsvStrings.Text := CP1252ToUTF8(ocsvStrings.Text)
+          else if ContainsText(Info.Name, '1253') then
+            ocsvStrings.Text := CP1253ToUTF8(ocsvStrings.Text)
+          else if ContainsText(Info.Name, '1255') then
+            ocsvStrings.Text := CP1255ToUTF8(ocsvStrings.Text)
+          else
+            ocsvStrings.Text := WinCPToUTF8(ocsvStrings.Text);
+        end;
 
         legend.DelimitedText := ocsvStrings[0];
 
@@ -1985,7 +2046,7 @@ begin
               SQLTransaction.Commit;
               Close;
             end;
-            LoadIni;
+            LoadConfig;
             LoadIniCategory;
           end;
           RefreshAll;
@@ -2120,21 +2181,20 @@ end;
 //  strlst.Free;
 //end;
 
-procedure LoadFinishTime(FileName: string);
+function InputComboSelectStage: integer;
 var
-  importfinish: integer;
-  ocsvStrings: TStringList;
+  c: TComponent;
+  strlst: TStringList;
   i, col, row: integer;
   k: integer = -1;
-  strlst: TStringList;
-  c: TComponent;
-  csvDoc: TCSVDocument;
-  sqlStr: string;
-  dns: boolean = False;
-  dnf: boolean = False;
 begin
-  try
-    strlst := TStringList.Create;
+  strlst := TStringList.Create;
+
+  // Если активных СУ больше одного, то
+  // получаем список активных СУ и выводим инпуткомбо
+  // В противном случае сразу выбираем активный СУ
+  if CountActiveStages > 1 then
+  begin
     for i := 1 to maxstages do
     begin
       c := MainForm.FindComponent('RadioCur' + IntToStr(i));
@@ -2147,337 +2207,354 @@ begin
         end;
       end;
     end;
-    importfinish := MyInputCombo(sImportFinish, sSetTimeToSU, strlst, k) + 1;
-    //вводим номер СУ для ввода финишных результатов
-    if importfinish > 0 then
-    begin
-      Screen.Cursor := crSQLWait;
-      if dbopen then
-      begin
-        try
-          with MainForm.SQLQuery1 do
-          begin
-            SQL.Clear;
-            SQL.Add('DELETE from loadresult');
-            Close;
-            ExecSQL;
-            SQLTransaction.Commit;
-            Close;
-          end;
+    Result := MyInputCombo(sImportFinish, sSetTimeToSU, strlst, k) + 1;
+  end
+  else
+    Result := SelectedStage;
+  strlst.Free;
+end;
 
-          try
-            ocsvStrings := TStringList.Create;
-            ocsvStrings.LoadFromFile(FileName);
-            csvDoc := TCSVDocument.Create;
-            csvDoc.Delimiter := ';';
-            //удаляем комментарии (#)
-            for  i := ocsvStrings.Count - 1 downto 0 do
+procedure LoadFinishTime(FileName: string);
+var
+  importfinish: integer;
+  ocsvStrings: TStringList;
+  i, col, row: integer;
+  strlst: TStringList;
+  csvDoc: TCSVDocument;
+  sqlStr: string;
+  dns: boolean = False;
+  dnf: boolean = False;
+begin
+  importfinish := InputComboSelectStage;
+
+  //вводим номер СУ для ввода финишных результатов
+  if importfinish > 0 then
+  begin
+    Screen.Cursor := crSQLWait;
+    if dbopen then
+    begin
+      try
+        with MainForm.SQLQuery1 do
+        begin
+          SQL.Clear;
+          SQL.Add('DELETE from loadresult');
+          Close;
+          ExecSQL;
+          SQLTransaction.Commit;
+          Close;
+        end;
+
+        try
+          ocsvStrings := TStringList.Create;
+          ocsvStrings.LoadFromFile(FileName);
+          csvDoc := TCSVDocument.Create;
+          csvDoc.Delimiter := ';';
+          //удаляем комментарии (#)
+          for  i := ocsvStrings.Count - 1 downto 0 do
+          begin
+            if Pos('#', Trim(ocsvStrings.ValueFromIndex[i])) = 1 then
             begin
-              if Pos('#', Trim(ocsvStrings.ValueFromIndex[i])) = 1 then
+              ocsvStrings.Delete(i);
+            end;
+          end;
+          csvDoc.CSVText := ocsvStrings.Text;
+          //считаем количество значений
+          col := csvDoc.MaxColCount;
+          //если значений 6 (number, starttime, correction, finishtime, penalty, status)
+          //то загрузка результатов этапа, например из другого компа на другом СУ
+          //Print('RowCount: ' + IntToStr(csvDoc.RowCount));
+          if col = 6 then
+          begin
+            if not BackupBD then
+            begin
+              if MessageDlg(sCanNotBackup, mtWarning, [mbYes, mbNo], 0) = mrNo then
               begin
-                ocsvStrings.Delete(i);
+                Screen.Cursor := crDefault;
+                Exit;
               end;
             end;
-            csvDoc.CSVText := ocsvStrings.Text;
-            //считаем количество значений
-            col := csvDoc.MaxColCount;
-            //если значений 6 (number, starttime, correction, finishtime, penalty, status)
-            //то загрузка результатов этапа, например из другого компа на другом СУ
-            //Print('RowCount: ' + IntToStr(csvDoc.RowCount));
-            if col = 6 then
+            MainForm.SQLQuery1.SQL.Clear;
+            MainForm.SQLQuery1.SQL.Add(
+              'INSERT INTO loadresult (number, starttime, correction, finishtime, penalty, status)');
+            MainForm.SQLQuery1.SQL.Add('VALUES');
+            for row := 0 to csvDoc.RowCount - 1 do
             begin
-              if not BackupBD then
+              MainForm.SQLQuery1.SQL.Add('(');
+              //соединяем строку в sql формат
+              for i := 0 to col - 1 do
               begin
-                if MessageDlg(sCanNotBackup, mtWarning, [mbYes, mbNo], 0) = mrNo then
-                begin
-                  Screen.Cursor := crDefault;
-                  Exit;
-                end;
-              end;
-              MainForm.SQLQuery1.SQL.Clear;
-              MainForm.SQLQuery1.SQL.Add(
-                'INSERT INTO loadresult (number, starttime, correction, finishtime, penalty, status)');
-              MainForm.SQLQuery1.SQL.Add('VALUES');
-              for row := 0 to csvDoc.RowCount - 1 do
-              begin
-                MainForm.SQLQuery1.SQL.Add('(');
-                //соединяем строку в sql формат
-                for i := 0 to col - 1 do
-                begin
-                  sqlStr := csvDoc.Cells[i, row];
-                  //в пустые ячейки ставим NULL
-                  if sqlStr = '' then
-                    sqlStr := 'NULL'
-                  else
-                    //непустые ячейки обрамляем двойными кавычками (")
-                    sqlStr := '"' + sqlStr + '"';
-
-                  MainForm.SQLQuery1.SQL.Add(sqlStr);
-                  //если ячейка не последняя ставим запятую
-                  if i <> col - 1 then
-                    MainForm.SQLQuery1.SQL.Add(',');
-
-                end;
-                MainForm.SQLQuery1.SQL.Add(')');
-                //если строка не последняя ставим запятую
-                if row <> csvDoc.RowCount - 1 then
-                  MainForm.SQLQuery1.SQL.Add(',');
-              end;
-              MainForm.SQLQuery1.SQL.Add(';');
-              //Print(MainForm.SQLQuery1.SQL.Text);
-              MainForm.SQLQuery1.Close;
-              MainForm.SQLQuery1.ExecSQL;
-              MainForm.SQLQuery1.SQLTransaction.Commit;
-              MainForm.SQLQuery1.Close;
-
-              with MainForm.SQLQuery1 do
-              begin
-                SQL.Clear;
-                SQL.Add('INSERT into main (number,');
-                SQL.Add('starttime' + IntToStr(importfinish) + ',');
-                SQL.Add('correction' + IntToStr(importfinish) + ',');
-                SQL.Add('finishtime' + IntToStr(importfinish) + ',');
-                SQL.Add('penalty' + IntToStr(importfinish) + ',');
-                SQL.Add('status' + IntToStr(importfinish));
-                SQL.Add(')');
-                SQL.Add(
-                  'SELECT number, starttime, correction, finishtime, penalty, status FROM loadresult WHERE number NOTNULL');
-                SQL.Add('ON CONFLICT (number) DO UPDATE SET');
-                SQL.Add('starttime' + IntToStr(importfinish) +
-                  ' = excluded.starttime' + IntToStr(importfinish) + ',');
-                SQL.Add('correction' + IntToStr(importfinish) +
-                  ' = excluded.correction' + IntToStr(importfinish) + ',');
-                SQL.Add('finishtime' + IntToStr(importfinish) +
-                  ' = excluded.finishtime' + IntToStr(importfinish) + ',');
-                SQL.Add('penalty' + IntToStr(importfinish) +
-                  ' = excluded.penalty' + IntToStr(importfinish) + ',');
-                SQL.Add('status' + IntToStr(importfinish) +
-                  ' = excluded.status' + IntToStr(importfinish));
-                Close;
-                ExecSQL;
-                SQLTransaction.Commit;
-                Close;
-                MainForm.SQLTransaction1.Active := False;
-              end;
-              RecalculateStatus(GetAllStageStatus(importfinish));
-              UpdateResults;
-              Log(sImportFinishtime + ' ' + IntToStr(importfinish) +
-                ': ' + stageName[importfinish] + ' ' + sLoaded_o);
-            end
-            //если значений 3 (number, starttime, correction)
-            //то загрузка из стартового телефона
-            else if col = 3 then
-            begin
-              if not BackupBD then
-              begin
-                if MessageDlg(sCanNotBackup, mtWarning, [mbYes, mbNo], 0) = mrNo then
-                begin
-                  Screen.Cursor := crDefault;
-                  Exit;
-                end;
-              end;
-              MainForm.SQLQuery1.SQL.Clear;
-              MainForm.SQLQuery1.SQL.Add(
-                'INSERT INTO loadresult (number, starttime, correction, status)');
-              MainForm.SQLQuery1.SQL.Add('VALUES');
-
-              for row := 0 to csvDoc.RowCount - 1 do
-              begin
-                //пропускаем строку с заголовками
-                if csvDoc.Cells[i, row] = 'number' then
-                  Continue;
-                MainForm.SQLQuery1.SQL.Add('(');
-                //соединяем строку в sql формат
-                dns := False;
-                for i := 0 to col - 1 do
-                begin
-                  sqlStr := csvDoc.Cells[i, row];
-                  //в пустые ячейки ставим NULL
-                  if sqlStr = '' then
-                    sqlStr := 'NULL'
-                  else if sqlStr = 'DNS' then
-                  begin
-                    sqlStr := 'NULL';
-                    dns := True;
-                  end
-                  else
-                  begin
-                    //разделитель целой и дробной части меняем на точку
-                    sqlStr :=
-                      ReplaceStr(sqlStr, DefaultFormatSettings.DecimalSeparator, '.');
-                    //непустые ячейки обрамляем двойными кавычками (")
-                    sqlStr := '"' + sqlStr + '"';
-                  end;
-
-                  MainForm.SQLQuery1.SQL.Add(sqlStr);
-                  ////если ячейка не последняя ставим запятую
-                  //if i <> col - 1 then
-                  MainForm.SQLQuery1.SQL.Add(',');
-                end;
-                //если есть DNS, то ставим в статус 2
-                if dns then
-                  MainForm.SQLQuery1.SQL.Add('2')
+                sqlStr := csvDoc.Cells[i, row];
+                //в пустые ячейки ставим NULL
+                if sqlStr = '' then
+                  sqlStr := 'NULL'
                 else
-                  MainForm.SQLQuery1.SQL.Add('NULL');
-                MainForm.SQLQuery1.SQL.Add(')');
-                //если строка не последняя ставим запятую
-                if row <> csvDoc.RowCount - 1 then
+                  //непустые ячейки обрамляем двойными кавычками (")
+                  sqlStr := '"' + sqlStr + '"';
+
+                MainForm.SQLQuery1.SQL.Add(sqlStr);
+                //если ячейка не последняя ставим запятую
+                if i <> col - 1 then
                   MainForm.SQLQuery1.SQL.Add(',');
-              end;
 
-              MainForm.SQLQuery1.SQL.Add(';');
-              MainForm.SQLQuery1.Close;
-              MainForm.SQLQuery1.ExecSQL;
-              MainForm.SQLQuery1.SQLTransaction.Commit;
-              MainForm.SQLQuery1.Close;
-
-              with MainForm.SQLQuery1 do
-              begin
-                SQL.Clear;
-                SQL.Add('INSERT into main (number,');
-                SQL.Add('starttime' + IntToStr(importfinish) + ',');
-                SQL.Add('correction' + IntToStr(importfinish) + ',');
-                SQL.Add('status' + IntToStr(importfinish));
-                SQL.Add(')');
-                SQL.Add(
-                  'SELECT number, starttime, correction, status FROM loadresult WHERE number NOTNULL');
-                SQL.Add('ON CONFLICT (number) DO UPDATE SET');
-                SQL.Add('starttime' + IntToStr(importfinish) +
-                  ' = excluded.starttime' + IntToStr(importfinish) + ',');
-                SQL.Add('correction' + IntToStr(importfinish) +
-                  ' = excluded.correction' + IntToStr(importfinish) + ',');
-                SQL.Add('status' + IntToStr(importfinish) +
-                  ' = excluded.status' + IntToStr(importfinish));
-                //Print(SQL.Text);
-                Close;
-                ExecSQL;
-                SQLTransaction.Commit;
-                Close;
-                MainForm.SQLTransaction1.Active := False;
               end;
-              //SetGlobalStatus(n);
-              UpdateResults;
-              Log(sImportStarttime + ' ' + IntToStr(importfinish) +
-                ': ' + stageName[importfinish] + ' ' + sLoaded);
-            end
-            //если значений 2 (number, finishtime)
-            //то загрузка из финишного телефона
-            else if col = 2 then
+              MainForm.SQLQuery1.SQL.Add(')');
+              //если строка не последняя ставим запятую
+              if row <> csvDoc.RowCount - 1 then
+                MainForm.SQLQuery1.SQL.Add(',');
+            end;
+            MainForm.SQLQuery1.SQL.Add(';');
+            //Print(MainForm.SQLQuery1.SQL.Text);
+            MainForm.SQLQuery1.Close;
+            MainForm.SQLQuery1.ExecSQL;
+            MainForm.SQLQuery1.SQLTransaction.Commit;
+            MainForm.SQLQuery1.Close;
+
+            with MainForm.SQLQuery1 do
             begin
-              if not BackupBD then
-              begin
-                if MessageDlg(sCanNotBackup, mtWarning, [mbYes, mbNo], 0) = mrNo then
-                begin
-                  Screen.Cursor := crDefault;
-                  Exit;
-                end;
-              end;
-              MainForm.SQLQuery1.SQL.Clear;
-              MainForm.SQLQuery1.SQL.Add(
-                'INSERT INTO loadresult (number, finishtime, status)');
-              MainForm.SQLQuery1.SQL.Add('VALUES');
-              for row := 0 to csvDoc.RowCount - 1 do
-              begin
-                //пропускаем строку с заголовками
-                if csvDoc.Cells[i, row] = 'number' then
-                  Continue;
-                MainForm.SQLQuery1.SQL.Add('(');
-                //соединяем строку в sql формат
-                dnf := False;
-                for i := 0 to col - 1 do
-                begin
-                  sqlStr := csvDoc.Cells[i, row];
-                  //в пустые ячейки ставим NULL
-                  if sqlStr = '' then
-                    sqlStr := 'NULL'
-                  else if sqlStr = 'DNF' then
-                  begin
-                    sqlStr := 'NULL';
-                    dnf := True;
-                  end
-                  else
-                  begin
-                    //разделитель целой и дробной части меняем на точку
-                    sqlStr :=
-                      ReplaceStr(sqlStr, DefaultFormatSettings.DecimalSeparator, '.');
-                    //непустые ячейки обрамляем двойными кавычками (")
-                    sqlStr := '"' + sqlStr + '"';
-                  end;
-                  MainForm.SQLQuery1.SQL.Add(sqlStr);
-                  ////если ячейка не последняя ставим запятую
-                  //if i <> col - 1 then
-                  MainForm.SQLQuery1.SQL.Add(',');
-                end;
-                //если есть DNF, то ставим в статус 1
-                if dnf then
-                  MainForm.SQLQuery1.SQL.Add('1')
-                else
-                  MainForm.SQLQuery1.SQL.Add('NULL');
-                MainForm.SQLQuery1.SQL.Add(')');
-                //если строка не последняя ставим запятую
-                if row <> csvDoc.RowCount - 1 then
-                  MainForm.SQLQuery1.SQL.Add(',');
-              end;
-
-              MainForm.SQLQuery1.SQL.Add(';');
-              MainForm.SQLQuery1.Close;
-              MainForm.SQLQuery1.ExecSQL;
-              MainForm.SQLQuery1.SQLTransaction.Commit;
-              MainForm.SQLQuery1.Close;
-
-              with MainForm.SQLQuery1 do
-              begin
-                SQL.Clear;
-                SQL.Add('INSERT into main (number,');
-                SQL.Add('finishtime' + IntToStr(importfinish) + ',');
-                SQL.Add('status' + IntToStr(importfinish));
-                SQL.Add(')');
-                SQL.Add(
-                  'SELECT number, finishtime, status FROM loadresult WHERE number NOTNULL');
-                SQL.Add('ON CONFLICT (number) DO UPDATE SET');
-                SQL.Add('finishtime' + IntToStr(importfinish) +
-                  ' = excluded.finishtime' + IntToStr(importfinish) + ',');
-                SQL.Add('status' + IntToStr(importfinish) +
-                  ' = excluded.status' + IntToStr(importfinish));
-                Close;
-                ExecSQL;
-                SQLTransaction.Commit;
-                Close;
-                MainForm.SQLTransaction1.Active := False;
-              end;
-              //SetGlobalStatus(n);
-              UpdateResults;
-              Log(sImportFinishtime + ' ' + IntToStr(importfinish) +
-                ': ' + stageName[importfinish] + ' ' + sLoaded_o);
-            end
-            else
-              MessageDlg(sFinishTimeOpenError, mtError, [mbOK], 0);
-          finally
-            ocsvStrings.Free;
-            csvDoc.Free;
-          end;
-        except
-          On E: Exception do
+              SQL.Clear;
+              SQL.Add('INSERT into main (number,');
+              SQL.Add('starttime' + IntToStr(importfinish) + ',');
+              SQL.Add('correction' + IntToStr(importfinish) + ',');
+              SQL.Add('finishtime' + IntToStr(importfinish) + ',');
+              SQL.Add('penalty' + IntToStr(importfinish) + ',');
+              SQL.Add('status' + IntToStr(importfinish));
+              SQL.Add(')');
+              SQL.Add(
+                'SELECT number, starttime, correction, finishtime, penalty, status FROM loadresult WHERE number NOTNULL');
+              SQL.Add('ON CONFLICT (number) DO UPDATE SET');
+              SQL.Add('starttime' + IntToStr(importfinish) +
+                ' = excluded.starttime' + IntToStr(importfinish) + ',');
+              SQL.Add('correction' + IntToStr(importfinish) +
+                ' = excluded.correction' + IntToStr(importfinish) + ',');
+              SQL.Add('finishtime' + IntToStr(importfinish) +
+                ' = excluded.finishtime' + IntToStr(importfinish) + ',');
+              SQL.Add('penalty' + IntToStr(importfinish) +
+                ' = excluded.penalty' + IntToStr(importfinish) + ',');
+              SQL.Add('status' + IntToStr(importfinish) +
+                ' = excluded.status' + IntToStr(importfinish));
+              Close;
+              ExecSQL;
+              SQLTransaction.Commit;
+              Close;
+              MainForm.SQLTransaction1.Active := False;
+            end;
+            RecalculateStatus(GetAllStageStatus(importfinish));
+            UpdateResults;
+            Log(sImportFinishtime + ' ' + IntToStr(importfinish) +
+              ': ' + stageName[importfinish] + ' ' + sLoaded_o);
+          end
+          //если значений 3 (number, starttime, correction)
+          //то загрузка из стартового телефона
+          else if col = 3 then
           begin
-            MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-            Log(sDatabaseOpenError + E.Message);
-          end;
+            if not BackupBD then
+            begin
+              if MessageDlg(sCanNotBackup, mtWarning, [mbYes, mbNo], 0) = mrNo then
+              begin
+                Screen.Cursor := crDefault;
+                Exit;
+              end;
+            end;
+            MainForm.SQLQuery1.SQL.Clear;
+            MainForm.SQLQuery1.SQL.Add(
+              'INSERT INTO loadresult (number, starttime, correction, status)');
+            MainForm.SQLQuery1.SQL.Add('VALUES');
+
+            for row := 0 to csvDoc.RowCount - 1 do
+            begin
+              //пропускаем строку с заголовками
+              if csvDoc.Cells[i, row] = 'number' then
+                Continue;
+              MainForm.SQLQuery1.SQL.Add('(');
+              //соединяем строку в sql формат
+              dns := False;
+              for i := 0 to col - 1 do
+              begin
+                sqlStr := csvDoc.Cells[i, row];
+                //в пустые ячейки ставим NULL
+                if sqlStr = '' then
+                  sqlStr := 'NULL'
+                else if sqlStr = 'DNS' then
+                begin
+                  sqlStr := 'NULL';
+                  dns := True;
+                end
+                else
+                begin
+                  //разделитель целой и дробной части меняем на точку
+                  sqlStr :=
+                    ReplaceStr(sqlStr, DefaultFormatSettings.DecimalSeparator, '.');
+                  //непустые ячейки обрамляем двойными кавычками (")
+                  sqlStr := '"' + sqlStr + '"';
+                end;
+
+                MainForm.SQLQuery1.SQL.Add(sqlStr);
+                ////если ячейка не последняя ставим запятую
+                //if i <> col - 1 then
+                MainForm.SQLQuery1.SQL.Add(',');
+              end;
+              //если есть DNS, то ставим в статус 2
+              if dns then
+                MainForm.SQLQuery1.SQL.Add('2')
+              else
+                MainForm.SQLQuery1.SQL.Add('NULL');
+              MainForm.SQLQuery1.SQL.Add(')');
+              //если строка не последняя ставим запятую
+              if row <> csvDoc.RowCount - 1 then
+                MainForm.SQLQuery1.SQL.Add(',');
+            end;
+
+            MainForm.SQLQuery1.SQL.Add(';');
+            MainForm.SQLQuery1.Close;
+            MainForm.SQLQuery1.ExecSQL;
+            MainForm.SQLQuery1.SQLTransaction.Commit;
+            MainForm.SQLQuery1.Close;
+
+            with MainForm.SQLQuery1 do
+            begin
+              SQL.Clear;
+              SQL.Add('INSERT into main (number,');
+              SQL.Add('starttime' + IntToStr(importfinish) + ',');
+              SQL.Add('correction' + IntToStr(importfinish) + ',');
+              SQL.Add('status' + IntToStr(importfinish));
+              SQL.Add(')');
+              SQL.Add(
+                'SELECT number, starttime, correction, status FROM loadresult WHERE number NOTNULL');
+              SQL.Add('ON CONFLICT (number) DO UPDATE SET');
+              SQL.Add('starttime' + IntToStr(importfinish) +
+                ' = excluded.starttime' + IntToStr(importfinish) + ',');
+              SQL.Add('correction' + IntToStr(importfinish) +
+                ' = excluded.correction' + IntToStr(importfinish) + ',');
+              SQL.Add('status' + IntToStr(importfinish) +
+                ' = excluded.status' + IntToStr(importfinish));
+              //Print(SQL.Text);
+              Close;
+              ExecSQL;
+              SQLTransaction.Commit;
+              Close;
+              MainForm.SQLTransaction1.Active := False;
+            end;
+            //SetGlobalStatus(n);
+            UpdateResults;
+            Log(sImportStarttime + ' ' + IntToStr(importfinish) +
+              ': ' + stageName[importfinish] + ' ' + sLoaded);
+          end
+          //если значений 2 (number, finishtime)
+          //то загрузка из финишного телефона
+          else if col = 2 then
+          begin
+            if not BackupBD then
+            begin
+              if MessageDlg(sCanNotBackup, mtWarning, [mbYes, mbNo], 0) = mrNo then
+              begin
+                Screen.Cursor := crDefault;
+                Exit;
+              end;
+            end;
+            MainForm.SQLQuery1.SQL.Clear;
+            MainForm.SQLQuery1.SQL.Add(
+              'INSERT INTO loadresult (number, finishtime, status)');
+            MainForm.SQLQuery1.SQL.Add('VALUES');
+            for row := 0 to csvDoc.RowCount - 1 do
+            begin
+              //пропускаем строку с заголовками
+              if csvDoc.Cells[i, row] = 'number' then
+                Continue;
+              MainForm.SQLQuery1.SQL.Add('(');
+              //соединяем строку в sql формат
+              dnf := False;
+              for i := 0 to col - 1 do
+              begin
+                sqlStr := csvDoc.Cells[i, row];
+                //в пустые ячейки ставим NULL
+                if sqlStr = '' then
+                  sqlStr := 'NULL'
+                else if sqlStr = 'DNF' then
+                begin
+                  sqlStr := 'NULL';
+                  dnf := True;
+                end
+                else
+                begin
+                  //разделитель целой и дробной части меняем на точку
+                  sqlStr :=
+                    ReplaceStr(sqlStr, DefaultFormatSettings.DecimalSeparator, '.');
+                  //непустые ячейки обрамляем двойными кавычками (")
+                  sqlStr := '"' + sqlStr + '"';
+                end;
+                MainForm.SQLQuery1.SQL.Add(sqlStr);
+                ////если ячейка не последняя ставим запятую
+                //if i <> col - 1 then
+                MainForm.SQLQuery1.SQL.Add(',');
+              end;
+              //если есть DNF, то ставим в статус 1
+              if dnf then
+                MainForm.SQLQuery1.SQL.Add('1')
+              else
+                MainForm.SQLQuery1.SQL.Add('NULL');
+              MainForm.SQLQuery1.SQL.Add(')');
+              //если строка не последняя ставим запятую
+              if row <> csvDoc.RowCount - 1 then
+                MainForm.SQLQuery1.SQL.Add(',');
+            end;
+
+            MainForm.SQLQuery1.SQL.Add(';');
+            MainForm.SQLQuery1.Close;
+            MainForm.SQLQuery1.ExecSQL;
+            MainForm.SQLQuery1.SQLTransaction.Commit;
+            MainForm.SQLQuery1.Close;
+
+            with MainForm.SQLQuery1 do
+            begin
+              SQL.Clear;
+              SQL.Add('INSERT into main (number,');
+              SQL.Add('finishtime' + IntToStr(importfinish) + ',');
+              SQL.Add('status' + IntToStr(importfinish));
+              SQL.Add(')');
+              SQL.Add(
+                'SELECT number, finishtime, status FROM loadresult WHERE number NOTNULL');
+              SQL.Add('ON CONFLICT (number) DO UPDATE SET');
+              SQL.Add('finishtime' + IntToStr(importfinish) +
+                ' = excluded.finishtime' + IntToStr(importfinish) + ',');
+              SQL.Add('status' + IntToStr(importfinish) +
+                ' = excluded.status' + IntToStr(importfinish));
+              Close;
+              ExecSQL;
+              SQLTransaction.Commit;
+              Close;
+              MainForm.SQLTransaction1.Active := False;
+            end;
+            //SetGlobalStatus(n);
+            UpdateResults;
+            Log(sImportFinishtime + ' ' + IntToStr(importfinish) +
+              ': ' + stageName[importfinish] + ' ' + sLoaded_o);
+          end
+          else
+            MessageDlg(sFinishTimeOpenError, mtError, [mbOK], 0);
+        finally
+          ocsvStrings.Free;
+          csvDoc.Free;
+        end;
+      except
+        On E: Exception do
+        begin
+          MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+          Log(sDatabaseOpenError + E.Message);
         end;
       end;
-      Screen.Cursor := crDefault;
     end;
-  finally
-    strlst.Free;
+    Screen.Cursor := crDefault;
   end;
 end;
 
-procedure ExportFinishTime(FileName: string);
+procedure ExportFinishTime(FileName: string; stageIndex: integer);
+var
+  index: string;
 begin
+  index := IntToStr(stageIndex);
   MainForm.SQLQuery1.SQL.Text :=
-    'SELECT number, starttime' + IntToStr(CurrentStage) + ', correction' +
-    IntToStr(CurrentStage) + ', finishtime' + IntToStr(CurrentStage) +
-    ', penalty' + IntToStr(CurrentStage) + ', status' + IntToStr(CurrentStage) +
-    ' FROM main' + ';';
+    'SELECT number, starttime' + index + ', correction' + index +
+    ', finishtime' + index + ', penalty' + index + ', status' + index + ' FROM main;';
   SQLQueryToCSV(FileName, MainForm.SQLQuery1);
 end;
 
@@ -2500,7 +2577,7 @@ var
   //sql: string;
   //fileName: string;
   MyWorkbook: TsWorkbook;
-  MyWorksheet: TsWorksheet;
+  FinishWorksheet, ThruWorksheet: TsWorksheet;
   c, i, j: integer;
   stageColumnCount: integer = 3;
   categories, exportColumns, ColumnstageName, stageNames: TStringList;
@@ -2513,7 +2590,8 @@ begin
   begin
     // Create the spreadsheet
     MyWorkbook := TsWorkbook.Create;
-    MyWorksheet := MyWorkbook.AddWorksheet(sFinishProtocol);
+    FinishWorksheet := MyWorkbook.AddWorksheet(sFinishProtocol);
+    ThruWorksheet := MyWorkbook.AddWorksheet(sFinishThruProtocol);
 
     // Шрифты
     normalFont := TsFont.Create;
@@ -2639,8 +2717,8 @@ begin
         Open();
 
         // Запись категории
-        MyWorksheet.WriteText(j, 0, Categories[c]);
-        MyWorksheet.WriteFont(j, 0, icategoryFont);
+        FinishWorksheet.WriteText(j, 0, Categories[c]);
+        FinishWorksheet.WriteFont(j, 0, icategoryFont);
         Inc(j);
 
         // Отдельной строкой название СУ если их больше одного
@@ -2650,10 +2728,10 @@ begin
           begin
             // 7 - количество столбцов до отдельных результатов СУ
             // 4 - кол-во столбцов на СУ
-            MyWorksheet.WriteText(j, 7 + stageColumnCount * i, stageNames[i]);
-            MyWorksheet.WriteFont(j, 7 + stageColumnCount * i, ilegendFont);
-            MyWorksheet.WriteHorAlignment(j, 7 + stageColumnCount * i, haCenter);
-            MyWorksheet.MergeCells(j, 7 + stageColumnCount * i, j,
+            FinishWorksheet.WriteText(j, 7 + stageColumnCount * i, stageNames[i]);
+            FinishWorksheet.WriteFont(j, 7 + stageColumnCount * i, ilegendFont);
+            FinishWorksheet.WriteHorAlignment(j, 7 + stageColumnCount * i, haCenter);
+            FinishWorksheet.MergeCells(j, 7 + stageColumnCount * i, j,
               7 + stageColumnCount * i + stageColumnCount - 1);
           end;
           Inc(j);
@@ -2662,9 +2740,23 @@ begin
         // Запись имён столбцов
         for i := 0 to Fields.Count - 1 do
         begin
-          MyWorksheet.WriteText(j, i, ColumnstageName[i]);
-          MyWorksheet.WriteFont(j, i, ilegendFont);
-          MyWorksheet.WriteHorAlignment(j, i, haCenter);
+          FinishWorksheet.WriteText(j, i, ColumnstageName[i]);
+          FinishWorksheet.WriteFont(j, i, ilegendFont);
+          FinishWorksheet.WriteHorAlignment(j, i, haCenter);
+
+          // Изменяем ширину столбцов (да, в каждой категории :( )
+          if pos('number', exportColumns[i]) > 0 then
+            FinishWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints);
+          if pos('place', exportColumns[i]) > 0 then
+            FinishWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints);
+          if exportColumns[i] = 'name' then
+            FinishWorksheet.WriteColWidth(i, 125, TsSizeUnits.suPoints);
+          if exportColumns[i] = 'age' then
+            FinishWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints);
+          if pos('penalty', exportColumns[i]) > 0 then
+            FinishWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints);
+          if exportColumns[i] = 'sumstages' then
+            FinishWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints);
         end;
         Inc(j);
 
@@ -2679,37 +2771,23 @@ begin
               (Fields[i].AsString <> '')) or (exportColumns[i] = 'number') or
               (exportColumns[i] = 'sumstages') then
             begin
-              MyWorksheet.WriteNumber(j, i, Fields[i].AsInteger);
-              MyWorksheet.WriteHorAlignment(j, i, haCenter);
+              FinishWorksheet.WriteNumber(j, i, Fields[i].AsInteger);
+              FinishWorksheet.WriteHorAlignment(j, i, haCenter);
             end
             else if (pos('result', exportColumns[i]) > 0) or
               (pos('diff', exportColumns[i]) > 0) or
               (pos('penalty', exportColumns[i]) > 0) then
             begin
-              MyWorksheet.WriteText(j, i, HideLeadingZeroHour(Fields[i].AsString));
-              MyWorksheet.WriteHorAlignment(j, i, haRight);
+              FinishWorksheet.WriteText(j, i, HideLeadingZeroHour(Fields[i].AsString));
+              FinishWorksheet.WriteHorAlignment(j, i, haRight);
               if (exportColumns[i] = 'sumresult') then
-                MyWorksheet.WriteFont(j, i, ilegendFont);
+                FinishWorksheet.WriteFont(j, i, ilegendFont);
             end
             else
             begin
-              MyWorksheet.WriteText(j, i, Fields[i].AsString);
-              MyWorksheet.WriteFont(j, i, inormalFont);
+              FinishWorksheet.WriteText(j, i, Fields[i].AsString);
+              FinishWorksheet.WriteFont(j, i, inormalFont);
             end;
-
-            // Изменяем ширину столбцов (да, в каждой категории :( )
-            if pos('number', exportColumns[i]) > 0 then
-              MyWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints);
-            if pos('place', exportColumns[i]) > 0 then
-              MyWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints);
-            if exportColumns[i] = 'name' then
-              MyWorksheet.WriteColWidth(i, 125, TsSizeUnits.suPoints);
-            if exportColumns[i] = 'age' then
-              MyWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints);
-            if pos('penalty', exportColumns[i]) > 0 then
-              MyWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints);
-            if exportColumns[i] = 'sumstages' then
-              MyWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints);
           end;
           Next;
           Inc(j);
@@ -2720,9 +2798,96 @@ begin
       end;
     end;
 
-    // Изменяем ширину столбцов
-    // 0 - Номер
-    //MyWorksheet.WriteColWidth(0,50,TsSizeUnits.suPoints);
+
+    // Сквозной протокол
+    // Формируем список колонок для экспорта
+    exportColumns.Clear;
+    exportColumns.add('category');
+    exportColumns.add('sumplace');
+    exportColumns.add('number');
+    exportColumns.add('name');
+    exportColumns.add('sumresult');
+    exportColumns.add('thrudiff');
+
+    ColumnstageName.Clear;
+    ColumnstageName.add(sCategory);
+    ColumnstageName.add(splace);
+    ColumnstageName.add(sNumber);
+    ColumnstageName.add(sName);
+    ColumnstageName.add(sresult);
+    ColumnstageName.add(sdiffleader);
+
+    if CountActiveStages > 1 then
+    begin
+      exportColumns.add('sumstages');
+      ColumnstageName.add(ssumstages);
+    end;
+
+    j := 0;
+    with MainForm.ResultDataset7 do
+    begin
+      First;
+
+      // Запись имён столбцов
+      for i := 0 to exportColumns.Count - 1 do
+      begin
+        ThruWorksheet.WriteText(j, i, ColumnstageName[i]);
+        ThruWorksheet.WriteFont(j, i, ilegendFont);
+        ThruWorksheet.WriteHorAlignment(j, i, haCenter);
+
+        //// Изменяем ширину столбцов
+        //if exportColumns[i] = 'category' then
+        //ThruWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints)
+        if exportColumns[i] = 'sumplace' then
+          ThruWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints)
+        else if exportColumns[i] = 'number' then
+          ThruWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints)
+        else if exportColumns[i] = 'name' then
+          ThruWorksheet.WriteColWidth(i, 125, TsSizeUnits.suPoints)
+        //else if exportColumns[i] = 'sumresult' then
+        //ThruWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints)
+        //else if exportColumns[i] = 'thrudiff' then
+        //ThruWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints)
+        else if exportColumns[i] = 'sumstages' then
+          ThruWorksheet.WriteColWidth(i, 50, TsSizeUnits.suPoints);
+      end;
+      Inc(j);
+
+      // Запись результатов категории в worksheet
+      while not EOF do
+      begin
+        for i := 0 to exportColumns.Count - 1 do
+        begin
+          ThruWorksheet.WriteText(j, i, Fields[i].AsString);
+          //Если содержит 'place'
+          if (exportColumns[i] = 'sumplace') or (exportColumns[i] =
+            'number') or (exportColumns[i] = 'sumstages') then
+          begin
+            ThruWorksheet.WriteNumber(j, i, Fields[i].AsInteger);
+            ThruWorksheet.WriteHorAlignment(j, i, haCenter);
+          end
+          else if (exportColumns[i] = 'sumresult') or
+            (exportColumns[i] = 'place') then
+          begin
+            ThruWorksheet.WriteText(j, i, HideLeadingZeroHour(Fields[i].AsString));
+            ThruWorksheet.WriteHorAlignment(j, i, haRight);
+            ThruWorksheet.WriteFont(j, i, ilegendFont);
+          end
+          else if exportColumns[i] = 'thrudiff' then
+          begin
+            ThruWorksheet.WriteText(j, i, HideLeadingZeroHour(Fields[i].AsString));
+            ThruWorksheet.WriteHorAlignment(j, i, haRight);
+          end
+          else
+          begin
+            ThruWorksheet.WriteText(j, i, Fields[i].AsString);
+            ThruWorksheet.WriteFont(j, i, inormalFont);
+          end;
+        end;
+        Next;
+        Inc(j);
+      end;
+    end;
 
     // Save the spreadsheet to a file
     try
@@ -2781,7 +2946,7 @@ begin
     with MainForm.SQLQuery1 do
     begin
       SQL.Text := 'SELECT number FROM main WHERE starttime' +
-        IntToStr(CurrentStage) + ' BETWEEN "' +
+        IntToStr(ActiveStage) + ' BETWEEN "' +
         FormatDateTime('hh:nn:ss.zzz', timeBefore) + '" AND "' +
         FormatDateTime('hh:nn:ss.zzz', timeAfter) + '";';
       Open;
@@ -2906,6 +3071,35 @@ begin
       begin
         for k := ExportFields.Count - 1 downto 10 do
           ExportFields.Delete(k);
+      end;
+    end;
+  end;
+end;
+
+procedure ExportCSVResults(FileName: string);
+var
+  csvfilename: string;
+begin
+  csvfilename := FileName;
+
+  if FileExists(FileName) then
+  begin
+    if MessageDlg(sCSVResultsFileExists, mtWarning, [mbYes, mbNo], 0) <> mrYes then
+      exit;
+  end;
+
+  with MainForm.CSVResultsExporter do
+  begin
+    Dataset := MainForm.MainDataSource1.DataSet;
+    FileName := csvfilename;
+    Log(FileName);
+    try
+      Execute;
+    except
+      On E: Exception do
+      begin
+        MessageDlg(sCSVResultsExportError + E.Message, mtError, [mbOK], 0);
+        Log(sCSVResultsExportError + E.Message);
       end;
     end;
   end;
@@ -3168,15 +3362,16 @@ begin
 end;
 
 function CatStartList: TStringList;
-var
-  i, k: integer;
-  s: integer = 0;
+  //var
+  //  i, k: integer;
+  //  s: integer = 0;
 begin
   with MainForm.SQLQuery1 do
   begin
     Close;
     //sql запрос на список категорий
-    SQL.Text := 'SELECT category FROM main GROUP BY category';
+    SQL.Text := 'SELECT category FROM main GROUP BY category ORDER BY starttime' +
+      IntToStr(ActiveStage);
     //открываем
     Open;
     //перегоняем в стринглист список категорий
@@ -3189,23 +3384,25 @@ begin
         Next;
       end;
       Close;
+      MainForm.SQLTransaction1.Active := False;
       //сортируем категории по порядку категорий, показываемых в окне результатов
       //категории, которых нет в этом списке, будут первыми
       //s := 0;
-      for i := visiblecat downto 1 do
-      begin
-        k := Result.IndexOf(cat[i]);
-        if k > -1 then
-        begin
-          Result.Exchange(k, (Result.Count - 1) - s);
-          s := s + 1;
-        end;
-      end;
+      //for i := visiblecat downto 1 do
+      //begin
+      //  k := Result.IndexOf(cat[i]);
+      //  if k > -1 then
+      //  begin
+      //    Result.Exchange(k, (Result.Count - 1) - s);
+      //    s := s + 1;
+      //  end;
+      //end;
       //MainForm.Memo.Lines.Add(Result.Text);
     except
       on E: Exception do
       begin
         MessageDlg(E.Message, mtError, [mbOK], 0);
+        MainForm.SQLTransaction1.Active := False;
       end;
     end;
   end;
@@ -3258,6 +3455,7 @@ begin
   end;
 end;
 
+// Количество активных СУ
 function CountActiveStages: integer;
 var
   i: integer;
@@ -3268,8 +3466,8 @@ begin
       Inc(Result);
 end;
 
+//высчитываем номер СУ, где стоит выделение
 function SelectedStage: integer;
-  //высчитываем номер СУ, где стоит выделение
 var
   co, i: integer;
 begin
@@ -3284,8 +3482,8 @@ begin
   end;
 end;
 
-function CurrentStage: integer;
-  //высчитывает номер СУ, активное на данный момент
+//высчитывает номер СУ, активное на данный момент
+function ActiveStage: integer;
 var
   i: integer;
   c: TComponent;

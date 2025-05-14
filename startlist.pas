@@ -33,10 +33,13 @@ type
     TimeEdit1: TTimeEdit;
     procedure FormCreate(Sender: TObject);
     procedure ListBox1DragDrop(Sender, Source: TObject; X, Y: integer);
-    procedure ListBox1DragOver(Sender, Source: TObject; X, Y: integer; State: TDragState; var Accept: boolean);
-    procedure ListBox1MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: integer);
-    procedure GenerateStartlist(startCatList: string; startTime: TDateTime; delayBetweenRacers: integer;
-      delayBetweenCategories: integer; sortBy: StartListSortBy);
+    procedure ListBox1DragOver(Sender, Source: TObject; X, Y: integer;
+      State: TDragState; var Accept: boolean);
+    procedure ListBox1MouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: integer);
+    procedure GenerateStartlist(startCatList: string; startTime: TDateTime;
+      delayBetweenRacers: integer; delayBetweenCategories: integer;
+      sortBy: StartListSortBy);
   private
 
   public
@@ -71,6 +74,7 @@ begin
       end
       else
       begin
+        ComboBox1.Text := ComboBox1.Items[startlistSortByIndex];
         Label6.Visible := False;
         Panel1.Visible := False;
       end;
@@ -83,20 +87,23 @@ begin
         startTime := TimeEdit1.Time;
         delayBetweenRacers := SpinEditEx1.Value;
         delayBetweenCategories := SpinEditEx2.Value;
+        categoriesAtStartlist.Text := ListBox1.Items.Text;
+        startlistSortByIndex := ComboBox1.ItemIndex;
         if qualifier then
         begin
           sortBy := slByResult;
         end
         else
         begin
-          case ComboBox1.ItemIndex of
+          case startlistSortByIndex of
             0: sortBy := slByNumberAsc;
             1: sortBy := slByNumberDesc;
             2: sortBy := slByNameAsc;
             3: sortBy := slByNameDesc;
           end;
         end;
-        GenerateStartlist(ListBox1.Items.Text, startTime, delayBetweenRacers,
+
+        GenerateStartlist(categoriesAtStartlist.Text, startTime, delayBetweenRacers,
           delayBetweenCategories, sortBy);
         Log(sGenerateStartList + ': ' + ComboBox1.Text);
       end;
@@ -114,12 +121,9 @@ end;
 { TStartlistForm }
 
 procedure TStartlistForm.FormCreate(Sender: TObject);
-var
-  startlist: TStringList;
 begin
-  startlist := CatStartList;
-  ListBox1.Items.Text := startlist.Text;
-  startlist.Free;
+  if categoriesAtStartlist.Text.IsEmpty then categoriesAtStartlist := CatStartList;
+  ListBox1.Items.Text := categoriesAtStartlist.Text;
   TimeEdit1.Time := startTime;
   SpinEditEx1.Value := delayBetweenRacers;
   SpinEditEx2.Value := delayBetweenCategories;
@@ -140,20 +144,22 @@ begin
   end;
 end;
 
-procedure TStartlistForm.ListBox1DragOver(Sender, Source: TObject; X, Y: integer; State: TDragState;
-  var Accept: boolean);
+procedure TStartlistForm.ListBox1DragOver(Sender, Source: TObject;
+  X, Y: integer; State: TDragState; var Accept: boolean);
 begin
   Accept := Source is TListBox;
 end;
 
-procedure TStartlistForm.ListBox1MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: integer);
+procedure TStartlistForm.ListBox1MouseDown(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: integer);
 begin
   StartingPoint.X := X;
   StartingPoint.Y := Y;
 end;
 
-procedure TStartlistForm.GenerateStartlist(startCatList: string; startTime: TDateTime;
-  delayBetweenRacers: integer; delayBetweenCategories: integer; sortBy: StartListSortBy);
+procedure TStartlistForm.GenerateStartlist(startCatList: string;
+  startTime: TDateTime; delayBetweenRacers: integer; delayBetweenCategories: integer;
+  sortBy: StartListSortBy);
 var
   i, min, sec: integer;
   number: string;
@@ -165,7 +171,7 @@ begin
       CatList := TStringList.Create;
       CatList.Text := startCatList;
       //удаляем текущее время старта, оставшееся от файла квалификации
-      SQL.Text := ('UPDATE main SET starttime' + IntToStr(CurrentStage) + ' = NULL');
+      SQL.Text := ('UPDATE main SET starttime' + IntToStr(ActiveStage) + ' = NULL');
       ExecSQL;
       SQLTransaction.Commit;
       Close;
@@ -174,37 +180,42 @@ begin
       for i := 0 to CatList.Count - 1 do
       begin
         SQL.Clear;
-        SQL.Text := 'SELECT number FROM main WHERE category IS "' + CatList.Strings[i] + '"';
+        SQL.Text := 'SELECT number FROM main WHERE category IS "' +
+          CatList.Strings[i] + '"';
         if sortBy = slByResult then
         begin
-          SQL.Add('AND result' + IntToStr(CurrentStage) + ' NOTNULL');
+          SQL.Add('AND result' + IntToStr(ActiveStage) + ' NOTNULL');
           if not cbDNS.Checked then
-            SQL.Add('AND result' + IntToStr(CurrentStage) + ' <> ''DNS''');
+            SQL.Add('AND result' + IntToStr(ActiveStage) + ' <> ''DNS''');
           if not cbDNF.Checked then
-            SQL.Add('AND result' + IntToStr(CurrentStage) + ' <> ''DNF''');
+            SQL.Add('AND result' + IntToStr(ActiveStage) + ' <> ''DNF''');
           if not cbDSQ.Checked then
-            SQL.Add('AND result' + IntToStr(CurrentStage) + ' <> ''DSQ''');
-          SQL.Add('ORDER BY status DESC, place' + IntToStr(CurrentStage) + ' DESC');
+            SQL.Add('AND result' + IntToStr(ActiveStage) + ' <> ''DSQ''');
+          SQL.Add('ORDER BY status DESC, place' + IntToStr(ActiveStage) + ' DESC');
         end;
-        if sortBy = slByNumberAsc then
-          SQL.Add('ORDER BY number ASC');
-        if sortBy = slByNumberDesc then
-          SQL.Add('ORDER BY number DESC');
-        if sortBy = slByNameAsc then
-          SQL.Add('ORDER BY name ASC');
-        if sortBy = slByNameDesc then
-          SQL.Add('ORDER BY name DESC');
+        case sortBy of
+          slByNumberAsc:
+          begin
+            SQL.Add('ORDER BY number ASC');
+          end;
+          slByNumberDesc:
+            SQL.Add('ORDER BY number DESC');
+          slByNameAsc:
+            SQL.Add('ORDER BY name ASC');
+          slByNameDesc:
+            SQL.Add('ORDER BY name DESC');
+        end;
         Open;
         while not EOF do
         begin
           number := Fields.Fields[0].AsString;
           Next;
           MainForm.SQLQuery2.SQL.Text :=
-            'UPDATE main SET starttime' + IntToStr(CurrentStage) + ' = "' +
-            FormatDateTime('hh:nn:ss', startTime) + '" WHERE number =' + number;
+            'UPDATE main SET starttime' + IntToStr(ActiveStage) +
+            ' = "' + FormatDateTime('hh:nn:ss', startTime) + '" WHERE number =' + number;
           MainForm.SQLQuery2.ExecSQL;
-          min := delayBetweenRacers div 60;
           //кол-во минут
+          min := delayBetweenRacers div 60;
           sec := delayBetweenRacers - min * 60;
           startTime := startTime + EncodeTime(0, min, sec, 0);
         end;
@@ -215,10 +226,8 @@ begin
         MainForm.SQLQuery2.Close;
         MainForm.SQLTransaction2.Active := False;
       end;
-
+      //ToDo: а то не обновляло в основном окне
       UpdateResults;
-      //а то не обновляло в основном окне
-
     finally
       CatList.Free;
     end;

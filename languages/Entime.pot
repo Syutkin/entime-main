@@ -42,6 +42,11 @@ msgstr ""
 msgid "Электро"
 msgstr ""
 
+#: i18n.scategory
+msgctxt "i18n.scategory"
+msgid "Категория"
+msgstr ""
+
 #: i18n.scity
 msgctxt "i18n.scity"
 msgid "Город"
@@ -90,6 +95,14 @@ msgstr ""
 
 #: i18n.scorrectionalreadyset
 msgid "поправка уже установлена. Перезаписать значение?"
+msgstr ""
+
+#: i18n.scsvresultsexporterror
+msgid "Ошибка создания финишных результатов: "
+msgstr ""
+
+#: i18n.scsvresultsfileexists
+msgid "Файл с результатами уже существует. Перезаписать?"
 msgstr ""
 
 #: i18n.scurrentresults
@@ -162,13 +175,17 @@ msgstr ""
 msgid "Имя файла финала должно отличаться от имени файла квалификации"
 msgstr ""
 
+#: i18n.sfinal
+msgid "Финал"
+msgstr ""
+
 #: i18n.sfinalfileexists
 msgid "Файл финала уже существует. Перезаписать?"
 msgstr ""
 
 #: i18n.sfinishprotocol
 msgctxt "i18n.sfinishprotocol"
-msgid "Результаты"
+msgid "Финишный протокол"
 msgstr ""
 
 #: i18n.sfinishthruprotocol
@@ -288,6 +305,11 @@ msgctxt "i18n.sresult"
 msgid "Результат"
 msgstr ""
 
+#: i18n.sresults
+msgctxt "i18n.sresults"
+msgid "Результаты"
+msgstr ""
+
 #: i18n.sresultscleared
 msgid "Результаты соревнований удалены!"
 msgstr ""
@@ -341,6 +363,10 @@ msgstr ""
 msgid "Запуск программы"
 msgstr ""
 
+#: i18n.sstartprotocol
+msgid "Стартовый протокол"
+msgstr ""
+
 #: i18n.sstarttime
 msgctxt "i18n.sstarttime"
 msgid "Старт"
@@ -386,6 +412,7 @@ msgid "Итог"
 msgstr ""
 
 #: i18n.ssumstages
+msgctxt "i18n.ssumstages"
 msgid "Кол-во СУ"
 msgstr ""
 
@@ -510,6 +537,10 @@ msgstr ""
 
 #: tmainform.acloraclear.hint
 msgid "Убирает ненужные значение поправки"
+msgstr ""
+
+#: tmainform.acrunracesettings.caption
+msgid "Параметры соревнования"
 msgstr ""
 
 #: tmainform.acrunsettings.caption
@@ -649,6 +680,14 @@ msgid ""
 "с другим соревнованием/днём соревнования"
 msgstr ""
 
+#: tmainform.fileexportcsvresults.caption
+msgid "Экспорт результатов ..."
+msgstr ""
+
+#: tmainform.fileexportcsvresults.hint
+msgid "Экспорт результатов в CSV файл для подсчёта общего рейтинга"
+msgstr ""
+
 #: tmainform.fileexportcsvstartlist.caption
 msgid "Экспорт стартового протокола..."
 msgstr ""
@@ -677,12 +716,8 @@ msgstr ""
 msgid "Экспорт результатов этапа ..."
 msgstr ""
 
-#: tmainform.fileexportstageresults.dialog.title
-msgid "Экспорт результатов этапа"
-msgstr ""
-
 #: tmainform.fileexportstageresults.hint
-msgid "Экспорт результатов этапа для переноса в другую БД"
+msgid "Экспорт результатов этапов для переноса в другую БД"
 msgstr ""
 
 #: tmainform.fileexportsumdays.caption
@@ -695,18 +730,6 @@ msgstr ""
 
 #: tmainform.fileexportsumdays.hint
 msgid "Сохранить как..."
-msgstr ""
-
-#: tmainform.fileexportthru.caption
-msgid "Экспорт сквозного протокола ..."
-msgstr ""
-
-#: tmainform.fileexportthru.dialog.title
-msgid "Экспорт сквозного протокола"
-msgstr ""
-
-#: tmainform.fileexportthru.hint
-msgid "Формирование сквозного протокола в виде электронной таблицы"
 msgstr ""
 
 #: tmainform.filegeneratefinal.caption
@@ -1025,6 +1048,11 @@ msgstr ""
 #: tmainform.gridresult7.columns[5].title.caption
 msgctxt "tmainform.gridresult7.columns[5].title.caption"
 msgid "Отставание"
+msgstr ""
+
+#: tmainform.gridresult7.columns[6].title.caption
+msgctxt "tmainform.gridresult7.columns[6].title.caption"
+msgid "Кол-во СУ"
 msgstr ""
 
 #: tmainform.gridresult8.columns[0].title.caption
@@ -1936,6 +1964,14 @@ msgstr ""
 
 #: tsettingsform.groupboxcategory.hint
 msgid "Категории, которые будут показываться в окне результатов"
+msgstr ""
+
+#: tsettingsform.groupboxname.caption
+msgid "Название"
+msgstr ""
+
+#: tsettingsform.groupboxname.hint
+msgid "Название соревнования"
 msgstr ""
 
 #: tsettingsform.groupboxstages.caption

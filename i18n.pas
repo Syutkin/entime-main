@@ -27,6 +27,7 @@ resourcestring
   sAge = 'ГР';
   sTeam = 'Команда';
   sCity = 'Город';
+  sCategory = 'Категория';
 
   //имена СУ по умолчанию
   sSU  = 'СУ';
@@ -50,8 +51,11 @@ resourcestring
   sEnglish = 'English';
 
   //экспорт
-  sFinishProtocol = 'Результаты';
+  sStartProtocol = 'Стартовый протокол';
+  sFinishProtocol = 'Финишный протокол';
   sFinishThruProtocol = 'Сквозной протокол';
+  sResults = 'Результаты';
+  sFinal = 'Финал';
 
   //остальное
   sIncorrectCorrection = 'Некорректное значение поправки, введите верное значение';
@@ -114,6 +118,8 @@ resourcestring
   sFileExists = 'Файл уже существует. Перезаписать?';
   sFinalFileExists = 'Файл финала уже существует. Перезаписать?';
   sStartListFileExists = 'Файл стартового протокола уже существует. Перезаписать?';
+  sCSVResultsFileExists = 'Файл с результатами уже существует. Перезаписать?';
+  sCSVResultsExportError = 'Ошибка создания финишных результатов: ';
   sCanNotDeleteFile = 'Не удалось перезаписать файл';
   sTimeToStart = 'Время старта';
   sEnterStartTime = 'Введите новое время старта для номера';

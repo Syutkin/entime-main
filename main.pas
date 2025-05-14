@@ -43,10 +43,13 @@ type
     AcSetStarttime: TAction;
     AcLEDPanel: TAction;
     AcTelegramBot: TAction;
+    AcRunRaceSettings: TAction;
+    CSVResultsExporter: TCSVExporter;
     CSVStartListExporter: TCSVExporter;
     DataPortHTTP1: TDataPortHTTP;
     DataPortHTTPTelegramBot: TDataPortHTTP;
     FileExportCSVStartlist: TFileSaveAs;
+    FileExportCSVResults: TFileSaveAs;
     GenerateSumDays: TAction;
     EditCopy1: TEditCopy;
     EditCopy2: TEditCopy;
@@ -68,6 +71,10 @@ type
     MainDataset1email: TStringField;
     MainDataset1phone: TStringField;
     MenuItem10: TMenuItem;
+    MenuItemExportAllResults: TMenuItem;
+    MenuItemExportCSVResults: TMenuItem;
+    MenuItem2: TMenuItem;
+    Separator1: TMenuItem;
     MenuItemExportCSVStartList: TMenuItem;
     MenuItemTelegramBot: TMenuItem;
     N14: TMenuItem;
@@ -76,7 +83,7 @@ type
     MenuItemGenerateSumDays: TMenuItem;
     pmSetStartTime: TMenuItem;
     N12: TMenuItem;
-    MenuItem11: TMenuItem;
+    N15: TMenuItem;
     MenuItemExportStageResults: TMenuItem;
     MenuItemLoRaCopy: TMenuItem;
     N11: TMenuItem;
@@ -105,8 +112,6 @@ type
     MenuItemGenerateFinal: TMenuItem;
     ComboBox1Category: TComboBox;
     CurrentSU: TGroupBox;
-    ExportSpreadSheet2: TRxDBGridExportSpreadSheet;
-    FileExportThru: TFileSaveAs;
     FileNewDB: TFileSaveAs;
     GridResult3: TRxDBGrid;
     GridResult4: TRxDBGrid;
@@ -115,7 +120,6 @@ type
     GridResult7: TRxDBGrid;
     GridResult8: TRxDBGrid;
     HistoryFiles1: THistoryFiles;
-    MenuItem2: TMenuItem;
     MenuItemAbout: TMenuItem;
     MenuItemCOMClose: TMenuItem;
     MenuItemHelp: TMenuItem;
@@ -199,7 +203,6 @@ type
     RadioCur4: TRadioButton;
     RadioCur5: TRadioButton;
     RadioCur6: TRadioButton;
-    ExportSpreadSheet1: TRxDBGridExportSpreadSheet;
     Splitter1: TSplitter;
     ResultDataset1: TSqlite3Dataset;
     Splitter2: TSplitter;
@@ -324,6 +327,7 @@ type
     procedure AcGenerateStartTimeExecute(Sender: TObject);
     procedure AcLEDPanelExecute(Sender: TObject);
     procedure AcLoRaClearExecute(Sender: TObject);
+    procedure AcRunRaceSettingsExecute(Sender: TObject);
     procedure AcTelegramBotExecute(Sender: TObject);
     procedure AcSetStarttimeExecute(Sender: TObject);
     procedure CSVStartListExporterExportRow(Sender: TObject;
@@ -333,7 +337,13 @@ type
     procedure DataPortHTTPTelegramBotClose(Sender: TObject);
     procedure DataPortHTTPTelegramBotDataAppear(Sender: TObject);
     procedure DataPortHTTPTelegramBotError(Sender: TObject; const AMsg: ansistring);
+    procedure FileExportCSVResultsAccept(Sender: TObject);
+    procedure FileExportCSVResultsBeforeExecute(Sender: TObject);
     procedure FileExportCSVStartlistAccept(Sender: TObject);
+    procedure FileExportCSVStartlistBeforeExecute(Sender: TObject);
+    procedure FileExportFullBeforeExecute(Sender: TObject);
+    procedure FileExportStageResultsBeforeExecute(Sender: TObject);
+    procedure FileGenerateFinalBeforeExecute(Sender: TObject);
     procedure GenerateSumDaysExecute(Sender: TObject);
     procedure ComboBox1CategoryEditingDone(Sender: TObject);
     procedure COMStatus(Sender: TObject);
@@ -363,12 +373,10 @@ type
     procedure FileExportAllResultsAccept(Sender: TObject);
     procedure FileCloseExecute(Sender: TObject);
     procedure FileExportStageResultsAccept(Sender: TObject);
-    procedure FileExportThruAccept(Sender: TObject);
     procedure FileGenerateFinalAccept(Sender: TObject);
     procedure FileNewDBAccept(Sender: TObject);
     procedure FileOpenCSVAccept(Sender: TObject);
     procedure FileOpenCSVResultAccept(Sender: TObject);
-    procedure FileOpenCSVResultBeforeExecute(Sender: TObject);
     procedure FileOpenCSVSumAccept(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
@@ -488,6 +496,7 @@ var
   //задержка в мс между приёмом нового значения финиша
   checkinterval: integer = 250;
   NAME_VERSION: string;
+  raceName: string = '';
   //активные СУ
   stage: array[1..6] of boolean;
   //имена СУ
@@ -498,12 +507,17 @@ var
   //timemarkformat: string;
 
   //для генерации стартового протокола
+
   //время начала заездов
   startTime: TDateTime = 0.5;
   //время между стартами  (в секундах)
   delayBetweenRacers: integer = 60;
   //время между категориями (в минутах)
   delayBetweenCategories: integer = 3;
+  //выбранная сортировка
+  startlistSortByIndex: integer = 0;
+  //список категорий
+  categoriesAtStartlist: TStringList;
 
   //скрывать нулевое значение часа в результатах
   zerohour: boolean = True;
@@ -513,6 +527,9 @@ var
 
   //Telegram Bot
   telegrambotadress: string;
+
+  //Индекс этапа при экспорте
+  exportStageIndex: integer = 1;
 
 
   //CatList: TStringList;
@@ -555,7 +572,7 @@ begin
   StatDataset2.SQL :=
     'SELECT number, name, starttime1 as starttime, strftime(''%H:%M:%S'',julianday(time(''now'', ''localtime'')) - julianday(time(starttime1)) + 0.5) as timeontrack FROM main WHERE julianday(time(''now'', ''localtime'')) > julianday(time(starttime1)) AND finishtime1 ISNULL AND status1 ISNULL ORDER BY starttime';
   ResultDataset7.SQL :=
-    'SELECT category, thruplace as sumplace, number, name, sumresult, thrudiff FROM main WHERE sumresult NOTNULL ORDER BY status, sumresult';
+    'SELECT category, thruplace as sumplace, number, name, sumresult, thrudiff, sumstages FROM main WHERE sumresult NOTNULL ORDER BY status, thruplace';
   ResultDataset8.SQL :=
     'SELECT * from main WHERE sumresult NOTNULL ORDER BY category, status, sumstages DESC, IFNULL(sumplace,''toend'')';
 
@@ -590,6 +607,7 @@ begin
 
   (Sender as TForm).Caption := NAME_VERSION;
 
+  categoriesAtStartlist := TStringList.Create;
 end;
 
 
@@ -637,7 +655,6 @@ begin
   else
   begin
     MessageDlg(sIncorrectCorrection, mtInformation, [mbOK], 0);
-    Abort;
   end;
 end;
 
@@ -674,6 +691,11 @@ begin
   ExportCSVStartList(FileExportCSVStartlist.Dialog.FileName);
 end;
 
+procedure TMainForm.FileExportCSVStartlistBeforeExecute(Sender: TObject);
+begin
+  TFileSaveAs(Sender).Dialog.FileName := raceName + '-' + UTF8LowerCase(sStartProtocol);
+end;
+
 procedure TMainForm.FileCloseExecute(Sender: TObject);
 var
   n: integer;
@@ -708,14 +730,7 @@ end;
 
 procedure TMainForm.FileExportStageResultsAccept(Sender: TObject);
 begin
-  ExportFinishTime(FileExportStageResults.Dialog.FileName);
-end;
-
-procedure TMainForm.FileExportThruAccept(Sender: TObject);
-begin
-  ExportSpreadSheet2.FileName := FileExportThru.Dialog.FileName;
-  ExportSpreadSheet2.Execute;
-  Log(sResultsThruExportedToFile + ' ' + FileExportThru.Dialog.FileName);
+  ExportFinishTime(FileExportStageResults.Dialog.FileName, exportStageIndex);
 end;
 
 procedure TMainForm.FileGenerateFinalAccept(Sender: TObject);
@@ -741,11 +756,6 @@ begin
   LoadFinishTime((Sender as TFileOpen).Dialog.FileName);
 end;
 
-procedure TMainForm.FileOpenCSVResultBeforeExecute(Sender: TObject);
-begin
-
-end;
-
 procedure TMainForm.FileOpenCSVSumAccept(Sender: TObject);
 begin
   AddDayResult((Sender as TFileOpen).Dialog.FileName);
@@ -762,6 +772,7 @@ begin
   DataPortHTTP1.OnDataAppear := nil;
   DataPortHTTP1.OnError := nil;
   DataPortHTTP1 := nil;
+  categoriesAtStartlist.Free;
 end;
 
 procedure TMainForm.AcViewMemoExecute(Sender: TObject);
@@ -908,6 +919,12 @@ begin
   end;
 end;
 
+procedure TMainForm.AcRunRaceSettingsExecute(Sender: TObject);
+begin
+  // 2 - страница с настройками соревнования
+  SettingsForm.RunSettings(2);
+end;
+
 procedure TMainForm.AcTelegramBotExecute(Sender: TObject);
 begin
   //if AcTelegramBot.Checked then
@@ -952,6 +969,17 @@ procedure TMainForm.DataPortHTTPTelegramBotError(Sender: TObject;
   const AMsg: ansistring);
 begin
   Print('Telegram Bot error: ' + AMsg);
+end;
+
+procedure TMainForm.FileExportCSVResultsAccept(Sender: TObject);
+begin
+  ExportCSVResults(FileExportCSVResults.Dialog.FileName);
+end;
+
+procedure TMainForm.FileExportCSVResultsBeforeExecute(Sender: TObject);
+begin
+  TFileSaveAs(Sender).Dialog.FileName :=
+    raceName + '-' + UTF8LowerCase(sResults);
 end;
 
 procedure TMainForm.GenerateSumDaysExecute(Sender: TObject);
@@ -1219,31 +1247,26 @@ begin
   InitDB(FileOpenDB.Dialog.FileName);
 end;
 
+procedure TMainForm.FileExportFullBeforeExecute(Sender: TObject);
+begin
+  TFileSaveAs(Sender).Dialog.FileName := raceName + '-' + UTF8LowerCase(sFinishProtocol);
+end;
 
-//procedure TMainForm.FileExportFullAccept(Sender: TObject);
-//var
-//  sql: string;
-//begin
-//  MainDataset1.Close;
-//  //sql запрос для выдачи итоговой таблицы
-//  sql := MainDataset1.SQL;
-//  //сортирует по категории, а внутри неё по результату
-//  MainDataset1.SQL :=
-//    'SELECT * from main ORDER BY category, IFNULL(sumplace,''toend''), IFNULL(sumresult,''toend'');';
-//  //манёвр с 'toend' чтобы результат NULL был в конце
-//  MainDataset1.Open;
-//  ExportSpreadSheet1.FileName := FileExportFull.Dialog.FileName;
-//  ExportSpreadSheet1.Execute;
-//  MainDataset1.Close;
-//  MainDataset1.SQL := sql;
-//  MainDataset1.Open;
-//  Log(sResultsExportedToFile + ' ' + FileExportFull.Dialog.FileName);
-//end;
+procedure TMainForm.FileExportStageResultsBeforeExecute(Sender: TObject);
+begin
+  exportStageIndex := InputComboSelectStage;
+  TFileSaveAs(Sender).Dialog.FileName :=
+    raceName + '-' + UTF8LowerCase(sResults) + '-' + stageName[exportStageIndex];
+end;
 
+procedure TMainForm.FileGenerateFinalBeforeExecute(Sender: TObject);
+begin
+  TFileSaveAs(Sender).Dialog.FileName := raceName + '-' + UTF8LowerCase(sFinal);
+end;
 
 procedure TMainForm.FileExportFullAccept(Sender: TObject);
 begin
-  ExportAllResultsToXLSX(FileExportFull.Dialog.FileName);
+  ExportAllResultsToXLSX(TFileSaveAs(Sender).Dialog.FileName);
 end;
 
 
@@ -1466,8 +1489,8 @@ var
   minstarttime: string;
 begin
   SQLQuery1.Close;
-  SQLQuery1.SQL.Text := 'SELECT min(starttime' + IntToStr(CurrentStage) +
-    ') as starttime FROM main WHERE starttime' + IntToStr(CurrentStage) + ' NOTNULL;';
+  SQLQuery1.SQL.Text := 'SELECT min(starttime' + IntToStr(ActiveStage) +
+    ') as starttime FROM main WHERE starttime' + IntToStr(ActiveStage) + ' NOTNULL;';
   SQLQuery1.Open();
   minstarttime := SQLQuery1.FieldByName('starttime').AsString;
   Print(minstarttime);
@@ -1735,8 +1758,8 @@ begin
   if Column.FieldName = 'category' then
   begin
     // ToDo: обновлять список категорий при их реальном изменении
-    ComboBox1Category.Items.Clear;
     //а не делать каждый раз sql запросы
+    ComboBox1Category.Items.Clear;
     ComboBox1Category.Text :=
       TRxDBGrid(Sender).DataSource.DataSet.FieldByName('category').AsString;
     if StatDataset1.Active then
@@ -1748,6 +1771,9 @@ begin
     end;
     Editor := ComboBox1Category;
     Editor.BoundsRect := TRxDBGrid(Sender).SelectedFieldRect;
+    // И заодно обнуляем список категорий
+    // ToDo: делать это только при непосредственном изменении категорий
+    categoriesAtStartlist.Text := '';
   end;
 end;
 
