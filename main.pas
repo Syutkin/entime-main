@@ -1,6 +1,7 @@
 unit Main;
 
 {$mode objfpc}{$H+}
+
 {$IFOPT D+} {$DEFINE DEBUG} {$ENDIF}
 
 interface
@@ -12,14 +13,10 @@ uses
   rxdbcomb, rxtoolbar, RxTimeEdit, RxIniPropStorage, rxspin, RxAboutDialog,
   RxDBGridExportSpreadSheet, DB, Sqlite3DS, sqlite3conn, sqldb, fpcsvexport,
   dateutils, Controls, DBGrids, Graphics, i18n, LCLTranslator, VersionSupport,
-  LazUTF8, PropertyStorage, Buttons, DBCtrls, translations, Types, Clipbrd,
-  lclintf, DataPort, fpDBExport;
+  LazUTF8, PropertyStorage, Buttons, DBCtrls, translations, Types,
+  Clipbrd, lclintf, DataPort, fpDBExport, Startlist, MyRxDBGrid;
 
 type
-
-  TMyDBGrid = class(TRxDBGrid);
-
-
 
   { TMainForm }
 
@@ -74,6 +71,7 @@ type
     MenuItemExportAllResults: TMenuItem;
     MenuItemExportCSVResults: TMenuItem;
     MenuItem2: TMenuItem;
+    RxDBGrid1: TMyRxDBGrid;
     Separator1: TMenuItem;
     MenuItemExportCSVStartList: TMenuItem;
     MenuItemTelegramBot: TMenuItem;
@@ -288,7 +286,6 @@ type
     MenuItemOpenCSV: TMenuItem;
     PopupMenu1: TPopupMenu;
     ResultClear: TButton;
-    RxDBGrid1: TRxDBGrid;
     RxDBGridCorrection: TRxDBGrid;
     sGridResult: TStringGrid;
     SQLite3Connection1: TSQLite3Connection;
@@ -469,14 +466,15 @@ type
 
 
 const
-  maxstages: integer = 6;
   //максимальное количество спецучаствок
-  visiblecat: integer = 6;
+  maxstages: integer = 6;
   //количество категорий в окне результатов
-  commoncols: integer = 9;
+  visiblecat: integer = 6;
   //первые девять колонок с информацией об участнике
-  stagecols: integer = 7;
+  commoncols: integer = 12;
   //количество колонок в СУ
+  stagecols: integer = 7;
+
 
 
 
@@ -506,19 +504,6 @@ var
   //timemarkstr: string;
   //timemarkformat: string;
 
-  //для генерации стартового протокола
-
-  //время начала заездов
-  startTime: TDateTime = 0.5;
-  //время между стартами  (в секундах)
-  delayBetweenRacers: integer = 60;
-  //время между категориями (в минутах)
-  delayBetweenCategories: integer = 3;
-  //выбранная сортировка
-  startlistSortByIndex: integer = 0;
-  //список категорий
-  categoriesAtStartlist: TStringList;
-
   //скрывать нулевое значение часа в результатах
   zerohour: boolean = True;
 
@@ -531,12 +516,13 @@ var
   //Индекс этапа при экспорте
   exportStageIndex: integer = 1;
 
+  startlistConfig: TStartlistConfig;
 
   //CatList: TStringList;
 
 implementation
 
-uses Result, Settings, Startlist, rxapputils, Implement, exsortsqlite, LoRa;
+uses Result, Settings, rxapputils, Implement, exsortsqlite, LoRa;
 
   {$R *.lfm}
 
@@ -607,7 +593,9 @@ begin
 
   (Sender as TForm).Caption := NAME_VERSION;
 
-  categoriesAtStartlist := TStringList.Create;
+  //categoriesAtStartlist := TStringList.Create;
+
+  startlistConfig := TStartlistConfig.Create;
 end;
 
 
@@ -735,7 +723,8 @@ end;
 
 procedure TMainForm.FileGenerateFinalAccept(Sender: TObject);
 begin
-  GenerateStartlistFromQualifier(FileGenerateFinal.Dialog.FileName);
+  // Не используется формирование в отдельный файл
+  //GenerateStartlistFromQualifier(FileGenerateFinal.Dialog.FileName);
 end;
 
 procedure TMainForm.FileNewDBAccept(Sender: TObject);
@@ -772,7 +761,8 @@ begin
   DataPortHTTP1.OnDataAppear := nil;
   DataPortHTTP1.OnError := nil;
   DataPortHTTP1 := nil;
-  categoriesAtStartlist.Free;
+  //categoriesAtStartlist.Free;
+  FreeAndNil(startlistConfig);
 end;
 
 procedure TMainForm.AcViewMemoExecute(Sender: TObject);
@@ -884,7 +874,7 @@ end;
 
 procedure TMainForm.AcGenerateStartTimeExecute(Sender: TObject);
 begin
-  RunStartlist;
+  RunStartlist(startlistConfig);
 end;
 
 procedure TMainForm.AcLEDPanelExecute(Sender: TObject);
@@ -1773,7 +1763,7 @@ begin
     Editor.BoundsRect := TRxDBGrid(Sender).SelectedFieldRect;
     // И заодно обнуляем список категорий
     // ToDo: делать это только при непосредственном изменении категорий
-    categoriesAtStartlist.Text := '';
+    startlistConfig.categories.Text := '';
   end;
 end;
 
@@ -1784,7 +1774,7 @@ end;
 
 procedure TMainForm.CheckDBOpen(Sender: TObject);
 begin
-  TAction(Sender).Enabled := dbopen;
+  TCustomAction(Sender).Enabled := dbopen;
 end;
 
 end.

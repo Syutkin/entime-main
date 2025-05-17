@@ -167,7 +167,18 @@ object MainForm: TMainForm
         Constraints.MinWidth = 720
         ParentFont = False
         TabOrder = 0
-        object RxDBGrid1: TRxDBGrid
+        object ComboBox1Category: TComboBox
+          Left = 72
+          Height = 33
+          Top = 804
+          Width = 150
+          ItemHeight = 25
+          ParentFont = False
+          TabOrder = 0
+          Visible = False
+          OnEditingDone = ComboBox1CategoryEditingDone
+        end
+        object RxDBGrid1: TMyRxDBGrid
           Left = 0
           Height = 1029
           Top = 0
@@ -1174,22 +1185,11 @@ object MainForm: TMainForm
           ParentFont = False
           PopupMenu = PopupMenu1
           Scrollbars = ssAutoBoth
-          TabOrder = 0
+          TabOrder = 1
           OnEditingDone = RxDBGrid1EditingDone
           OnKeyDown = RxDBGrid1KeyDown
           OnKeyPress = RxDBGrid1KeyPress
           OnSelectEditor = RxDBGrid1SelectEditor
-        end
-        object ComboBox1Category: TComboBox
-          Left = 72
-          Height = 33
-          Top = 804
-          Width = 150
-          ItemHeight = 25
-          ParentFont = False
-          TabOrder = 1
-          Visible = False
-          OnEditingDone = ComboBox1CategoryEditingDone
         end
       end
     end
@@ -3860,6 +3860,7 @@ object MainForm: TMainForm
       end
       object MenuItemGenerateFinal: TMenuItem
         Action = FileGenerateFinal
+        Visible = False
       end
       object N12: TMenuItem
         Caption = '-'

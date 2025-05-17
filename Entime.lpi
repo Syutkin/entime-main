@@ -27,8 +27,8 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="7"/>
-      <RevisionNr Value="18"/>
-      <BuildNr Value="82"/>
+      <RevisionNr Value="19"/>
+      <BuildNr Value="87"/>
       <Language Value="0419"/>
       <CharSet Value="04B0"/>
       <Attributes pvaDebug="True"/>
@@ -155,7 +155,7 @@
         <Mode0 Name="default"/>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="15">
+    <RequiredPackages Count="16">
       <Item1>
         <PackageName Value="FCL"/>
       </Item1>
@@ -201,6 +201,9 @@
       <Item15>
         <PackageName Value="chsdet"/>
       </Item15>
+      <Item16>
+        <PackageName Value="MyForks"/>
+      </Item16>
     </RequiredPackages>
     <Units Count="10">
       <Unit0>

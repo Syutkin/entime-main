@@ -11,18 +11,6 @@ uses
   csvdocument, opensslsockets, fphttpclient, nsCore, chsdIntf, fpcsvexport,
   fpstypes, fpspreadsheet, LCLIntf, LConvEncoding;
 
-type
-  TMyDBGrid = class(TRxDBGrid);
-
-  StartListSortBy =
-    (
-    slByResult,
-    slByNumberAsc,
-    slByNumberDesc,
-    slByNameAsc,
-    slByNameDesc
-    );
-
 procedure RefreshAll;
 procedure RefreshResults;
 procedure LoadConfig;
@@ -58,13 +46,14 @@ procedure ExportSumDays(FileName: string);
 procedure ExportAllResultsToXLSX(FileName: string);
 procedure GetFinishTime(FinishTime: TDateTime);
 procedure SetLoRaTime(StartTime: TDateTime; correction: string);
-procedure GenerateStartlistFromQualifier(FileName: string);
+//procedure GenerateStartlistFromQualifier(FileName: string);
 procedure ExportCSVStartList(FileName: string);
 procedure ExportCSVResults(FileName: string);
 procedure ParseSerial(Str: string);
 procedure SQLQueryToCSV(FileName: string; Query: TSQLQuery; headers: boolean = False);
 procedure AddDayResult(FileName: string);
 procedure Print(Str: string);
+procedure Print(Int: integer);
 
 
 function InputComboSelectStage: integer;
@@ -73,8 +62,9 @@ function GetAllStageStatus(stage: integer): TStringList;
 function CountOccurrences(ASubString: string; AString: string): integer;
 function CheckPenaltyInput(key: char): char;
 function CountActiveStages: integer;
-function SelectedStage: integer;
+function GetSelectedStage: integer;
 function ActiveStage: integer;
+function IsFinishesExists(stageIndex: integer): boolean;
 function BackupBD: boolean;
 function HideLeadingZeroHour(Sender: TField): string;
 function HideLeadingZeroHour(time: string): string;
@@ -107,8 +97,8 @@ begin
   begin
     //запоминаем положение курсора в датасете
     id := MainForm.RxDBGrid1.DataSource.DataSet.Fields.FieldByName('id').Value;
-    //и основном гриде
-    row := TMyDBGrid(MainForm.RxDBGrid1).Row;
+    //и основном гриде (GetRow из MyDBGrid)
+    row := MainForm.RxDBGrid1.GetRow;
   end;
   for n := 0 to MainForm.ComponentCount - 1 do
   begin
@@ -130,12 +120,13 @@ begin
   RefreshResults;
   if db then
   begin
-    MainForm.MainDataset1.Locate('id', id, []);
     //восстанавливаем положение курсора
-    MainForm.RxDBGrid1.DataSource.DataSet.MoveBy(-row + 1);
+    MainForm.MainDataset1.Locate('id', id, []);
     //и основного грида после открытия
-    MainForm.RxDBGrid1.DataSource.DataSet.MoveBy(row - 1);
     //(на остальные забили)
+    MainForm.RxDBGrid1.DataSource.DataSet.MoveBy(-row + 1);
+    MainForm.RxDBGrid1.DataSource.DataSet.MoveBy(row - 1);
+
   end;
 end;
 
@@ -456,7 +447,7 @@ begin
   if dbnotempty then
   begin
     n := MainForm.MainDataset1.FieldByName('number').AsString;
-    SetSQLStatus(SelectedStage, status, n);
+    SetSQLStatus(GetSelectedStage, status, n);
   end;
 end;
 
@@ -699,7 +690,7 @@ begin
       end
       else
       begin
-        i := SelectedStage;
+        i := GetSelectedStage;
         if sSU + ' ' + IntToStr(i) = stageName[i] then
         begin
           d := sClearStatus + ' ' + n + ' ' + sOnStage + ' ' + IntToStr(i) + '?';
@@ -1756,7 +1747,7 @@ begin
   if dbnotempty then
   begin
     n := MainForm.MainDataset1.FieldByName('number').AsString;
-    st := SelectedStage;
+    st := GetSelectedStage;
     t := InputDateTime(sTimeToStart, sEnterStartTime + ' ' + n + ' ' +
       sOnStage + ': ' + stageName[st]);
     if t > 0 then
@@ -2210,7 +2201,7 @@ begin
     Result := MyInputCombo(sImportFinish, sSetTimeToSU, strlst, k) + 1;
   end
   else
-    Result := SelectedStage;
+    Result := GetSelectedStage;
   strlst.Free;
 end;
 
@@ -2981,59 +2972,59 @@ begin
   end;
 end;
 
-procedure GenerateStartlistFromQualifier(FileName: string);
-var
-  prevfName: string;
-  fileExistsBefore: boolean;
-begin
-  if fName <> FileName then
-  begin
-    fileExistsBefore := FileExists(FileName);
-    if fileExistsBefore and (MessageDlg(sFinalFileExists, mtWarning,
-      [mbOK, mbCancel], 0) = mrCancel) then
-      Exit;
-    prevfName := fName;
-    //1. закрываем текущее соревнование
-    MainForm.FileCloseExecute(nil);
-    SetfName('');
-    //2. копируем файл
-    try
-      CopyFile(fName, FileName, False, True);
-      //3. открываем новый файл
-      //fName := FileName;
-      //SetfName(fName);
-      //OpenDB;
-      InitDB(FileName);
-      //4 формируем порядок старта категорий
-      if RunStartlist(True) then
-      begin
-        //5. удаляем результаты
-        ClearResults(True);
-        //уведомление что стартовый протокол создан
-        MessageDlg(sGenerateStartList + ': ' + FileName,
-          mtInformation, [mbOK], 0);
-      end
-      else
-      begin
-        MainForm.FileCloseExecute(nil);
-        if not fileExistsBefore then
-          DeleteFile(FileName);
-        //fName := prevfName;
-        //SetfName(fName);
-        //OpenDB;
-        InitDB(prevfName);
-      end;
-    except
-      on E: Exception do
-      begin
-        MessageDlg(sFileCopyError + ':' + #13#10 + E.Message,
-          mtError, [mbOK], 0);
-      end;
-    end;
-  end
-  else
-    MessageDlg(sFilesAreEqual, mtError, [mbOK], 0);
-end;
+//procedure GenerateStartlistFromQualifier(FileName: string);
+//var
+//  prevfName: string;
+//  fileExistsBefore: boolean;
+//begin
+//  if fName <> FileName then
+//  begin
+//    fileExistsBefore := FileExists(FileName);
+//    if fileExistsBefore and (MessageDlg(sFinalFileExists, mtWarning,
+//      [mbOK, mbCancel], 0) = mrCancel) then
+//      Exit;
+//    prevfName := fName;
+//    //1. закрываем текущее соревнование
+//    MainForm.FileCloseExecute(nil);
+//    SetfName('');
+//    //2. копируем файл
+//    try
+//      CopyFile(fName, FileName, False, True);
+//      //3. открываем новый файл
+//      //fName := FileName;
+//      //SetfName(fName);
+//      //OpenDB;
+//      InitDB(FileName);
+//      //4 формируем порядок старта категорий
+//      if RunStartlist(startlistConfig) then
+//      begin
+//        //5. удаляем результаты
+//        ClearResults(True);
+//        //уведомление что стартовый протокол создан
+//        MessageDlg(sGenerateStartList + ': ' + FileName,
+//          mtInformation, [mbOK], 0);
+//      end
+//      else
+//      begin
+//        MainForm.FileCloseExecute(nil);
+//        if not fileExistsBefore then
+//          DeleteFile(FileName);
+//        //fName := prevfName;
+//        //SetfName(fName);
+//        //OpenDB;
+//        InitDB(prevfName);
+//      end;
+//    except
+//      on E: Exception do
+//      begin
+//        MessageDlg(sFileCopyError + ':' + #13#10 + E.Message,
+//          mtError, [mbOK], 0);
+//      end;
+//    end;
+//  end
+//  else
+//    MessageDlg(sFilesAreEqual, mtError, [mbOK], 0);
+//end;
 
 procedure ExportCSVStartList(FileName: string);
 var
@@ -3348,6 +3339,11 @@ begin
   MainForm.Memo.Lines.Add(Str);
 end;
 
+procedure Print(Int: integer);
+begin
+  MainForm.Memo.Lines.Add(IntToStr(Int));
+end;
+
 function CountOccurrences(ASubString: string; AString: string): integer;
 var
   offset: integer;
@@ -3467,7 +3463,7 @@ begin
 end;
 
 //высчитываем номер СУ, где стоит выделение
-function SelectedStage: integer;
+function GetSelectedStage: integer;
 var
   co, i: integer;
 begin
@@ -3496,6 +3492,37 @@ begin
     begin
       Result := i;
       Break;
+    end;
+  end;
+end;
+
+function IsFinishesExists(stageIndex: integer): boolean;
+var
+  c: integer = 0;
+begin
+  Result := False;
+  try
+    if dbnotempty then
+    begin
+      MainForm.SQLQuery1.Close;
+      MainForm.SQLQuery1.SQL.Text :=
+        'SELECT * FROM main WHERE finishtime' + IntToStr(stageIndex) +
+        ' NOTNULL AND finishtime' + IntToStr(stageIndex) + ' <> ''''';
+      MainForm.SQLQuery1.Open;
+      while not MainForm.SQLQuery1.EOF do
+      begin
+        Inc(c);
+        MainForm.SQLQuery1.Next;
+      end;
+      MainForm.SQLQuery1.Close;
+      MainForm.SQLTransaction1.Active := False;
+      if c > 0 then Result := True;
+    end;
+  except
+    On E: Exception do
+    begin
+      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+      Log(sDatabaseOpenError + E.Message);
     end;
   end;
 end;

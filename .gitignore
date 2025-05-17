@@ -20,6 +20,7 @@
 *.rst
 *.rsj
 *.lrt
+*.trc
 
 # Lazarus local files (user-specific info)
 *.lps

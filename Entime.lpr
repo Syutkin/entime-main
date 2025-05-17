@@ -2,10 +2,13 @@ program Entime;
 
 {$mode objfpc}{$H+}
 
+{$IFOPT D+} {$DEFINE DEBUG} {$ENDIF}
+
 uses
   {$IFDEF UNIX} {$IFDEF UseCThreads}
   cthreads, {$ENDIF} {$ENDIF}
   Interfaces, // this includes the LCL widgetset
+  sysutils,
   Forms,
   Main,
   LazSerialPort,
@@ -21,6 +24,14 @@ uses
 
 begin
   RequireDerivedFormResource := True;
+  {$IFDEF DEBUG}
+  if FileExists('heaptrace.trc') then
+  begin
+    DeleteFile('heaptrace.trc');
+    SetHeapTraceOutput('heaptrace.trc');
+    globalSkipIfNoLeaks := true;
+  end;
+  {$ENDIF DEBUG} 
   Application.Scaled:=True;
   Application.Initialize;
   Application.CreateForm(TMainForm, MainForm);

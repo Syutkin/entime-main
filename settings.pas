@@ -165,7 +165,7 @@ begin
   for i := 1 to maxstages do
   begin
     c := FindComponent('Edit' + IntToStr(i));
-    TEdit(c).Text := cat[i];
+    TComboBox(c).Text := cat[i];
     c := FindComponent('SUEdit' + IntToStr(i));
     TEdit(c).Text := stageName[i];
   end;
@@ -266,8 +266,8 @@ begin
           //для того, чтобы освободить место для таблицы с вводом поправки
           //без этого в текущей организации GUI были коллизии
           MainForm.Splitter1.Top := MainForm.Splitter1.Top + MainForm.CurrentSU.Height;
+        //сохраняем статус СУ (вкл/выкл) и его название
         for i := 1 to maxstages do
-          //сохраняем статус СУ (вкл/выкл) и его название
         begin
           if CheckGroup1.Checked[i - 1] then
             stage[i] := True

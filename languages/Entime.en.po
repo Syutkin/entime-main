@@ -19,6 +19,27 @@ msgstr ""
 msgid "ГР"
 msgstr ""
 
+#: i18n.sbynameasc
+msgid "По именам А-Я"
+msgstr ""
+
+#: i18n.sbynamedesc
+msgid "По именам Я-А"
+msgstr ""
+
+#: i18n.sbynumberasc
+msgctxt "i18n.sbynumberasc"
+msgid "По номерам по возрастанию"
+msgstr ""
+
+#: i18n.sbynumberdesc
+msgid "По номерам по убыванию"
+msgstr ""
+
+#: i18n.sbyresult
+msgid "По текущим результатам"
+msgstr ""
+
 #: i18n.scannotbackup
 msgid "Не удалось сделать бэкап, продолжить загрузку результатов?"
 msgstr ""
@@ -203,6 +224,10 @@ msgstr ""
 msgctxt "i18n.sfinishprotocol"
 msgid "Финишный протокол"
 msgstr "Results"
+
+#: i18n.sfinishresultsnotempty
+msgid "результаты финиша не пусты. Вы уверены что хотите сформировать стартовый протокол для данного спецучастка?"
+msgstr ""
 
 #: i18n.sfinishthruprotocol
 msgid "Сквозной протокол"
@@ -2338,10 +2363,6 @@ msgctxt "tstartlistform.cbdsq.hint"
 msgid "Дисквалифицирован"
 msgstr ""
 
-#: tstartlistform.combobox1.text
-msgid "По номерам по возрастанию"
-msgstr ""
-
 #: tstartlistform.label1.caption
 msgid "Время старта первого участника"
 msgstr ""
@@ -2366,8 +2387,8 @@ msgstr ""
 msgid "Включать в финальный заезд следующих участников:"
 msgstr ""
 
-#: tstartlistform.panel2.caption
-msgid "Panel2"
+#: tstartlistform.stageselected.caption
+msgid "Спецучасток"
 msgstr ""
 
 #: tstartlistform.timeedit1.text
