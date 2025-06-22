@@ -89,7 +89,7 @@ type
 
 const
   StartListSortByStr: array[0..4] of string =
-    (sByNumberAsc, sByNumberDesc, sByNameAsc, sByNameDesc, sByResult);
+    (rsByNumberAsc, rsByNumberDesc, rsByNameAsc, rsByNameDesc, rsByResult);
 
 
 
@@ -124,9 +124,9 @@ begin
 
       // Заполняем список спецучастков
       ComboBoxStageSelection.Items.Clear;
-      for i := 1 to high(stageName) do
+      for i := 1 to MAXSTAGES do
       begin
-        ComboBoxStageSelection.Items.Add(stageName[i]);
+        ComboBoxStageSelection.Items.Add(stages[i].Name);
       end;
 
       if config.selectedStage < 0 then
@@ -181,7 +181,7 @@ begin
         // проверяем есть ли результаты в выбранном спецучастке
         // если есть, то запрашиваем подтверждение
         if (not IsFinishesExists(config.selectedStage + 1)) or
-          (MessageDlg(ComboBoxStageSelection.Text + ' ' + sFinishResultsNotEmpty,
+          (MessageDlg(ComboBoxStageSelection.Text + ' ' + rsFinishResultsNotEmpty,
           mtWarning, [mbYes, mbNo], 0) = mrYes) then
         begin
           GenerateStartlist(
@@ -191,13 +191,13 @@ begin
             config.delayBetweenRacers,
             config.delayBetweenCategories,
             sortBy);
-          Log(sGenerateStartList + ': ' + ComboBoxSortBy.Text);
+          Log(rsGenerateStartList + ': ' + ComboBoxSortBy.Text);
 
-          //Если спецучасток с формируемын на нём временем не активен,
+          //Если спецучасток с формируемым на нём временем не активен,
           //то активируем его
-          if not stage[config.selectedStage + 1] then
+          if not stages[config.selectedStage + 1].isActive then
           begin
-            stage[config.selectedStage + 1] := True;
+            stages[config.selectedStage + 1].isActive := True;
             ////эта дичь определяет был ли переход от работы с одним этапом на несколько
             //if (not stage[2]) and (not stage[3]) and (not stage[4]) and
             //  (not stage[5]) and (not stage[6]) and
@@ -318,14 +318,17 @@ begin
         case sortBy of
           slByResult:
           begin
-            SQL.Add('AND sumresult NOTNULL');
             if not cbDNS.Checked then
               SQL.Add('AND sumresult <> ''DNS''');
             if not cbDNF.Checked then
               SQL.Add('AND sumresult <> ''DNF''');
             if not cbDSQ.Checked then
               SQL.Add('AND sumresult <> ''DSQ''');
-            SQL.Add('ORDER BY sumstages DESC, sumresult ASC');
+            if (cbDNS.Checked) or (cbDNF.Checked) or (cbDSQ.Checked) then
+              SQL.Add('OR sumresult IS NULL')
+            else
+              SQL.Add('AND sumresult NOTNULL');
+            SQL.Add('ORDER BY sumstages DESC NULLS FIRST, sumresult DESC NULLS FIRST');
           end;
           slByNumberAsc:
             SQL.Add('ORDER BY number ASC');

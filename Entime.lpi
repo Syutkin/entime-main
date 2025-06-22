@@ -27,8 +27,8 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="7"/>
-      <RevisionNr Value="19"/>
-      <BuildNr Value="87"/>
+      <RevisionNr Value="20"/>
+      <BuildNr Value="101"/>
       <Language Value="0419"/>
       <CharSet Value="04B0"/>
       <Attributes pvaDebug="True"/>
@@ -41,7 +41,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="debug\$NameOnly($(ProjFile))"/>
+            <Filename Value="$NameOnly($(ProjFile))"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -99,6 +99,7 @@
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
+              <DebugInfoType Value="dsDwarf3"/>
               <StripSymbols Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
@@ -126,6 +127,7 @@
           </SearchPaths>
           <Linking>
             <Debugging>
+              <DebugInfoType Value="dsDwarf3"/>
               <UseHeaptrc Value="True"/>
             </Debugging>
             <Options>
@@ -155,57 +157,60 @@
         <Mode0 Name="default"/>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="16">
+    <RequiredPackages Count="17">
       <Item1>
-        <PackageName Value="FCL"/>
+        <PackageName Value="LazControlDsgn"/>
       </Item1>
       <Item2>
-        <PackageName Value="LCL"/>
+        <PackageName Value="FCL"/>
       </Item2>
       <Item3>
-        <PackageName Value="LazControls"/>
+        <PackageName Value="LCL"/>
       </Item3>
       <Item4>
-        <PackageName Value="DateTimeCtrls"/>
+        <PackageName Value="LazControls"/>
       </Item4>
       <Item5>
-        <PackageName Value="SQLDBLaz"/>
+        <PackageName Value="DateTimeCtrls"/>
       </Item5>
       <Item6>
-        <PackageName Value="sqlite3laz"/>
+        <PackageName Value="SQLDBLaz"/>
       </Item6>
       <Item7>
-        <PackageName Value="laz_synapse"/>
+        <PackageName Value="sqlite3laz"/>
       </Item7>
       <Item8>
-        <PackageName Value="DataPortLasarus"/>
+        <PackageName Value="laz_synapse"/>
       </Item8>
       <Item9>
-        <PackageName Value="LazSerialPort"/>
+        <PackageName Value="DataPortLasarus"/>
       </Item9>
       <Item10>
-        <PackageName Value="laz_fpspreadsheet"/>
+        <PackageName Value="LazSerialPort"/>
       </Item10>
       <Item11>
-        <PackageName Value="rxnew"/>
+        <PackageName Value="laz_fpspreadsheet"/>
       </Item11>
       <Item12>
-        <PackageName Value="rxdbgrid_export_spreadsheet"/>
+        <PackageName Value="rxnew"/>
       </Item12>
       <Item13>
-        <PackageName Value="lazdbexport"/>
+        <PackageName Value="rxdbgrid_export_spreadsheet"/>
       </Item13>
       <Item14>
-        <PackageName Value="HistoryLazarus"/>
+        <PackageName Value="lazdbexport"/>
       </Item14>
       <Item15>
-        <PackageName Value="chsdet"/>
+        <PackageName Value="HistoryLazarus"/>
       </Item15>
       <Item16>
-        <PackageName Value="MyForks"/>
+        <PackageName Value="chsdet"/>
       </Item16>
+      <Item17>
+        <PackageName Value="MyForks"/>
+      </Item17>
     </RequiredPackages>
-    <Units Count="10">
+    <Units Count="11">
       <Unit0>
         <Filename Value="Entime.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -268,6 +273,10 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="StartItemModel"/>
       </Unit9>
+      <Unit10>
+        <Filename Value="stagemodel.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit10>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

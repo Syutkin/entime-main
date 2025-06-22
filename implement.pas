@@ -61,9 +61,9 @@ function CatStartList: TStringList;
 function GetAllStageStatus(stage: integer): TStringList;
 function CountOccurrences(ASubString: string; AString: string): integer;
 function CheckPenaltyInput(key: char): char;
-function CountActiveStages: integer;
+//function ActiveStagesCount: integer;
 function GetSelectedStage: integer;
-function ActiveStage: integer;
+function ActiveStageIndex: integer;
 function IsFinishesExists(stageIndex: integer): boolean;
 function BackupBD: boolean;
 function HideLeadingZeroHour(Sender: TField): string;
@@ -111,8 +111,8 @@ begin
       except
         On E: Exception do
         begin
-          MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-          Log(sDatabaseOpenError + E.Message);
+          MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+          Log(rsDatabaseOpenError + E.Message);
         end;
       end;
     end;
@@ -126,7 +126,6 @@ begin
     //(на остальные забили)
     MainForm.RxDBGrid1.DataSource.DataSet.MoveBy(-row + 1);
     MainForm.RxDBGrid1.DataSource.DataSet.MoveBy(row - 1);
-
   end;
 end;
 
@@ -146,8 +145,8 @@ begin
       except
         On E: Exception do
         begin
-          MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-          Log(sDatabaseOpenError + E.Message);
+          MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+          Log(rsDatabaseOpenError + E.Message);
         end;
       end;
     end;
@@ -158,6 +157,7 @@ procedure LoadConfig;
 var
   c: TComponent;
   i: integer;
+  iStr: string;
 begin
   Screen.Cursor := crHourGlass;
   try
@@ -184,12 +184,12 @@ begin
         MainForm.SQLQuery1.SQL.Text :=
           'SELECT * FROM config WHERE key = "stage' + IntToStr(i) + '";';
         MainForm.SQLQuery1.Open();
-        stage[i] := MainForm.SQLQuery1.FieldByName('value').AsBoolean;
+        stages[i].isActive := MainForm.SQLQuery1.FieldByName('value').AsBoolean;
         MainForm.SQLQuery1.Close;
         MainForm.SQLQuery1.SQL.Text :=
           'SELECT * FROM config WHERE key = "stagename' + IntToStr(i) + '";';
         MainForm.SQLQuery1.Open();
-        stageName[i] := MainForm.SQLQuery1.FieldByName('value').AsString;
+        stages[i].Name := MainForm.SQLQuery1.FieldByName('value').AsString;
       end;
       MainForm.SQLQuery1.Close;
       MainForm.SQLQuery1.SQL.Text :=
@@ -221,35 +221,35 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(sDatabaseOpenError + E.Message);
+      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+      Log(rsDatabaseOpenError + E.Message);
     end;
   end;
 
   //  RxIniPropStorage1.Restore;
 
-  if stageName[1] = '' then
-    stageName[1] := sSU1;
-  if stageName[2] = '' then
-    stageName[2] := sSU2;
-  if stageName[3] = '' then
-    stageName[3] := sSU3;
-  if stageName[4] = '' then
-    stageName[4] := sSU4;
-  if stageName[5] = '' then
-    stageName[5] := sSU5;
-  if stageName[6] = '' then
-    stageName[6] := sSU6;
+  if stages[1].Name = '' then
+    stages[1].Name := rsSU1;
+  if stages[2].Name = '' then
+    stages[2].Name := rsSU2;
+  if stages[3].Name = '' then
+    stages[3].Name := rsSU3;
+  if stages[4].Name = '' then
+    stages[4].Name := rsSU4;
+  if stages[5].Name = '' then
+    stages[5].Name := rsSU5;
+  if stages[6].Name = '' then
+    stages[6].Name := rsSU6;
 
   for i := 1 to maxstages do
   begin
     c := MainForm.FindComponent('SheetStage' + IntToStr(i));
-    TTabSheet(c).Caption := stageName[i];
+    TTabSheet(c).Caption := stages[i].Name;
 
     with MainForm.GridResult8 do
     begin
-      ColumnByFieldName('result' + IntToStr(i)).Title.Caption := stageName[i];
-      if stage[i] then
+      ColumnByFieldName('result' + IntToStr(i)).Title.Caption := stages[i].Name;
+      if stages[i].isActive then
       begin
         ColumnByFieldName('result' + IntToStr(i)).Visible := True;
       end
@@ -263,22 +263,22 @@ begin
     begin
       //ставим названия
       ColumnByFieldName('correction' + IntToStr(i)).Title.Caption :=
-        stageName[i] + '|' + scorrection;
+        stages[i].Name + '|' + rsCorrection;
       ColumnByFieldName('starttime' + IntToStr(i)).Title.Caption :=
-        stageName[i] + '|' + sstarttime;
+        stages[i].Name + '|' + rsStarttime;
       ColumnByFieldName('finishtime' + IntToStr(i)).Title.Caption :=
-        stageName[i] + '|' + sfinishtime;
+        stages[i].Name + '|' + rsFinishtime;
       ColumnByFieldName('penalty' + IntToStr(i)).Title.Caption :=
-        stageName[i] + '|' + spenalty;
+        stages[i].Name + '|' + rsPenalty;
       ColumnByFieldName('result' + IntToStr(i)).Title.Caption :=
-        stageName[i] + '|' + sresult;
+        stages[i].Name + '|' + rsResult;
       ColumnByFieldName('diffleader' + IntToStr(i)).Title.Caption :=
-        stageName[i] + '|' + sdiffleader;
+        stages[i].Name + '|' + rsDiffleader;
       ColumnByFieldName('place' + IntToStr(i)).Title.Caption :=
-        stageName[i] + '|' + splace;
+        stages[i].Name + '|' + rsPlace;
     end;
     //скрываем неиспользуемые СУ
-    if stage[i] then
+    if stages[i].isActive then
     begin
       with MainForm.RxDBGrid1 do
       begin
@@ -290,8 +290,7 @@ begin
         ColumnByFieldName('diffleader' + IntToStr(i)).Visible := True;
         ColumnByFieldName('place' + IntToStr(i)).Visible := True;
       end;
-      c := MainForm.FindComponent('RadioCur' + IntToStr(i));
-      TRadioButton(c).Enabled := True;
+      MainForm.CurrentSU.Buttons[i - 1].Enabled := True;
       c := MainForm.FindComponent('SheetStage' + IntToStr(i));
       TTabSheet(c).TabVisible := True;
     end
@@ -307,38 +306,40 @@ begin
         ColumnByFieldName('diffleader' + IntToStr(i)).Visible := False;
         ColumnByFieldName('place' + IntToStr(i)).Visible := False;
       end;
-      c := MainForm.FindComponent('RadioCur' + IntToStr(i));
-      TRadioButton(c).Enabled := False;
+      MainForm.CurrentSU.Buttons[i - 1].Enabled := False;
       c := MainForm.FindComponent('SheetStage' + IntToStr(i));
       TTabSheet(c).TabVisible := False;
     end;
   end;
 
   //настройка для работы с одним этапом
-  if (not stage[2]) and (not stage[3]) and (not stage[4]) and
-    (not stage[5]) and (not stage[6]) then
+  if stages.ActiveStagesCount = 1 then
   begin
+    iStr := IntToStr(stages.FirstActiveStage.Key);
     MainForm.CurrentSU.Visible := False;
-    MainForm.RadioCur1.Checked := True;
+    MainForm.CurrentSU.ItemIndex := stages.FirstActiveStage.Key - 1;
     MainForm.SheetStageSum.TabVisible := False;
-    MainForm.SheetStage1.Caption := stotal;
-    MainForm.GridResult8.ColumnByFieldName('result1').Visible := False;
+    MainForm.SheetStage1.Caption := rsTotal;
+    MainForm.GridResult8.ColumnByFieldName('result' + iStr).Visible := False;
     with MainForm.RxDBGrid1 do
     begin
-      ColumnByFieldName('correction1').Title.Caption := scorrection;
-      ColumnByFieldName('starttime1').Title.Caption := sstarttime;
-      ColumnByFieldName('finishtime1').Title.Caption := sfinishtime;
-      ColumnByFieldName('penalty1').Title.Caption := spenalty;
-      ColumnByFieldName('result1').Title.Caption := sresult;
-      ColumnByFieldName('diffleader1').Title.Caption := sdiffleader;
-      ColumnByFieldName('place1').Title.Caption := splace;
-      ColumnByFieldName('place1').Visible := False;
+      if not showStageNameForSingleStage then
+      begin
+        ColumnByFieldName('correction' + iStr).Title.Caption := rsCorrection;
+        ColumnByFieldName('starttime' + iStr).Title.Caption := rsStarttime;
+        ColumnByFieldName('finishtime' + iStr).Title.Caption := rsFinishtime;
+        ColumnByFieldName('penalty' + iStr).Title.Caption := rsPenalty;
+        ColumnByFieldName('result' + iStr).Title.Caption := rsResult;
+        ColumnByFieldName('diffleader' + iStr).Title.Caption := rsDiffleader;
+        ColumnByFieldName('place' + iStr).Title.Caption := rsPlace;
+      end;
+      ColumnByFieldName('place' + iStr).Visible := False;
       //RxDBGrid1.ColumnByFieldName('sumresult').Visible:=false;
       //RxDBGrid1.ColumnByFieldName('sumdiffleader').Visible:=false;
       ColumnByFieldName('sumresult').Visible := True;
       ColumnByFieldName('sumdiffleader').Visible := True;
-      ColumnByFieldName('result1').Visible := False;
-      ColumnByFieldName('diffleader1').Visible := False;
+      ColumnByFieldName('result' + iStr).Visible := False;
+      ColumnByFieldName('diffleader' + iStr).Visible := False;
     end;
   end
   else
@@ -349,14 +350,22 @@ begin
     MainForm.SheetStageSum.TabVisible := True;
   end;
 
-  // Если активных СУ больше одного, выключаем показ кол-ва пройденных СУ
+  // Если активных СУ больше одного, включаем показ кол-ва пройденных СУ
   // в сквозном протоколе
-  if CountActiveStages > 1 then
+  if stages.ActiveStagesCount > 1 then
     (MainForm.FindComponent('GridResult7') as
       TRxDBGrid).ColumnByFieldName('sumstages').Visible := True
   else
     (MainForm.FindComponent('GridResult7') as
       TRxDBGrid).ColumnByFieldName('sumstages').Visible := False;
+
+  // Если текущий выбранный СУ неактивен, то выбираем первый активный СУ
+  with MainForm.CurrentSU do
+  begin
+    if not Buttons[ItemIndex].Enabled and (stages.FirstActiveStage.Key > 0) then
+      Buttons[stages.FirstActiveStage.Key - 1].Checked := True;
+  end;
+
   Screen.Cursor := crDefault;
 end;
 
@@ -381,7 +390,7 @@ begin
     astage + ' as place from main WHERE finishtime' + astage +
     ' > 0 AND status ISNULL ORDER BY finishtime' + astage + ' DESC';
   ResultsForm.GroupBoxResults.Caption :=
-    sCurrentResults + ': ' + stageName[StrToInt(astage)];
+    rsCurrentResults + ': ' + stages[StrToInt(astage)].Name;
 end;
 
 procedure SetfName(fName: string);
@@ -437,7 +446,7 @@ end;
 //  LoadIniCategory;
 //  // --> close-open dataset в Main и затем в settings (RefreshResults)
 //  RefreshAll;
-//  Log(sDBFileOpen + ' ' + fName);
+//  Log(rsDBFileOpen + ' ' + fName);
 //end;
 
 procedure SetStatus(const status: string);
@@ -477,34 +486,35 @@ begin
       if status = 'DNS' then
       begin
         s := '2';
-        logstatus := sDidNotStart;
+        logstatus := rsDidNotStart;
       end
       else
       begin
         s := '1';
-        logstatus := sDidNotFinish;
+        logstatus := rsDidNotFinish;
       end;
-      if (not stage[2]) and (not stage[3]) and (not stage[4]) and
-        (not stage[5]) and (not stage[6]) then
+      if (not stages[2].isActive) and (not stages[3].isActive) and
+        (not stages[4].isActive) and (not stages[5].isActive) and
+        (not stages[6].isActive) then
       begin
-        d := sSureWithNumber + ' ' + n + ' ' + logstatus + '?';
-        l := sParticipantWithNumber + ' ' + n + ' ' + logstatus;
+        d := rsSureWithNumber + ' ' + n + ' ' + logstatus + '?';
+        l := rsParticipantWithNumber + ' ' + n + ' ' + logstatus;
       end
       else
       begin
-        if sSU + ' ' + IntToStr(i) = stageName[i] then
+        if rsSU + ' ' + IntToStr(i) = stages[i].Name then
         begin
-          d := sSureWithNumber + ' ' + n + ' ' + logstatus + ' ' +
-            sOnStage + ' ' + IntToStr(i) + '?';
-          l := sParticipantWithNumber + ' ' + n + ' ' + logstatus +
-            ' ' + sOnStage + ' ' + IntToStr(i);
+          d := rsSureWithNumber + ' ' + n + ' ' + logstatus + ' ' +
+            rsOnStage + ' ' + IntToStr(i) + '?';
+          l := rsParticipantWithNumber + ' ' + n + ' ' + logstatus +
+            ' ' + rsOnStage + ' ' + IntToStr(i);
         end
         else
         begin
-          d := sSureWithNumber + ' ' + n + ' ' + logstatus + ' ' +
-            sOnStage + ' ' + IntToStr(i) + ': ' + stageName[i] + '?';
-          l := sParticipantWithNumber + ' ' + n + ' ' + logstatus +
-            ' ' + sOnStage + ' ' + IntToStr(i) + ': ' + stageName[i];
+          d := rsSureWithNumber + ' ' + n + ' ' + logstatus + ' ' +
+            rsOnStage + ' ' + IntToStr(i) + ': ' + stages[i].Name + '?';
+          l := rsParticipantWithNumber + ' ' + n + ' ' + logstatus +
+            ' ' + rsOnStage + ' ' + IntToStr(i) + ': ' + stages[i].Name;
         end;
       end;
       if MessageDlg(d, mtWarning, [mbYes, mbNo], 0) = mrYes then
@@ -528,7 +538,7 @@ begin
     end
     else
     begin
-      if MessageDlg(sReallyDisqualifyNumber + ' ' + n + '?', mtWarning,
+      if MessageDlg(rsReallyDisqualifyNumber + ' ' + n + '?', mtWarning,
         [mbYes, mbNo], 0) = mrYes then
       begin
         with MainForm.SQLQuery1 do
@@ -543,14 +553,14 @@ begin
           Close;
         end;
         UpdateResults;
-        Log(sParticipantWithNumber + ' ' + n + ' ' + sDisqualified);
+        Log(rsParticipantWithNumber + ' ' + n + ' ' + rsDisqualified);
       end;
     end;
   except
     On E: Exception do
     begin
-      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(sDatabaseOpenError + E.Message);
+      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+      Log(rsDatabaseOpenError + E.Message);
     end;
   end;
 end;
@@ -574,7 +584,7 @@ begin
         //если не общий дисквал, то считаем
         for k := 1 to maxstages do
         begin
-          if stage[k] then
+          if stages[k].isActive then
           begin
             if FieldByName('status' + IntToStr(k)).AsString <> '' then
             begin
@@ -603,8 +613,8 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(sDatabaseOpenError + E.Message);
+      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+      Log(rsDatabaseOpenError + E.Message);
     end;
   end;
 end;
@@ -638,11 +648,12 @@ begin
     begin
       co := MainForm.RxDBGrid1.SelectedIndex;
       n := MainForm.MainDataset1.FieldByName('number').AsString;
-      if (not stage[2]) and (not stage[3]) and (not stage[4]) and
-        (not stage[5]) and (not stage[6]) then
+      if (not stages[2].isActive) and (not stages[3].isActive) and
+        (not stages[4].isActive) and (not stages[5].isActive) and
+        (not stages[6].isActive) then
       begin
-        d := sClearAllStatus + ' ' + n + '?';
-        l := sClearAllStatusLog + ' ' + n;
+        d := rsClearAllStatus + ' ' + n + '?';
+        l := rsClearAllStatusLog + ' ' + n;
         if MessageDlg(d, mtWarning, [mbYes, mbNo], 0) = mrYes then
         begin
           with MainForm.SQLQuery1 do
@@ -668,8 +679,8 @@ begin
       // выделение в общих результатах
       if (co > commoncols + stagecols * maxstages) then
       begin
-        d := sClearDSQ + ' ' + n + '?';
-        l := sClearDSQLog + ' ' + n;
+        d := rsClearDSQ + ' ' + n + '?';
+        l := rsClearDSQLog + ' ' + n;
         if MessageDlg(d, mtWarning, [mbYes, mbNo], 0) = mrYes then
         begin
           with MainForm.SQLQuery1 do
@@ -691,17 +702,17 @@ begin
       else
       begin
         i := GetSelectedStage;
-        if sSU + ' ' + IntToStr(i) = stageName[i] then
+        if rsSU + ' ' + IntToStr(i) = stages[i].Name then
         begin
-          d := sClearStatus + ' ' + n + ' ' + sOnStage + ' ' + IntToStr(i) + '?';
-          l := sClearStatusLog + ' ' + n + ' ' + sOnStage + ' ' + IntToStr(i);
+          d := rsClearStatus + ' ' + n + ' ' + rsOnStage + ' ' + IntToStr(i) + '?';
+          l := rsClearStatusLog + ' ' + n + ' ' + rsOnStage + ' ' + IntToStr(i);
         end
         else
         begin
-          d := sClearStatus + ' ' + n + ' ' + sOnStage + ' ' +
-            IntToStr(i) + ': ' + stageName[i] + '?';
-          l := sClearStatusLog + ' ' + n + ' ' + sOnStage + ' ' +
-            IntToStr(i) + ': ' + stageName[i];
+          d := rsClearStatus + ' ' + n + ' ' + rsOnStage + ' ' +
+            IntToStr(i) + ': ' + stages[i].Name + '?';
+          l := rsClearStatusLog + ' ' + n + ' ' + rsOnStage + ' ' +
+            IntToStr(i) + ': ' + stages[i].Name;
         end;
         if MessageDlg(d, mtWarning, [mbYes, mbNo], 0) = mrYes then
         begin
@@ -727,8 +738,8 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(sDatabaseOpenError + E.Message);
+      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+      Log(rsDatabaseOpenError + E.Message);
     end;
   end;
 end;
@@ -838,10 +849,10 @@ begin
 
         MainForm.SQLite3Connection1.ExecuteDirect(
           'INSERT INTO config (key, value) VALUES' + '("activestage", "1"),' +
-          '("stage1", "True"),' + '("catname1", "' + sCat1 + '"),' +
-          '("catname2", "' + sCat2 + '"),' + '("catname3", "' + sCat3 +
-          '"),' + '("catname4", "' + sCat4 + '"),' + '("catname5", "' +
-          sCat5 + '")' + ';');
+          '("stage1", "True"),' + '("catname1", "' + rsCat1 + '"),' +
+          '("catname2", "' + rsCat2 + '"),' + '("catname3", "' + rsCat3 +
+          '"),' + '("catname4", "' + rsCat4 + '"),' + '("catname5", "' +
+          rsCat5 + '")' + ';');
         MainForm.SQLTransaction1.Commit;
 
         with MainForm.SQLQuery1 do
@@ -856,11 +867,11 @@ begin
         end;
         MainForm.SQLTransaction1.Commit;
         MainForm.SQLTransaction1.Active := False;
-        Log(sNewFileCreated + ': ' + fName);
+        Log(rsNewFileCreated + ': ' + fName);
       except
         MainForm.SQLTransaction1.Active := False;
-        MessageDlg(sNewFileNotCreated, mtError, [mbOK], 0);
-        Log(sNewFileNotCreated);
+        MessageDlg(rsNewFileNotCreated, mtError, [mbOK], 0);
+        Log(rsNewFileNotCreated);
         Screen.Cursor := crDefault;
         // Если файл не создан, не пытаемся его открыть
         Exit;
@@ -873,10 +884,10 @@ begin
     LoadIniCategory;
     // --> close-open dataset в Main и затем в settings (RefreshResults)
     RefreshAll;
-    Log(sDBFileOpen + ' ' + fName);
+    Log(rsDBFileOpen + ' ' + fName);
   except
-    MessageDlg(sNewFileExistUnknow, mtError, [mbOK], 0);
-    Log(sNewFileExistUnknow);
+    MessageDlg(rsNewFileExistUnknow, mtError, [mbOK], 0);
+    Log(rsNewFileExistUnknow);
   end;
 end;
 
@@ -884,10 +895,8 @@ procedure SetFinish;
 var
   row, number, leadernumber, currentplace, i: integer;
   setfinish: boolean = False;
-  c: TComponent;
   currentresult, bottomline, currentcategory, st, leaderresult, upperline, Name: string;
   currentdiff: string = '';
-  response: string;
 
   //Отправка в телегу
   QueryParams: TStrings = nil;
@@ -923,8 +932,8 @@ begin
           if MainForm.SQLQuery2.FieldByName('number').AsInteger <> number then
           begin
             //проверяем что номер в данный момент находится на трассе
-            if MessageDlg(sNumber + ' ' + IntToStr(number) + ' ' +
-              sDidNotStartSetFinish, mtWarning, [mbYes, mbNo], 0) = mrYes then
+            if MessageDlg(rsNumber + ' ' + IntToStr(number) + ' ' +
+              rsDidNotStartSetFinish, mtWarning, [mbYes, mbNo], 0) = mrYes then
               setfinish := True
             else
               setfinish := False;
@@ -936,13 +945,12 @@ begin
           MainForm.SQLTransaction2.Active := False;
           for i := 1 to maxstages do
           begin
-            c := MainForm.FindComponent('RadioCur' + IntToStr(i));
-            if TRadioButton(c).Checked and setfinish then
+            if MainForm.CurrentSU.Buttons[i - 1].Checked and setfinish then
             begin
               //проверяем в какой этап заносить результат
               if MainForm.SQLQuery1.FieldByName('result' + IntToStr(i)).AsString <> '' then
               begin
-                if MessageDlg(sUpdateFinishTime + ' ' + IntToStr(number) +
+                if MessageDlg(rsUpdateFinishTime + ' ' + IntToStr(number) +
                   '?', mtWarning, [mbYes, mbNo], 0) = mrYes then
                   setfinish := True
                 else
@@ -957,7 +965,7 @@ begin
             //сначала определяем номер и результат текущего лидера категории для LED панели или телеграм бота
             if Mainform.AcLEDPanel.Checked or Mainform.AcTelegramBot.Checked then
             begin
-              st := IntToStr(ActiveStage);
+              st := IntToStr(ActiveStageIndex);
               currentcategory := MainForm.SQLQuery1.FieldByName('category').AsString;
               Name := MainForm.SQLQuery1.FieldByName('name').AsString;
               MainForm.SQLQuery1.Active := False;
@@ -973,8 +981,7 @@ begin
             MainForm.SQLQuery1.SQL.Add('UPDATE main');
             for i := 1 to maxstages do
             begin
-              c := MainForm.FindComponent('RadioCur' + IntToStr(i));
-              if TRadioButton(c).Checked then
+              if MainForm.CurrentSU.Buttons[i - 1].Checked then
                 MainForm.SQLQuery1.SQL.Add('SET finishtime' + IntToStr(i) +
                   ' = :TIME' + ', status' + IntToStr(i) + ' = NULL');
             end;
@@ -989,7 +996,7 @@ begin
             UpdateResults;
             //ставим результат
             MainForm.sGridResult.DeleteRow(row);
-            Log(sFinishTimeSet + ' ' + IntToStr(number));
+            Log(rsFinishTimeSet + ' ' + IntToStr(number));
 
             //если используется LED панель или телеграм бот, добываем для них данные
             if Mainform.AcLEDPanel.Checked or Mainform.AcTelegramBot.Checked then
@@ -1166,8 +1173,8 @@ begin
                 except
                   On E: Exception do
                   begin
-                    //MessageDlg(sTelegramBotSendingError + E.Message, mtError, [mbOK], 0);
-                    Log(sTelegramBotSendingError + E.Message);
+                    //MessageDlg(rsTelegramBotSendingError + E.Message, mtError, [mbOK], 0);
+                    Log(rsTelegramBotSendingError + E.Message);
                   end;
 
                 end;
@@ -1201,14 +1208,14 @@ begin
           end;
         end
         else
-          Log(sNumber + ' ' + IntToStr(number) + ' ' + sDoNotExist);
+          Log(rsNumber + ' ' + IntToStr(number) + ' ' + rsDoNotExist);
       end;
     end;
   except
     On E: Exception do
     begin
-      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(sDatabaseOpenError + E.Message);
+      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+      Log(rsDatabaseOpenError + E.Message);
     end;
   end;
   Screen.Cursor := crDefault;
@@ -1234,7 +1241,7 @@ begin
         //проверяем что номер есть в таблице результатов
         if FieldByName('number').AsString = n then
         begin
-          if FieldByName('correction' + IntToStr(ActiveStage)).AsString = '' then
+          if FieldByName('correction' + IntToStr(ActiveStageIndex)).AsString = '' then
             //если поправки нет
           begin
             setcorrection := True;
@@ -1242,7 +1249,7 @@ begin
           else
             //если поправка есть спрашиваем переписать или нет
           begin
-            if MessageDlg(sNumberu + ' ' + n + ' ' + sCorrectionAlreadySet,
+            if MessageDlg(rsNumberu + ' ' + n + ' ' + rsCorrectionAlreadySet,
               mtWarning, [mbYes, mbNo], 0) = mrYes then
               setcorrection := True
             else
@@ -1251,7 +1258,7 @@ begin
           if setcorrection then
           begin
             Close;
-            SQL.Text := 'UPDATE main SET correction' + IntToStr(ActiveStage) +
+            SQL.Text := 'UPDATE main SET correction' + IntToStr(ActiveStageIndex) +
               ' = ' + correction + ' WHERE number = ' + n + ';';
             Close;
             ExecSQL;
@@ -1266,7 +1273,7 @@ begin
         end
         else
         begin
-          Log(sNumber + ' ' + n + ' ' + sDoNotExist);
+          Log(rsNumber + ' ' + n + ' ' + rsDoNotExist);
         end;
         Close;
         MainForm.SQLite3Connection1.Close;
@@ -1295,7 +1302,7 @@ begin
   try
     for i := 1 to maxstages do
     begin
-      if stage[i] then
+      if stages[i].isActive then
         with MainForm.SQLQuery1 do
         begin
           SQL.Clear;
@@ -1395,8 +1402,8 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(sDatabaseOpenError + E.Message);
+      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+      Log(rsDatabaseOpenError + E.Message);
     end;
   end;
 end;
@@ -1416,7 +1423,7 @@ begin
       SQL.Add('ELSE strftime(''%H:%M:%f'',0.5');
       for i := 1 to maxstages do
       begin
-        if stage[i] then
+        if stages[i].isActive then
           SQL.Add('+ julianday(result' + IntToStr(i) + ') -2451543.5');
       end;
       SQL.Add(')END;');
@@ -1462,8 +1469,8 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(sDatabaseOpenError + E.Message);
+      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+      Log(rsDatabaseOpenError + E.Message);
     end;
   end;
 end;
@@ -1486,7 +1493,7 @@ begin
         sumstages := 0;
         for i := 1 to maxstages do
         begin
-          if stage[i] then
+          if stages[i].isActive then
           begin
             stringtime := FieldByName('result' + IntToStr(i)).AsString;
             if stringtime <> '' then
@@ -1552,7 +1559,7 @@ begin
         'SELECT number, row_number() over(partition BY category ORDER BY sumresult) as sumplace FROM main WHERE sumresult > 0 AND status ISNULL');
       for i := 1 to maxstages do
       begin
-        if stage[i] then
+        if stages[i].isActive then
         begin
           SQL.Add('AND result' + IntToStr(i) + ' NOTNULL');
           SQL.Add('AND status' + IntToStr(i) + ' IS NULL');
@@ -1593,7 +1600,7 @@ begin
         't2(current,cat2, num2) AS (SELECT sumstages, category, number FROM main WHERE sumplace IS NULL AND sumstages NOT NULL AND (status < 3 OR status IS NULL))');
       SQL.Add('INSERT into main (sumdiffleader, number)');
       SQL.Add('SELECT ''+'' || (t1.sumstages1 - t2.current) || ''' +
-        ' ' + sSU + ''', t2.num2 from t1, t2 WHERE t1.cat1 = t2.cat2');
+        ' ' + rsSU + ''', t2.num2 from t1, t2 WHERE t1.cat1 = t2.cat2');
       SQL.Add(
         'ON CONFLICT(number) DO UPDATE SET sumdiffleader= excluded.sumdiffleader;');
       Close;
@@ -1606,8 +1613,8 @@ begin
     begin
       MainForm.SQLQuery1.Close;
       MainForm.SQLQuery1.SQLTransaction.Active := False;
-      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(sDatabaseOpenError + E.Message);
+      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+      Log(rsDatabaseOpenError + E.Message);
     end;
   end;
 end;
@@ -1659,7 +1666,7 @@ begin
         '(SELECT sumstages, number FROM main WHERE sumplace IS NULL AND sumstages NOT NULL AND (status < 3 OR status IS NULL))');
       SQL.Add('INSERT into main (thrudiff, number)');
       SQL.Add('SELECT ''+'' || (t1.sumstages1 - t2.current) || ''' +
-        ' ' + sSU + ''', t2.num2 from t1, t2 WHERE TRUE');
+        ' ' + rsSU + ''', t2.num2 from t1, t2 WHERE TRUE');
       SQL.Add('ON CONFLICT(number) DO UPDATE SET thrudiff= excluded.thrudiff;');
       Close;
       ExecSQL;
@@ -1671,8 +1678,8 @@ begin
     begin
       MainForm.SQLQuery1.Close;
       MainForm.SQLQuery1.SQLTransaction.Active := False;
-      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(sDatabaseOpenError + E.Message);
+      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+      Log(rsDatabaseOpenError + E.Message);
     end;
   end;
 end;
@@ -1681,7 +1688,7 @@ procedure ClearResults(silent: boolean);
 var
   i: integer;
 begin
-  if silent or (MessageDlg(sClearResults, mtWarning, [mbYes, mbNo], 0) = mrYes) then
+  if silent or (MessageDlg(rsClearResults, mtWarning, [mbYes, mbNo], 0) = mrYes) then
   begin
     try
       with MainForm.SQLQuery1 do
@@ -1704,12 +1711,12 @@ begin
         Close;
         RefreshAll;
       end;
-      Log(sResultsCleared);
+      Log(rsResultsCleared);
     except
       On E: Exception do
       begin
-        MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-        Log(sDatabaseOpenError + E.Message);
+        MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+        Log(rsDatabaseOpenError + E.Message);
       end;
     end;
   end;
@@ -1718,7 +1725,6 @@ end;
 procedure SetDNSFromCorrection;
 var
   n: string;
-  c: TComponent;
   i: integer;
 begin
   if dbopen then
@@ -1727,8 +1733,7 @@ begin
     begin
       for i := 1 to maxstages do
       begin
-        c := MainForm.FindComponent('RadioCur' + IntToStr(i));
-        if TRadioButton(c).Checked then
+        if MainForm.CurrentSU.Buttons[i - 1].Checked then
         begin
           n := MainForm.CorrectionDataset.FieldByName('number').AsString;
           SetSQLStatus(i, 'DNS', n);
@@ -1748,8 +1753,8 @@ begin
   begin
     n := MainForm.MainDataset1.FieldByName('number').AsString;
     st := GetSelectedStage;
-    t := InputDateTime(sTimeToStart, sEnterStartTime + ' ' + n + ' ' +
-      sOnStage + ': ' + stageName[st]);
+    t := InputDateTime(rsTimeToStart, rsEnterStartTime + ' ' + n + ' ' +
+      rsOnStage + ': ' + stages[st].Name);
     if t > 0 then
     begin
       with MainForm.SQLQuery1 do
@@ -1770,15 +1775,13 @@ end;
 procedure SetDNFFromOnTrace;
 var
   n: string;
-  c: TComponent;
   i: integer;
 begin
   if not MainForm.StatDataset2.IsEmpty then
   begin
     for i := 1 to maxstages do
     begin
-      c := MainForm.FindComponent('RadioCur' + IntToStr(i));
-      if TRadioButton(c).Checked then
+      if MainForm.CurrentSU.Buttons[i - 1].Checked then
       begin
         n := MainForm.StatDataset2.FieldByName('number').AsString;
         SetSQLStatus(i, 'DNF', n);
@@ -1790,7 +1793,7 @@ end;
 procedure LoadParticipantsList(FileName: string);
 var
   ocsvStrings: TStringList;
-  i, k: integer;
+  i, k, num: integer;
   startItem: TStartItemModel;
   startItems: TList;
   legend: TStringList;
@@ -1802,6 +1805,7 @@ var
   fileStream: TFilestream;
   Info: rCharsetInfo;
   S: pchar;
+  isNumberColumnExists: boolean = False;
 begin
   if dbopen then
   begin
@@ -1861,6 +1865,18 @@ begin
 
         legend.DelimitedText := ocsvStrings[0];
 
+        // Проверяем что есть обязательные поля (номер)
+        for legendItem in legend do
+        begin
+          if legendMap.number.IndexOf(legendItem.ToLower) >= 0 then
+          begin
+            isNumberColumnExists := True;
+            break;
+          end;
+        end;
+        if not isNumberColumnExists then
+          raise Exception.Create(rsNumberColumnNotFound);
+
         // Собираем названия СУ
         for legendItem in legend do
         begin
@@ -1907,7 +1923,10 @@ begin
           for legendItem in legend do
           begin
             if legendMap.number.IndexOf(legendItem.ToLower) >= 0 then
-              startItem.number := item[legend.IndexOf(legendItem)].ToInteger
+              if TryStrToInt(item[legend.IndexOf(legendItem)], num) then
+                startItem.number := num
+              else
+                break
             else if legendMap.Name.IndexOf(legendItem.ToLower) >= 0 then
               startItem.Name := item[legend.IndexOf(legendItem)]
             else if legendMap.category.IndexOf(legendItem.ToLower) >= 0 then
@@ -1976,80 +1995,68 @@ begin
             MainForm.SQLQuery1.SQL.Add(',');
         end;
         MainForm.SQLQuery1.SQL.Add(';');
-        //{$IFDEF Windows}
-        //MainForm.SQLQuery1.SQL.Text:= WinCPToUTF8(MainForm.SQLQuery1.SQL.Text);
-        //{$ENDIF}
-        try
-          MainForm.SQLQuery1.Close;
-          MainForm.SQLQuery1.ExecSQL;
-          MainForm.SQLQuery1.SQLTransaction.Commit;
+        MainForm.SQLQuery1.Close;
+        MainForm.SQLQuery1.ExecSQL;
+        MainForm.SQLQuery1.SQLTransaction.Commit;
 
+        // Запись в основную таблицу
+        with MainForm.SQLQuery1 do
+        begin
+          SQL.Clear;
+          SQL.Add(
+            'INSERT into main (category, number, name, nickname, age, team, city, phone, email, comment, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6)');
+          SQL.Add(
+            'SELECT category, number, name, nickname, age, team, city, phone, email, comment, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6 FROM load WHERE number NOTNULL AND number != "" AND number != 0');
+          SQL.Add('ON CONFLICT(number) DO UPDATE SET');
+          SQL.Add(
+            'category = excluded.category, name = excluded.name, nickname = excluded.nickname, age = excluded.age, team = excluded.team, city = excluded.city, phone = excluded.phone, email = excluded.email, comment = excluded.comment, starttime1 = excluded.starttime1,');
+          SQL.Add(
+            'starttime2 = excluded.starttime2, starttime3 = excluded.starttime3, starttime4 = excluded.starttime4, starttime5 = excluded.starttime5, starttime6 = excluded.starttime6;');
+          Close;
+          ExecSQL;
+          SQLTransaction.Commit;
+          Close;
+        end;
 
-          // Запись в основную таблицу
+        if MessageDlg(rsSetCategoryName, mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+        begin
+          //записывать ли первые несколько* категорий из списка участников
           with MainForm.SQLQuery1 do
           begin
+            //в окно результатов и в конфиг БД
+            Close;
+            //*несколько равно количеству категорий, показываемых в окне результатов
+            SQL.Text := 'SELECT category FROM main GROUP BY category';
+            Open;
+            k := RecordCount;
+            if k > visiblecat then
+              k := visiblecat;
+            for i := 1 to k do
+            begin
+              cat[i] := Fields.Fields[0].AsString;
+              Next;
+            end;
+            Close;
             SQL.Clear;
-            SQL.Add(
-              'INSERT into main (category, number, name, nickname, age, team, city, phone, email, comment, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6)');
-            SQL.Add(
-              'SELECT category, number, name, nickname, age, team, city, phone, email, comment, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6 FROM load WHERE number NOTNULL AND number != ""');
-            SQL.Add('ON CONFLICT(number) DO UPDATE SET');
-            SQL.Add(
-              'category = excluded.category, name = excluded.name, nickname = excluded.nickname, age = excluded.age, team = excluded.team, city = excluded.city, phone = excluded.phone, email = excluded.email, comment = excluded.comment, starttime1 = excluded.starttime1,');
-            SQL.Add(
-              'starttime2 = excluded.starttime2, starttime3 = excluded.starttime3, starttime4 = excluded.starttime4, starttime5 = excluded.starttime5, starttime6 = excluded.starttime6;');
+            SQL.Add('INSERT INTO config (key, value) VALUES');
+            for i := 1 to visiblecat do
+            begin
+              SQL.Add('("catname' + IntToStr(i) + '", "' + cat[i] + '")');
+              if i < visiblecat then
+                SQL.Add(',');
+            end;
+            SQL.Add('ON CONFLICT(key) DO UPDATE SET value = excluded.value;');
             Close;
             ExecSQL;
             SQLTransaction.Commit;
             Close;
           end;
-
-          if MessageDlg(sSetCategoryName, mtConfirmation, [mbYes, mbNo], 0) = mrYes then
-          begin
-            //записывать ли первые несколько* категорий из списка участников
-            with MainForm.SQLQuery1 do
-            begin
-              //в окно результатов и в конфиг БД
-              Close;
-              //*несколько равно количеству категорий, показываемых в окне результатов
-              SQL.Text := 'SELECT category FROM main GROUP BY category';
-              Open;
-              k := RecordCount;
-              if k > visiblecat then
-                k := visiblecat;
-              for i := 1 to k do
-              begin
-                cat[i] := Fields.Fields[0].AsString;
-                Next;
-              end;
-              Close;
-              SQL.Clear;
-              SQL.Add('INSERT INTO config (key, value) VALUES');
-              for i := 1 to visiblecat do
-              begin
-                SQL.Add('("catname' + IntToStr(i) + '", "' + cat[i] + '")');
-                if i < visiblecat then
-                  SQL.Add(',');
-              end;
-              SQL.Add('ON CONFLICT(key) DO UPDATE SET value = excluded.value;');
-              Close;
-              ExecSQL;
-              SQLTransaction.Commit;
-              Close;
-            end;
-            LoadConfig;
-            LoadIniCategory;
-          end;
-          RefreshAll;
-          Log(sLoadCSVParticipants);
-          Screen.Cursor := crDefault;
-        except
-          On E: Exception do
-          begin
-            MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-            Log(sDatabaseOpenError + E.Message);
-          end;
+          LoadConfig;
+          LoadIniCategory;
         end;
+        RefreshAll;
+        Log(rsLoadCSVParticipants);
+        Screen.Cursor := crDefault;
         MainForm.SQLQuery1.Close;
       finally
         begin
@@ -2067,8 +2074,8 @@ begin
     except
       On E: Exception do
       begin
-        MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-        Log(sDatabaseOpenError + E.Message);
+        MessageDlg(rsLoadParticipantsListError + E.Message, mtError, [mbOK], 0);
+        Log(rsLoadParticipantsListError + E.Message);
       end;
     end;
     Screen.Cursor := crDefault;
@@ -2090,14 +2097,14 @@ end;
 //    c := MainForm.FindComponent('RadioCur' + IntToStr(i));
 //    if TRadioButton(c).Enabled then
 //    begin
-//      strlst.add(stageName[i]);
+//      strlst.add(stages[i].Name);
 //      if TRadioButton(c).Checked then
 //      begin
 //        k := strlst.Count - 1;
 //      end;
 //    end;
 //  end;
-//  importfinish := MyInputCombo(sImportFinish, sSetTimeToSU, strlst, k) + 1;
+//  importfinish := MyInputCombo(rsImportFinish, rsSetTimeToSU, strlst, k) + 1;
 //  //вводим номер СУ для ввода финишных результатов
 //  if importfinish > 0 then
 //  begin
@@ -2157,13 +2164,13 @@ end;
 //          Close;
 //        end;
 //        UpdateResults;
-//        Log(sImportFinishtime + ' ' + IntToStr(importfinish) +
-//          ': ' + stageName[importfinish] + ' ' + sLoaded);
+//        Log(rsImportFinishtime + ' ' + IntToStr(importfinish) +
+//          ': ' + stageName[importfinish] + ' ' + rsLoaded);
 //      except
 //        On E: Exception do
 //        begin
-//          MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-//          Log(sDatabaseOpenError + E.Message);
+//          MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+//          Log(rsDatabaseOpenError + E.Message);
 //        end;
 //      end;
 //    end;
@@ -2174,9 +2181,8 @@ end;
 
 function InputComboSelectStage: integer;
 var
-  c: TComponent;
   strlst: TStringList;
-  i, col, row: integer;
+  i: integer;
   k: integer = -1;
 begin
   strlst := TStringList.Create;
@@ -2184,24 +2190,23 @@ begin
   // Если активных СУ больше одного, то
   // получаем список активных СУ и выводим инпуткомбо
   // В противном случае сразу выбираем активный СУ
-  if CountActiveStages > 1 then
+  if stages.ActiveStagesCount > 1 then
   begin
     for i := 1 to maxstages do
     begin
-      c := MainForm.FindComponent('RadioCur' + IntToStr(i));
-      if TRadioButton(c).Enabled then
+      if stages[i].isActive then
       begin
-        strlst.add(stageName[i]);
-        if TRadioButton(c).Checked then
+        strlst.add(stages[i].Name);
+        if MainForm.CurrentSU.Buttons[i - 1].Checked then
         begin
           k := strlst.Count - 1;
         end;
       end;
     end;
-    Result := MyInputCombo(sImportFinish, sSetTimeToSU, strlst, k) + 1;
+    Result := MyInputCombo(rsImportFinish, rsSetTimeToSU, strlst, k);
   end
   else
-    Result := GetSelectedStage;
+    Result := ActiveStageIndex();
   strlst.Free;
 end;
 
@@ -2209,8 +2214,7 @@ procedure LoadFinishTime(FileName: string);
 var
   importfinish: integer;
   ocsvStrings: TStringList;
-  i, col, row: integer;
-  strlst: TStringList;
+  i, col, row, num: integer;
   csvDoc: TCSVDocument;
   sqlStr: string;
   dns: boolean = False;
@@ -2258,7 +2262,7 @@ begin
           begin
             if not BackupBD then
             begin
-              if MessageDlg(sCanNotBackup, mtWarning, [mbYes, mbNo], 0) = mrNo then
+              if MessageDlg(rsCanNotBackup, mtWarning, [mbYes, mbNo], 0) = mrNo then
               begin
                 Screen.Cursor := crDefault;
                 Exit;
@@ -2331,8 +2335,8 @@ begin
             end;
             RecalculateStatus(GetAllStageStatus(importfinish));
             UpdateResults;
-            Log(sImportFinishtime + ' ' + IntToStr(importfinish) +
-              ': ' + stageName[importfinish] + ' ' + sLoaded_o);
+            Log(rsImportFinishtime + ' ' + IntToStr(importfinish) +
+              ': ' + stages[importfinish].Name + ' ' + rsLoaded_o);
           end
           //если значений 3 (number, starttime, correction)
           //то загрузка из стартового телефона
@@ -2340,7 +2344,7 @@ begin
           begin
             if not BackupBD then
             begin
-              if MessageDlg(sCanNotBackup, mtWarning, [mbYes, mbNo], 0) = mrNo then
+              if MessageDlg(rsCanNotBackup, mtWarning, [mbYes, mbNo], 0) = mrNo then
               begin
                 Screen.Cursor := crDefault;
                 Exit;
@@ -2353,8 +2357,8 @@ begin
 
             for row := 0 to csvDoc.RowCount - 1 do
             begin
-              //пропускаем строку с заголовками
-              if csvDoc.Cells[i, row] = 'number' then
+              //пропускаем строку с заголовками (если первое значение не номер)
+              if not trystrtoint(csvDoc.Cells[0, row], num) then
                 Continue;
               MainForm.SQLQuery1.SQL.Add('(');
               //соединяем строку в sql формат
@@ -2418,7 +2422,6 @@ begin
                 ' = excluded.correction' + IntToStr(importfinish) + ',');
               SQL.Add('status' + IntToStr(importfinish) +
                 ' = excluded.status' + IntToStr(importfinish));
-              //Print(SQL.Text);
               Close;
               ExecSQL;
               SQLTransaction.Commit;
@@ -2427,8 +2430,8 @@ begin
             end;
             //SetGlobalStatus(n);
             UpdateResults;
-            Log(sImportStarttime + ' ' + IntToStr(importfinish) +
-              ': ' + stageName[importfinish] + ' ' + sLoaded);
+            Log(rsImportStarttime + ' ' + IntToStr(importfinish) +
+              ': ' + stages[importfinish].Name + ' ' + rsLoaded);
           end
           //если значений 2 (number, finishtime)
           //то загрузка из финишного телефона
@@ -2436,7 +2439,7 @@ begin
           begin
             if not BackupBD then
             begin
-              if MessageDlg(sCanNotBackup, mtWarning, [mbYes, mbNo], 0) = mrNo then
+              if MessageDlg(rsCanNotBackup, mtWarning, [mbYes, mbNo], 0) = mrNo then
               begin
                 Screen.Cursor := crDefault;
                 Exit;
@@ -2448,8 +2451,8 @@ begin
             MainForm.SQLQuery1.SQL.Add('VALUES');
             for row := 0 to csvDoc.RowCount - 1 do
             begin
-              //пропускаем строку с заголовками
-              if csvDoc.Cells[i, row] = 'number' then
+              //пропускаем строку с заголовками (если первое значение не номер)
+              if not trystrtoint(csvDoc.Cells[0, row], num) then
                 Continue;
               MainForm.SQLQuery1.SQL.Add('(');
               //соединяем строку в sql формат
@@ -2517,11 +2520,11 @@ begin
             end;
             //SetGlobalStatus(n);
             UpdateResults;
-            Log(sImportFinishtime + ' ' + IntToStr(importfinish) +
-              ': ' + stageName[importfinish] + ' ' + sLoaded_o);
+            Log(rsImportFinishtime + ' ' + IntToStr(importfinish) +
+              ': ' + stages[importfinish].Name + ' ' + rsLoaded_o);
           end
           else
-            MessageDlg(sFinishTimeOpenError, mtError, [mbOK], 0);
+            MessageDlg(rsFinishTimeOpenError, mtError, [mbOK], 0);
         finally
           ocsvStrings.Free;
           csvDoc.Free;
@@ -2529,8 +2532,8 @@ begin
       except
         On E: Exception do
         begin
-          MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-          Log(sDatabaseOpenError + E.Message);
+          MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+          Log(rsDatabaseOpenError + E.Message);
         end;
       end;
     end;
@@ -2577,12 +2580,12 @@ var
   showPenalty: boolean = False;
 begin
   if not FileExists(FileName) or
-    (MessageDlg(sFileExists, mtWarning, [mbOK, mbCancel], 0) = mrOk) then
+    (MessageDlg(rsFileExists, mtWarning, [mbOK, mbCancel], 0) = mrOk) then
   begin
     // Create the spreadsheet
     MyWorkbook := TsWorkbook.Create;
-    FinishWorksheet := MyWorkbook.AddWorksheet(sFinishProtocol);
-    ThruWorksheet := MyWorkbook.AddWorksheet(sFinishThruProtocol);
+    FinishWorksheet := MyWorkbook.AddWorksheet(rsFinishProtocol);
+    ThruWorksheet := MyWorkbook.AddWorksheet(rsFinishThruProtocol);
 
     // Шрифты
     normalFont := TsFont.Create;
@@ -2613,13 +2616,13 @@ begin
     exportColumns.add('team');
     exportColumns.add('city');
 
-    ColumnstageName.add(splace);
-    ColumnstageName.add(sNumber);
-    ColumnstageName.add(sName);
-    ColumnstageName.add(sNickname);
-    ColumnstageName.add(sAge);
-    ColumnstageName.add(sTeam);
-    ColumnstageName.add(sCity);
+    ColumnstageName.add(rsPlace);
+    ColumnstageName.add(rsNumber);
+    ColumnstageName.add(rsName);
+    ColumnstageName.add(rsNickname);
+    ColumnstageName.add(rsAge);
+    ColumnstageName.add(rsTeam);
+    ColumnstageName.add(rsCity);
 
     // Если есть штрафы в таблице, заносим их в результаты,
     // в противном случае не показываем эти столбцы
@@ -2644,25 +2647,25 @@ begin
       stageColumnCount := 4;
     end;
 
-    if (CountActiveStages > 1) then
+    if (stages.ActiveStagesCount > 1) then
     begin
       // Колонки для активных СУ
       for i := 1 to maxstages do
       begin
-        if stage[i] then
+        if stages[i].isActive then
         begin
           exportColumns.add('result' + IntToStr(i));
-          ColumnstageName.add(sresult);
+          ColumnstageName.add(rsResult);
           exportColumns.add('diffleader' + IntToStr(i));
-          ColumnstageName.add(sdiffleader);
+          ColumnstageName.add(rsDiffleader);
           if (showPenalty) then
           begin
             exportColumns.add('penalty' + IntToStr(i));
-            ColumnstageName.add(spenalty);
+            ColumnstageName.add(rsPenalty);
           end;
           exportColumns.add('place' + IntToStr(i));
-          ColumnstageName.add(splace);
-          stageNames.add(stageName[i]);
+          ColumnstageName.add(rsPlace);
+          stageNames.add(stages[i].Name);
         end;
       end;
     end;
@@ -2670,13 +2673,13 @@ begin
     exportColumns.add('sumresult');
     exportColumns.add('sumdiffleader');
 
-    ColumnstageName.add(ssumresult);
-    ColumnstageName.add(sdiffleader);
+    ColumnstageName.add(rsSumresult);
+    ColumnstageName.add(rsDiffleader);
 
-    if (CountActiveStages > 1) then
+    if (stages.ActiveStagesCount > 1) then
     begin
       exportColumns.add('sumstages');
-      ColumnstageName.add(ssumstages);
+      ColumnstageName.add(rsSumstages);
     end;
 
     // Создаём список категорий
@@ -2713,9 +2716,9 @@ begin
         Inc(j);
 
         // Отдельной строкой название СУ если их больше одного
-        if (CountActiveStages > 1) then
+        if (stages.ActiveStagesCount > 1) then
         begin
-          for i := 0 to CountActiveStages - 1 do
+          for i := 0 to stages.ActiveStagesCount - 1 do
           begin
             // 7 - количество столбцов до отдельных результатов СУ
             // 4 - кол-во столбцов на СУ
@@ -2801,17 +2804,17 @@ begin
     exportColumns.add('thrudiff');
 
     ColumnstageName.Clear;
-    ColumnstageName.add(sCategory);
-    ColumnstageName.add(splace);
-    ColumnstageName.add(sNumber);
-    ColumnstageName.add(sName);
-    ColumnstageName.add(sresult);
-    ColumnstageName.add(sdiffleader);
+    ColumnstageName.add(rsCategory);
+    ColumnstageName.add(rsPlace);
+    ColumnstageName.add(rsNumber);
+    ColumnstageName.add(rsName);
+    ColumnstageName.add(rsResult);
+    ColumnstageName.add(rsDiffleader);
 
-    if CountActiveStages > 1 then
+    if stages.ActiveStagesCount > 1 then
     begin
       exportColumns.add('sumstages');
-      ColumnstageName.add(ssumstages);
+      ColumnstageName.add(rsSumstages);
     end;
 
     j := 0;
@@ -2885,7 +2888,7 @@ begin
       begin
         //MyWorkbook.WriteToFile(MyDir + 'test' + STR_EXCEL_EXTENSION, OUTPUT_FORMAT);
         MyWorkbook.WriteToFile(FileName, True);
-        Log(sResultsExportedToFile + ' ' + FileName);
+        Log(rsResultsExportedToFile + ' ' + FileName);
         OpenDocument(FileName);
       end;
     finally
@@ -2937,7 +2940,7 @@ begin
     with MainForm.SQLQuery1 do
     begin
       SQL.Text := 'SELECT number FROM main WHERE starttime' +
-        IntToStr(ActiveStage) + ' BETWEEN "' +
+        IntToStr(ActiveStageIndex) + ' BETWEEN "' +
         FormatDateTime('hh:nn:ss.zzz', timeBefore) + '" AND "' +
         FormatDateTime('hh:nn:ss.zzz', timeAfter) + '";';
       Open;
@@ -2964,8 +2967,8 @@ begin
       except
         On E: Exception do
         begin
-          MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-          Log(sDatabaseOpenError + E.Message);
+          MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+          Log(rsDatabaseOpenError + E.Message);
         end;
       end;
     end;
@@ -2980,7 +2983,7 @@ end;
 //  if fName <> FileName then
 //  begin
 //    fileExistsBefore := FileExists(FileName);
-//    if fileExistsBefore and (MessageDlg(sFinalFileExists, mtWarning,
+//    if fileExistsBefore and (MessageDlg(rsFinalFileExists, mtWarning,
 //      [mbOK, mbCancel], 0) = mrCancel) then
 //      Exit;
 //    prevfName := fName;
@@ -3001,7 +3004,7 @@ end;
 //        //5. удаляем результаты
 //        ClearResults(True);
 //        //уведомление что стартовый протокол создан
-//        MessageDlg(sGenerateStartList + ': ' + FileName,
+//        MessageDlg(rsGenerateStartList + ': ' + FileName,
 //          mtInformation, [mbOK], 0);
 //      end
 //      else
@@ -3017,13 +3020,13 @@ end;
 //    except
 //      on E: Exception do
 //      begin
-//        MessageDlg(sFileCopyError + ':' + #13#10 + E.Message,
+//        MessageDlg(rsFileCopyError + ':' + #13#10 + E.Message,
 //          mtError, [mbOK], 0);
 //      end;
 //    end;
 //  end
 //  else
-//    MessageDlg(sFilesAreEqual, mtError, [mbOK], 0);
+//    MessageDlg(rsFilesAreEqual, mtError, [mbOK], 0);
 //end;
 
 procedure ExportCSVStartList(FileName: string);
@@ -3036,7 +3039,7 @@ begin
 
   if FileExists(FileName) then
   begin
-    if MessageDlg(sStartListFileExists, mtWarning, [mbYes, mbNo], 0) <> mrYes then
+    if MessageDlg(rsStartListFileExists, mtWarning, [mbYes, mbNo], 0) <> mrYes then
       exit;
   end;
 
@@ -3046,13 +3049,13 @@ begin
     FileName := csvfilename;
     for i := 1 to 6 do
     begin
-      if (stage[i]) then
+      if (stages[i].isActive) then
         // Эта хрень с добавлением/удалением из-за того,
         // что почему-то экспортируются задизейбленные поля
       begin
         ExportFields.AddField(fieldName + IntToStr(i));
         fieldIndex := ExportFields.IndexOfField(fieldName + IntToStr(i));
-        ExportFields.Fields[fieldIndex].ExportedName := stageName[i];
+        ExportFields.Fields[fieldIndex].ExportedName := stages[i].Name;
       end;
     end;
 
@@ -3075,7 +3078,7 @@ begin
 
   if FileExists(FileName) then
   begin
-    if MessageDlg(sCSVResultsFileExists, mtWarning, [mbYes, mbNo], 0) <> mrYes then
+    if MessageDlg(rsCSVResultsFileExists, mtWarning, [mbYes, mbNo], 0) <> mrYes then
       exit;
   end;
 
@@ -3089,8 +3092,8 @@ begin
     except
       On E: Exception do
       begin
-        MessageDlg(sCSVResultsExportError + E.Message, mtError, [mbOK], 0);
-        Log(sCSVResultsExportError + E.Message);
+        MessageDlg(rsCSVResultsExportError + E.Message, mtError, [mbOK], 0);
+        Log(rsCSVResultsExportError + E.Message);
       end;
     end;
   end;
@@ -3283,8 +3286,8 @@ begin
         except
           On E: Exception do
           begin
-            MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-            Log(sDatabaseOpenError + E.Message);
+            MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+            Log(rsDatabaseOpenError + E.Message);
           end;
         end;
         MainForm.SQLQuery1.Close;
@@ -3326,8 +3329,8 @@ begin
     except
       On E: Exception do
       begin
-        MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-        Log(sDatabaseOpenError + E.Message);
+        MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+        Log(rsDatabaseOpenError + E.Message);
         Screen.Cursor := crDefault;
       end;
     end;
@@ -3367,7 +3370,7 @@ begin
     Close;
     //sql запрос на список категорий
     SQL.Text := 'SELECT category FROM main GROUP BY category ORDER BY starttime' +
-      IntToStr(ActiveStage);
+      IntToStr(ActiveStageIndex);
     //открываем
     Open;
     //перегоняем в стринглист список категорий
@@ -3430,8 +3433,8 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(sDatabaseOpenError + E.Message);
+      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+      Log(rsDatabaseOpenError + E.Message);
     end;
   end;
 end;
@@ -3452,15 +3455,15 @@ begin
 end;
 
 // Количество активных СУ
-function CountActiveStages: integer;
-var
-  i: integer;
-begin
-  Result := 0;
-  for i := 1 to maxstages do
-    if stage[i] then
-      Inc(Result);
-end;
+//function ActiveStagesCount: integer;
+//var
+//  i: integer;
+//begin
+//  Result := 0;
+//  for i := 1 to maxstages do
+//    if stages[i].isActive then
+//      Inc(Result);
+//end;
 
 //высчитываем номер СУ, где стоит выделение
 function GetSelectedStage: integer;
@@ -3479,16 +3482,14 @@ begin
 end;
 
 //высчитывает номер СУ, активное на данный момент
-function ActiveStage: integer;
+function ActiveStageIndex: integer;
 var
   i: integer;
-  c: TComponent;
 begin
   Result := 1;
   for i := 1 to maxstages do
   begin
-    c := MainForm.FindComponent('RadioCur' + IntToStr(i));
-    if TRadioButton(c).Checked then
+    if MainForm.CurrentSU.Buttons[i - 1].Checked then
     begin
       Result := i;
       Break;
@@ -3521,8 +3522,8 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(sDatabaseOpenError + E.Message);
+      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+      Log(rsDatabaseOpenError + E.Message);
     end;
   end;
 end;

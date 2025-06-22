@@ -11,10 +11,12 @@ uses
   lazserialsetup, synaser, HistoryFiles, DataPortHTTP, ComCtrls, ExtCtrls,
   LCLType, LResources, Menus, ActnList, StdActns, Grids, rxdbgrid, rxlookup,
   rxdbcomb, rxtoolbar, RxTimeEdit, RxIniPropStorage, rxspin, RxAboutDialog,
-  RxDBGridExportSpreadSheet, DB, Sqlite3DS, sqlite3conn, sqldb, fpcsvexport,
-  dateutils, Controls, DBGrids, Graphics, i18n, LCLTranslator, VersionSupport,
-  LazUTF8, PropertyStorage, Buttons, DBCtrls, translations, Types,
-  Clipbrd, lclintf, DataPort, fpDBExport, Startlist, MyRxDBGrid;
+  RxDBGridExportSpreadSheet, rxFileUtils, DB, Sqlite3DS, sqlite3conn, sqldb,
+  fpcsvexport, dateutils, Controls, DBGrids, Graphics,
+  i18n, gettext, LCLTranslator, translations,
+  VersionSupport, LazUTF8, PropertyStorage, Buttons, DBCtrls,
+  Types, Clipbrd, lclintf, DataPort, fpDBExport, Startlist, MyRxDBGrid,
+  stagemodel;
 
 type
 
@@ -41,8 +43,10 @@ type
     AcLEDPanel: TAction;
     AcTelegramBot: TAction;
     AcRunRaceSettings: TAction;
+    CheckBoxAutomaticUpdateResutls: TCheckBox;
     CSVResultsExporter: TCSVExporter;
     CSVStartListExporter: TCSVExporter;
+    CurrentSU: TRadioGroup;
     DataPortHTTP1: TDataPortHTTP;
     DataPortHTTPTelegramBot: TDataPortHTTP;
     FileExportCSVStartlist: TFileSaveAs;
@@ -109,7 +113,6 @@ type
     N6: TMenuItem;
     MenuItemGenerateFinal: TMenuItem;
     ComboBox1Category: TComboBox;
-    CurrentSU: TGroupBox;
     FileNewDB: TFileSaveAs;
     GridResult3: TRxDBGrid;
     GridResult4: TRxDBGrid;
@@ -195,12 +198,6 @@ type
     ResultDataSource7: TDataSource;
     ResultDataSource8: TDataSource;
     SheetStage: TPageControl;
-    RadioCur1: TRadioButton;
-    RadioCur2: TRadioButton;
-    RadioCur3: TRadioButton;
-    RadioCur4: TRadioButton;
-    RadioCur5: TRadioButton;
-    RadioCur6: TRadioButton;
     Splitter1: TSplitter;
     ResultDataset1: TSqlite3Dataset;
     Splitter2: TSplitter;
@@ -327,11 +324,8 @@ type
     procedure AcRunRaceSettingsExecute(Sender: TObject);
     procedure AcTelegramBotExecute(Sender: TObject);
     procedure AcSetStarttimeExecute(Sender: TObject);
-    procedure CSVStartListExporterExportRow(Sender: TObject;
-      var AllowExport: boolean);
     procedure DataPortHTTP1DataAppear(Sender: TObject);
     procedure DataPortHTTP1Error(Sender: TObject; const AMsg: string);
-    procedure DataPortHTTPTelegramBotClose(Sender: TObject);
     procedure DataPortHTTPTelegramBotDataAppear(Sender: TObject);
     procedure DataPortHTTPTelegramBotError(Sender: TObject; const AMsg: ansistring);
     procedure FileExportCSVResultsAccept(Sender: TObject);
@@ -393,15 +387,14 @@ type
     procedure CheckPenaltySetText(Sender: TField; const aText: string);
     procedure HideZeroHour(Sender: TField; var aText: string; DisplayText: boolean);
     procedure MainDataSource1StateChange(Sender: TObject);
-    procedure MenuItemExportBDStartListClick(Sender: TObject);
     procedure MenuItemMonitorModeClick(Sender: TObject);
     procedure MenuItem5Click(Sender: TObject);
-    procedure RecalcResultsAfterPenaltyChange(Sender: TField);
+    procedure RecalcResults(Sender: TField);
     procedure MainDataset1statusGetText(Sender: TField; var aText: string;
       DisplayText: boolean);
     procedure MenuItemAboutClick(Sender: TObject);
     procedure RaceModeClick(Sender: TObject);
-    procedure RadioCurClick(Sender: TObject);
+    procedure CurrentSUClick(Sender: TObject);
     procedure RxDBGrid1EditingDone(Sender: TObject);
     procedure RxDBGrid1KeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
     procedure RxDBGrid1KeyPress(Sender: TObject; var Key: char);
@@ -436,6 +429,10 @@ type
       var Value: TStoredType);
     procedure RxIniPropStorage1StoredValues5Save(Sender: TStoredValue;
       var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues6Restore(Sender: TStoredValue;
+      var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues6Save(Sender: TStoredValue;
+      var Value: TStoredType);
     procedure sGridResultDrawCell(Sender: TObject; aCol, aRow: integer;
       aRect: TRect; aState: TGridDrawState);
     procedure sGridResultValidateEntry(Sender: TObject; aCol, aRow: integer;
@@ -452,6 +449,7 @@ type
       const Value: string);
     procedure Timer1Timer(Sender: TObject);
     procedure CheckDBOpen(Sender: TObject);
+    procedure SetLang(ALang: string);
     //functions
 
   private
@@ -467,7 +465,7 @@ type
 
 const
   //максимальное количество спецучаствок
-  maxstages: integer = 6;
+  MAXSTAGES: integer = 6;
   //количество категорий в окне результатов
   visiblecat: integer = 6;
   //первые девять колонок с информацией об участнике
@@ -485,8 +483,9 @@ var
   //имя файла БД
   fName: string = '';
   //язык программы
-  lang: string = 'ru';
-  //номер СУ, результаты которого будут выводиться в отдельно окно
+  CurrentLang: string = '';
+  FallbackLang: string = 'ru';
+  //номер СУ, результаты которого будут выводиться в отдельное окно
   astage: string = '1';
   //список категорий, которые будут выводиться в отдельно окно
   cat: array[1..6] of string;
@@ -496,9 +495,11 @@ var
   NAME_VERSION: string;
   raceName: string = '';
   //активные СУ
-  stage: array[1..6] of boolean;
+  //stages: TStageDictionary;
+  stages: TStages;
+  //stage: array[1..6] of boolean;
   //имена СУ
-  stageName: array[1..6] of string;
+  //stageName: array[1..6] of string;
   //timemark: string;
   //режим работы со временем, str or mark
   //timemarkstr: string;
@@ -512,6 +513,9 @@ var
 
   //Telegram Bot
   telegrambotadress: string;
+
+  //Показывать название СУ если активен только один
+  showStageNameForSingleStage: bool = False;
 
   //Индекс этапа при экспорте
   exportStageIndex: integer = 1;
@@ -535,13 +539,20 @@ var
 begin
   NAME_VERSION := Application.Title + ' v' + GetFileVersion;
 
-  Log(sStartProgram + ' ' + NAME_VERSION);
-  stage[1] := True;
+  Log(rsStartProgram + ' ' + NAME_VERSION);
+  stages := TStages.Create(MAXSTAGES);
+
+  //stages := TStageDictionary.Create;
+  //for i := 1 to MAXSTAGES do
+  //begin
+  //  stages.Add(i, TStageModel.Create('', False));
+  //end;
+  //stages[1].isActive := True;
   //значение по умолчанию (режим работы с 1 СУ)
   HistoryFiles1.IniFile := UTF8ToSys(GetDefaultIniName);
   //для хранения там же, где и RxINIPropStorage
   HistoryFiles1.UpdateParentMenu;
-  //  Log(sShownCategories+' '+cat[1]+', '+cat[2]+', '+cat[3]+', '+cat[4]+', '+cat[5]+', '+cat[6]);
+  //  Log(rsShownCategories+' '+cat[1]+', '+cat[2]+', '+cat[3]+', '+cat[4]+', '+cat[5]+', '+cat[6]);
   Memo.Lines.Add('File version = ' + GetFileVersion);
   //  Memo.Lines.Add('Product version = ' + GetProductVersion);
   Memo.Lines.Add('');
@@ -642,7 +653,7 @@ begin
   end
   else
   begin
-    MessageDlg(sIncorrectCorrection, mtInformation, [mbOK], 0);
+    MessageDlg(rsIncorrectCorrection, mtInformation, [mbOK], 0);
   end;
 end;
 
@@ -681,7 +692,7 @@ end;
 
 procedure TMainForm.FileExportCSVStartlistBeforeExecute(Sender: TObject);
 begin
-  TFileSaveAs(Sender).Dialog.FileName := raceName + '-' + UTF8LowerCase(sStartProtocol);
+  TFileSaveAs(Sender).Dialog.FileName := raceName + '-' + UTF8LowerCase(rsStartProtocol);
 end;
 
 procedure TMainForm.FileCloseExecute(Sender: TObject);
@@ -713,7 +724,7 @@ begin
 
   SetfName('');
 
-  Log(sDBFileClosed + ' ' + fName);
+  Log(rsDBFileClosed + ' ' + fName);
 end;
 
 procedure TMainForm.FileExportStageResultsAccept(Sender: TObject);
@@ -751,8 +762,9 @@ begin
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+var
+  i: integer;
 begin
-  //CatList.Free;
   //DataPortHTTP1.Close();
   //DataPortHTTP1.Free;
   DataPortHTTP1.Close();
@@ -761,8 +773,8 @@ begin
   DataPortHTTP1.OnDataAppear := nil;
   DataPortHTTP1.OnError := nil;
   DataPortHTTP1 := nil;
-  //categoriesAtStartlist.Free;
   FreeAndNil(startlistConfig);
+  FreeAndNil(stages);
 end;
 
 procedure TMainForm.AcViewMemoExecute(Sender: TObject);
@@ -866,8 +878,8 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(sCOMOpenError + ' ' + Serial.Device, mtError, [mbOK], 0);
-      Log(sCOMOpenError + ' ' + Serial.Device);
+      MessageDlg(rsCOMOpenError + ' ' + Serial.Device, mtError, [mbOK], 0);
+      Log(rsCOMOpenError + ' ' + Serial.Device);
     end;
   end;
 end;
@@ -902,8 +914,8 @@ begin
     except
       On E: Exception do
       begin
-        MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-        Log(sDatabaseOpenError + E.Message);
+        MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+        Log(rsDatabaseOpenError + E.Message);
       end;
     end;
   end;
@@ -928,12 +940,6 @@ begin
   SetStarttimeFromPopup;
 end;
 
-procedure TMainForm.CSVStartListExporterExportRow(Sender: TObject;
-  var AllowExport: boolean);
-begin
-
-end;
-
 procedure TMainForm.DataPortHTTP1DataAppear(Sender: TObject);
 begin
   Print((Sender as TDataPortHTTP).Pull());
@@ -943,11 +949,6 @@ procedure TMainForm.DataPortHTTP1Error(Sender: TObject; const AMsg: string);
 begin
   Print('LED Panel error: ' + AMsg);
   //AcLEDPanel.Checked := False;
-end;
-
-procedure TMainForm.DataPortHTTPTelegramBotClose(Sender: TObject);
-begin
-
 end;
 
 procedure TMainForm.DataPortHTTPTelegramBotDataAppear(Sender: TObject);
@@ -969,7 +970,7 @@ end;
 procedure TMainForm.FileExportCSVResultsBeforeExecute(Sender: TObject);
 begin
   TFileSaveAs(Sender).Dialog.FileName :=
-    raceName + '-' + UTF8LowerCase(sResults);
+    raceName + '-' + UTF8LowerCase(rsResults);
 end;
 
 procedure TMainForm.GenerateSumDaysExecute(Sender: TObject);
@@ -991,7 +992,7 @@ begin
       Close;
     end;
 
-    while MessageDlg(sAddDayResults + ' ' + IntToStr(i) + '?',
+    while MessageDlg(rsAddDayResults + ' ' + IntToStr(i) + '?',
         mtConfirmation, [mbYes, mbNo], 0) = mrYes do
     begin
       if FileOpenCSVSum.Dialog.Execute then
@@ -1003,7 +1004,7 @@ begin
 
     //Print('i = ' + IntToStr(i));
 
-    if (i > 2) and (MessageDlg(sSaveResults, mtConfirmation, [mbYes, mbNo], 0) =
+    if (i > 2) and (MessageDlg(rsSaveResults, mtConfirmation, [mbYes, mbNo], 0) =
       mrYes) then
     begin
       //ставим итоговые места
@@ -1110,24 +1111,13 @@ end;
 procedure TMainForm.RxIniPropStorage1StoredValues1Restore(Sender: TStoredValue;
   var Value: TStoredType);
 begin
-  if Value <> '' then
-  begin
-    lang := Value;
-  end;
-  SetDefaultLang(lang);
-  TranslateUnitResourceStrings('rxconst', 'languages/rxconst.' + lang + '.po');
-  //var
-  //  Lang, FallbackLang: String;
-  //begin
-  //  GetLanguageIDs(Lang{%H-},FallbackLang{%H-}); // in unit gettext
-  //  TranslateUnitResourceStrings('rxconst',NormalizeDirectoryName('../../../languages/rxconst.%s.po'), Lang, FallbackLang);
-  //  TranslateUnitResourceStrings('rxdconst',NormalizeDirectoryName('../../../languages/rxdconst.%s.po'), Lang, FallbackLang);
+  SetLang(Value);
 end;
 
 procedure TMainForm.RxIniPropStorage1StoredValues1Save(Sender: TStoredValue;
   var Value: TStoredType);
 begin
-  Value := lang;
+  Value := CurrentLang;
 end;
 
 procedure TMainForm.RxIniPropStorage1StoredValues2Restore(Sender: TStoredValue;
@@ -1184,6 +1174,19 @@ begin
   Value := telegrambotadress;
 end;
 
+procedure TMainForm.RxIniPropStorage1StoredValues6Restore(Sender: TStoredValue;
+  var Value: TStoredType);
+begin
+  if Value <> '' then
+    showStageNameForSingleStage := StrToBool(Value);
+end;
+
+procedure TMainForm.RxIniPropStorage1StoredValues6Save(Sender: TStoredValue;
+  var Value: TStoredType);
+begin
+  Value := BoolToStr(showStageNameForSingleStage);
+end;
+
 procedure TMainForm.sGridResultDrawCell(Sender: TObject; aCol, aRow: integer;
   aRect: TRect; aState: TGridDrawState);
 begin
@@ -1233,25 +1236,26 @@ begin
     FileCloseExecute(nil);
   //fName := FileOpenDB.Dialog.FileName;
   //OpenDB;
-  //Log(sDBFileOpen+' '+fName);
+  //Log(rsDBFileOpen+' '+fName);
   InitDB(FileOpenDB.Dialog.FileName);
 end;
 
 procedure TMainForm.FileExportFullBeforeExecute(Sender: TObject);
 begin
-  TFileSaveAs(Sender).Dialog.FileName := raceName + '-' + UTF8LowerCase(sFinishProtocol);
+  TFileSaveAs(Sender).Dialog.FileName :=
+    raceName + '-' + UTF8LowerCase(rsFinishProtocol);
 end;
 
 procedure TMainForm.FileExportStageResultsBeforeExecute(Sender: TObject);
 begin
   exportStageIndex := InputComboSelectStage;
   TFileSaveAs(Sender).Dialog.FileName :=
-    raceName + '-' + UTF8LowerCase(sResults) + '-' + stageName[exportStageIndex];
+    raceName + '-' + UTF8LowerCase(rsResults) + '-' + stages[exportStageIndex].Name;
 end;
 
 procedure TMainForm.FileGenerateFinalBeforeExecute(Sender: TObject);
 begin
-  TFileSaveAs(Sender).Dialog.FileName := raceName + '-' + UTF8LowerCase(sFinal);
+  TFileSaveAs(Sender).Dialog.FileName := raceName + '-' + UTF8LowerCase(rsFinal);
 end;
 
 procedure TMainForm.FileExportFullAccept(Sender: TObject);
@@ -1369,7 +1373,7 @@ begin
   //fName := FileName;
   //OpenDB;
   InitDB(FileName);
-  Log(sDBFileOpen + ' ' + fName);
+  Log(rsDBFileOpen + ' ' + fName);
 end;
 
 procedure TMainForm.LoRaPopupDefaultExecute(Sender: TObject);
@@ -1386,8 +1390,8 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(sDatabaseOpenError + E.Message);
+      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+      Log(rsDatabaseOpenError + E.Message);
     end;
   end;
 end;
@@ -1415,8 +1419,8 @@ begin
     except
       On E: Exception do
       begin
-        MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-        Log(sDatabaseOpenError + E.Message);
+        MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+        Log(rsDatabaseOpenError + E.Message);
       end;
     end;
   end;
@@ -1448,8 +1452,8 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(sDatabaseOpenError + E.Message);
+      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+      Log(rsDatabaseOpenError + E.Message);
     end;
   end;
 end;
@@ -1468,8 +1472,8 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(sDatabaseOpenError + E.Message);
+      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+      Log(rsDatabaseOpenError + E.Message);
     end;
   end;
 end;
@@ -1479,8 +1483,9 @@ var
   minstarttime: string;
 begin
   SQLQuery1.Close;
-  SQLQuery1.SQL.Text := 'SELECT min(starttime' + IntToStr(ActiveStage) +
-    ') as starttime FROM main WHERE starttime' + IntToStr(ActiveStage) + ' NOTNULL;';
+  SQLQuery1.SQL.Text := 'SELECT min(starttime' + IntToStr(ActiveStageIndex) +
+    ') as starttime FROM main WHERE starttime' + IntToStr(ActiveStageIndex) +
+    ' NOTNULL;';
   SQLQuery1.Open();
   minstarttime := SQLQuery1.FieldByName('starttime').AsString;
   Print(minstarttime);
@@ -1499,8 +1504,8 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(sDatabaseOpenError + E.Message);
+      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+      Log(rsDatabaseOpenError + E.Message);
     end;
   end;
 end;
@@ -1535,10 +1540,10 @@ var
   n: string;
 begin
   n := DataSet.Fields.FieldByName('number').AsString;
-  if MessageDlg(sDeleteNumber + ' ' + n, mtWarning, [mbYes, mbNo], 0) <> mrYes then
+  if MessageDlg(rsDeleteNumber + ' ' + n, mtWarning, [mbYes, mbNo], 0) <> mrYes then
     abort
   else
-    Log(sParticipantWithNumber + ' ' + n + ' ' + sDeleted);
+    Log(rsParticipantWithNumber + ' ' + n + ' ' + rsDeleted);
 end;
 
 procedure TMainForm.CheckPenaltySetText(Sender: TField; const aText: string);
@@ -1563,7 +1568,7 @@ begin
       if aText = '' then
         Sender.AsString := ''
       else
-        MessageDlg(sPenaltyTimeFormat, mtInformation, [mbOK], 0);
+        MessageDlg(rsPenaltyTimeFormat, mtInformation, [mbOK], 0);
     end;
   end;
 end;
@@ -1580,11 +1585,6 @@ begin
   //if TDataSource(Sender).DataSet.State = dsInsert then Memo.Lines.Add('dsInsert');
   //if TDataSource(Sender).DataSet.State = dsBrowse then Memo.Lines.Add('dsBrowse');
   //if TDataSource(Sender).DataSet.State = dsInsert then Memo.Lines.Add('dsInsert');
-end;
-
-procedure TMainForm.MenuItemExportBDStartListClick(Sender: TObject);
-begin
-
 end;
 
 procedure TMainForm.MenuItemMonitorModeClick(Sender: TObject);
@@ -1632,10 +1632,11 @@ begin
   //Print(s);
 end;
 
-procedure TMainForm.RecalcResultsAfterPenaltyChange(Sender: TField);
+procedure TMainForm.RecalcResults(Sender: TField);
 begin
   MainDataset1.ApplyUpdates;
-  UpdateResults;
+  if CheckBoxAutomaticUpdateResutls.Checked then
+    UpdateResults;
 end;
 
 procedure TMainForm.MainDataset1statusGetText(Sender: TField;
@@ -1661,46 +1662,42 @@ begin
     RaceModeLabel.Font.Color := clRed;
     RaceModeLabel.Font.Style := RaceModeLabel.Font.Style + [fsBold];
     RxDBGrid1.Options := RxDBGrid1.Options - [dgEditing];
+    RxDBGrid1.Color := clMenu;
   end
   else
   begin
     RxDBGrid1.Options := RxDBGrid1.Options + [dgEditing];
     RaceModeLabel.Font.Style := RaceModeLabel.Font.Style - [fsBold];
     RaceModeLabel.Font.Color := clDefault;
+    RxDBGrid1.Color := clWindow;
   end;
 end;
 
-procedure TMainForm.RadioCurClick(Sender: TObject);
+procedure TMainForm.CurrentSUClick(Sender: TObject);
 var
   c: TComponent;
   i: integer;
 begin
-  for i := 1 to maxstages do
+  i := (Sender as TRadioGroup).ItemIndex + 1;
+  CorrectionDatasetcorrection.FieldName := 'correction' + IntToStr(i);
+  RxDBGridCorrection.Columns[1].FieldName := 'correction' + IntToStr(i);
+  CorrectionDataset.SQL :=
+    'SELECT * from main where correction' + IntToStr(i) + ' ISNULL AND status' +
+    IntToStr(i) + ' ISNULL AND starttime' + IntToStr(i) +
+    ' NOTNULL ORDER BY starttime' + IntToStr(i);
+  StatDataset2.SQL := 'SELECT number, name, starttime' + IntToStr(i) +
+    ' as starttime, strftime(''%H:%M:%S'',julianday(time(''now'', ''localtime'')) - julianday(time(starttime'
+    + IntToStr(i) +
+    ')) + 0.5) as timeontrack from main where julianday(time(''now'', ''localtime'')) > julianday(time(starttime'
+    + IntToStr(i) + ')) AND finishtime' + IntToStr(i) + ' ISNULL AND status' +
+    IntToStr(i) + ' ISNULL ORDER BY starttime';
+  if dbopen then
   begin
-    c := FindComponent('RadioCur' + IntToStr(i));
-    if TRadioButton(c).Checked then
-    begin
-      CorrectionDatasetcorrection.FieldName := 'correction' + IntToStr(i);
-      RxDBGridCorrection.Columns[1].FieldName := 'correction' + IntToStr(i);
-      CorrectionDataset.SQL :=
-        'SELECT * from main where correction' + IntToStr(i) +
-        ' ISNULL AND status' + IntToStr(i) + ' ISNULL AND starttime' +
-        IntToStr(i) + ' NOTNULL ORDER BY starttime' + IntToStr(i);
-      StatDataset2.SQL := 'SELECT number, name, starttime' + IntToStr(i) +
-        ' as starttime, strftime(''%H:%M:%S'',julianday(time(''now'', ''localtime'')) - julianday(time(starttime'
-        + IntToStr(i) +
-        ')) + 0.5) as timeontrack from main where julianday(time(''now'', ''localtime'')) > julianday(time(starttime'
-        + IntToStr(i) + ')) AND finishtime' + IntToStr(i) +
-        ' ISNULL AND status' + IntToStr(i) + ' ISNULL ORDER BY starttime';
-      if dbopen then
-      begin
-        ;
-        CorrectionDataset.Close;
-        CorrectionDataset.Open;
-        StatDataset2.Close;
-        StatDataset2.Open;
-      end;
-    end;
+    ;
+    CorrectionDataset.Close;
+    CorrectionDataset.Open;
+    StatDataset2.Close;
+    StatDataset2.Open;
   end;
 end;
 
@@ -1775,6 +1772,32 @@ end;
 procedure TMainForm.CheckDBOpen(Sender: TObject);
 begin
   TCustomAction(Sender).Enabled := dbopen;
+end;
+
+procedure TMainForm.SetLang(ALang: string);
+var
+  lang, SystemCurrentLang, SystemFallbackLang: string;
+begin
+  if ALang <> '' then
+  begin
+    lang := ALang;
+    CurrentLang := ALang;
+  end
+  else
+  begin
+    GetLanguageIDs(SystemCurrentLang{%H-}, SystemFallbackLang{%H-}); // in unit gettext
+    lang := SystemFallbackLang;
+    CurrentLang := '';
+  end;
+
+  SetDefaultLang(lang);
+
+  TranslateUnitResourceStrings('rxconst', NormalizeDirectoryName(
+    'languages/rxconst.%s.po'), lang, FallbackLang);
+  TranslateUnitResourceStrings('rxdconst', NormalizeDirectoryName(
+    'languages/rxdconst.%s.po'), lang, FallbackLang);
+
+  //CurrentLang := lang;
 end;
 
 end.

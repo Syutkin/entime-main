@@ -62,8 +62,8 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(sDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(sDatabaseOpenError + E.Message);
+      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+      Log(rsDatabaseOpenError + E.Message);
     end;
   end;
 end;

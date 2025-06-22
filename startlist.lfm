@@ -1,13 +1,13 @@
 object StartlistForm: TStartlistForm
   Left = 419
-  Height = 903
+  Height = 902
   Top = 74
   Width = 605
   Anchors = []
   Caption = 'Параметры стартового протокола'
-  ClientHeight = 903
+  ClientHeight = 902
   ClientWidth = 605
-  Constraints.MinHeight = 525
+  Constraints.MinHeight = 526
   Constraints.MinWidth = 420
   DesignTimePPI = 144
   Position = poMainFormCenter
@@ -126,11 +126,11 @@ object StartlistForm: TStartlistForm
     AnchorSideRight.Control = Owner
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 9
+    Left = 10
     Height = 43
-    Top = 851
-    Width = 587
-    BorderSpacing.Around = 9
+    Top = 849
+    Width = 585
+    BorderSpacing.Around = 10
     OKButton.Name = 'OKButton'
     OKButton.DefaultCaption = True
     HelpButton.Name = 'HelpButton'
@@ -184,7 +184,7 @@ object StartlistForm: TStartlistForm
     AnchorSideBottom.Control = Panel2
     Left = 0
     Height = 45
-    Top = 434
+    Top = 433
     Width = 605
     Anchors = [akTop, akLeft, akRight]
     AutoSize = True
@@ -237,11 +237,11 @@ object StartlistForm: TStartlistForm
     AnchorSideRight.Side = asrBottom
     Left = 8
     Height = 25
-    Top = 409
+    Top = 408
     Width = 589
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Left = 8
-    BorderSpacing.Top = 15
+    BorderSpacing.Top = 14
     BorderSpacing.Right = 8
     Caption = 'Включать в финальный заезд следующих участников:'
     ParentColor = False
@@ -254,14 +254,14 @@ object StartlistForm: TStartlistForm
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = ButtonPanel1
     Left = 8
-    Height = 347
-    Top = 495
+    Height = 345
+    Top = 494
     Width = 589
     Anchors = [akTop, akLeft, akRight, akBottom]
     BorderSpacing.Top = 8
     BorderSpacing.Around = 8
     BevelOuter = bvNone
-    ClientHeight = 347
+    ClientHeight = 345
     ClientWidth = 589
     TabOrder = 6
     object Label4: TLabel
@@ -275,7 +275,7 @@ object StartlistForm: TStartlistForm
     end
     object ListBox1: TListBox
       Left = 0
-      Height = 314
+      Height = 312
       Top = 33
       Width = 589
       Align = alClient

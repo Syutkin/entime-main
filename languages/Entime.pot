@@ -1,473 +1,562 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8"
 
-#: i18n.sadddayresults
+#: i18n.rsadddayresults
+msgctxt "i18n.rsadddayresults"
 msgid "Добавить результаты дня"
 msgstr ""
 
-#: i18n.sage
+#: i18n.rsage
+msgctxt "i18n.rsage"
 msgid "ГР"
 msgstr ""
 
-#: i18n.sbynameasc
+#: i18n.rsbynameasc
+msgctxt "i18n.rsbynameasc"
 msgid "По именам А-Я"
 msgstr ""
 
-#: i18n.sbynamedesc
+#: i18n.rsbynamedesc
+msgctxt "i18n.rsbynamedesc"
 msgid "По именам Я-А"
 msgstr ""
 
-#: i18n.sbynumberasc
-msgctxt "i18n.sbynumberasc"
+#: i18n.rsbynumberasc
+msgctxt "i18n.rsbynumberasc"
 msgid "По номерам по возрастанию"
 msgstr ""
 
-#: i18n.sbynumberdesc
+#: i18n.rsbynumberdesc
+msgctxt "i18n.rsbynumberdesc"
 msgid "По номерам по убыванию"
 msgstr ""
 
-#: i18n.sbyresult
+#: i18n.rsbyresult
+msgctxt "i18n.rsbyresult"
 msgid "По текущим результатам"
 msgstr ""
 
-#: i18n.scannotbackup
+#: i18n.rscannotbackup
+msgctxt "i18n.rscannotbackup"
 msgid "Не удалось сделать бэкап, продолжить загрузку результатов?"
 msgstr ""
 
-#: i18n.scannotdeletefile
+#: i18n.rscannotdeletefile
+msgctxt "i18n.rscannotdeletefile"
 msgid "Не удалось перезаписать файл"
 msgstr ""
 
-#: i18n.scat1
+#: i18n.rscat1
+msgctxt "i18n.rscat1"
 msgid "Девушки"
 msgstr ""
 
-#: i18n.scat2
+#: i18n.rscat2
+msgctxt "i18n.rscat2"
 msgid "Юниоры"
 msgstr ""
 
-#: i18n.scat3
-msgctxt "i18n.scat3"
+#: i18n.rscat3
+msgctxt "i18n.rscat3"
 msgid "Любители"
 msgstr ""
 
-#: i18n.scat4
+#: i18n.rscat4
+msgctxt "i18n.rscat4"
 msgid "Мастера"
 msgstr ""
 
-#: i18n.scat5
+#: i18n.rscat5
+msgctxt "i18n.rscat5"
 msgid "Элита"
 msgstr ""
 
-#: i18n.scat6
+#: i18n.rscat6
+msgctxt "i18n.rscat6"
 msgid "Электро"
 msgstr ""
 
-#: i18n.scategory
-msgctxt "i18n.scategory"
+#: i18n.rscategory
+msgctxt "i18n.rscategory"
 msgid "Категория"
 msgstr ""
 
-#: i18n.scity
-msgctxt "i18n.scity"
+#: i18n.rscity
+msgctxt "i18n.rscity"
 msgid "Город"
 msgstr ""
 
-#: i18n.sclearallstatus
+#: i18n.rsclearallstatus
+msgctxt "i18n.rsclearallstatus"
 msgid "Действительно убрать DNS/DNF/DSQ с участника номер"
 msgstr ""
 
-#: i18n.sclearallstatuslog
+#: i18n.rsclearallstatuslog
+msgctxt "i18n.rsclearallstatuslog"
 msgid "DNS/DNF/DSQ убрано с участника номер"
 msgstr ""
 
-#: i18n.scleardsq
+#: i18n.rscleardsq
+msgctxt "i18n.rscleardsq"
 msgid "Действительно убрать DSQ с участника номер"
 msgstr ""
 
-#: i18n.scleardsqlog
+#: i18n.rscleardsqlog
+msgctxt "i18n.rscleardsqlog"
 msgid "DSQ убрана с участника номер"
 msgstr ""
 
-#: i18n.sclearresults
+#: i18n.rsclearresults
+msgctxt "i18n.rsclearresults"
 msgid "Действительно удалить все результаты?"
 msgstr ""
 
-#: i18n.sclearstatus
+#: i18n.rsclearstatus
+msgctxt "i18n.rsclearstatus"
 msgid "Действительно убрать DNS/DNF с участника номер"
 msgstr ""
 
-#: i18n.sclearstatuslog
+#: i18n.rsclearstatuslog
+msgctxt "i18n.rsclearstatuslog"
 msgid "DNS/DNF убрано с участника номер"
 msgstr ""
 
-#: i18n.scomopenerror
+#: i18n.rscomopenerror
+msgctxt "i18n.rscomopenerror"
 msgid "Не удалось открыть порт"
 msgstr ""
 
-#: i18n.sconfignotfound
+#: i18n.rsconfignotfound
+msgctxt "i18n.rsconfignotfound"
 msgid "Файл настроек не найден, создание файла настроек по умолчанию"
 msgstr ""
 
-#: i18n.scorrection
-msgctxt "i18n.scorrection"
+#: i18n.rscorrection
+msgctxt "i18n.rscorrection"
 msgid "Поправка"
 msgstr ""
 
-#: i18n.scorrectionalreadyset
+#: i18n.rscorrectionalreadyset
+msgctxt "i18n.rscorrectionalreadyset"
 msgid "поправка уже установлена. Перезаписать значение?"
 msgstr ""
 
-#: i18n.scsvresultsexporterror
+#: i18n.rscsvresultsexporterror
+msgctxt "i18n.rscsvresultsexporterror"
 msgid "Ошибка создания финишных результатов: "
 msgstr ""
 
-#: i18n.scsvresultsfileexists
+#: i18n.rscsvresultsfileexists
+msgctxt "i18n.rscsvresultsfileexists"
 msgid "Файл с результатами уже существует. Перезаписать?"
 msgstr ""
 
-#: i18n.scurrentresults
-msgctxt "i18n.scurrentresults"
+#: i18n.rscurrentresults
+msgctxt "i18n.rscurrentresults"
 msgid "Текущие результаты"
 msgstr ""
 
-#: i18n.sdatabaseopenerror
+#: i18n.rsdatabaseopenerror
+msgctxt "i18n.rsdatabaseopenerror"
 msgid "Ошибка открытия базы: "
 msgstr ""
 
-#: i18n.sdbfileclosed
+#: i18n.rsdbfileclosed
+msgctxt "i18n.rsdbfileclosed"
 msgid "Файл соревнований закрыт:"
 msgstr ""
 
-#: i18n.sdbfileopen
+#: i18n.rsdbfileopen
+msgctxt "i18n.rsdbfileopen"
 msgid "Файл соревнований открыт:"
 msgstr ""
 
-#: i18n.sdeleted
+#: i18n.rsdeleted
+msgctxt "i18n.rsdeleted"
 msgid "удалён"
 msgstr ""
 
-#: i18n.sdeletenumber
+#: i18n.rsdeletenumber
+msgctxt "i18n.rsdeletenumber"
 msgid "Действительно удалить участника c номером"
 msgstr ""
 
-#: i18n.sdidnotfinish
+#: i18n.rsdidnotfinish
+msgctxt "i18n.rsdidnotfinish"
 msgid "не финишировал"
 msgstr ""
 
-#: i18n.sdidnotstart
+#: i18n.rsdidnotstart
+msgctxt "i18n.rsdidnotstart"
 msgid "не стартовал"
 msgstr ""
 
-#: i18n.sdidnotstartsetfinish
+#: i18n.rsdidnotstartsetfinish
+msgctxt "i18n.rsdidnotstartsetfinish"
 msgid "не числится в списке стартовавших, но не финишировавших. Всё равно установить финишное время?"
 msgstr ""
 
-#: i18n.sdiffleader
-msgctxt "i18n.sdiffleader"
+#: i18n.rsdiffleader
+msgctxt "i18n.rsdiffleader"
 msgid "Отставание"
 msgstr ""
 
-#: i18n.sdisqualified
+#: i18n.rsdisqualified
+msgctxt "i18n.rsdisqualified"
 msgid "дисквалифицирован"
 msgstr ""
 
-#: i18n.sdonotexist
+#: i18n.rsdonotexist
+msgctxt "i18n.rsdonotexist"
 msgid "не существует"
 msgstr ""
 
-#: i18n.senglish
-msgid "English"
-msgstr ""
-
-#: i18n.senterstarttime
+#: i18n.rsenterstarttime
+msgctxt "i18n.rsenterstarttime"
 msgid "Введите новое время старта для номера"
 msgstr ""
 
-#: i18n.sfilecopyerror
+#: i18n.rsfilecopyerror
+msgctxt "i18n.rsfilecopyerror"
 msgid "Ошибка создания файла финала"
 msgstr ""
 
-#: i18n.sfileexists
+#: i18n.rsfileexists
+msgctxt "i18n.rsfileexists"
 msgid "Файл уже существует. Перезаписать?"
 msgstr ""
 
-#: i18n.sfilesareequal
+#: i18n.rsfilesareequal
+msgctxt "i18n.rsfilesareequal"
 msgid "Имя файла финала должно отличаться от имени файла квалификации"
 msgstr ""
 
-#: i18n.sfinal
+#: i18n.rsfinal
+msgctxt "i18n.rsfinal"
 msgid "Финал"
 msgstr ""
 
-#: i18n.sfinalfileexists
+#: i18n.rsfinalfileexists
+msgctxt "i18n.rsfinalfileexists"
 msgid "Файл финала уже существует. Перезаписать?"
 msgstr ""
 
-#: i18n.sfinishprotocol
-msgctxt "i18n.sfinishprotocol"
+#: i18n.rsfinishprotocol
+msgctxt "i18n.rsfinishprotocol"
 msgid "Финишный протокол"
 msgstr ""
 
-#: i18n.sfinishresultsnotempty
+#: i18n.rsfinishresultsnotempty
+msgctxt "i18n.rsfinishresultsnotempty"
 msgid "результаты финиша не пусты. Вы уверены что хотите сформировать стартовый протокол для данного спецучастка?"
 msgstr ""
 
-#: i18n.sfinishthruprotocol
+#: i18n.rsfinishthruprotocol
+msgctxt "i18n.rsfinishthruprotocol"
 msgid "Сквозной протокол"
 msgstr ""
 
-#: i18n.sfinishtime
+#: i18n.rsfinishtime
+msgctxt "i18n.rsfinishtime"
 msgid "Финиш"
 msgstr ""
 
-#: i18n.sfinishtimeopenerror
+#: i18n.rsfinishtimeopenerror
+msgctxt "i18n.rsfinishtimeopenerror"
 msgid "Неверный формат файла с результатами СУ"
 msgstr ""
 
-#: i18n.sfinishtimeset
+#: i18n.rsfinishtimeset
+msgctxt "i18n.rsfinishtimeset"
 msgid "Установлено финишное время для номера"
 msgstr ""
 
-#: i18n.sgeneratestartlist
+#: i18n.rsgeneratestartlist
+msgctxt "i18n.rsgeneratestartlist"
 msgid "Стартовый протокол финального заезда сформирован"
 msgstr ""
 
-#: i18n.simportfinish
+#: i18n.rsimportfinish
+msgctxt "i18n.rsimportfinish"
 msgid "Импорт результатов"
 msgstr ""
 
-#: i18n.simportfinishtime
+#: i18n.rsimportfinishtime
+msgctxt "i18n.rsimportfinishtime"
 msgid "Финишное время для СУ"
 msgstr ""
 
-#: i18n.simportstarttime
+#: i18n.rsimportstarttime
+msgctxt "i18n.rsimportstarttime"
 msgid "Стартовый протокол для СУ"
 msgstr ""
 
-#: i18n.sincorrectcorrection
+#: i18n.rsincorrectcorrection
+msgctxt "i18n.rsincorrectcorrection"
 msgid "Некорректное значение поправки, введите верное значение"
 msgstr ""
 
-#: i18n.sloadcsvparticipants
+#: i18n.rsloadcsvparticipants
+msgctxt "i18n.rsloadcsvparticipants"
 msgid "Список участников загружен"
 msgstr ""
 
-#: i18n.sloaded
+#: i18n.rsloaded
+msgctxt "i18n.rsloaded"
 msgid "загружен"
 msgstr ""
 
-#: i18n.sloaded_o
+#: i18n.rsloaded_o
+msgctxt "i18n.rsloaded_o"
 msgid "загружено"
 msgstr ""
 
-#: i18n.sloadingconfig
+#: i18n.rsloadingconfig
+msgctxt "i18n.rsloadingconfig"
 msgid "Загрузка настроек из файла"
 msgstr ""
 
-#: i18n.sname
-msgctxt "i18n.sname"
+#: i18n.rsloadparticipantslisterror
+msgctxt "i18n.rsloadparticipantslisterror"
+msgid "Ошибка загрузки списка участников: "
+msgstr ""
+
+#: i18n.rsname
+msgctxt "i18n.rsname"
 msgid "Имя"
 msgstr ""
 
-#: i18n.snewfilecreated
+#: i18n.rsnewfilecreated
+msgctxt "i18n.rsnewfilecreated"
 msgid "Файл соревнований создан"
 msgstr ""
 
-#: i18n.snewfileexistunknow
+#: i18n.rsnewfileexistunknow
+msgctxt "i18n.rsnewfileexistunknow"
 msgid "Не удалось проверить существование указанного файла"
 msgstr ""
 
-#: i18n.snewfilenotcreated
+#: i18n.rsnewfilenotcreated
+msgctxt "i18n.rsnewfilenotcreated"
 msgid "Не удалось создать файл соревнований"
 msgstr ""
 
-#: i18n.snickname
+#: i18n.rsnickname
+msgctxt "i18n.rsnickname"
 msgid "Ник"
 msgstr ""
 
-#: i18n.snumber
-msgctxt "i18n.snumber"
+#: i18n.rsnumber
+msgctxt "i18n.rsnumber"
 msgid "Номер"
 msgstr ""
 
-#: i18n.snumberu
+#: i18n.rsnumbercolumnnotfound
+msgctxt "i18n.rsnumbercolumnnotfound"
+msgid "Не найдена колонка с номерами участников"
+msgstr ""
+
+#: i18n.rsnumberu
+msgctxt "i18n.rsnumberu"
 msgid "Номеру"
 msgstr ""
 
-#: i18n.sonstage
+#: i18n.rsonstage
+msgctxt "i18n.rsonstage"
 msgid "на СУ"
 msgstr ""
 
-#: i18n.sparticipantwithnumber
+#: i18n.rsparticipantwithnumber
+msgctxt "i18n.rsparticipantwithnumber"
 msgid "Участник с номером"
 msgstr ""
 
-#: i18n.spenalty
-msgctxt "i18n.spenalty"
+#: i18n.rspenalty
+msgctxt "i18n.rspenalty"
 msgid "Штраф"
 msgstr ""
 
-#: i18n.spenaltytimeformat
+#: i18n.rspenaltytimeformat
+msgctxt "i18n.rspenaltytimeformat"
 msgid "Штрафное время вводится в формате мм:сс или чч:мм:сс"
 msgstr ""
 
-#: i18n.splace
-msgctxt "i18n.splace"
+#: i18n.rsplace
+msgctxt "i18n.rsplace"
 msgid "Место"
 msgstr ""
 
-#: i18n.squalificationresults
+#: i18n.rsqualificationresults
+msgctxt "i18n.rsqualificationresults"
 msgid "По результатам квалификации"
 msgstr ""
 
-#: i18n.sreallydisqualifynumber
+#: i18n.rsreallydisqualifynumber
+msgctxt "i18n.rsreallydisqualifynumber"
 msgid "Действительно дисквалифицировать участника под номером"
 msgstr ""
 
-#: i18n.sresult
-msgctxt "i18n.sresult"
+#: i18n.rsresult
+msgctxt "i18n.rsresult"
 msgid "Результат"
 msgstr ""
 
-#: i18n.sresults
-msgctxt "i18n.sresults"
+#: i18n.rsresults
+msgctxt "i18n.rsresults"
 msgid "Результаты"
 msgstr ""
 
-#: i18n.sresultscleared
+#: i18n.rsresultscleared
+msgctxt "i18n.rsresultscleared"
 msgid "Результаты соревнований удалены!"
 msgstr ""
 
-#: i18n.sresultsexportedtofile
+#: i18n.rsresultsexportedtofile
+msgctxt "i18n.rsresultsexportedtofile"
 msgid "Финишный протокол экспортирован в файл"
 msgstr ""
 
-#: i18n.sresultsthruexportedtofile
+#: i18n.rsresultsthruexportedtofile
+msgctxt "i18n.rsresultsthruexportedtofile"
 msgid "Сквозной протокол экспортирован в файл"
 msgstr ""
 
-#: i18n.srussian
-msgid "Русский"
-msgstr ""
-
-#: i18n.ssaveresults
+#: i18n.rssaveresults
+msgctxt "i18n.rssaveresults"
 msgid "Сохранить результаты?"
 msgstr ""
 
-#: i18n.ssetcategoryname
+#: i18n.rssetcategoryname
+msgctxt "i18n.rssetcategoryname"
 msgid "Проставить категории из списка участников в окно результатов?"
 msgstr ""
 
-#: i18n.ssetintervalwarning
+#: i18n.rssetintervalwarning
+msgctxt "i18n.rssetintervalwarning"
 msgid "Интервал задаётся как целое неотрицательное число миллисекунд"
 msgstr ""
 
-#: i18n.ssettimetosu
+#: i18n.rssettimetosu
+msgctxt "i18n.rssettimetosu"
 msgid "Проставить результаты для СУ:"
 msgstr ""
 
-#: i18n.sshowncategories
+#: i18n.rsshowncategories
+msgctxt "i18n.rsshowncategories"
 msgid "Категории для показа в окне результатов:"
 msgstr ""
 
-#: i18n.sstartfilecopyerror
+#: i18n.rsstartfilecopyerror
+msgctxt "i18n.rsstartfilecopyerror"
 msgid "Ошибка создания стартового файла"
 msgstr ""
 
-#: i18n.sstartfilecreated
+#: i18n.rsstartfilecreated
+msgctxt "i18n.rsstartfilecreated"
 msgid "Файл для стартовых ворот создан"
 msgstr ""
 
-#: i18n.sstartlistfileexists
-msgctxt "i18n.sstartlistfileexists"
+#: i18n.rsstartlistfileexists
+msgctxt "i18n.rsstartlistfileexists"
 msgid "Файл стартового протокола уже существует. Перезаписать?"
 msgstr ""
 
-#: i18n.sstartprogram
+#: i18n.rsstartprogram
+msgctxt "i18n.rsstartprogram"
 msgid "Запуск программы"
 msgstr ""
 
-#: i18n.sstartprotocol
+#: i18n.rsstartprotocol
+msgctxt "i18n.rsstartprotocol"
 msgid "Стартовый протокол"
 msgstr ""
 
-#: i18n.sstarttime
-msgctxt "i18n.sstarttime"
+#: i18n.rsstarttime
+msgctxt "i18n.rsstarttime"
 msgid "Старт"
 msgstr ""
 
-#: i18n.ssu
+#: i18n.rssu
+msgctxt "i18n.rssu"
 msgid "СУ"
 msgstr ""
 
-#: i18n.ssu1
-msgctxt "i18n.ssu1"
+#: i18n.rssu1
+msgctxt "i18n.rssu1"
 msgid "СУ 1"
 msgstr ""
 
-#: i18n.ssu2
-msgctxt "i18n.ssu2"
+#: i18n.rssu2
+msgctxt "i18n.rssu2"
 msgid "СУ 2"
 msgstr ""
 
-#: i18n.ssu3
-msgctxt "i18n.ssu3"
+#: i18n.rssu3
+msgctxt "i18n.rssu3"
 msgid "СУ 3"
 msgstr ""
 
-#: i18n.ssu4
-msgctxt "i18n.ssu4"
+#: i18n.rssu4
+msgctxt "i18n.rssu4"
 msgid "СУ 4"
 msgstr ""
 
-#: i18n.ssu5
-msgctxt "i18n.ssu5"
+#: i18n.rssu5
+msgctxt "i18n.rssu5"
 msgid "СУ 5"
 msgstr ""
 
-#: i18n.ssu6
-msgctxt "i18n.ssu6"
+#: i18n.rssu6
+msgctxt "i18n.rssu6"
 msgid "СУ 6"
 msgstr ""
 
-#: i18n.ssumresult
-msgctxt "i18n.ssumresult"
+#: i18n.rssumresult
+msgctxt "i18n.rssumresult"
 msgid "Итог"
 msgstr ""
 
-#: i18n.ssumstages
-msgctxt "i18n.ssumstages"
+#: i18n.rssumstages
+msgctxt "i18n.rssumstages"
 msgid "Кол-во СУ"
 msgstr ""
 
-#: i18n.ssurewithnumber
+#: i18n.rssurewithnumber
+msgctxt "i18n.rssurewithnumber"
 msgid "Уверены, что участник под номером"
 msgstr ""
 
-#: i18n.steam
-msgctxt "i18n.steam"
+#: i18n.rssystemdefault
+msgid "Системный"
+msgstr ""
+
+#: i18n.rsteam
+msgctxt "i18n.rsteam"
 msgid "Команда"
 msgstr ""
 
-#: i18n.stelegrambotsendingerror
+#: i18n.rstelegrambotsendingerror
+msgctxt "i18n.rstelegrambotsendingerror"
 msgid "Ошибка отправки данных в телеграм бота: "
 msgstr ""
 
-#: i18n.stimetostart
+#: i18n.rstimetostart
+msgctxt "i18n.rstimetostart"
 msgid "Время старта"
 msgstr ""
 
-#: i18n.stotal
-msgctxt "i18n.stotal"
+#: i18n.rstotal
+msgctxt "i18n.rstotal"
 msgid "Общий"
 msgstr ""
 
-#: i18n.supdateerror
+#: i18n.rsupdateerror
+msgctxt "i18n.rsupdateerror"
 msgid "Ошибка обновления результатов: "
 msgstr ""
 
-#: i18n.supdatefinishtime
+#: i18n.rsupdatefinishtime
+msgctxt "i18n.rsupdatefinishtime"
 msgid "Обновить финишное время для номера"
 msgstr ""
 
@@ -649,6 +738,16 @@ msgstr ""
 
 #: tmainform.buttonsavememo.caption
 msgid "Сохранить"
+msgstr ""
+
+#: tmainform.checkboxautomaticupdateresutls.caption
+msgid "Обновлять результаты"
+msgstr ""
+
+#: tmainform.checkboxautomaticupdateresutls.hint
+msgid ""
+"При изменении поправки, стартового времени, финишного времени\n"
+"или штрафа автоматически пересчитывать результаты"
 msgstr ""
 
 #: tmainform.currentsu.caption
@@ -1263,31 +1362,6 @@ msgstr ""
 msgid ""
 "В режиме гонки редактирование таблицы запрещено\n"
 "При нажатии на пробел фиксируется время"
-msgstr ""
-
-#: tmainform.radiocur1.caption
-msgid "1"
-msgstr ""
-
-#: tmainform.radiocur2.caption
-msgctxt "tmainform.radiocur2.caption"
-msgid "2"
-msgstr ""
-
-#: tmainform.radiocur3.caption
-msgid "3"
-msgstr ""
-
-#: tmainform.radiocur4.caption
-msgid "4"
-msgstr ""
-
-#: tmainform.radiocur5.caption
-msgid "5"
-msgstr ""
-
-#: tmainform.radiocur6.caption
-msgid "6"
 msgstr ""
 
 #: tmainform.resultclear.caption
@@ -1922,6 +1996,10 @@ msgstr ""
 msgid "Скрывать нулевой час в результатах"
 msgstr ""
 
+#: tsettingsform.checkboxshowstagename.caption
+msgid "Показывать название спецучастка когда когда он один активный"
+msgstr ""
+
 #: tsettingsform.checkgroup1.caption
 msgid "Активные спецучастки:"
 msgstr ""
@@ -1968,6 +2046,10 @@ msgstr ""
 #: tsettingsform.dividerbeveltelegramtest.caption
 msgctxt "tsettingsform.dividerbeveltelegramtest.caption"
 msgid "Тест"
+msgstr ""
+
+#: tsettingsform.dividerbevelviewother.caption
+msgid "Разное"
 msgstr ""
 
 #: tsettingsform.editcomsetstr.hint

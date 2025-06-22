@@ -8,7 +8,7 @@ uses
   {$IFDEF UNIX} {$IFDEF UseCThreads}
   cthreads, {$ENDIF} {$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  sysutils,
+  SysUtils,
   Forms,
   Main,
   LazSerialPort,
@@ -28,10 +28,10 @@ begin
   if FileExists('heaptrace.trc') then
   begin
     DeleteFile('heaptrace.trc');
-    SetHeapTraceOutput('heaptrace.trc');
-    globalSkipIfNoLeaks := true;
   end;
-  {$ENDIF DEBUG} 
+  SetHeapTraceOutput('heaptrace.trc');
+  globalSkipIfNoLeaks := true;
+  {$ENDIF DEBUG}
   Application.Scaled:=True;
   Application.Initialize;
   Application.CreateForm(TMainForm, MainForm);

@@ -1,7 +1,7 @@
 object MainForm: TMainForm
-  Left = 340
+  Left = 184
   Height = 1140
-  Top = 30
+  Top = 8
   Width = 1644
   ClientHeight = 1140
   ClientWidth = 1644
@@ -10,7 +10,7 @@ object MainForm: TMainForm
   DesignTimePPI = 144
   KeyPreview = True
   Menu = MainMenu
-  SessionProperties = 'AcLEDPanel.Checked;AcViewDebug.Checked;AcViewResults.Checked;Height;Left;RaceMode.Checked;RxDBGridCorrection.Height;Serial.Device;Top;Width;WindowState;AcTelegramBot.Checked'
+  SessionProperties = 'AcLEDPanel.Checked;AcTelegramBot.Checked;AcViewDebug.Checked;AcViewResults.Checked;Height;Left;RaceMode.Checked;RxDBGridCorrection.Height;Serial.Device;Top;Width;WindowState;CheckBoxAutomaticUpdateResutls.Checked'
   ShowHint = True
   LCLVersion = '4.0.0.4'
   OnClose = FormClose
@@ -19,8 +19,8 @@ object MainForm: TMainForm
   OnResize = FormResize
   object DebugSplitter: TSplitter
     Left = 1262
-    Height = 1067
-    Top = 36
+    Height = 1064
+    Top = 39
     Width = 8
     Align = alRight
     ResizeAnchor = akRight
@@ -29,12 +29,12 @@ object MainForm: TMainForm
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 1270
-    Height = 1067
-    Top = 36
+    Height = 1064
+    Top = 39
     Width = 374
     Align = alRight
     BevelOuter = bvNone
-    ClientHeight = 1067
+    ClientHeight = 1064
     ClientWidth = 374
     Constraints.MinWidth = 374
     ParentFont = False
@@ -46,7 +46,7 @@ object MainForm: TMainForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonSaveMemo
       Left = 0
-      Height = 1013
+      Height = 1010
       Top = 0
       Width = 374
       Anchors = [akTop, akLeft, akRight, akBottom]
@@ -66,7 +66,7 @@ object MainForm: TMainForm
       AnchorSideBottom.Side = asrBottom
       Left = 128
       Height = 38
-      Top = 1021
+      Top = 1018
       Width = 112
       Anchors = [akLeft, akBottom]
       BorderSpacing.Around = 8
@@ -82,7 +82,7 @@ object MainForm: TMainForm
       AnchorSideBottom.Side = asrBottom
       Left = 8
       Height = 38
-      Top = 1021
+      Top = 1018
       Width = 112
       Anchors = [akLeft, akBottom]
       BorderSpacing.Around = 8
@@ -94,7 +94,7 @@ object MainForm: TMainForm
   end
   object ToolPanel1: TToolPanel
     Left = 0
-    Height = 36
+    Height = 39
     Top = 0
     Width = 1644
     Items = <>
@@ -102,7 +102,7 @@ object MainForm: TMainForm
     CustomizeShortCut = False
     Align = alTop
     BorderWidth = 4
-    ClientHeight = 36
+    ClientHeight = 39
     ClientWidth = 1644
     ParentFont = False
     TabOrder = 2
@@ -110,10 +110,13 @@ object MainForm: TMainForm
       AnchorSideLeft.Control = ToolPanel1
       AnchorSideTop.Control = ToolPanel1
       AnchorSideTop.Side = asrCenter
-      Left = 5
+      AnchorSideRight.Control = RaceModeLabel
+      Left = 1503
       Height = 24
-      Top = 6
+      Top = 7
       Width = 25
+      Anchors = [akTop, akRight]
+      BorderSpacing.Right = 2
       Color = clDefault
       ParentColor = False
       ParentFont = False
@@ -122,26 +125,43 @@ object MainForm: TMainForm
       OnClick = RaceModeClick
     end
     object RaceModeLabel: TLabel
-      AnchorSideLeft.Control = RaceMode
-      AnchorSideLeft.Side = asrBottom
+      AnchorSideLeft.Control = ToolPanel1
+      AnchorSideLeft.Side = asrCenter
       AnchorSideTop.Control = ToolPanel1
       AnchorSideTop.Side = asrCenter
-      Left = 32
+      AnchorSideRight.Control = ToolPanel1
+      AnchorSideRight.Side = asrBottom
+      Left = 1530
       Height = 25
       Hint = 'В режиме гонки редактирование таблицы запрещено'#13#10'При нажатии на пробел фиксируется время'
-      Top = 6
+      Top = 7
       Width = 107
-      BorderSpacing.Left = 2
+      Anchors = [akTop, akRight]
+      BorderSpacing.Right = 2
       Caption = 'Режим гонки'
       ParentColor = False
       ParentFont = False
       WordWrap = True
     end
+    object CheckBoxAutomaticUpdateResutls: TCheckBox
+      AnchorSideLeft.Control = ToolPanel1
+      AnchorSideTop.Control = ToolPanel1
+      Left = 7
+      Height = 29
+      Hint = 'При изменении поправки, стартового времени, финишного времени'#13#10'или штрафа автоматически пересчитывать результаты'
+      Top = 5
+      Width = 210
+      BorderSpacing.Left = 2
+      Caption = 'Обновлять результаты'
+      Checked = True
+      State = cbChecked
+      TabOrder = 1
+    end
   end
   object PageControl1: TPageControl
     Left = 0
-    Height = 1067
-    Top = 36
+    Height = 1064
+    Top = 39
     Width = 910
     ActivePage = TabSheet1
     Align = alClient
@@ -150,19 +170,19 @@ object MainForm: TMainForm
     TabOrder = 3
     object TabSheet1: TTabSheet
       Caption = 'Стартовый'
-      ClientHeight = 1029
+      ClientHeight = 1026
       ClientWidth = 902
       ParentFont = False
       object MainPanel: TPanel
         AnchorSideRight.Control = DebugSplitter
         AnchorSideRight.Side = asrBottom
         Left = 0
-        Height = 1029
+        Height = 1026
         Top = 0
         Width = 902
         Align = alClient
         BevelOuter = bvNone
-        ClientHeight = 1029
+        ClientHeight = 1026
         ClientWidth = 902
         Constraints.MinWidth = 720
         ParentFont = False
@@ -180,7 +200,7 @@ object MainForm: TMainForm
         end
         object RxDBGrid1: TMyRxDBGrid
           Left = 0
-          Height = 1029
+          Height = 1026
           Top = 0
           Width = 902
           ColumnDefValues.BlobText = '(данные)'
@@ -513,6 +533,7 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
+              Alignment = taRightJustify
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 2|Поправка'
@@ -624,6 +645,7 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
+              Alignment = taRightJustify
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 3|Поправка'
@@ -735,6 +757,7 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
+              Alignment = taRightJustify
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 4|Поправка'
@@ -846,6 +869,7 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
+              Alignment = taRightJustify
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 5|Поправка'
@@ -957,6 +981,7 @@ object MainForm: TMainForm
               Footers = <>
             end          
             item
+              Alignment = taRightJustify
               Title.Alignment = taCenter
               Title.Orientation = toHorizontal
               Title.Caption = 'СУ 6|Поправка'
@@ -1173,15 +1198,16 @@ object MainForm: TMainForm
               Enabled = True
             end>
           FooterOptions.DrawFullLine = False
-          SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
-          SearchOptions.FromStart = False
-          OptionsRx = []
+          SearchOptions.QuickSearchOptions = [loPartialKey]
+          SearchOptions.FromStart = True
+          OptionsRx = [rdgAllowColumnsForm, rdgAllowDialogFind]
           Align = alClient
+          AutoAdvance = aaDown
           Color = clWindow
           DrawFullLine = False
           SelectedColor = clHighlight
           DataSource = MainDataSource1
-          Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgCancelOnExit, dgHeaderPushedLook, dgDblClickAutoSize]
+          Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColumnMove, dgColLines, dgRowLines, dgTabs, dgAlwaysShowSelection, dgCancelOnExit, dgHeaderHotTracking, dgHeaderPushedLook, dgRowHighlight, dgDblClickAutoSize]
           ParentFont = False
           PopupMenu = PopupMenu1
           Scrollbars = ssAutoBoth
@@ -1195,7 +1221,7 @@ object MainForm: TMainForm
     end
     object TabSheet2: TTabSheet
       Caption = 'Статистика'
-      ClientHeight = 1029
+      ClientHeight = 1026
       ClientWidth = 902
       ParentFont = False
       OnShow = TabSheet2Show
@@ -1521,27 +1547,27 @@ object MainForm: TMainForm
     end
     object TabSheet3: TTabSheet
       Caption = 'Результаты'
-      ClientHeight = 1029
+      ClientHeight = 1026
       ClientWidth = 902
       ParentFont = False
       object SheetStage: TPageControl
         Left = 0
-        Height = 1029
+        Height = 1026
         Top = 0
         Width = 902
-        ActivePage = SheetStageTotal
+        ActivePage = SheetStage1
         Align = alClient
         ParentFont = False
-        TabIndex = 7
+        TabIndex = 0
         TabOrder = 0
         object SheetStage1: TTabSheet
           Caption = 'СУ 1'
-          ClientHeight = 991
+          ClientHeight = 988
           ClientWidth = 894
           ParentFont = False
           object GridResult1: TRxDBGrid
             Left = 0
-            Height = 991
+            Height = 988
             Top = 0
             Width = 894
             ColumnDefValues.BlobText = '(данные)'
@@ -1734,12 +1760,12 @@ object MainForm: TMainForm
         end
         object SheetStage2: TTabSheet
           Caption = 'СУ 2'
-          ClientHeight = 991
+          ClientHeight = 988
           ClientWidth = 894
           ParentFont = False
           object GridResult2: TRxDBGrid
             Left = 0
-            Height = 991
+            Height = 988
             Top = 0
             Width = 894
             ColumnDefValues.BlobText = '(данные)'
@@ -1932,12 +1958,12 @@ object MainForm: TMainForm
         end
         object SheetStage3: TTabSheet
           Caption = 'СУ 3'
-          ClientHeight = 991
+          ClientHeight = 988
           ClientWidth = 894
           ParentFont = False
           object GridResult3: TRxDBGrid
             Left = 0
-            Height = 991
+            Height = 988
             Top = 0
             Width = 894
             ColumnDefValues.BlobText = '(данные)'
@@ -2130,12 +2156,12 @@ object MainForm: TMainForm
         end
         object SheetStage4: TTabSheet
           Caption = 'СУ 4'
-          ClientHeight = 991
+          ClientHeight = 988
           ClientWidth = 894
           ParentFont = False
           object GridResult4: TRxDBGrid
             Left = 0
-            Height = 991
+            Height = 988
             Top = 0
             Width = 894
             ColumnDefValues.BlobText = '(данные)'
@@ -2328,12 +2354,12 @@ object MainForm: TMainForm
         end
         object SheetStage5: TTabSheet
           Caption = 'СУ 5'
-          ClientHeight = 991
+          ClientHeight = 988
           ClientWidth = 894
           ParentFont = False
           object GridResult5: TRxDBGrid
             Left = 0
-            Height = 991
+            Height = 988
             Top = 0
             Width = 894
             ColumnDefValues.BlobText = '(данные)'
@@ -2526,12 +2552,12 @@ object MainForm: TMainForm
         end
         object SheetStage6: TTabSheet
           Caption = 'СУ 6'
-          ClientHeight = 991
+          ClientHeight = 988
           ClientWidth = 894
           ParentFont = False
           object GridResult6: TRxDBGrid
             Left = 0
-            Height = 991
+            Height = 988
             Top = 0
             Width = 894
             ColumnDefValues.BlobText = '(данные)'
@@ -2724,12 +2750,12 @@ object MainForm: TMainForm
         end
         object SheetStageSum: TTabSheet
           Caption = 'Общий'
-          ClientHeight = 991
+          ClientHeight = 988
           ClientWidth = 894
           ParentFont = False
           object GridResult8: TRxDBGrid
             Left = 0
-            Height = 991
+            Height = 988
             Top = 0
             Width = 894
             ColumnDefValues.BlobText = '(данные)'
@@ -3003,12 +3029,12 @@ object MainForm: TMainForm
         end
         object SheetStageTotal: TTabSheet
           Caption = 'Сквозной'
-          ClientHeight = 991
+          ClientHeight = 988
           ClientWidth = 894
           ParentFont = False
           object GridResult7: TRxDBGrid
             Left = 0
-            Height = 991
+            Height = 988
             Top = 0
             Width = 894
             ColumnDefValues.BlobText = '(данные)'
@@ -3273,13 +3299,13 @@ object MainForm: TMainForm
   end
   object EditPanel: TPanel
     Left = 910
-    Height = 1067
-    Top = 36
+    Height = 1064
+    Top = 39
     Width = 352
     Align = alRight
     AutoSize = True
     BevelOuter = bvNone
-    ClientHeight = 1067
+    ClientHeight = 1064
     ClientWidth = 352
     Constraints.MinWidth = 352
     ParentFont = False
@@ -3292,7 +3318,7 @@ object MainForm: TMainForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = Splitter1
       Left = 0
-      Height = 266
+      Height = 265
       Top = 68
       Width = 352
       ColumnDefValues.BlobText = '(данные)'
@@ -3406,99 +3432,6 @@ object MainForm: TMainForm
       TabOrder = 0
       OnEditingDone = RxDBGridCorrectionEditingDone
     end
-    object CurrentSU: TGroupBox
-      AnchorSideLeft.Control = EditPanel
-      AnchorSideTop.Control = EditPanel
-      AnchorSideRight.Control = EditPanel
-      AnchorSideRight.Side = asrBottom
-      Left = 0
-      Height = 68
-      Top = 0
-      Width = 352
-      Anchors = [akTop, akLeft, akRight]
-      AutoSize = True
-      Caption = 'Текущий СУ'
-      ClientHeight = 38
-      ClientWidth = 348
-      Constraints.MaxHeight = 68
-      Constraints.MinHeight = 68
-      ParentFont = False
-      TabOrder = 1
-      object RadioCur1: TRadioButton
-        Left = 8
-        Height = 38
-        Top = 0
-        Width = 35
-        Align = alLeft
-        BorderSpacing.Left = 8
-        Caption = '1'
-        Checked = True
-        ParentFont = False
-        TabOrder = 5
-        TabStop = True
-        OnClick = RadioCurClick
-      end
-      object RadioCur2: TRadioButton
-        Left = 51
-        Height = 38
-        Top = 0
-        Width = 35
-        Align = alLeft
-        BorderSpacing.Left = 8
-        Caption = '2'
-        ParentFont = False
-        TabOrder = 0
-        OnClick = RadioCurClick
-      end
-      object RadioCur3: TRadioButton
-        Left = 94
-        Height = 38
-        Top = 0
-        Width = 35
-        Align = alLeft
-        BorderSpacing.Left = 8
-        Caption = '3'
-        ParentFont = False
-        TabOrder = 1
-        OnClick = RadioCurClick
-      end
-      object RadioCur4: TRadioButton
-        Left = 137
-        Height = 38
-        Top = 0
-        Width = 35
-        Align = alLeft
-        BorderSpacing.Left = 8
-        Caption = '4'
-        ParentFont = False
-        TabOrder = 2
-        OnClick = RadioCurClick
-      end
-      object RadioCur5: TRadioButton
-        Left = 180
-        Height = 38
-        Top = 0
-        Width = 35
-        Align = alLeft
-        BorderSpacing.Left = 8
-        Caption = '5'
-        ParentFont = False
-        TabOrder = 3
-        OnClick = RadioCurClick
-      end
-      object RadioCur6: TRadioButton
-        Left = 223
-        Height = 38
-        Top = 0
-        Width = 35
-        Align = alLeft
-        BorderSpacing.Left = 8
-        Caption = '6'
-        ParentFont = False
-        TabOrder = 4
-        OnClick = RadioCurClick
-      end
-    end
     object Splitter1: TSplitter
       AnchorSideLeft.Control = EditPanel
       AnchorSideRight.Control = EditPanel
@@ -3506,7 +3439,7 @@ object MainForm: TMainForm
       Cursor = crVSplit
       Left = 0
       Height = 8
-      Top = 334
+      Top = 333
       Width = 352
       Align = alNone
       Anchors = [akLeft, akRight]
@@ -3519,7 +3452,7 @@ object MainForm: TMainForm
       Cursor = crVSplit
       Left = 0
       Height = 8
-      Top = 802
+      Top = 800
       Width = 352
       Align = alNone
       Anchors = [akLeft, akRight]
@@ -3533,16 +3466,16 @@ object MainForm: TMainForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = Splitter2
       Left = 0
-      Height = 460
-      Top = 342
+      Height = 459
+      Top = 341
       Width = 352
       Anchors = [akTop, akLeft, akRight, akBottom]
       BevelOuter = bvNone
-      ClientHeight = 460
+      ClientHeight = 459
       ClientWidth = 352
       Constraints.MinHeight = 300
       ParentFont = False
-      TabOrder = 4
+      TabOrder = 3
       object sGridResult: TStringGrid
         AnchorSideLeft.Control = PanelResult
         AnchorSideTop.Control = PanelResult
@@ -3550,7 +3483,7 @@ object MainForm: TMainForm
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = ButtonSetFinish
         Left = 0
-        Height = 409
+        Height = 408
         Top = 0
         Width = 352
         Anchors = [akTop, akLeft, akRight, akBottom]
@@ -3590,7 +3523,7 @@ object MainForm: TMainForm
         AnchorSideBottom.Side = asrBottom
         Left = 8
         Height = 35
-        Top = 417
+        Top = 416
         Width = 101
         Anchors = [akLeft, akBottom]
         AutoSize = True
@@ -3608,7 +3541,7 @@ object MainForm: TMainForm
         AnchorSideBottom.Side = asrBottom
         Left = 117
         Height = 35
-        Top = 417
+        Top = 416
         Width = 98
         Action = AcSetFinish
         Anchors = [akLeft, akBottom]
@@ -3628,22 +3561,22 @@ object MainForm: TMainForm
       AnchorSideBottom.Control = EditPanel
       AnchorSideBottom.Side = asrBottom
       Left = 0
-      Height = 257
-      Top = 810
+      Height = 256
+      Top = 808
       Width = 352
       Anchors = [akTop, akLeft, akRight, akBottom]
       Caption = 'Время от стартовой отсечки'
-      ClientHeight = 227
+      ClientHeight = 226
       ClientWidth = 348
       ParentFont = False
-      TabOrder = 5
+      TabOrder = 4
       object ButtonLoRaClear: TButton
         AnchorSideLeft.Control = PanelLoRa
         AnchorSideBottom.Control = PanelLoRa
         AnchorSideBottom.Side = asrBottom
         Left = 8
         Height = 38
-        Top = 181
+        Top = 180
         Width = 112
         Action = AcLoRaClear
         Anchors = [akLeft, akBottom]
@@ -3658,7 +3591,7 @@ object MainForm: TMainForm
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = ButtonLoRaClear
         Left = 0
-        Height = 173
+        Height = 172
         Hint = 'Двойной клик на строке с нужной поправкой заносит её в основную таблицу'
         Top = 0
         Width = 348
@@ -3790,6 +3723,44 @@ object MainForm: TMainForm
         OnDblClick = RxDBGridLoRaDblClick
       end
     end
+    object CurrentSU: TRadioGroup
+      AnchorSideLeft.Control = EditPanel
+      AnchorSideTop.Control = EditPanel
+      AnchorSideRight.Control = EditPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 0
+      Height = 68
+      Top = 0
+      Width = 352
+      Anchors = [akTop, akLeft, akRight]
+      AutoFill = True
+      AutoSize = True
+      Caption = 'Текущий СУ'
+      ChildSizing.LeftRightSpacing = 6
+      ChildSizing.EnlargeHorizontal = crsHomogenousSpaceResize
+      ChildSizing.EnlargeVertical = crsHomogenousSpaceResize
+      ChildSizing.ShrinkHorizontal = crsHomogenousChildResize
+      ChildSizing.ShrinkVertical = crsHomogenousChildResize
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 6
+      ClientHeight = 38
+      ClientWidth = 348
+      Columns = 6
+      Constraints.MaxHeight = 68
+      Constraints.MinHeight = 68
+      ItemIndex = 0
+      Items.Strings = (
+        '1'
+        '2'
+        '3'
+        '4'
+        '5'
+        '6'
+      )
+      ParentFont = False
+      TabOrder = 5
+      OnClick = CurrentSUClick
+    end
   end
   object Serial: TLazSerial
     Active = False
@@ -3824,12 +3795,14 @@ object MainForm: TMainForm
       Caption = 'Файл'
       object MenuItemNewDB: TMenuItem
         Action = FileNewDB
+        ShortCut = 24654
       end
       object N3: TMenuItem
         Caption = '-'
       end
       object MenuItemOpen: TMenuItem
         Action = FileOpenDB
+        ShortCut = 24655
       end
       object MenuItemOpenRecent: TMenuItem
         Caption = 'Открыть недавнее'
@@ -3840,14 +3813,15 @@ object MainForm: TMainForm
       object MenuItemOpenCSV: TMenuItem
         Action = FileOpenCSV
         Caption = 'Загрузить список участников ...'
-        ShortCut = 16460
+        ShortCut = 24652
       end
       object MenuItemImportResults: TMenuItem
         Action = FileOpenCSVResult
-        ShortCut = 16457
+        ShortCut = 24649
       end
       object MenuItemExportCSVStartList: TMenuItem
         Action = FileExportCSVStartlist
+        ShortCut = 24659
       end
       object MenuItemExportCSVResults: TMenuItem
         Action = FileExportCSVResults
@@ -3867,6 +3841,7 @@ object MainForm: TMainForm
       end
       object MenuItemExport: TMenuItem
         Action = FileExportFull
+        ShortCut = 24646
       end
       object N2: TMenuItem
         Caption = '-'
@@ -3890,7 +3865,7 @@ object MainForm: TMainForm
       object ViewMemo: TMenuItem
         Action = AcViewMemo
         AutoCheck = True
-        ShortCut = 16464
+        ShortCut = 24656
       end
       object MenuItem4: TMenuItem
         Caption = '-'
@@ -4518,6 +4493,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+      OnChange = RecalcResults
       Size = 255
     end
     object MainDataset1correction1: TStringField
@@ -4528,6 +4504,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+      OnChange = RecalcResults
       OnSetText = CheckCorrectionSetText
       Size = 255
     end
@@ -4539,6 +4516,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+      OnChange = RecalcResults
       Size = 255
     end
     object MainDataset1penalty1: TStringField
@@ -4549,7 +4527,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
-      OnChange = RecalcResultsAfterPenaltyChange
+      OnChange = RecalcResults
       OnSetText = CheckPenaltySetText
       Size = 255
     end
@@ -4591,6 +4569,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+      OnChange = RecalcResults
       Size = 255
     end
     object MainDataset1correction2: TStringField
@@ -4601,6 +4580,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+      OnChange = RecalcResults
       OnSetText = CheckCorrectionSetText
       Size = 255
     end
@@ -4612,6 +4592,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+      OnChange = RecalcResults
       Size = 255
     end
     object MainDataset1penalty2: TStringField
@@ -4622,7 +4603,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
-      OnChange = RecalcResultsAfterPenaltyChange
+      OnChange = RecalcResults
       OnSetText = CheckPenaltySetText
       Size = 255
     end
@@ -4665,6 +4646,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+      OnChange = RecalcResults
       Size = 255
     end
     object MainDataset1correction3: TStringField
@@ -4675,6 +4657,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+      OnChange = RecalcResults
       OnSetText = CheckCorrectionSetText
       Size = 255
     end
@@ -4686,6 +4669,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+      OnChange = RecalcResults
       Size = 255
     end
     object MainDataset1penalty3: TStringField
@@ -4696,7 +4680,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
-      OnChange = RecalcResultsAfterPenaltyChange
+      OnChange = RecalcResults
       OnSetText = CheckPenaltySetText
       Size = 255
     end
@@ -4739,6 +4723,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+      OnChange = RecalcResults
       Size = 255
     end
     object MainDataset1correction4: TStringField
@@ -4749,6 +4734,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+      OnChange = RecalcResults
       OnSetText = CheckCorrectionSetText
       Size = 255
     end
@@ -4760,6 +4746,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+      OnChange = RecalcResults
       Size = 255
     end
     object MainDataset1penalty4: TStringField
@@ -4770,7 +4757,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
-      OnChange = RecalcResultsAfterPenaltyChange
+      OnChange = RecalcResults
       OnSetText = CheckPenaltySetText
       Size = 255
     end
@@ -4813,6 +4800,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+      OnChange = RecalcResults
       Size = 255
     end
     object MainDataset1correction5: TStringField
@@ -4823,6 +4811,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+      OnChange = RecalcResults
       OnSetText = CheckCorrectionSetText
       Size = 255
     end
@@ -4834,6 +4823,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+      OnChange = RecalcResults
       Size = 255
     end
     object MainDataset1penalty5: TStringField
@@ -4844,7 +4834,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
-      OnChange = RecalcResultsAfterPenaltyChange
+      OnChange = RecalcResults
       OnSetText = CheckPenaltySetText
       Size = 255
     end
@@ -4887,6 +4877,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+      OnChange = RecalcResults
       Size = 255
     end
     object MainDataset1correction6: TStringField
@@ -4897,6 +4888,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+      OnChange = RecalcResults
       OnSetText = CheckCorrectionSetText
       Size = 255
     end
@@ -4908,6 +4900,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
+      OnChange = RecalcResults
       Size = 255
     end
     object MainDataset1penalty6: TStringField
@@ -4918,7 +4911,7 @@ object MainForm: TMainForm
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
-      OnChange = RecalcResultsAfterPenaltyChange
+      OnChange = RecalcResults
       OnSetText = CheckPenaltySetText
       Size = 255
     end
@@ -5342,6 +5335,11 @@ object MainForm: TMainForm
         Name = 'telegrambotadress'
         OnSave = RxIniPropStorage1StoredValues5Save
         OnRestore = RxIniPropStorage1StoredValues5Restore
+      end    
+      item
+        Name = 'showStageNameForSingleStage'
+        OnSave = RxIniPropStorage1StoredValues6Save
+        OnRestore = RxIniPropStorage1StoredValues6Restore
       end>
     OnSavingProperties = RxIniPropStorage1SavingProperties
     OnRestoreProperties = RxIniPropStorage1RestoreProperties

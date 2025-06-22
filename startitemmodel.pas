@@ -97,6 +97,7 @@ begin
   FNumber := TStringList.Create;
   FNumber.Add('number');
   FNumber.Add('номер');
+  FNumber.Add('№');
 
   FName := TStringList.Create;
   FName.add('имя');

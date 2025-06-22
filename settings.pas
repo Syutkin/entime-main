@@ -19,6 +19,7 @@ type
     ButtonTelegramTest: TButton;
     ButtonPanel1: TButtonPanel;
     CheckBoxHideZeroHour: TCheckBoxThemed;
+    CheckBoxShowStageName: TCheckBoxThemed;
     CheckGroup1: TCheckGroup;
     ComboBoxLanguage: TComboBox;
     ComboBoxAStage: TComboBox;
@@ -31,6 +32,7 @@ type
     DelayEdit: TSpinEdit;
     DividerBevelCOMSettings1: TDividerBevel;
     DividerBevelCOMSettings2: TDividerBevel;
+    DividerBevelViewOther: TDividerBevel;
     DividerBevelLEDAdress: TDividerBevel;
     DividerBevelTelegramTest: TDividerBevel;
     DividerBevelTelegramBotAdress: TDividerBevel;
@@ -99,13 +101,14 @@ type
     TreeView1: TTreeView;
     procedure ButtonLEDTestClick(Sender: TObject);
     procedure ButtonTelegramTestClick(Sender: TObject);
+    procedure CheckGroup1ItemClick(Sender: TObject; Index: integer);
     procedure ComboBoxAStageDropDown(Sender: TObject);
     procedure ComboBoxLanguageChange(Sender: TObject);
     procedure EditDropDown(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Label1Click(Sender: TObject);
     procedure Page2ViewBeforeShow(ASender: TObject; ANewPage: TPage; ANewIndex: integer);
-    procedure RunSettings(ActivePage: integer = 1);
+    procedure RunSettings(ActivePage: integer = 0);
     procedure TreeView1Change(Sender: TObject; Node: TTreeNode);
   private
 
@@ -167,18 +170,28 @@ begin
     c := FindComponent('Edit' + IntToStr(i));
     TComboBox(c).Text := cat[i];
     c := FindComponent('SUEdit' + IntToStr(i));
-    TEdit(c).Text := stageName[i];
+    TEdit(c).Text := stages[i].Name;
   end;
   DelayEdit.Text := IntToStr(checkinterval);
-  if lang = 'ru' then
-    ComboBoxLanguage.Text := sRussian;
-  if lang = 'en' then
-    ComboBoxLanguage.Text := sEnglish;
+
+  // Формирование списка языков и выбор текущего
+  ComboBoxLanguage.Items.Add(rsSystemDefault);
+  ComboBoxLanguage.Items.Add(rsEnglish);
+  ComboBoxLanguage.Items.Add(rsRussian);
+
+  if CurrentLang = '' then
+    ComboBoxLanguage.Text := rsSystemDefault
+  else if CurrentLang = 'ru' then
+    ComboBoxLanguage.Text := rsRussian
+  else if CurrentLang = 'en' then
+    ComboBoxLanguage.Text := rsEnglish;
+
   for i := 1 to maxstages do
-    if stage[i] then
+    if stages[i].isActive then
       CheckGroup1.Checked[i - 1] := True;
 
   CheckBoxHideZeroHour.Checked := zerohour;
+  CheckBoxShowStageName.Checked := showStageNameForSingleStage;
 
   //if timemark = 'str' then RadioButtonCOMSetStr.Checked := true
   //else RadioButtonCOMSetTime.Checked := true;
@@ -223,13 +236,15 @@ begin
 end;
 
 //разбить запись на процедуры?
-procedure TSettingsForm.RunSettings(ActivePage: integer = 1);
+procedure TSettingsForm.RunSettings(ActivePage: integer = 0);
 var
   i: integer;
 begin
   with TSettingsForm.Create(nil) do
   begin
     try
+      TreeView1.Items[ActivePage].Selected := True;
+      TreeView1.Items[ActivePage].Focused := True;
       Notebook1.PageIndex := ActivePage;
       ShowModal;
       if ModalResult = mrOk then
@@ -244,10 +259,12 @@ begin
         MainForm.StatusBarLeft.Panels[1].Text := MainForm.Serial.Device;
 
         checkinterval := StrToInt(DelayEdit.Text);
-        if ComboBoxLanguage.Text = sRussian then
-          lang := 'ru';
-        if ComboBoxLanguage.Text = sEnglish then
-          lang := 'en';
+        if ComboBoxLanguage.Text = rsSystemDefault then
+          CurrentLang := ''
+        else if ComboBoxLanguage.Text = rsRussian then
+          CurrentLang := 'ru'
+        else if ComboBoxLanguage.Text = rsEnglish then
+          CurrentLang := 'en';
 
         //if RadioButtonCOMSetStr.Checked then timemark := 'str' else timemark := 'time';
         //timemarkstr := EditCOMSetStr.Text;
@@ -258,8 +275,7 @@ begin
         if astage = '' then
           astage := '1';
         //эта дичь определяет был ли переход от работы с одним этапом на несколько
-        if (not stage[2]) and (not stage[3]) and (not stage[4]) and
-          (not stage[5]) and (not stage[6]) and
+        if (stages.ActiveStagesCount = 1) and
           (CheckGroup1.Checked[1] or CheckGroup1.Checked[2] or
           CheckGroup1.Checked[3] or CheckGroup1.Checked[4] or
           CheckGroup1.Checked[5]) then
@@ -270,10 +286,10 @@ begin
         for i := 1 to maxstages do
         begin
           if CheckGroup1.Checked[i - 1] then
-            stage[i] := True
+            stages[i].isActive := True
           else
-            stage[i] := False;
-          stageName[i] := (FindComponent('SUEdit' + IntToStr(i)) as TEdit).Text;
+            stages[i].isActive := False;
+          stages[i].Name := (FindComponent('SUEdit' + IntToStr(i)) as TEdit).Text;
         end;
         for i := 1 to visiblecat do
         begin
@@ -282,6 +298,7 @@ begin
         end;
 
         zerohour := CheckBoxHideZeroHour.Checked;
+        showStageNameForSingleStage := CheckBoxShowStageName.Checked;
         ledpaneladress := LEDAdress.Text;
         telegrambotadress := TelegramBotAdressEdit.Text;
         MainForm.DataPortHTTP1.Url := 'http://' + ledpaneladress + '/post';
@@ -301,8 +318,8 @@ begin
             for i := 1 to maxstages do
             begin
               SQL.Add('("stage' + IntToStr(i) + '", "' +
-                BoolToStr(stage[i], True) + '"),');
-              SQL.Add('("stagename' + IntToStr(i) + '", "' + stageName[i] + '"),');
+                BoolToStr(stages[i].isActive, True) + '"),');
+              SQL.Add('("stagename' + IntToStr(i) + '", "' + stages[i].Name + '"),');
             end;
             SQL.Add('("activestage", "' + astage + '")');
             //SQL.Add('("timemark", "'+timemark+'"),');
@@ -322,7 +339,7 @@ begin
           RecalculateStatus(GetAllStageStatus(0));
           UpdateResults;
         end;
-        Log(sShownCategories + ' ' + cat[1] + ', ' + cat[2] + ', ' +
+        Log(rsShownCategories + ' ' + cat[1] + ', ' + cat[2] + ', ' +
           cat[3] + ', ' + cat[4] + ', ' + cat[5] + ', ' + cat[6]);
       end;
     finally
@@ -419,7 +436,7 @@ begin
     except
       On E: Exception do
       begin
-        Log(sTelegramBotSendingError + E.Message);
+        Log(rsTelegramBotSendingError + E.Message);
       end;
 
     end;
@@ -436,15 +453,52 @@ begin
   end;
 end;
 
-procedure TSettingsForm.ComboBoxLanguageChange(Sender: TObject);
+procedure TSettingsForm.CheckGroup1ItemClick(Sender: TObject; Index: integer);
+var
+  i: integer;
 begin
-  if ComboBoxLanguage.Text = sRussian then
+  if not TryStrToInt(ComboBoxAStage.Text, i) then i := 1;
+  if (not (Sender as TCheckGroup).Checked[i - 1]) or (i = 1) then
   begin
-    SetDefaultLang('ru');
-    TranslateUnitResourceStrings('rxconst', 'languages/rxconst.ru.po');
+    ComboBoxAStage.Items.Clear;
+    for i := 1 to maxstages do
+    begin
+      if CheckGroup1.Checked[i - 1] then
+      begin
+        ComboBoxAStage.Items.Add(IntToStr(i));
+      end;
+    end;
+    if ComboBoxAStage.items.Count > 0 then
+    begin
+      ComboBoxAStage.Text := ComboBoxAStage.Items[0];
+      ComboBoxAStage.Enabled := True;
+    end
+    else
+    begin
+      ComboBoxAStage.Items.Add('1');
+      ComboBoxAStage.Text := '1';
+      ComboBoxAStage.Enabled := False;
+    end;
   end;
-  if ComboBoxLanguage.Text = sEnglish then
-    SetDefaultLang('en');
+end;
+
+procedure TSettingsForm.ComboBoxLanguageChange(Sender: TObject);
+var
+  lang: string = '';
+  def: boolean = False;
+begin
+  if (Sender as TComboBox).Text = rsSystemDefault then
+    def := True
+  else if (Sender as TComboBox).Text = rsRussian then
+    lang := 'ru'
+  else if (Sender as TComboBox).Text = rsEnglish then
+    lang := 'en';
+  MainForm.SetLang(lang);
+  (Sender as TComboBox).Items[0] := rsSystemDefault;
+  if def then
+  begin
+    (Sender as TComboBox).Text := rsSystemDefault;
+  end;
 end;
 
 procedure TSettingsForm.EditDropDown(Sender: TObject);
