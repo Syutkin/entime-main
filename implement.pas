@@ -850,9 +850,9 @@ begin
         MainForm.SQLite3Connection1.ExecuteDirect(
           'INSERT INTO config (key, value) VALUES' + '("activestage", "1"),' +
           '("stage1", "True"),' + '("catname1", "' + rsCat1 + '"),' +
-          '("catname2", "' + rsCat2 + '"),' + '("catname3", "' + rsCat3 +
-          '"),' + '("catname4", "' + rsCat4 + '"),' + '("catname5", "' +
-          rsCat5 + '")' + ';');
+          '("catname2", "' + rsCat2 + '"),' + '("catname3", "' +
+          rsCat3 + '"),' + '("catname4", "' + rsCat4 + '"),' +
+          '("catname5", "' + rsCat5 + '")' + ';');
         MainForm.SQLTransaction1.Commit;
 
         with MainForm.SQLQuery1 do
@@ -908,317 +908,328 @@ var
 begin
   Screen.Cursor := crSQLWait;
   try
-    for row := MainForm.sGridResult.RowCount - 1 downto 1 do
-    begin
-      if (TryStrToInt(MainForm.sGridResult.Cells[1, row], number)) and (number > 0) then
+    try
+      for row := MainForm.sGridResult.RowCount - 1 downto 1 do
       begin
-        MainForm.SQLQuery1.Active := False;
-        MainForm.SQLQuery1.SQL.Text :=
-          'select * from main where number = :NUMBER;';
-        MainForm.SQLQuery1.ParamByName('NUMBER').AsInteger := number;
-        MainForm.SQLQuery1.Active := True;
-        if MainForm.SQLQuery1.FieldByName('number').AsInteger = number then
+        if (TryStrToInt(MainForm.sGridResult.Cells[1, row], number)) and
+          (number > 0) then
         begin
-          //проверяем что номер есть в таблице результатов
-          MainForm.SQLite3Connection2.Open;
-          MainForm.SQLTransaction2.Active := True;
-          MainForm.SQLQuery2.Active := False;
-          MainForm.SQLQuery2.SQL.Text :=
-            StringReplace(MainForm.StatDataset2.SQL, 'ORDER BY starttime',
-            'AND number = :NUMBER;', []);
-          //  MainForm.StatDataset2.SQL + ' AND number = :NUMBER;';
-          MainForm.SQLQuery2.ParamByName('NUMBER').AsInteger := number;
-          MainForm.SQLQuery2.Active := True;
-          if MainForm.SQLQuery2.FieldByName('number').AsInteger <> number then
+          MainForm.SQLQuery1.Active := False;
+          MainForm.SQLQuery1.SQL.Text :=
+            'select * from main where number = :NUMBER;';
+          MainForm.SQLQuery1.ParamByName('NUMBER').AsInteger := number;
+          MainForm.SQLQuery1.Active := True;
+          if MainForm.SQLQuery1.FieldByName('number').AsInteger = number then
           begin
-            //проверяем что номер в данный момент находится на трассе
-            if MessageDlg(rsNumber + ' ' + IntToStr(number) + ' ' +
-              rsDidNotStartSetFinish, mtWarning, [mbYes, mbNo], 0) = mrYes then
-              setfinish := True
-            else
-              setfinish := False;
-          end
-          else
-            setfinish := True;
-          MainForm.SQLQuery2.Active := False;
-          MainForm.SQLite3Connection2.Close;
-          MainForm.SQLTransaction2.Active := False;
-          for i := 1 to maxstages do
-          begin
-            if MainForm.CurrentSU.Buttons[i - 1].Checked and setfinish then
+            //проверяем что номер есть в таблице результатов
+            MainForm.SQLite3Connection2.Open;
+            MainForm.SQLTransaction2.Active := True;
+            MainForm.SQLQuery2.Active := False;
+            MainForm.SQLQuery2.SQL.Text :=
+              StringReplace(MainForm.StatDataset2.SQL, 'ORDER BY starttime',
+              'AND number = :NUMBER;', []);
+            //  MainForm.StatDataset2.SQL + ' AND number = :NUMBER;';
+            MainForm.SQLQuery2.ParamByName('NUMBER').AsInteger := number;
+            MainForm.SQLQuery2.Active := True;
+            if MainForm.SQLQuery2.FieldByName('number').AsInteger <> number then
             begin
-              //проверяем в какой этап заносить результат
-              if MainForm.SQLQuery1.FieldByName('result' + IntToStr(i)).AsString <> '' then
-              begin
-                if MessageDlg(rsUpdateFinishTime + ' ' + IntToStr(number) +
-                  '?', mtWarning, [mbYes, mbNo], 0) = mrYes then
-                  setfinish := True
-                else
-                  setfinish := False;
-              end
+              //проверяем что номер в данный момент находится на трассе
+              if MessageDlg(rsNumber + ' ' + IntToStr(number) + ' ' +
+                rsDidNotStartSetFinish, mtWarning, [mbYes, mbNo], 0) = mrYes then
+                setfinish := True
               else
-                setfinish := True;
-            end;
-          end;
-          if setfinish then
-          begin
-            //сначала определяем номер и результат текущего лидера категории для LED панели или телеграм бота
-            if Mainform.AcLEDPanel.Checked or Mainform.AcTelegramBot.Checked then
-            begin
-              st := IntToStr(ActiveStageIndex);
-              currentcategory := MainForm.SQLQuery1.FieldByName('category').AsString;
-              Name := MainForm.SQLQuery1.FieldByName('name').AsString;
-              MainForm.SQLQuery1.Active := False;
-              MainForm.SQLQuery1.SQL.Text :=
-                'select * from main where category = "' + currentcategory +
-                '" AND place' + st + ' = 1;';
-              MainForm.SQLQuery1.Active := True;
-              leaderresult := MainForm.SQLQuery1.FieldByName('result' + st).AsString;
-              leadernumber := MainForm.SQLQuery1.FieldByName('number').AsInteger;
-            end;
-
-            MainForm.SQLQuery1.SQL.Clear;
-            MainForm.SQLQuery1.SQL.Add('UPDATE main');
+                setfinish := False;
+            end
+            else
+              setfinish := True;
+            MainForm.SQLQuery2.Active := False;
+            MainForm.SQLite3Connection2.Close;
+            MainForm.SQLTransaction2.Active := False;
             for i := 1 to maxstages do
             begin
-              if MainForm.CurrentSU.Buttons[i - 1].Checked then
-                MainForm.SQLQuery1.SQL.Add('SET finishtime' + IntToStr(i) +
-                  ' = :TIME' + ', status' + IntToStr(i) + ' = NULL');
-            end;
-            MainForm.SQLQuery1.SQL.Add('WHERE number = :NUMBER;');
-            MainForm.SQLQuery1.ParamByName('TIME').Text :=
-              MainForm.sGridResult.Cells[0, row];
-            MainForm.SQLQuery1.ParamByName('NUMBER').AsInteger := number;
-            // ToDo: Без close падает, что за ExecSQL тут вообще?
-            MainForm.SQLQuery1.Close;
-            MainForm.SQLQuery1.ExecSQL;
-            //ставим время финиша для номера
-            UpdateResults;
-            //ставим результат
-            MainForm.sGridResult.DeleteRow(row);
-            Log(rsFinishTimeSet + ' ' + IntToStr(number));
-
-            //если используется LED панель или телеграм бот, добываем для них данные
-            if Mainform.AcLEDPanel.Checked or Mainform.AcTelegramBot.Checked then
-            begin
-              //результаты текущего участника
-              MainForm.SQLQuery1.Active := False;
-              MainForm.SQLQuery1.SQL.Text :=
-                'select * from main where number = :NUMBER;';
-              MainForm.SQLQuery1.ParamByName('NUMBER').AsInteger := number;
-              MainForm.SQLQuery1.Active := True;
-
-              currentresult := MainForm.SQLQuery1.FieldByName('result' + st).AsString;
-              currentplace := MainForm.SQLQuery1.FieldByName('place' + st).AsInteger;
-
-              //если текущий участник занял первое место
-              if currentplace = 1 then
+              if MainForm.CurrentSU.Buttons[i - 1].Checked and setfinish then
               begin
-
-                // ToDo: фоматирование
-
-                //результаты лидера категории для определения, насколько обогнал предыдущего лидера текущий участник
-                if leadernumber > 0 then
+                //проверяем в какой этап заносить результат
+                if MainForm.SQLQuery1.FieldByName('result' +
+                  IntToStr(i)).AsString <> '' then
                 begin
-                  MainForm.SQLQuery1.Active := False;
-                  MainForm.SQLQuery1.SQL.Text :=
-                    'select * from main where number = ' + IntToStr(leadernumber) + ';';
-                  MainForm.SQLQuery1.Active := True;
+                  if MessageDlg(rsUpdateFinishTime + ' ' + IntToStr(number) +
+                    '?', mtWarning, [mbYes, mbNo], 0) = mrYes then
+                    setfinish := True
+                  else
+                    setfinish := False;
+                end
+                else
+                  setfinish := True;
+              end;
+            end;
+            if setfinish then
+            begin
+              //сначала определяем номер и результат текущего лидера категории для LED панели или телеграм бота
+              if Mainform.AcLEDPanel.Checked or Mainform.AcTelegramBot.Checked then
+              begin
+                st := IntToStr(ActiveStageIndex);
+                currentcategory := MainForm.SQLQuery1.FieldByName('category').AsString;
+                Name := MainForm.SQLQuery1.FieldByName('name').AsString;
+                MainForm.SQLQuery1.Active := False;
+                MainForm.SQLQuery1.SQL.Text :=
+                  'select * from main where category = "' + currentcategory +
+                  '" AND place' + st + ' = 1;';
+                MainForm.SQLQuery1.Active := True;
+                leaderresult := MainForm.SQLQuery1.FieldByName('result' + st).AsString;
+                leadernumber := MainForm.SQLQuery1.FieldByName('number').AsInteger;
+              end;
+
+              MainForm.SQLQuery1.SQL.Clear;
+              MainForm.SQLQuery1.SQL.Add('UPDATE main');
+              for i := 1 to maxstages do
+              begin
+                if MainForm.CurrentSU.Buttons[i - 1].Checked then
+                  MainForm.SQLQuery1.SQL.Add('SET finishtime' +
+                    IntToStr(i) + ' = :TIME' + ', status' + IntToStr(i) + ' = NULL');
+              end;
+              MainForm.SQLQuery1.SQL.Add('WHERE number = :NUMBER;');
+              MainForm.SQLQuery1.ParamByName('TIME').Text :=
+                MainForm.sGridResult.Cells[0, row];
+              MainForm.SQLQuery1.ParamByName('NUMBER').AsInteger := number;
+              // ToDo: Без close падает, что за ExecSQL тут вообще?
+              MainForm.SQLQuery1.Close;
+              MainForm.SQLQuery1.ExecSQL;
+              //ставим время финиша для номера
+              UpdateResults;
+              //ставим результат
+              MainForm.sGridResult.DeleteRow(row);
+              Log(rsFinishTimeSet + ' ' + IntToStr(number));
+
+              //если используется LED панель или телеграм бот, добываем для них данные
+              if Mainform.AcLEDPanel.Checked or Mainform.AcTelegramBot.Checked then
+              begin
+                //результаты текущего участника
+                MainForm.SQLQuery1.Active := False;
+                MainForm.SQLQuery1.SQL.Text :=
+                  'select * from main where number = :NUMBER;';
+                MainForm.SQLQuery1.ParamByName('NUMBER').AsInteger := number;
+                MainForm.SQLQuery1.Active := True;
+
+                currentresult := MainForm.SQLQuery1.FieldByName('result' + st).AsString;
+                currentplace := MainForm.SQLQuery1.FieldByName('place' + st).AsInteger;
+
+                //если текущий участник занял первое место
+                if currentplace = 1 then
+                begin
+
+                  // ToDo: фоматирование
+
+                  //результаты лидера категории для определения, насколько обогнал предыдущего лидера текущий участник
+                  if leadernumber > 0 then
+                  begin
+                    MainForm.SQLQuery1.Active := False;
+                    MainForm.SQLQuery1.SQL.Text :=
+                      'select * from main where number = ' +
+                      IntToStr(leadernumber) + ';';
+                    MainForm.SQLQuery1.Active := True;
+                    currentdiff :=
+                      MainForm.SQLQuery1.FieldByName('diffleader' + st).AsString;
+
+                    //формируем верхнюю строку (текущий участник-лидер)
+                    //upperline := FormatLEDLine(number, currentresult, currentdiff, currentplace, '-');
+                    //bottomline := FormatLEDLine(leadernumber, leaderresult, '', 2);
+                  end
+                  else
+                  begin
+                    //upperline := FormatLEDLine(number, currentresult, '', currentplace);
+                    //bottomline := '';
+                  end;
+                end
+                //если текущий участник НЕ занял первое место
+                else
+                begin
+                  //  upperline := FormatLEDLine(leadernumber, leaderresult, '', 1);
                   currentdiff :=
                     MainForm.SQLQuery1.FieldByName('diffleader' + st).AsString;
-
-                  //формируем верхнюю строку (текущий участник-лидер)
-                  //upperline := FormatLEDLine(number, currentresult, currentdiff, currentplace, '-');
-                  //bottomline := FormatLEDLine(leadernumber, leaderresult, '', 2);
-                end
-                else
-                begin
-                  //upperline := FormatLEDLine(number, currentresult, '', currentplace);
-                  //bottomline := '';
+                  //  bottomline := FormatLEDLine(number, currentresult, currentdiff, currentplace);
                 end;
-              end
-              //если текущий участник НЕ занял первое место
-              else
-              begin
-                //  upperline := FormatLEDLine(leadernumber, leaderresult, '', 1);
-                currentdiff :=
-                  MainForm.SQLQuery1.FieldByName('diffleader' + st).AsString;
-                //  bottomline := FormatLEDLine(number, currentresult, currentdiff, currentplace);
-              end;
-            end;
-
-            //если используется LED панель, отправляем в неё данные
-            if Mainform.AcLEDPanel.Checked then
-            begin
-              if MainForm.DataPortHTTP1.Active then
-                MainForm.DataPortHTTP1.Close();
-              //результаты текущего участника
-              //MainForm.SQLQuery1.Active := False;
-              //MainForm.SQLQuery1.SQL.Text :=
-              //  'select * from main where number = :NUMBER;';
-              //MainForm.SQLQuery1.ParamByName('NUMBER').AsInteger := number;
-              //MainForm.SQLQuery1.Active := True;
-
-              //currentresult := MainForm.SQLQuery1.FieldByName('result' + st).AsString;
-              //currentplace := MainForm.SQLQuery1.FieldByName('place' + st).AsInteger;
-
-              //если текущий участник занял первое место
-              if currentplace = 1 then
-              begin
-
-                // ToDo: фоматирование
-
-                //результаты лидера категории для определения, насколько обогнал предыдущего лидера текущий участник
-                if leadernumber > 0 then
-                begin
-                  //MainForm.SQLQuery1.Active := False;
-                  //MainForm.SQLQuery1.SQL.Text :=
-                  //  'select * from main where number = ' + IntToStr(leadernumber) + ';';
-                  //MainForm.SQLQuery1.Active := True;
-                  //currentdiff := MainForm.SQLQuery1.FieldByName('diffleader' + st).AsString;
-
-                  //формируем верхнюю строку (текущий участник-лидер)
-                  upperline :=
-                    FormatLEDLine(number, currentresult, currentdiff, currentplace, '-');
-                  bottomline := FormatLEDLine(leadernumber, leaderresult, '', 2);
-                end
-                else
-                begin
-                  upperline := FormatLEDLine(number, currentresult, '', currentplace);
-                  bottomline := '';
-                end;
-              end
-              //если текущий участник НЕ занял первое место
-              else
-              begin
-                upperline := FormatLEDLine(leadernumber, leaderresult, '', 1);
-                //currentdiff := MainForm.SQLQuery1.FieldByName('diffleader' + st).AsString;
-                bottomline := FormatLEDLine(number, currentresult,
-                  currentdiff, currentplace);
               end;
 
-              MainForm.DataPortHTTP1.Params.Clear;
-              MainForm.DataPortHTTP1.Params.Add('upperline=' + upperline);
-              MainForm.DataPortHTTP1.Params.Add('bottomline=' + bottomline);
-              Print(MainForm.DataPortHTTP1.Params.Text);
-              Print(MainForm.DataPortHTTP1.Url);
-              MainForm.DataPortHTTP1.Open();
-              MainForm.DataPortHTTP1.Push('');
-            end;
-
-            //если хотим отправлять данные в бота телеги
-            if Mainform.AcTelegramBot.Checked then
-            begin
-              //if MainForm.DataPortHTTPTelegramBot.Active then
-              //  MainForm.DataPortHTTPTelegramBot.Close();
-              //если текущий участник занял первое место
-              if currentplace = 1 then
+              //если используется LED панель, отправляем в неё данные
+              if Mainform.AcLEDPanel.Checked then
               begin
-                //результаты лидера категории для определения, насколько обогнал предыдущего лидера текущий участник
-                if leadernumber > 0 then
-                begin
-                  // Участник кого-то обогнал
-                  //upperline := FormatLEDLine(number, currentresult, currentdiff, currentplace, '-');
-                  //bottomline := FormatLEDLine(leadernumber, leaderresult, '', 2);
-                  currentdiff := FormatDiff(currentdiff, '-');
-                end
-                else
-                begin
-                  // Участник первый финишировавший
-                  //upperline := FormatLEDLine(number, currentresult, '', currentplace);
-                  //bottomline := '';
-                end;
-              end
-              //если текущий участник НЕ занял первое место
-              else
-              begin
-                //upperline := FormatLEDLine(leadernumber, leaderresult, '', 1);
-                currentdiff :=
-                  MainForm.SQLQuery1.FieldByName('diffleader' + st).AsString;
-                currentdiff := FormatDiff(currentdiff, '');
-                //bottomline := FormatLEDLine(number, currentresult, currentdiff, currentplace);
-              end;
+                if MainForm.DataPortHTTP1.Active then
+                  MainForm.DataPortHTTP1.Close();
+                //результаты текущего участника
+                //MainForm.SQLQuery1.Active := False;
+                //MainForm.SQLQuery1.SQL.Text :=
+                //  'select * from main where number = :NUMBER;';
+                //MainForm.SQLQuery1.ParamByName('NUMBER').AsInteger := number;
+                //MainForm.SQLQuery1.Active := True;
 
-              // отправка данных в телегу
-              l := TStringStream.Create('');
-              http := tfphttpclient.Create(nil);
-              with http do
-              try
-                QueryParams := TStringList.Create;
-                //AddHeader('Authorization', 'AccessToken MjtAFOrgYUrsfCC7KPLpAi03N4Od17Bh');
-                //AddHeader('X-User-Authorization', 'Basic aW5mb0BzcG1hc2gucnU6NTE0NzU4');
-                //AddHeader('Content-Type', 'application/json;charset=UTF-8');
-                with QueryParams do
-                begin
-                  if not IntToStr(number).IsEmpty then
-                    Values['number'] := EncodeURLElement(IntToStr(number));
-                  if not Name.IsEmpty then
-                    Values['name'] := EncodeURLElement(Name);
-                  if not currentcategory.IsEmpty then
-                    Values['category'] := EncodeURLElement(currentcategory);
-                  if not currentresult.IsEmpty then
-                    Values['result'] := EncodeURLElement(FormatTime(currentresult));
-                  if not currentdiff.IsEmpty then
-                    Values['diff'] := EncodeURLElement(currentdiff);
-                  if not IntToStr(currentplace).IsEmpty then
-                    Values['place'] := EncodeURLElement(IntToStr(currentplace));
-                end;
-                AURL := telegrambotadress;
-                for item in QueryParams do
-                  s := s + '&' + item;
-                AURL := AURL + '?' + s.Substring(1);
+                //currentresult := MainForm.SQLQuery1.FieldByName('result' + st).AsString;
+                //currentplace := MainForm.SQLQuery1.FieldByName('place' + st).AsInteger;
 
-                try
-                  httpmethod('GET', AURL, l, []);
-                except
-                  On E: Exception do
+                //если текущий участник занял первое место
+                if currentplace = 1 then
+                begin
+
+                  // ToDo: фоматирование
+
+                  //результаты лидера категории для определения, насколько обогнал предыдущего лидера текущий участник
+                  if leadernumber > 0 then
                   begin
-                    //MessageDlg(rsTelegramBotSendingError + E.Message, mtError, [mbOK], 0);
-                    Log(rsTelegramBotSendingError + E.Message);
+                    //MainForm.SQLQuery1.Active := False;
+                    //MainForm.SQLQuery1.SQL.Text :=
+                    //  'select * from main where number = ' + IntToStr(leadernumber) + ';';
+                    //MainForm.SQLQuery1.Active := True;
+                    //currentdiff := MainForm.SQLQuery1.FieldByName('diffleader' + st).AsString;
+
+                    //формируем верхнюю строку (текущий участник-лидер)
+                    upperline :=
+                      FormatLEDLine(number, currentresult, currentdiff,
+                      currentplace, '-');
+                    bottomline := FormatLEDLine(leadernumber, leaderresult, '', 2);
+                  end
+                  else
+                  begin
+                    upperline := FormatLEDLine(number, currentresult, '', currentplace);
+                    bottomline := '';
                   end;
-
+                end
+                //если текущий участник НЕ занял первое место
+                else
+                begin
+                  upperline := FormatLEDLine(leadernumber, leaderresult, '', 1);
+                  //currentdiff := MainForm.SQLQuery1.FieldByName('diffleader' + st).AsString;
+                  bottomline :=
+                    FormatLEDLine(number, currentresult, currentdiff, currentplace);
                 end;
-                MainForm.Memo.Lines.Append(IntToStr(ResponseStatusCode) +
-                  ' ' + ResponseStatusText);
-                MainForm.Memo.Lines.Append(ResponseHeaders.Text);
-                MainForm.Memo.Lines.Append(l.DataString);
 
-              finally
-                MainForm.Memo.Lines.Append(AURL);
-                Free;
-                QueryParams.Free;
-                l.Free;
+                MainForm.DataPortHTTP1.Params.Clear;
+                MainForm.DataPortHTTP1.Params.Add('upperline=' + upperline);
+                MainForm.DataPortHTTP1.Params.Add('bottomline=' + bottomline);
+                Print(MainForm.DataPortHTTP1.Params.Text);
+                Print(MainForm.DataPortHTTP1.Url);
+                MainForm.DataPortHTTP1.Open();
+                MainForm.DataPortHTTP1.Push('');
               end;
 
-              //end;
+              //если хотим отправлять данные в бота телеги
+              if Mainform.AcTelegramBot.Checked then
+              begin
+                //if MainForm.DataPortHTTPTelegramBot.Active then
+                //  MainForm.DataPortHTTPTelegramBot.Close();
+                //если текущий участник занял первое место
+                if currentplace = 1 then
+                begin
+                  //результаты лидера категории для определения, насколько обогнал предыдущего лидера текущий участник
+                  if leadernumber > 0 then
+                  begin
+                    // Участник кого-то обогнал
+                    //upperline := FormatLEDLine(number, currentresult, currentdiff, currentplace, '-');
+                    //bottomline := FormatLEDLine(leadernumber, leaderresult, '', 2);
+                    currentdiff := FormatDiff(currentdiff, '-');
+                  end
+                  else
+                  begin
+                    // Участник первый финишировавший
+                    //upperline := FormatLEDLine(number, currentresult, '', currentplace);
+                    //bottomline := '';
+                  end;
+                end
+                //если текущий участник НЕ занял первое место
+                else
+                begin
+                  //upperline := FormatLEDLine(leadernumber, leaderresult, '', 1);
+                  currentdiff :=
+                    MainForm.SQLQuery1.FieldByName('diffleader' + st).AsString;
+                  currentdiff := FormatDiff(currentdiff, '');
+                  //bottomline := FormatLEDLine(number, currentresult, currentdiff, currentplace);
+                end;
 
-              //MainForm.DataPortHTTPTelegramBot.Params.Clear;
-              //MainForm.DataPortHTTPTelegramBot.Params.Add('number=' + IntToStr(number));
-              //MainForm.DataPortHTTPTelegramBot.Params.Add('name=' + name);
-              //MainForm.DataPortHTTPTelegramBot.Params.Add('category=' + currentcategory);
-              //MainForm.DataPortHTTPTelegramBot.Params.Add('result=' + FormatTime(currentresult));
-              //MainForm.DataPortHTTPTelegramBot.Params.Add('diff=' + currentdiff);
-              //MainForm.DataPortHTTPTelegramBot.Params.Add('place=' + IntToStr(currentplace));
+                // отправка данных в телегу
+                l := TStringStream.Create('');
+                http := tfphttpclient.Create(nil);
+                with http do
+                try
+                  QueryParams := TStringList.Create;
+                  //AddHeader('Authorization', 'AccessToken MjtAFOrgYUrsfCC7KPLpAi03N4Od17Bh');
+                  //AddHeader('X-User-Authorization', 'Basic aW5mb0BzcG1hc2gucnU6NTE0NzU4');
+                  //AddHeader('Content-Type', 'application/json;charset=UTF-8');
+                  with QueryParams do
+                  begin
+                    if not IntToStr(number).IsEmpty then
+                      Values['number'] := EncodeURLElement(IntToStr(number));
+                    if not Name.IsEmpty then
+                      Values['name'] := EncodeURLElement(Name);
+                    if not currentcategory.IsEmpty then
+                      Values['category'] := EncodeURLElement(currentcategory);
+                    if not currentresult.IsEmpty then
+                      Values['result'] := EncodeURLElement(FormatTime(currentresult));
+                    if not currentdiff.IsEmpty then
+                      Values['diff'] := EncodeURLElement(currentdiff);
+                    if not IntToStr(currentplace).IsEmpty then
+                      Values['place'] := EncodeURLElement(IntToStr(currentplace));
+                  end;
+                  AURL := telegrambotadress;
+                  for item in QueryParams do
+                    s := s + '&' + item;
+                  AURL := AURL + '?' + s.Substring(1);
 
-              //Print(MainForm.DataPortHTTPTelegramBot.Params.Text);
-              //Print(MainForm.DataPortHTTPTelegramBot.Url);
-              //MainForm.DataPortHTTPTelegramBot.Open();
-              //MainForm.DataPortHTTPTelegramBot.Push('');
+                  try
+                    httpmethod('GET', AURL, l, []);
+                  except
+                    On E: Exception do
+                    begin
+                      //MessageDlg(rsTelegramBotSendingError + E.Message, mtError, [mbOK], 0);
+                      Log(rsTelegramBotSendingError + E.Message);
+                    end;
+
+                  end;
+                  MainForm.Memo.Lines.Append(IntToStr(ResponseStatusCode) +
+                    ' ' + ResponseStatusText);
+                  MainForm.Memo.Lines.Append(ResponseHeaders.Text);
+                  MainForm.Memo.Lines.Append(l.DataString);
+
+                finally
+                  MainForm.Memo.Lines.Append(AURL);
+                  Free;
+                  QueryParams.Free;
+                  l.Free;
+                end;
+
+                //end;
+
+                //MainForm.DataPortHTTPTelegramBot.Params.Clear;
+                //MainForm.DataPortHTTPTelegramBot.Params.Add('number=' + IntToStr(number));
+                //MainForm.DataPortHTTPTelegramBot.Params.Add('name=' + name);
+                //MainForm.DataPortHTTPTelegramBot.Params.Add('category=' + currentcategory);
+                //MainForm.DataPortHTTPTelegramBot.Params.Add('result=' + FormatTime(currentresult));
+                //MainForm.DataPortHTTPTelegramBot.Params.Add('diff=' + currentdiff);
+                //MainForm.DataPortHTTPTelegramBot.Params.Add('place=' + IntToStr(currentplace));
+
+                //Print(MainForm.DataPortHTTPTelegramBot.Params.Text);
+                //Print(MainForm.DataPortHTTPTelegramBot.Url);
+                //MainForm.DataPortHTTPTelegramBot.Open();
+                //MainForm.DataPortHTTPTelegramBot.Push('');
+              end;
             end;
-          end;
-        end
-        else
-          Log(rsNumber + ' ' + IntToStr(number) + ' ' + rsDoNotExist);
+          end
+          else
+            Log(rsNumber + ' ' + IntToStr(number) + ' ' + rsDoNotExist);
+        end;
+      end;
+    except
+      On E: Exception do
+      begin
+        MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
+        Log(rsDatabaseOpenError + E.Message);
       end;
     end;
-  except
-    On E: Exception do
-    begin
-      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(rsDatabaseOpenError + E.Message);
-    end;
+  finally
+    MainForm.SQLQuery1.Active := False;
+    MainForm.SQLTransaction1.Active := False;
+    MainForm.SQLQuery2.Active := False;
+    MainForm.SQLTransaction2.Active := False;
+    Screen.Cursor := crDefault;
   end;
-  Screen.Cursor := crDefault;
 end;
 
 procedure SetCorrectionFromLoRa;
@@ -1753,8 +1764,8 @@ begin
   begin
     n := MainForm.MainDataset1.FieldByName('number').AsString;
     st := GetSelectedStage;
-    t := InputDateTime(rsTimeToStart, rsEnterStartTime + ' ' + n + ' ' +
-      rsOnStage + ': ' + stages[st].Name);
+    t := InputDateTime(rsTimeToStart, rsEnterStartTime + ' ' + n +
+      ' ' + rsOnStage + ': ' + stages[st].Name);
     if t > 0 then
     begin
       with MainForm.SQLQuery1 do
