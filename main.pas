@@ -43,6 +43,7 @@ type
     AcLEDPanel: TAction;
     AcTelegramBot: TAction;
     AcRunRaceSettings: TAction;
+    ExportStageResults: TAction;
     CheckBoxAutomaticUpdateResutls: TCheckBox;
     CSVResultsExporter: TCSVExporter;
     CSVStartListExporter: TCSVExporter;
@@ -51,10 +52,10 @@ type
     DataPortHTTPTelegramBot: TDataPortHTTP;
     FileExportCSVStartlist: TFileSaveAs;
     FileExportCSVResults: TFileSaveAs;
+    FileExportStageResultsSaveAs: TFileSaveAs;
     GenerateSumDays: TAction;
     EditCopy1: TEditCopy;
     EditCopy2: TEditCopy;
-    FileExportStageResults: TFileSaveAs;
     FileExportAllResults: TFileSaveAs;
     FileOpenCSVSum: TFileOpen;
     FileExportSumDays: TFileSaveAs;
@@ -75,6 +76,7 @@ type
     MenuItemExportAllResults: TMenuItem;
     MenuItemExportCSVResults: TMenuItem;
     MenuItem2: TMenuItem;
+    MainPanel: TPanel;
     RxDBGrid1: TMyRxDBGrid;
     Separator1: TMenuItem;
     MenuItemExportCSVStartList: TMenuItem;
@@ -251,7 +253,7 @@ type
     MainDataset1rfid: TLongintField;
     MainDataset1starttime1: TStringField;
     MainDataset1team: TStringField;
-    MainPanel: TPanel;
+    TabSheetMainPanel: TPanel;
     EditPanel: TPanel;
     N1: TMenuItem;
     PageControl1: TPageControl;
@@ -324,6 +326,7 @@ type
     procedure AcRunRaceSettingsExecute(Sender: TObject);
     procedure AcTelegramBotExecute(Sender: TObject);
     procedure AcSetStarttimeExecute(Sender: TObject);
+    procedure ExportStageResultsExecute(Sender: TObject);
     procedure DataPortHTTP1DataAppear(Sender: TObject);
     procedure DataPortHTTP1Error(Sender: TObject; const AMsg: string);
     procedure DataPortHTTPTelegramBotDataAppear(Sender: TObject);
@@ -333,7 +336,8 @@ type
     procedure FileExportCSVStartlistAccept(Sender: TObject);
     procedure FileExportCSVStartlistBeforeExecute(Sender: TObject);
     procedure FileExportFullBeforeExecute(Sender: TObject);
-    procedure FileExportStageResultsBeforeExecute(Sender: TObject);
+    procedure FileExportStageResultsSaveAsAccept(Sender: TObject);
+    procedure FileExportStageResultsSaveAsBeforeExecute(Sender: TObject);
     procedure FileGenerateFinalBeforeExecute(Sender: TObject);
     procedure GenerateSumDaysExecute(Sender: TObject);
     procedure ComboBox1CategoryEditingDone(Sender: TObject);
@@ -363,7 +367,6 @@ type
     procedure EmptyExecute(Sender: TObject);
     procedure FileExportAllResultsAccept(Sender: TObject);
     procedure FileCloseExecute(Sender: TObject);
-    procedure FileExportStageResultsAccept(Sender: TObject);
     procedure FileGenerateFinalAccept(Sender: TObject);
     procedure FileNewDBAccept(Sender: TObject);
     procedure FileOpenCSVAccept(Sender: TObject);
@@ -595,11 +598,7 @@ begin
   RxDBGrid1.Columns[54].Width := 50;
 
   MenuItemDebug.Visible := True;
-
-  //AcViewMemo.Checked := True;
-  //ViewMemo.Checked := True;
-  //DebugPanel.Visible := True;
-  //DebugSplitter.Visible := True;
+  AcViewMemo.Checked := True;
   {$ENDIF}
 
   (Sender as TForm).Caption := NAME_VERSION;
@@ -725,11 +724,6 @@ begin
   SetfName('');
 
   Log(rsDBFileClosed + ' ' + fName);
-end;
-
-procedure TMainForm.FileExportStageResultsAccept(Sender: TObject);
-begin
-  ExportFinishTime(FileExportStageResults.Dialog.FileName, exportStageIndex);
 end;
 
 procedure TMainForm.FileGenerateFinalAccept(Sender: TObject);
@@ -940,6 +934,20 @@ begin
   SetStarttimeFromPopup;
 end;
 
+procedure TMainForm.ExportStageResultsExecute(Sender: TObject);
+begin
+  exportStageIndex := InputComboSelectStage(rsExportFinish, rsExportTimeToSU);
+  if exportStageIndex > 0 then
+  begin
+    FileExportStageResultsSaveAs.Execute;
+  end;
+  //ExportFinishTime(FileExportStageResults.Dialog.FileName, exportStageIndex);
+
+  //TFileSaveAs(Sender).Dialog.FileName :=
+  //  raceName + '-' + UTF8LowerCase(rsResults) + '-' + stages[exportStageIndex].Name;
+
+end;
+
 procedure TMainForm.DataPortHTTP1DataAppear(Sender: TObject);
 begin
   Print((Sender as TDataPortHTTP).Pull());
@@ -1081,6 +1089,7 @@ begin
     DataPortHTTP1.Open();
   //if AcTelegramBot.Checked then
   //  DataPortHTTPTelegramBot.Open();
+  AcViewMemoExecute(AcViewMemo);
 end;
 
 procedure TMainForm.RxIniPropStorage1SavingProperties(Sender: TObject);
@@ -1246,9 +1255,13 @@ begin
     raceName + '-' + UTF8LowerCase(rsFinishProtocol);
 end;
 
-procedure TMainForm.FileExportStageResultsBeforeExecute(Sender: TObject);
+procedure TMainForm.FileExportStageResultsSaveAsAccept(Sender: TObject);
 begin
-  exportStageIndex := InputComboSelectStage;
+  ExportFinishTime(FileExportStageResultsSaveAs.Dialog.FileName, exportStageIndex);
+end;
+
+procedure TMainForm.FileExportStageResultsSaveAsBeforeExecute(Sender: TObject);
+begin
   TFileSaveAs(Sender).Dialog.FileName :=
     raceName + '-' + UTF8LowerCase(rsResults) + '-' + stages[exportStageIndex].Name;
 end;
@@ -1636,7 +1649,12 @@ procedure TMainForm.RecalcResults(Sender: TField);
 begin
   MainDataset1.ApplyUpdates;
   if CheckBoxAutomaticUpdateResutls.Checked then
-    UpdateResults;
+    UpdateResults
+  else
+  begin
+    CorrectionDataset.Close;
+    CorrectionDataset.Open;
+  end;
 end;
 
 procedure TMainForm.MainDataset1statusGetText(Sender: TField;

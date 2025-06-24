@@ -226,6 +226,15 @@ msgctxt "i18n.rsenterstarttime"
 msgid "Введите новое время старта для номера"
 msgstr "Введите новое время старта для номера"
 
+#: i18n.rsexportfinish
+msgctxt "i18n.rsexportfinish"
+msgid "Экспорт результатов"
+msgstr "Экспорт результатов"
+
+#: i18n.rsexporttimetosu
+msgid "Экспортировать результаты СУ:"
+msgstr "Экспортировать результаты СУ:"
+
 #: i18n.rsfilecopyerror
 msgctxt "i18n.rsfilecopyerror"
 msgid "Ошибка создания файла финала"
@@ -792,6 +801,16 @@ msgstr "Копировать"
 msgid "Empty"
 msgstr "Empty"
 
+#: tmainform.exportstageresults.caption
+msgctxt "tmainform.exportstageresults.caption"
+msgid "Экспорт результатов СУ..."
+msgstr "Экспорт результатов СУ..."
+
+#: tmainform.exportstageresults.hint
+msgctxt "tmainform.exportstageresults.hint"
+msgid "Экспорт результатов СУ для переноса в другую БД"
+msgstr "Экспорт результатов СУ для переноса в другую БД"
+
 #: tmainform.fileclose.caption
 msgctxt "tmainform.fileclose.caption"
 msgid "Закрыть"
@@ -810,6 +829,7 @@ msgid "Экспорт результатов дня ..."
 msgstr "Экспорт результатов дня ..."
 
 #: tmainform.fileexportallresults.dialog.title
+msgctxt "tmainform.fileexportallresults.dialog.title"
 msgid "Экспорт результатов"
 msgstr "Экспорт результатов"
 
@@ -853,16 +873,18 @@ msgstr "Экспорт финишного протокола"
 msgid "Формирование финишного протокола в виде электронной таблицы"
 msgstr "Формирование финишного протокола в виде электронной таблицы"
 
-#: tmainform.fileexportstageresults.caption
-msgctxt "tmainform.fileexportstageresults.caption"
-msgid "Экспорт результатов этапа ..."
-msgstr "Экспорт результатов этапа ..."
+#: tmainform.fileexportstageresultssaveas.caption
+msgctxt "tmainform.fileexportstageresultssaveas.caption"
+msgid "Сохранить &как ..."
+msgstr "Сохранить &как ..."
 
-#: tmainform.fileexportstageresults.hint
-msgid "Экспорт результатов этапов для переноса в другую БД"
-msgstr "Экспорт результатов этапов для переноса в другую БД"
+#: tmainform.fileexportstageresultssaveas.hint
+msgctxt "tmainform.fileexportstageresultssaveas.hint"
+msgid "Сохранить как..."
+msgstr "Сохранить как..."
 
 #: tmainform.fileexportsumdays.caption
+msgctxt "tmainform.fileexportsumdays.caption"
 msgid "Сохранить &как ..."
 msgstr "Сохранить &как ..."
 
@@ -871,6 +893,7 @@ msgid "Сохранить сумму результатов как"
 msgstr "Сохранить сумму результатов как"
 
 #: tmainform.fileexportsumdays.hint
+msgctxt "tmainform.fileexportsumdays.hint"
 msgid "Сохранить как..."
 msgstr "Сохранить как..."
 
@@ -1326,6 +1349,16 @@ msgctxt "tmainform.menuitem5.caption"
 msgid "http запрос"
 msgstr "http запрос"
 
+#: tmainform.menuitem6.caption
+msgctxt "tmainform.menuitem6.caption"
+msgid "Экспорт результатов СУ..."
+msgstr "Экспорт результатов СУ..."
+
+#: tmainform.menuitem6.hint
+msgctxt "tmainform.menuitem6.hint"
+msgid "Экспорт результатов СУ для переноса в другую БД"
+msgstr "Экспорт результатов СУ для переноса в другую БД"
+
 #: tmainform.menuitemabout.caption
 msgid "О программе"
 msgstr "О программе"
@@ -1652,8 +1685,9 @@ msgid "Отставание"
 msgstr "Отставание"
 
 #: tmainform.rxdbgrid1.columns[57].title.caption
+#| msgid "status"
 msgctxt "tmainform.rxdbgrid1.columns[57].title.caption"
-msgid "status"
+msgid "Статус"
 msgstr "Статус"
 
 #: tmainform.rxdbgrid1.columns[5].title.caption

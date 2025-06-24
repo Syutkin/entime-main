@@ -56,7 +56,7 @@ procedure Print(Str: string);
 procedure Print(Int: integer);
 
 
-function InputComboSelectStage: integer;
+function InputComboSelectStage(const ACaption, APrompt: string): integer;
 function CatStartList: TStringList;
 function GetAllStageStatus(stage: integer): TStringList;
 function CountOccurrences(ASubString: string; AString: string): integer;
@@ -2190,12 +2190,13 @@ end;
 //  strlst.Free;
 //end;
 
-function InputComboSelectStage: integer;
+function InputComboSelectStage(const ACaption, APrompt: string): integer;
 var
   strlst: TStringList;
-  i: integer;
+  i, index: integer;
   k: integer = -1;
 begin
+  Result := -1;
   strlst := TStringList.Create;
 
   // Если активных СУ больше одного, то
@@ -2214,7 +2215,8 @@ begin
         end;
       end;
     end;
-    Result := MyInputCombo(rsImportFinish, rsSetTimeToSU, strlst, k);
+    if MyInputCombo(ACaption, APrompt, strlst, k, index) = mrOk then
+      Result := index;
   end
   else
     Result := ActiveStageIndex();
@@ -2231,7 +2233,7 @@ var
   dns: boolean = False;
   dnf: boolean = False;
 begin
-  importfinish := InputComboSelectStage;
+  importfinish := InputComboSelectStage(rsImportFinish, rsSetTimeToSU);
 
   //вводим номер СУ для ввода финишных результатов
   if importfinish > 0 then
