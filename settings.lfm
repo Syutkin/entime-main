@@ -1,7 +1,7 @@
 object SettingsForm: TSettingsForm
-  Left = 927
+  Left = 584
   Height = 706
-  Top = 222
+  Top = 221
   Width = 1152
   Anchors = []
   Caption = 'Настройки'
@@ -100,7 +100,6 @@ object SettingsForm: TSettingsForm
         Anchors = [akTop, akLeft, akRight]
         BorderSpacing.Around = 8
         MaxValue = 100000
-        ParentFont = False
         TabOrder = 1
       end
       object DividerBevelLanguage1: TDividerBevel
@@ -136,6 +135,137 @@ object SettingsForm: TSettingsForm
         LeftIndent = 75
         ParentFont = False
       end
+      object DividerBevelUpdate: TDividerBevel
+        AnchorSideLeft.Control = Page1Commons
+        AnchorSideTop.Control = DelayEdit
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = Page1Commons
+        AnchorSideRight.Side = asrBottom
+        Left = 8
+        Height = 25
+        Top = 157
+        Width = 836
+        Caption = 'Обновление'
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Around = 8
+        Font.Style = [fsBold]
+        LeftIndent = 75
+        ParentFont = False
+      end
+      object CheckBoxUpdateAtStartup: TCheckBox
+        AnchorSideLeft.Control = Page1Commons
+        AnchorSideTop.Control = DividerBevelUpdate
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = ComboBoxUpdateInterval
+        Left = 8
+        Height = 29
+        Top = 190
+        Width = 487
+        BorderSpacing.Around = 8
+        Caption = 'Проверять наличие обновлений при старте программы'
+        TabOrder = 2
+        OnChange = CheckBoxUpdateAtStartupChange
+      end
+      object ComboBoxUpdateInterval: TComboBox
+        AnchorSideLeft.Control = CheckBoxUpdateAtStartup
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideTop.Control = DividerBevelUpdate
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = Page1Commons
+        AnchorSideRight.Side = asrBottom
+        Left = 503
+        Height = 33
+        Top = 190
+        Width = 341
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Around = 8
+        ItemHeight = 25
+        Items.Strings = (
+          'Каждый раз'
+          'Один раз в сутки'
+          'Один раз в неделю'
+          'Один раз в месяц'
+        )
+        ReadOnly = True
+        Style = csDropDownList
+        TabOrder = 3
+      end
+      object PanelBackup: TPanel
+        AnchorSideLeft.Control = Page1Commons
+        AnchorSideTop.Control = CheckBoxUpdateAtStartup
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = Page1Commons
+        AnchorSideRight.Side = asrBottom
+        Left = 0
+        Height = 82
+        Hint = 'Автоматически создавать резервные копии открытого соревнования через заданные промежутки времени'
+        Top = 227
+        Width = 852
+        Anchors = [akTop, akLeft, akRight]
+        AutoSize = True
+        BevelOuter = bvNone
+        ClientHeight = 82
+        ClientWidth = 852
+        TabOrder = 4
+        object DividerBackup: TDividerBevel
+          AnchorSideLeft.Control = PanelBackup
+          AnchorSideTop.Control = PanelBackup
+          AnchorSideRight.Control = PanelBackup
+          AnchorSideRight.Side = asrBottom
+          Left = 8
+          Height = 25
+          Top = 8
+          Width = 836
+          Caption = 'Резервное копирование'
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Around = 8
+          Font.Style = [fsBold]
+          LeftIndent = 75
+          ParentFont = False
+        end
+        object CheckBoxBackup: TCheckBox
+          AnchorSideLeft.Control = PanelBackup
+          AnchorSideTop.Control = DividerBackup
+          AnchorSideTop.Side = asrBottom
+          Left = 8
+          Height = 29
+          Top = 41
+          Width = 327
+          BorderSpacing.Around = 8
+          Caption = 'Создавать резервные копии каждые'
+          Checked = True
+          State = cbChecked
+          TabOrder = 0
+        end
+        object SpinBackup: TSpinEdit
+          AnchorSideLeft.Control = CheckBoxBackup
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Control = DividerBackup
+          AnchorSideTop.Side = asrBottom
+          Left = 343
+          Height = 33
+          Top = 41
+          Width = 75
+          Alignment = taRightJustify
+          BorderSpacing.Around = 8
+          MaxValue = 1440
+          MinValue = 1
+          TabOrder = 1
+          Value = 1
+        end
+        object LabelBackupMinutes: TLabel
+          AnchorSideLeft.Control = SpinBackup
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Control = DividerBackup
+          AnchorSideTop.Side = asrBottom
+          Left = 426
+          Height = 25
+          Top = 41
+          Width = 49
+          BorderSpacing.Around = 8
+          Caption = 'минут'
+        end
+      end
     end
     object Page2View: TPage
       OnBeforeShow = Page2ViewBeforeShow
@@ -144,9 +274,9 @@ object SettingsForm: TSettingsForm
         AnchorSideTop.Control = DividerBevelViewOther
         AnchorSideTop.Side = asrBottom
         Left = 8
-        Height = 27
-        Top = 44
-        Width = 315
+        Height = 29
+        Top = 41
+        Width = 326
         BorderSpacing.Around = 8
         Caption = 'Скрывать нулевой час в результатах'
         Checked = True
@@ -160,9 +290,9 @@ object SettingsForm: TSettingsForm
         AnchorSideRight.Control = Page2View
         AnchorSideRight.Side = asrBottom
         Left = 8
-        Height = 23
+        Height = 25
         Top = 8
-        Width = 696
+        Width = 836
         Caption = 'Разное'
         Anchors = [akTop, akLeft, akRight]
         BorderSpacing.Around = 8
@@ -175,9 +305,9 @@ object SettingsForm: TSettingsForm
         AnchorSideTop.Control = CheckBoxHideZeroHour
         AnchorSideTop.Side = asrBottom
         Left = 8
-        Height = 27
-        Top = 85
-        Width = 547
+        Height = 29
+        Top = 78
+        Width = 566
         BorderSpacing.Around = 8
         Caption = 'Показывать название спецучастка когда когда он один активный'
         Checked = True
@@ -196,24 +326,24 @@ object SettingsForm: TSettingsForm
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 2
       object LeftPanel: TPanel
-        Left = 8
-        Height = 642
+        Left = 7
+        Height = 651
         Top = 0
-        Width = 350
+        Width = 376
         BevelOuter = bvNone
-        ClientHeight = 642
-        ClientWidth = 350
+        ClientHeight = 651
+        ClientWidth = 376
         TabOrder = 0
         object GroupBoxName: TGroupBox
           AnchorSideLeft.Control = LeftPanel
           AnchorSideTop.Control = LeftPanel
           AnchorSideRight.Control = LeftPanel
           AnchorSideRight.Side = asrBottom
-          Left = -8
-          Height = 63
+          Left = 0
+          Height = 67
           Hint = 'Название соревнования'
           Top = 0
-          Width = 300
+          Width = 376
           Anchors = [akTop, akLeft, akRight]
           AutoSize = True
           Caption = 'Название'
@@ -225,16 +355,16 @@ object SettingsForm: TSettingsForm
           ChildSizing.ShrinkVertical = crsScaleChilds
           ChildSizing.Layout = cclLeftToRightThenTopToBottom
           ChildSizing.ControlsPerLine = 1
-          ClientHeight = 39
-          ClientWidth = 298
+          ClientHeight = 37
+          ClientWidth = 372
           Constraints.MinWidth = 300
           TabOrder = 0
           object NameEdit: TEdit
             AnchorSideRight.Side = asrBottom
-            Left = 8
-            Height = 42
+            Left = 7
+            Height = 33
             Top = 2
-            Width = 331
+            Width = 358
             AutoSize = False
             TabOrder = 0
           end
@@ -245,11 +375,11 @@ object SettingsForm: TSettingsForm
           AnchorSideTop.Side = asrBottom
           AnchorSideRight.Control = LeftPanel
           AnchorSideRight.Side = asrBottom
-          Left = -8
-          Height = 248
+          Left = 0
+          Height = 242
           Hint = 'Категории, которые будут показываться в окне результатов'
-          Top = 76
-          Width = 300
+          Top = 67
+          Width = 376
           Anchors = [akTop, akLeft, akRight]
           AutoSize = True
           Caption = 'Категории'
@@ -261,19 +391,19 @@ object SettingsForm: TSettingsForm
           ChildSizing.ShrinkVertical = crsScaleChilds
           ChildSizing.Layout = cclLeftToRightThenTopToBottom
           ChildSizing.ControlsPerLine = 1
-          ClientHeight = 224
-          ClientWidth = 298
+          ClientHeight = 212
+          ClientWidth = 372
           Constraints.MinWidth = 300
           ParentFont = False
           TabOrder = 1
           object Edit1: TComboBox
             AnchorSideTop.Side = asrBottom
             AnchorSideRight.Side = asrBottom
-            Left = 8
-            Height = 35
+            Left = 7
+            Height = 33
             Top = 2
-            Width = 331
-            ItemHeight = 0
+            Width = 358
+            ItemHeight = 25
             ParentFont = False
             TabOrder = 0
             OnDropDown = EditDropDown
@@ -281,11 +411,11 @@ object SettingsForm: TSettingsForm
           object Edit2: TComboBox
             AnchorSideTop.Side = asrBottom
             AnchorSideRight.Side = asrBottom
-            Left = 8
-            Height = 35
-            Top = 47
-            Width = 331
-            ItemHeight = 0
+            Left = 7
+            Height = 33
+            Top = 37
+            Width = 358
+            ItemHeight = 25
             ParentFont = False
             TabOrder = 1
             OnDropDown = EditDropDown
@@ -293,11 +423,11 @@ object SettingsForm: TSettingsForm
           object Edit3: TComboBox
             AnchorSideTop.Side = asrBottom
             AnchorSideRight.Side = asrBottom
-            Left = 8
-            Height = 35
-            Top = 91
-            Width = 331
-            ItemHeight = 0
+            Left = 7
+            Height = 33
+            Top = 72
+            Width = 358
+            ItemHeight = 25
             ParentFont = False
             TabOrder = 2
             OnDropDown = EditDropDown
@@ -305,11 +435,11 @@ object SettingsForm: TSettingsForm
           object Edit4: TComboBox
             AnchorSideTop.Side = asrBottom
             AnchorSideRight.Side = asrBottom
-            Left = 8
-            Height = 35
-            Top = 136
-            Width = 331
-            ItemHeight = 0
+            Left = 7
+            Height = 33
+            Top = 107
+            Width = 358
+            ItemHeight = 25
             ParentFont = False
             TabOrder = 3
             OnDropDown = EditDropDown
@@ -317,11 +447,11 @@ object SettingsForm: TSettingsForm
           object Edit5: TComboBox
             AnchorSideTop.Side = asrBottom
             AnchorSideRight.Side = asrBottom
-            Left = 8
-            Height = 35
-            Top = 180
-            Width = 331
-            ItemHeight = 0
+            Left = 7
+            Height = 33
+            Top = 142
+            Width = 358
+            ItemHeight = 25
             ParentFont = False
             TabOrder = 4
             OnDropDown = EditDropDown
@@ -329,11 +459,11 @@ object SettingsForm: TSettingsForm
           object Edit6: TComboBox
             AnchorSideTop.Side = asrBottom
             AnchorSideRight.Side = asrBottom
-            Left = 8
-            Height = 35
-            Top = 224
-            Width = 331
-            ItemHeight = 0
+            Left = 7
+            Height = 33
+            Top = 177
+            Width = 358
+            ItemHeight = 25
             ParentFont = False
             TabOrder = 5
             OnDropDown = EditDropDown
@@ -342,13 +472,13 @@ object SettingsForm: TSettingsForm
       end
       object GroupBoxStages: TGroupBox
         AnchorSideRight.Side = asrBottom
-        Left = 367
-        Height = 642
+        Left = 390
+        Height = 651
         Top = 0
-        Width = 476
+        Width = 455
         Caption = 'Спецучастки'
-        ClientHeight = 618
-        ClientWidth = 474
+        ClientHeight = 621
+        ClientWidth = 451
         Constraints.MinWidth = 300
         ParentFont = False
         TabOrder = 1
@@ -358,9 +488,9 @@ object SettingsForm: TSettingsForm
           AnchorSideRight.Control = GroupBoxStages
           AnchorSideRight.Side = asrBottom
           Left = 8
-          Height = 35
+          Height = 33
           Top = 2
-          Width = 381
+          Width = 435
           Anchors = [akTop, akLeft, akRight]
           BorderSpacing.Left = 8
           BorderSpacing.Top = 2
@@ -376,9 +506,9 @@ object SettingsForm: TSettingsForm
           AnchorSideRight.Control = GroupBoxStages
           AnchorSideRight.Side = asrBottom
           Left = 8
-          Height = 35
-          Top = 47
-          Width = 381
+          Height = 33
+          Top = 37
+          Width = 435
           Anchors = [akTop, akLeft, akRight]
           BorderSpacing.Left = 8
           BorderSpacing.Top = 2
@@ -394,9 +524,9 @@ object SettingsForm: TSettingsForm
           AnchorSideRight.Control = GroupBoxStages
           AnchorSideRight.Side = asrBottom
           Left = 8
-          Height = 35
-          Top = 91
-          Width = 381
+          Height = 33
+          Top = 72
+          Width = 435
           Anchors = [akTop, akLeft, akRight]
           BorderSpacing.Left = 8
           BorderSpacing.Top = 2
@@ -412,9 +542,9 @@ object SettingsForm: TSettingsForm
           AnchorSideRight.Control = GroupBoxStages
           AnchorSideRight.Side = asrBottom
           Left = 8
-          Height = 35
-          Top = 136
-          Width = 381
+          Height = 33
+          Top = 107
+          Width = 435
           Anchors = [akTop, akLeft, akRight]
           BorderSpacing.Left = 8
           BorderSpacing.Top = 2
@@ -430,9 +560,9 @@ object SettingsForm: TSettingsForm
           AnchorSideRight.Control = GroupBoxStages
           AnchorSideRight.Side = asrBottom
           Left = 8
-          Height = 35
-          Top = 180
-          Width = 381
+          Height = 33
+          Top = 142
+          Width = 435
           Anchors = [akTop, akLeft, akRight]
           BorderSpacing.Left = 8
           BorderSpacing.Top = 2
@@ -448,9 +578,9 @@ object SettingsForm: TSettingsForm
           AnchorSideRight.Control = GroupBoxStages
           AnchorSideRight.Side = asrBottom
           Left = 8
-          Height = 35
-          Top = 224
-          Width = 381
+          Height = 33
+          Top = 177
+          Width = 435
           Anchors = [akTop, akLeft, akRight]
           BorderSpacing.Left = 8
           BorderSpacing.Top = 2
@@ -465,9 +595,9 @@ object SettingsForm: TSettingsForm
           AnchorSideRight.Control = GroupBoxStages
           AnchorSideRight.Side = asrBottom
           Left = 8
-          Height = 86
-          Top = 269
-          Width = 381
+          Height = 100
+          Top = 212
+          Width = 435
           Anchors = [akTop, akLeft, akRight]
           AutoFill = True
           AutoSize = True
@@ -483,8 +613,8 @@ object SettingsForm: TSettingsForm
           ChildSizing.ShrinkVertical = crsScaleChilds
           ChildSizing.Layout = cclLeftToRightThenTopToBottom
           ChildSizing.ControlsPerLine = 3
-          ClientHeight = 62
-          ClientWidth = 379
+          ClientHeight = 70
+          ClientWidth = 431
           Columns = 3
           Items.Strings = (
             'СУ1'
@@ -506,12 +636,12 @@ object SettingsForm: TSettingsForm
           AnchorSideTop.Control = CheckGroup1
           AnchorSideTop.Side = asrBottom
           Left = 8
-          Height = 39
-          Top = 380
+          Height = 33
+          Top = 320
           Width = 74
           BorderSpacing.Left = 8
           BorderSpacing.Top = 8
-          ItemHeight = 0
+          ItemHeight = 25
           ParentFont = False
           Style = csDropDownList
           TabOrder = 7
@@ -524,10 +654,10 @@ object SettingsForm: TSettingsForm
           AnchorSideTop.Side = asrCenter
           AnchorSideRight.Control = GroupBoxStages
           AnchorSideRight.Side = asrBottom
-          Left = 91
-          Height = 23
-          Top = 390
-          Width = 312
+          Left = 90
+          Height = 25
+          Top = 324
+          Width = 353
           Anchors = [akTop, akLeft, akRight]
           BorderSpacing.Left = 8
           BorderSpacing.Right = 8
@@ -546,9 +676,9 @@ object SettingsForm: TSettingsForm
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Side = asrBottom
         Left = 8
-        Height = 240
-        Top = 44
-        Width = 230
+        Height = 208
+        Top = 41
+        Width = 258
         AutoSize = True
         BorderSpacing.Around = 8
         BevelOuter = bvNone
@@ -556,17 +686,17 @@ object SettingsForm: TSettingsForm
         ChildSizing.VerticalSpacing = 2
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 2
-        ClientHeight = 240
-        ClientWidth = 230
+        ClientHeight = 208
+        ClientWidth = 258
         ParentFont = False
         TabOrder = 0
         object Label1: TLabel
           AnchorSideTop.Side = asrCenter
           AnchorSideBottom.Side = asrBottom
           Left = 0
-          Height = 35
+          Height = 33
           Top = 0
-          Width = 95
+          Width = 98
           Caption = 'Port'
           Layout = tlCenter
           ParentColor = False
@@ -576,20 +706,20 @@ object SettingsForm: TSettingsForm
         object ComComboBox1: TComboBox
           AnchorSideLeft.Side = asrBottom
           AnchorSideRight.Side = asrBottom
-          Left = 126
-          Height = 35
+          Left = 108
+          Height = 33
           Top = 0
           Width = 150
-          ItemHeight = 0
+          ItemHeight = 25
           ParentFont = False
           TabOrder = 0
         end
         object Label2: TLabel
           AnchorSideTop.Side = asrCenter
           Left = 0
-          Height = 39
-          Top = 44
-          Width = 95
+          Height = 33
+          Top = 35
+          Width = 98
           Caption = 'Baud rate'
           Layout = tlCenter
           ParentColor = False
@@ -599,11 +729,11 @@ object SettingsForm: TSettingsForm
           AnchorSideLeft.Side = asrBottom
           AnchorSideTop.Side = asrBottom
           AnchorSideRight.Side = asrBottom
-          Left = 126
-          Height = 39
-          Top = 44
+          Left = 108
+          Height = 33
+          Top = 35
           Width = 150
-          ItemHeight = 0
+          ItemHeight = 25
           ParentFont = False
           Style = csDropDownList
           TabOrder = 1
@@ -611,9 +741,9 @@ object SettingsForm: TSettingsForm
         object Label3: TLabel
           AnchorSideTop.Side = asrCenter
           Left = 0
-          Height = 39
-          Top = 94
-          Width = 95
+          Height = 33
+          Top = 70
+          Width = 98
           Caption = 'Data bits'
           Layout = tlCenter
           ParentColor = False
@@ -623,11 +753,11 @@ object SettingsForm: TSettingsForm
           AnchorSideLeft.Side = asrBottom
           AnchorSideTop.Side = asrBottom
           AnchorSideRight.Side = asrBottom
-          Left = 126
-          Height = 39
-          Top = 94
+          Left = 108
+          Height = 33
+          Top = 70
           Width = 150
-          ItemHeight = 0
+          ItemHeight = 25
           ParentFont = False
           Style = csDropDownList
           TabOrder = 2
@@ -635,9 +765,9 @@ object SettingsForm: TSettingsForm
         object Label4: TLabel
           AnchorSideTop.Side = asrCenter
           Left = 0
-          Height = 39
-          Top = 143
-          Width = 95
+          Height = 33
+          Top = 105
+          Width = 98
           Caption = 'Stop bits'
           Layout = tlCenter
           ParentColor = False
@@ -647,11 +777,11 @@ object SettingsForm: TSettingsForm
           AnchorSideLeft.Side = asrBottom
           AnchorSideTop.Side = asrBottom
           AnchorSideRight.Side = asrBottom
-          Left = 126
-          Height = 39
-          Top = 143
+          Left = 108
+          Height = 33
+          Top = 105
           Width = 150
-          ItemHeight = 0
+          ItemHeight = 25
           ParentFont = False
           Style = csDropDownList
           TabOrder = 3
@@ -659,9 +789,9 @@ object SettingsForm: TSettingsForm
         object Label5: TLabel
           AnchorSideTop.Side = asrCenter
           Left = 0
-          Height = 39
-          Top = 192
-          Width = 95
+          Height = 33
+          Top = 140
+          Width = 98
           Caption = 'Parity'
           Layout = tlCenter
           ParentColor = False
@@ -671,11 +801,11 @@ object SettingsForm: TSettingsForm
           AnchorSideLeft.Side = asrBottom
           AnchorSideTop.Side = asrBottom
           AnchorSideRight.Side = asrBottom
-          Left = 126
-          Height = 39
-          Top = 192
+          Left = 108
+          Height = 33
+          Top = 140
           Width = 150
-          ItemHeight = 0
+          ItemHeight = 25
           ParentFont = False
           Style = csDropDownList
           TabOrder = 4
@@ -683,9 +813,9 @@ object SettingsForm: TSettingsForm
         object Label6: TLabel
           AnchorSideTop.Side = asrCenter
           Left = 0
-          Height = 39
-          Top = 241
-          Width = 95
+          Height = 33
+          Top = 175
+          Width = 98
           Caption = 'Flow control'
           Layout = tlCenter
           ParentColor = False
@@ -695,11 +825,11 @@ object SettingsForm: TSettingsForm
           AnchorSideLeft.Side = asrBottom
           AnchorSideTop.Side = asrBottom
           AnchorSideRight.Side = asrBottom
-          Left = 126
-          Height = 39
-          Top = 241
+          Left = 108
+          Height = 33
+          Top = 175
           Width = 150
-          ItemHeight = 0
+          ItemHeight = 25
           ParentFont = False
           Style = csDropDownList
           TabOrder = 5
@@ -711,9 +841,9 @@ object SettingsForm: TSettingsForm
         AnchorSideRight.Control = Page4COM
         AnchorSideRight.Side = asrBottom
         Left = 8
-        Height = 23
+        Height = 25
         Top = 8
-        Width = 696
+        Width = 836
         Caption = 'COM порт'
         Anchors = [akTop, akLeft, akRight]
         BorderSpacing.Around = 8
@@ -728,9 +858,9 @@ object SettingsForm: TSettingsForm
         AnchorSideRight.Control = Page4COM
         AnchorSideRight.Side = asrBottom
         Left = 8
-        Height = 23
-        Top = 341
-        Width = 696
+        Height = 25
+        Top = 257
+        Width = 836
         Caption = 'Режим работы с финишем'
         Anchors = [akTop, akLeft, akRight]
         BorderSpacing.Around = 8
@@ -746,9 +876,9 @@ object SettingsForm: TSettingsForm
         AnchorSideRight.Control = Page3Competition
         AnchorSideRight.Side = asrBottom
         Left = 8
-        Height = 72
-        Top = 377
-        Width = 277
+        Height = 68
+        Top = 290
+        Width = 300
         AutoSize = True
         BorderSpacing.Around = 8
         BevelOuter = bvNone
@@ -756,18 +886,18 @@ object SettingsForm: TSettingsForm
         ChildSizing.VerticalSpacing = 2
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 2
-        ClientHeight = 72
-        ClientWidth = 277
+        ClientHeight = 68
+        ClientWidth = 300
         ParentFont = False
         TabOrder = 1
         Visible = False
         object RadioButtonCOMSetStr: TRadioButton
           AnchorSideTop.Side = asrCenter
           Left = 0
-          Height = 35
+          Height = 33
           Hint = 'Программа будет ожидать из COM порта заданную строку,'#13#10'после получения которой, будет взята текущая метка времени'
           Top = 0
-          Width = 167
+          Width = 170
           Caption = 'Спец. команда'
           Checked = True
           ParentFont = False
@@ -776,8 +906,8 @@ object SettingsForm: TSettingsForm
         end
         object EditCOMSetStr: TEdit
           AnchorSideLeft.Side = asrBottom
-          Left = 212
-          Height = 35
+          Left = 180
+          Height = 33
           Hint = 'Строка, после получения которой,'#13#10'будет взята текущая метка времени,'#13#10'по умолчанию F'
           Top = 0
           Width = 120
@@ -786,19 +916,19 @@ object SettingsForm: TSettingsForm
         end
         object RadioButtonCOMSetTime: TRadioButton
           Left = 0
-          Height = 35
+          Height = 33
           Hint = 'Программа будет ожидать из COM порта метку времени,'#13#10'которая и будет установлена'
-          Top = 44
-          Width = 167
+          Top = 35
+          Width = 170
           Caption = 'Отметка времени'
           ParentFont = False
           TabOrder = 2
         end
         object EditCOMSetTime: TEdit
-          Left = 212
-          Height = 35
+          Left = 180
+          Height = 33
           Hint = 'Формат метки времени'#13#10'По умолчанию чч:мм:cc,000'
-          Top = 44
+          Top = 35
           Width = 120
           ParentFont = False
           TabOrder = 3

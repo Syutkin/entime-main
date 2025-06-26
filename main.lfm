@@ -1,7 +1,7 @@
 object MainForm: TMainForm
-  Left = 194
+  Left = 201
   Height = 1140
-  Top = 6
+  Top = 10
   Width = 1644
   ClientHeight = 1140
   ClientWidth = 1644
@@ -3933,7 +3933,7 @@ object MainForm: TMainForm
       object MenuItemCOMSync: TMenuItem
         Action = AcSyncModule
       end
-      object N14: TMenuItem
+      object Separator3: TMenuItem
         Caption = '-'
       end
       object MenuItemLED: TMenuItem
@@ -3951,6 +3951,12 @@ object MainForm: TMainForm
         Caption = 'О программе'
         ImageIndex = 14
         OnClick = MenuItemAboutClick
+      end
+      object Separator2: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemCheckUpdate: TMenuItem
+        Action = AcCheckUpdate
       end
     end
     object MenuItemDebug: TMenuItem
@@ -4356,6 +4362,11 @@ object MainForm: TMainForm
       Category = 'File'
       Caption = 'В&ыход'
       Hint = 'Выход'
+    end
+    object AcCheckUpdate: TAction
+      Caption = 'Проверить обновления ...'
+      OnExecute = AcCheckUpdateExecute
+      OnUpdate = AcCheckUpdateUpdate
     end
   end
   object Timer1: TTimer
@@ -5362,6 +5373,31 @@ object MainForm: TMainForm
         Name = 'showStageNameForSingleStage'
         OnSave = RxIniPropStorage1StoredValues6Save
         OnRestore = RxIniPropStorage1StoredValues6Restore
+      end    
+      item
+        Name = 'checkUpdateAtStartup'
+        OnSave = RxIniPropStorage1StoredValues7Save
+        OnRestore = RxIniPropStorage1StoredValues7Restore
+      end    
+      item
+        Name = 'lastUpdateCheckoutTime'
+        OnSave = RxIniPropStorage1StoredValues8Save
+        OnRestore = RxIniPropStorage1StoredValues8Restore
+      end    
+      item
+        Name = 'checkUpdateIntervalInDays'
+        OnSave = RxIniPropStorage1StoredValues9Save
+        OnRestore = RxIniPropStorage1StoredValues9Restore
+      end    
+      item
+        Name = 'doAutomaticBackup'
+        OnSave = RxIniPropStorage1StoredValues10Save
+        OnRestore = RxIniPropStorage1StoredValues10Restore
+      end    
+      item
+        Name = 'backupPeriodms'
+        OnSave = RxIniPropStorage1StoredValues11Save
+        OnRestore = RxIniPropStorage1StoredValues11Restore
       end>
     OnSavingProperties = RxIniPropStorage1SavingProperties
     OnRestoreProperties = RxIniPropStorage1RestoreProperties
@@ -6269,5 +6305,11 @@ object MainForm: TMainForm
     FormatSettings.QuoteChar = '"'
     Left = 528
     Top = 592
+  end
+  object BackupTimer: TTimer
+    Interval = 600000
+    OnTimer = BackupTimerTimer
+    Left = 528
+    Top = 264
   end
 end

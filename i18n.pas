@@ -143,8 +143,10 @@ resourcestring
   rsCOMOpenError = 'Не удалось открыть порт';
   rsFinishTimeOpenError =
     'Неверный формат файла с результатами СУ';
-  rsCanNotBackup =
-    'Не удалось сделать бэкап, продолжить загрузку результатов?';
+  rsCanNotBackup = 'Не удалось сделать резервную копию!';
+  rsContinueWithLoadingResults =
+    'Продолжить загрузку результатов?';
+  rsClearResultsWOBackup = 'Всё равно очистить результаты?';
   rsFileExists = 'Файл уже существует. Перезаписать?';
   rsFinalFileExists =
     'Файл финала уже существует. Перезаписать?';
@@ -164,7 +166,11 @@ resourcestring
     'результаты финиша не пусты. Вы уверены что хотите сформировать стартовый протокол для данного спецучастка?';
   rsLoadParticipantsListError =
     'Ошибка загрузки списка участников: ';
-  rsNumberColumnNotFound = 'Не найдена колонка с номерами участников';
+  rsNumberColumnNotFound =
+    'Не найдена колонка с номерами участников';
+  rsNewVersionAvailable = 'Доступна новая версия программы: %0:s. Перейти на сайт?';
+  rsUpdateAvailable = 'Доступно обновление ...';
+  rsUpdatesNotFound = 'Нет доступных обновлений.';
 
 const
   rsRussian: string = 'Русский';

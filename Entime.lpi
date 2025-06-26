@@ -27,8 +27,8 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="7"/>
-      <RevisionNr Value="22"/>
-      <BuildNr Value="109"/>
+      <RevisionNr Value="23"/>
+      <BuildNr Value="118"/>
       <Language Value="0419"/>
       <CharSet Value="04B0"/>
       <Attributes pvaDebug="True"/>
@@ -210,7 +210,7 @@
         <PackageName Value="MyForks"/>
       </Item17>
     </RequiredPackages>
-    <Units Count="11">
+    <Units Count="12">
       <Unit0>
         <Filename Value="Entime.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -277,6 +277,10 @@
         <Filename Value="stagemodel.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit10>
+      <Unit11>
+        <Filename Value="updater.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit11>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

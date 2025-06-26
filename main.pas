@@ -43,6 +43,7 @@ type
     AcLEDPanel: TAction;
     AcTelegramBot: TAction;
     AcRunRaceSettings: TAction;
+    AcCheckUpdate: TAction;
     ExportStageResults: TAction;
     CheckBoxAutomaticUpdateResutls: TCheckBox;
     CSVResultsExporter: TCSVExporter;
@@ -73,6 +74,8 @@ type
     MainDataset1email: TStringField;
     MainDataset1phone: TStringField;
     MenuItem10: TMenuItem;
+    Separator2: TMenuItem;
+    MenuItemCheckUpdate: TMenuItem;
     MenuItemExportAllResults: TMenuItem;
     MenuItemExportCSVResults: TMenuItem;
     MenuItem2: TMenuItem;
@@ -81,7 +84,7 @@ type
     Separator1: TMenuItem;
     MenuItemExportCSVStartList: TMenuItem;
     MenuItemTelegramBot: TMenuItem;
-    N14: TMenuItem;
+    Separator3: TMenuItem;
     MenuItemLED: TMenuItem;
     N13: TMenuItem;
     MenuItemGenerateSumDays: TMenuItem;
@@ -291,6 +294,7 @@ type
     CorrectionDataset: TSqlite3Dataset;
     SQLQuery1: TSQLQuery;
     SQLTransaction1: TSQLTransaction;
+    BackupTimer: TTimer;
     TimerMonitor: TTimer;
     ToolPanel1: TToolPanel;
     ViewMemo: TMenuItem;
@@ -318,6 +322,8 @@ type
     StatusBarLeft: TStatusBar;
     Timer1: TTimer;
     procedure AcCheckDBOpenUpdate(Sender: TObject);
+    procedure AcCheckUpdateExecute(Sender: TObject);
+    procedure AcCheckUpdateUpdate(Sender: TObject);
     procedure AcCOMCloseExecute(Sender: TObject);
     procedure AcCOMOpenExecute(Sender: TObject);
     procedure AcGenerateStartTimeExecute(Sender: TObject);
@@ -326,6 +332,7 @@ type
     procedure AcRunRaceSettingsExecute(Sender: TObject);
     procedure AcTelegramBotExecute(Sender: TObject);
     procedure AcSetStarttimeExecute(Sender: TObject);
+    procedure BackupTimerTimer(Sender: TObject);
     procedure ExportStageResultsExecute(Sender: TObject);
     procedure DataPortHTTP1DataAppear(Sender: TObject);
     procedure DataPortHTTP1Error(Sender: TObject; const AMsg: string);
@@ -412,6 +419,14 @@ type
       var Value: TStoredType);
     procedure RxIniPropStorage1StoredValues0Save(Sender: TStoredValue;
       var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues10Restore(Sender: TStoredValue;
+      var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues10Save(Sender: TStoredValue;
+      var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues11Restore(Sender: TStoredValue;
+      var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues11Save(Sender: TStoredValue;
+      var Value: TStoredType);
     procedure RxIniPropStorage1StoredValues1Restore(Sender: TStoredValue;
       var Value: TStoredType);
     procedure RxIniPropStorage1StoredValues1Save(Sender: TStoredValue;
@@ -436,6 +451,18 @@ type
       var Value: TStoredType);
     procedure RxIniPropStorage1StoredValues6Save(Sender: TStoredValue;
       var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues7Restore(Sender: TStoredValue;
+      var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues7Save(Sender: TStoredValue;
+      var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues8Restore(Sender: TStoredValue;
+      var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues8Save(Sender: TStoredValue;
+      var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues9Restore(Sender: TStoredValue;
+      var Value: TStoredType);
+    procedure RxIniPropStorage1StoredValues9Save(Sender: TStoredValue;
+      var Value: TStoredType);
     procedure sGridResultDrawCell(Sender: TObject; aCol, aRow: integer;
       aRect: TRect; aState: TGridDrawState);
     procedure sGridResultValidateEntry(Sender: TObject; aCol, aRow: integer;
@@ -453,8 +480,10 @@ type
     procedure Timer1Timer(Sender: TObject);
     procedure CheckDBOpen(Sender: TObject);
     procedure SetLang(ALang: string);
-    //functions
 
+    //functions
+    function CheckUpdateOnline(ACurrentVersion: string; ForceCheck: bool;
+      out LastVersion: string): boolean;
   private
     { private declarations }
 
@@ -475,6 +504,7 @@ const
   commoncols: integer = 12;
   //количество колонок в СУ
   stagecols: integer = 7;
+  releaseUrl: string = 'https://codeberg.org/Syutkin/entime/releases/tag/';
 
 
 
@@ -523,13 +553,24 @@ var
   //Индекс этапа при экспорте
   exportStageIndex: integer = 1;
 
+  //Обновление
+  updateExists: boolean = False;
+  checkUpdateAtStartup: boolean = True;
+  lastUpdateCheckoutTime: TDateTime;
+  checkUpdateIntervalInDays: integer = 7;
+  lastVersionOnline: string;
+
+  //Backup
+  doAutomaticBackup: boolean = True;
+  backupPeriod: integer = 10 * 60 * 1000; //in milliseconds
+
   startlistConfig: TStartlistConfig;
 
   //CatList: TStringList;
 
 implementation
 
-uses Result, Settings, rxapputils, Implement, exsortsqlite, LoRa;
+uses Result, Settings, rxapputils, Implement, exsortsqlite, LoRa, updater;
 
   {$R *.lfm}
 
@@ -934,6 +975,11 @@ begin
   SetStarttimeFromPopup;
 end;
 
+procedure TMainForm.BackupTimerTimer(Sender: TObject);
+begin
+  if dbopen then BackupBD;
+end;
+
 procedure TMainForm.ExportStageResultsExecute(Sender: TObject);
 begin
   exportStageIndex := InputComboSelectStage(rsExportFinish, rsExportTimeToSU);
@@ -1065,6 +1111,19 @@ begin
   TAction(Sender).Enabled := dbopen;
 end;
 
+procedure TMainForm.AcCheckUpdateExecute(Sender: TObject);
+begin
+  if updateExists and not lastVersionOnline.IsEmpty then
+    OpenURL(releaseUrl + lastVersionOnline)
+  else
+    CheckUpdateOnline(GetFileVersion, True, lastVersionOnline);
+end;
+
+procedure TMainForm.AcCheckUpdateUpdate(Sender: TObject);
+begin
+  if updateExists then (Sender as TAction).Caption := rsUpdateAvailable;
+end;
+
 procedure TMainForm.RxDBGridCorrectionEditingDone(Sender: TObject);
 begin
   if dbopen then
@@ -1087,9 +1146,14 @@ begin
   StatusBarLeft.Panels[1].Text := Serial.Device;
   if AcLEDPanel.Checked then
     DataPortHTTP1.Open();
-  //if AcTelegramBot.Checked then
-  //  DataPortHTTPTelegramBot.Open();
   AcViewMemoExecute(AcViewMemo);
+
+  // Check update online
+  CheckUpdateOnline(GetFileVersion, False, lastVersionOnline);
+
+  // Do automatic backup
+  BackupTimer.Enabled := doAutomaticBackup;
+  BackupTimer.Interval := backupPeriod;
 end;
 
 procedure TMainForm.RxIniPropStorage1SavingProperties(Sender: TObject);
@@ -1115,6 +1179,34 @@ begin
     Value := 'true'
   else
     Value := 'false';
+end;
+
+procedure TMainForm.RxIniPropStorage1StoredValues10Restore(Sender: TStoredValue;
+  var Value: TStoredType);
+begin
+  if Value <> '' then
+    doAutomaticBackup := StrToBool(Value);
+end;
+
+procedure TMainForm.RxIniPropStorage1StoredValues10Save(Sender: TStoredValue;
+  var Value: TStoredType);
+begin
+  Value := BoolToStr(doAutomaticBackup);
+end;
+
+procedure TMainForm.RxIniPropStorage1StoredValues11Restore(Sender: TStoredValue;
+  var Value: TStoredType);
+begin
+  if Value <> '' then
+  begin
+    backupPeriod := StrToInt(Value);
+  end;
+end;
+
+procedure TMainForm.RxIniPropStorage1StoredValues11Save(Sender: TStoredValue;
+  var Value: TStoredType);
+begin
+  Value := IntToStr(backupPeriod);
 end;
 
 procedure TMainForm.RxIniPropStorage1StoredValues1Restore(Sender: TStoredValue;
@@ -1194,6 +1286,45 @@ procedure TMainForm.RxIniPropStorage1StoredValues6Save(Sender: TStoredValue;
   var Value: TStoredType);
 begin
   Value := BoolToStr(showStageNameForSingleStage);
+end;
+
+procedure TMainForm.RxIniPropStorage1StoredValues7Restore(Sender: TStoredValue;
+  var Value: TStoredType);
+begin
+  if Value <> '' then
+    checkUpdateAtStartup := StrToBool(Value);
+end;
+
+procedure TMainForm.RxIniPropStorage1StoredValues7Save(Sender: TStoredValue;
+  var Value: TStoredType);
+begin
+  Value := BoolToStr(checkUpdateAtStartup);
+end;
+
+procedure TMainForm.RxIniPropStorage1StoredValues8Restore(Sender: TStoredValue;
+  var Value: TStoredType);
+begin
+  if Value <> '' then
+    lastUpdateCheckoutTime := StrToDateTime(Value);
+end;
+
+procedure TMainForm.RxIniPropStorage1StoredValues8Save(Sender: TStoredValue;
+  var Value: TStoredType);
+begin
+  Value := DateTimeToStr(lastUpdateCheckoutTime);
+end;
+
+procedure TMainForm.RxIniPropStorage1StoredValues9Restore(Sender: TStoredValue;
+  var Value: TStoredType);
+begin
+  if Value <> '' then
+    checkUpdateIntervalInDays := StrToInt(Value);
+end;
+
+procedure TMainForm.RxIniPropStorage1StoredValues9Save(Sender: TStoredValue;
+  var Value: TStoredType);
+begin
+  Value := IntToStr(checkUpdateIntervalInDays);
 end;
 
 procedure TMainForm.sGridResultDrawCell(Sender: TObject; aCol, aRow: integer;
@@ -1332,16 +1463,17 @@ procedure TMainForm.Timer1Timer(Sender: TObject);
 var
   pos: integer;
 begin
-  StatusBarLeft.Panels[0].Text := FormatDateTime('hh:nn:ss', Now);
   //это часы внизу
+  StatusBarLeft.Panels[0].Text := FormatDateTime('hh:nn:ss', Now);
+
+  //это тикающие секунды в окне "на трассе"
   if dbopen then
   begin
-    //это тикающие секунды в окне "на трассе"
-    pos := StatDataset2.RecNo;
     //запоминает положение курсора
+    pos := StatDataset2.RecNo;
+    //и восстанавливает его
     StatDataset2.RefetchData;
     StatDataset2.MoveBy(pos - 1);
-    //и восстанавливает его
   end;
 end;
 
@@ -1628,8 +1760,6 @@ begin
 end;
 
 procedure TMainForm.MenuItem5Click(Sender: TObject);
-//var
-//  S: string;
 begin
   //DataPortHTTPTelegramBot.Close();
   //DataPortHTTPTelegramBot.Method:=THttpMethods.httpGet;
@@ -1643,6 +1773,7 @@ begin
   //DataPortHTTPTelegramBot.Push('');
   //s := TFPCustomHTTPClient.SimpleGet('http://192.168.1.136/get?upperline=1%20%2010:10,123&bottomline=Фамилия');
   //Print(s);
+
 end;
 
 procedure TMainForm.RecalcResults(Sender: TField);
@@ -1816,6 +1947,57 @@ begin
     'languages/rxdconst.%s.po'), lang, FallbackLang);
 
   //CurrentLang := lang;
+end;
+
+function TMainForm.CheckUpdateOnline(ACurrentVersion: string;
+  ForceCheck: bool; out LastVersion: string): boolean;
+var
+  U: TUpdater;
+begin
+  Result := False;
+  if ForceCheck or (checkUpdateAtStartup and
+    ((checkUpdateIntervalInDays < 0) or
+    (IncDay(lastUpdateCheckoutTime, checkUpdateIntervalInDays) < Now))) then
+  begin
+    U := TUpdater.Create;
+    try
+      updateExists := U.NewVersionAvailable(ACurrentVersion, LastVersion);
+    finally
+      U.Free;
+    end;
+
+    if updateExists then
+    begin
+      if MessageDlg(format(rsNewVersionAvailable, [LastVersion]),
+        TMsgDlgType.mtInformation, mbYesNo, 0) = mrYes then
+        OpenURL(releaseUrl + lastVersionOnline);
+
+      //aMsgDlg := CreateMessageDialog(
+      //  'Доступна новая версия программы: ' +
+      //  LastVersion, TMsgDlgType.mtInformation, mbOKCancel);
+
+      //for i := 0 to aMsgDlg.ComponentCount - 1 do
+      //begin
+      //  if (aMsgDlg.Components[i] is TBitBtn) then
+      //  begin
+      //    TBitBtn(aMsgDlg.Components[i]).Caption :=
+      //      'Новый заголовок кнопки';
+      //  end;
+      //end;
+
+      //aMsgDlg.ShowModal;
+    end
+    else
+    begin
+      if ForceCheck and not LastVersion.IsEmpty then
+      begin
+        MessageDlg(rsUpdatesNotFound, TMsgDlgType.mtInformation, [mbOK], 0);
+      end;
+    end;
+
+    if not LastVersion.IsEmpty then
+      lastUpdateCheckoutTime := Now;
+  end;
 end;
 
 end.

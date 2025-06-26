@@ -48,8 +48,8 @@ msgstr "By current results"
 
 #: i18n.rscannotbackup
 msgctxt "i18n.rscannotbackup"
-msgid "Не удалось сделать бэкап, продолжить загрузку результатов?"
-msgstr "Failed to create backup, continue loading results?"
+msgid "Не удалось сделать резервную копию!"
+msgstr "Failed to create backup!"
 
 #: i18n.rscannotdeletefile
 msgctxt "i18n.rscannotdeletefile"
@@ -121,6 +121,10 @@ msgctxt "i18n.rsclearresults"
 msgid "Действительно удалить все результаты?"
 msgstr "Really delete all results?"
 
+#: i18n.rsclearresultswobackup
+msgid "Всё равно очистить результаты?"
+msgstr "Clear results anyway?"
+
 #: i18n.rsclearstatus
 msgctxt "i18n.rsclearstatus"
 msgid "Действительно убрать DNS/DNF с участника номер"
@@ -140,6 +144,10 @@ msgstr "Failed to open port"
 msgctxt "i18n.rsconfignotfound"
 msgid "Файл настроек не найден, создание файла настроек по умолчанию"
 msgstr "Config file not found, creating default config file"
+
+#: i18n.rscontinuewithloadingresults
+msgid "Продолжить загрузку результатов?"
+msgstr "Continue loading results?"
 
 #: i18n.rscorrection
 msgctxt "i18n.rscorrection"
@@ -360,6 +368,11 @@ msgctxt "i18n.rsnewfilenotcreated"
 msgid "Не удалось создать файл соревнований"
 msgstr "Failed to create competition file"
 
+#: i18n.rsnewversionavailable
+#, object-pascal-format
+msgid "Доступна новая версия программы: %0:s. Перейти на сайт?"
+msgstr "Update available: %0:s. Go to download page?"
+
 #: i18n.rsnickname
 msgctxt "i18n.rsnickname"
 msgid "Ник"
@@ -569,6 +582,10 @@ msgctxt "i18n.rstotal"
 msgid "Общий"
 msgstr "Total"
 
+#: i18n.rsupdateavailable
+msgid "Доступно обновление ..."
+msgstr "Update available ..."
+
 #: i18n.rsupdateerror
 msgctxt "i18n.rsupdateerror"
 msgid "Ошибка обновления результатов: "
@@ -578,6 +595,10 @@ msgstr "Error updating results: "
 msgctxt "i18n.rsupdatefinishtime"
 msgid "Обновить финишное время для номера"
 msgstr "Update finish time for number"
+
+#: i18n.rsupdatesnotfound
+msgid "Нет доступных обновлений."
+msgstr "There are currently no updates available."
 
 #: tloraform.accopy.caption
 msgctxt "tloraform.accopy.caption"
@@ -616,6 +637,11 @@ msgstr "Time"
 msgctxt "tloraform.rxdbgridlora.hint"
 msgid "Двойной клик на строке с нужной поправкой заносит её в основную таблицу"
 msgstr "Double click on row with needed correction to add it to main table"
+
+#: tmainform.accheckupdate.caption
+msgctxt "tmainform.accheckupdate.caption"
+msgid "Проверить обновления ..."
+msgstr "Check for updates ..."
 
 #: tmainform.acclearresults.caption
 msgid "Очистить результаты"
@@ -2044,6 +2070,10 @@ msgctxt "tsettingsform.caption"
 msgid "Настройки"
 msgstr "Settings"
 
+#: tsettingsform.checkboxbackup.caption
+msgid "Создавать резервные копии каждые"
+msgstr "Create backup copy every"
+
 #: tsettingsform.checkboxhidezerohour.caption
 msgid "Скрывать нулевой час в результатах"
 msgstr "Hide zero hour in results"
@@ -2051,6 +2081,10 @@ msgstr "Hide zero hour in results"
 #: tsettingsform.checkboxshowstagename.caption
 msgid "Показывать название спецучастка когда когда он один активный"
 msgstr "Show stage name when it's the only active one"
+
+#: tsettingsform.checkboxupdateatstartup.caption
+msgid "Проверять наличие обновлений при старте программы"
+msgstr "Check for updates at startup"
 
 #: tsettingsform.checkgroup1.caption
 msgid "Активные спецучастки:"
@@ -2067,6 +2101,10 @@ msgstr ""
 "new time values when sensor is triggered.\n"
 "Used to reduce spam.\n"
 "From 0 to 100000"
+
+#: tsettingsform.dividerbackup.caption
+msgid "Резервное копирование"
+msgstr "Backup"
 
 #: tsettingsform.dividerbevelcomsettings1.caption
 msgid "COM порт"
@@ -2103,6 +2141,11 @@ msgstr "Address"
 msgctxt "tsettingsform.dividerbeveltelegramtest.caption"
 msgid "Тест"
 msgstr "Test"
+
+#: tsettingsform.dividerbevelupdate.caption
+msgctxt "tsettingsform.dividerbevelupdate.caption"
+msgid "Обновление"
+msgstr "Update"
 
 #: tsettingsform.dividerbevelviewother.caption
 msgid "Разное"
@@ -2170,6 +2213,11 @@ msgstr "Parity"
 msgid "Flow control"
 msgstr "Flow control"
 
+#: tsettingsform.labelbackupminutes.caption
+msgctxt "tsettingsform.labelbackupminutes.caption"
+msgid "минут"
+msgstr "minutes"
+
 #: tsettingsform.labelbottomline.caption
 msgid "Нижняя строка"
 msgstr "Bottom line"
@@ -2215,6 +2263,11 @@ msgstr "Top line"
 #: tsettingsform.ledadress.texthint
 msgid "192.168.1.10"
 msgstr "192.168.1.10"
+
+#: tsettingsform.panelbackup.hint
+msgctxt "tsettingsform.panelbackup.hint"
+msgid "Автоматически создавать резервные копии открытого соревнования через заданные промежутки времени"
+msgstr "Automatically create backups of an open competition at specified intervals"
 
 #: tsettingsform.radiobuttoncomsetstr.caption
 msgid "Спец. команда"

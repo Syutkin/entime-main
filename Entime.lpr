@@ -18,7 +18,8 @@ uses
   datetimectrls,
   lazdbexport,
   Result,
-  HistoryLazarus;
+  HistoryLazarus,
+  updater;
 
   {$R *.res}
 

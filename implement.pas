@@ -11,6 +11,15 @@ uses
   csvdocument, opensslsockets, fphttpclient, nsCore, chsdIntf, fpcsvexport,
   fpstypes, fpspreadsheet, LCLIntf, LConvEncoding;
 
+type
+
+  { BackupThread }
+
+  BackupThread = class(TThread)
+  public
+    procedure Execute; override;
+  end;
+
 procedure RefreshAll;
 procedure RefreshResults;
 procedure LoadConfig;
@@ -54,7 +63,7 @@ procedure SQLQueryToCSV(FileName: string; Query: TSQLQuery; headers: boolean = F
 procedure AddDayResult(FileName: string);
 procedure Print(Str: string);
 procedure Print(Int: integer);
-
+procedure Print(Bool: boolean);
 
 function InputComboSelectStage(const ACaption, APrompt: string): integer;
 function CatStartList: TStringList;
@@ -80,7 +89,7 @@ function dbnotempty: boolean;
 
 implementation
 
-uses Main, Result, Startlist, StartItemModel;
+uses Main, Result, Startlist, StartItemModel, updater;
 
   {$I include/my.inc}
 
@@ -895,7 +904,7 @@ procedure SetFinish;
 var
   row, number, leadernumber, currentplace, i: integer;
   setfinish: boolean = False;
-  currentresult, bottomline, currentcategory, st, leaderresult, upperline, Name: string;
+  currentresult, bottomline, currentcategory, st, leaderresult, upperline, pName: string;
   currentdiff: string = '';
 
   //Отправка в телегу
@@ -970,7 +979,7 @@ begin
               begin
                 st := IntToStr(ActiveStageIndex);
                 currentcategory := MainForm.SQLQuery1.FieldByName('category').AsString;
-                Name := MainForm.SQLQuery1.FieldByName('name').AsString;
+                pName := MainForm.SQLQuery1.FieldByName('name').AsString;
                 MainForm.SQLQuery1.Active := False;
                 MainForm.SQLQuery1.SQL.Text :=
                   'select * from main where category = "' + currentcategory +
@@ -1157,8 +1166,8 @@ begin
                   begin
                     if not IntToStr(number).IsEmpty then
                       Values['number'] := EncodeURLElement(IntToStr(number));
-                    if not Name.IsEmpty then
-                      Values['name'] := EncodeURLElement(Name);
+                    if not pName.IsEmpty then
+                      Values['name'] := EncodeURLElement(pName);
                     if not currentcategory.IsEmpty then
                       Values['category'] := EncodeURLElement(currentcategory);
                     if not currentresult.IsEmpty then
@@ -1172,7 +1181,6 @@ begin
                   for item in QueryParams do
                     s := s + '&' + item;
                   AURL := AURL + '?' + s.Substring(1);
-
                   try
                     httpmethod('GET', AURL, l, []);
                   except
@@ -1181,15 +1189,13 @@ begin
                       //MessageDlg(rsTelegramBotSendingError + E.Message, mtError, [mbOK], 0);
                       Log(rsTelegramBotSendingError + E.Message);
                     end;
-
                   end;
-                  MainForm.Memo.Lines.Append(IntToStr(ResponseStatusCode) +
-                    ' ' + ResponseStatusText);
-                  MainForm.Memo.Lines.Append(ResponseHeaders.Text);
-                  MainForm.Memo.Lines.Append(l.DataString);
+                  Print(IntToStr(ResponseStatusCode) + ' ' +
+                    ResponseStatusText);
+                  Print(ResponseHeaders.Text);
+                  Print(l.DataString);
 
                 finally
-                  MainForm.Memo.Lines.Append(AURL);
                   Free;
                   QueryParams.Free;
                   l.Free;
@@ -1700,6 +1706,12 @@ var
   i: integer;
 begin
   if silent or (MessageDlg(rsClearResults, mtWarning, [mbYes, mbNo], 0) = mrYes) then
+    if not BackupBD then
+    begin
+      if MessageDlg(rsCanNotBackup + sLineBreak + rsClearResultsWOBackup,
+        mtWarning, [mbYes, mbNo], 0) = mrNo then
+        Exit;
+    end;
   begin
     try
       with MainForm.SQLQuery1 do
@@ -2275,7 +2287,8 @@ begin
           begin
             if not BackupBD then
             begin
-              if MessageDlg(rsCanNotBackup, mtWarning, [mbYes, mbNo], 0) = mrNo then
+              if MessageDlg(rsCanNotBackup + sLineBreak +
+                rsContinueWithLoadingResults, mtWarning, [mbYes, mbNo], 0) = mrNo then
               begin
                 Screen.Cursor := crDefault;
                 Exit;
@@ -2357,7 +2370,8 @@ begin
           begin
             if not BackupBD then
             begin
-              if MessageDlg(rsCanNotBackup, mtWarning, [mbYes, mbNo], 0) = mrNo then
+              if MessageDlg(rsCanNotBackup + sLineBreak +
+                rsContinueWithLoadingResults, mtWarning, [mbYes, mbNo], 0) = mrNo then
               begin
                 Screen.Cursor := crDefault;
                 Exit;
@@ -2452,7 +2466,8 @@ begin
           begin
             if not BackupBD then
             begin
-              if MessageDlg(rsCanNotBackup, mtWarning, [mbYes, mbNo], 0) = mrNo then
+              if MessageDlg(rsCanNotBackup + sLineBreak +
+                rsContinueWithLoadingResults, mtWarning, [mbYes, mbNo], 0) = mrNo then
               begin
                 Screen.Cursor := crDefault;
                 Exit;
@@ -3360,6 +3375,14 @@ begin
   MainForm.Memo.Lines.Add(IntToStr(Int));
 end;
 
+procedure Print(Bool: boolean);
+begin
+  if bool then
+    MainForm.Memo.Lines.Add('True')
+  else
+    MainForm.Memo.Lines.Add('False');
+end;
+
 function CountOccurrences(ASubString: string; AString: string): integer;
 var
   offset: integer;
@@ -3558,13 +3581,21 @@ begin
   backupfile := CreateAbsolutePath(FormatDateTime('YYYY-MM-DD hh-mm-ss', now) +
     ' ' + ExtractFileName(fname), ExtractFilePath(fName) + backupfolder);
 
-  MainForm.FileCloseExecute(nil);
-  SetfName('');
-  if not CopyFile(fName, backupfile, False, False) then
+  MainForm.SQLite3Connection1.Close();
+  MainForm.SQLite3Connection1.ExecuteDirect('End Transaction');
+  MainForm.SQLite3Connection1.ExecuteDirect('VACUUM INTO "' + backupfile + '";');
+  MainForm.SQLite3Connection1.ExecuteDirect('Begin Transaction');
+  MainForm.SQLTransaction1.Commit;
+  MainForm.SQLTransaction1.Active := False;
+
+  if (FileExists(backupfile)) and (FileSize(backupfile) > 0) then
+  begin
+    Result := True;
+    Log('Создание резервной копии успешно завершено: '
+      + backupfile);
+  end
+  else
     Result := False;
-  //SetfName(fName);
-  //OpenDB;
-  InitDB(fName);
 end;
 
 function HideLeadingZeroHour(Sender: TField): string;
@@ -3683,6 +3714,13 @@ begin
     Result := False
   else
     Result := True;
+end;
+
+{ BackupThread }
+
+procedure BackupThread.Execute;
+begin
+
 end;
 
 end.

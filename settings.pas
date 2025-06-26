@@ -18,9 +18,12 @@ type
     ButtonLEDTest: TButton;
     ButtonTelegramTest: TButton;
     ButtonPanel1: TButtonPanel;
+    CheckBoxBackup: TCheckBox;
+    CheckBoxUpdateAtStartup: TCheckBox;
     CheckBoxHideZeroHour: TCheckBoxThemed;
     CheckBoxShowStageName: TCheckBoxThemed;
     CheckGroup1: TCheckGroup;
+    ComboBoxUpdateInterval: TComboBox;
     ComboBoxLanguage: TComboBox;
     ComboBoxAStage: TComboBox;
     ComComboBox1: TComboBox;
@@ -32,6 +35,8 @@ type
     DelayEdit: TSpinEdit;
     DividerBevelCOMSettings1: TDividerBevel;
     DividerBevelCOMSettings2: TDividerBevel;
+    DividerBevelUpdate: TDividerBevel;
+    DividerBackup: TDividerBevel;
     DividerBevelViewOther: TDividerBevel;
     DividerBevelLEDAdress: TDividerBevel;
     DividerBevelTelegramTest: TDividerBevel;
@@ -43,6 +48,7 @@ type
     Edit4: TComboBox;
     Edit5: TComboBox;
     Edit6: TComboBox;
+    LabelBackupMinutes: TLabel;
     NameEdit: TEdit;
     EditCOMSetStr: TEdit;
     EditCOMSetTime: TEdit;
@@ -63,6 +69,8 @@ type
     LabelBottomline: TLabel;
     LabelNumber: TLabel;
     LeftPanel: TPanel;
+    PanelBackup: TPanel;
+    SpinBackup: TSpinEdit;
     TelegramResult: TEdit;
     TelegramDiff: TEdit;
     TelegramPlace: TEdit;
@@ -101,6 +109,7 @@ type
     TreeView1: TTreeView;
     procedure ButtonLEDTestClick(Sender: TObject);
     procedure ButtonTelegramTestClick(Sender: TObject);
+    procedure CheckBoxUpdateAtStartupChange(Sender: TObject);
     procedure CheckGroup1ItemClick(Sender: TObject; Index: integer);
     procedure ComboBoxAStageDropDown(Sender: TObject);
     procedure ComboBoxLanguageChange(Sender: TObject);
@@ -186,6 +195,22 @@ begin
   else if CurrentLang = 'en' then
     ComboBoxLanguage.Text := rsEnglish;
 
+  // Обновления
+  CheckBoxUpdateAtStartup.Checked := checkUpdateAtStartup;
+  ComboBoxUpdateInterval.Enabled := checkUpdateAtStartup;
+  if checkUpdateIntervalInDays < 0 then
+    ComboBoxUpdateInterval.ItemIndex := 0
+  else if checkUpdateIntervalInDays < 7 then
+    ComboBoxUpdateInterval.ItemIndex := 1
+  else if checkUpdateIntervalInDays < 30 then
+    ComboBoxUpdateInterval.ItemIndex := 2
+  else
+    ComboBoxUpdateInterval.ItemIndex := 3;
+
+  // Резервное копирование
+  CheckBoxBackup.Checked := doAutomaticBackup;
+  SpinBackup.Value := backupPeriod div (60 * 1000);
+
   for i := 1 to maxstages do
     if stages[i].isActive then
       CheckGroup1.Checked[i - 1] := True;
@@ -257,6 +282,24 @@ begin
         MainForm.Serial.Parity := StrToParity(ComComboBox5.Text);
         MainForm.Serial.FlowCOntrol := StrToFlowControl(ComComboBox6.Text);
         MainForm.StatusBarLeft.Panels[1].Text := MainForm.Serial.Device;
+
+        // Обновление
+        checkUpdateAtStartup := CheckBoxUpdateAtStartup.Checked;
+
+        if ComboBoxUpdateInterval.ItemIndex = 0 then
+          checkUpdateIntervalInDays := -1
+        else if ComboBoxUpdateInterval.ItemIndex = 1 then
+          checkUpdateIntervalInDays := 1
+        else if ComboBoxUpdateInterval.ItemIndex = 2 then
+          checkUpdateIntervalInDays := 7
+        else
+          checkUpdateIntervalInDays := 30;
+
+        // Резервное копирование
+        doAutomaticBackup := CheckBoxBackup.Checked;
+        backupPeriod := SpinBackup.Value * 60 * 1000;
+        MainForm.BackupTimer.Enabled := doAutomaticBackup;
+        MainForm.BackupTimer.Interval := backupPeriod;
 
         checkinterval := StrToInt(DelayEdit.Text);
         if ComboBoxLanguage.Text = rsSystemDefault then
@@ -451,6 +494,11 @@ begin
     QueryParams.Free;
     l.Free;
   end;
+end;
+
+procedure TSettingsForm.CheckBoxUpdateAtStartupChange(Sender: TObject);
+begin
+  ComboBoxUpdateInterval.Enabled := (Sender as TCheckBox).Checked;
 end;
 
 procedure TSettingsForm.CheckGroup1ItemClick(Sender: TObject; Index: integer);
