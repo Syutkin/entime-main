@@ -4050,14 +4050,14 @@ object MainForm: TMainForm
       Hint = 'Очистить результаты соревнований и оставить остальную информацию об участниках'
       ImageIndex = 22
       OnExecute = AcClearResultsExecute
-      OnUpdate = CheckDBOpen
+      OnUpdate = CheckDBOpenAndRaceMode
     end
     object AcDeleteNumber: TAction
       Category = 'EditMainDB'
       Enabled = False
       ImageIndex = 23
       OnExecute = AcDeleteNumberExecute
-      OnUpdate = CheckDBOpen
+      OnUpdate = CheckDBOpenAndRaceMode
     end
     object AcSetDNS: TAction
       Category = 'EditMainDB'
@@ -4194,7 +4194,7 @@ object MainForm: TMainForm
       Category = 'EditMainDB'
       Caption = 'Изменить время старта'
       OnExecute = AcSetStarttimeExecute
-      OnUpdate = CheckDBOpen
+      OnUpdate = CheckDBOpenAndRaceMode
     end
     object FileOpenDB: TFileOpen
       Category = 'File'
@@ -4272,7 +4272,7 @@ object MainForm: TMainForm
       Caption = 'Empty'
       DisableIfNoHandler = False
       OnExecute = EmptyExecute
-      OnUpdate = CheckDBOpen
+      OnUpdate = CheckDBOpenAndRaceMode
     end
     object AcLEDPanel: TAction
       AutoCheck = True

@@ -197,14 +197,14 @@ object SettingsForm: TSettingsForm
         AnchorSideRight.Control = Page1Commons
         AnchorSideRight.Side = asrBottom
         Left = 0
-        Height = 82
+        Height = 80
         Hint = 'Автоматически создавать резервные копии открытого соревнования через заданные промежутки времени'
         Top = 227
         Width = 852
         Anchors = [akTop, akLeft, akRight]
         AutoSize = True
         BevelOuter = bvNone
-        ClientHeight = 82
+        ClientHeight = 80
         ClientWidth = 852
         TabOrder = 4
         object DividerBackup: TDividerBevel
@@ -240,11 +240,11 @@ object SettingsForm: TSettingsForm
         object SpinBackup: TSpinEdit
           AnchorSideLeft.Control = CheckBoxBackup
           AnchorSideLeft.Side = asrBottom
-          AnchorSideTop.Control = DividerBackup
-          AnchorSideTop.Side = asrBottom
+          AnchorSideTop.Control = CheckBoxBackup
+          AnchorSideTop.Side = asrCenter
           Left = 343
           Height = 33
-          Top = 41
+          Top = 39
           Width = 75
           Alignment = taRightJustify
           BorderSpacing.Around = 8
@@ -256,11 +256,11 @@ object SettingsForm: TSettingsForm
         object LabelBackupMinutes: TLabel
           AnchorSideLeft.Control = SpinBackup
           AnchorSideLeft.Side = asrBottom
-          AnchorSideTop.Control = DividerBackup
-          AnchorSideTop.Side = asrBottom
+          AnchorSideTop.Control = CheckBoxBackup
+          AnchorSideTop.Side = asrCenter
           Left = 426
           Height = 25
-          Top = 41
+          Top = 43
           Width = 49
           BorderSpacing.Around = 8
           Caption = 'минут'

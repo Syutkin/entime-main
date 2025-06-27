@@ -333,6 +333,7 @@ type
     procedure AcTelegramBotExecute(Sender: TObject);
     procedure AcSetStarttimeExecute(Sender: TObject);
     procedure BackupTimerTimer(Sender: TObject);
+    procedure CheckDBOpenAndRaceMode(Sender: TObject);
     procedure ExportStageResultsExecute(Sender: TObject);
     procedure DataPortHTTP1DataAppear(Sender: TObject);
     procedure DataPortHTTP1Error(Sender: TObject; const AMsg: string);
@@ -978,6 +979,11 @@ end;
 procedure TMainForm.BackupTimerTimer(Sender: TObject);
 begin
   if dbopen then BackupBD;
+end;
+
+procedure TMainForm.CheckDBOpenAndRaceMode(Sender: TObject);
+begin
+   TAction(Sender).Enabled := (dbopen and not RaceMode.Checked);
 end;
 
 procedure TMainForm.ExportStageResultsExecute(Sender: TObject);
