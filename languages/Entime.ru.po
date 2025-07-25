@@ -543,6 +543,16 @@ msgctxt "i18n.rssu6"
 msgid "СУ 6"
 msgstr "СУ 6"
 
+#: i18n.rssu7
+msgctxt "i18n.rssu7"
+msgid "СУ 7"
+msgstr ""
+
+#: i18n.rssu8
+msgctxt "i18n.rssu8"
+msgid "СУ 8"
+msgstr ""
+
 #: i18n.rssumresult
 msgctxt "i18n.rssumresult"
 msgid "Итог"
@@ -1212,99 +1222,216 @@ msgid "Отставание"
 msgstr "Отставание"
 
 #: tmainform.gridresult7.columns[0].title.caption
+#, fuzzy
 msgctxt "tmainform.gridresult7.columns[0].title.caption"
 msgid "Категория"
 msgstr "Категория"
 
 #: tmainform.gridresult7.columns[1].title.caption
+#, fuzzy
 msgctxt "tmainform.gridresult7.columns[1].title.caption"
 msgid "Место"
 msgstr "Место"
 
 #: tmainform.gridresult7.columns[2].title.caption
+#, fuzzy
 msgctxt "tmainform.gridresult7.columns[2].title.caption"
 msgid "Номер"
 msgstr "Номер"
 
 #: tmainform.gridresult7.columns[3].title.caption
+#, fuzzy
 msgctxt "tmainform.gridresult7.columns[3].title.caption"
 msgid "Имя"
 msgstr "Имя"
 
 #: tmainform.gridresult7.columns[4].title.caption
+#, fuzzy
 msgctxt "tmainform.gridresult7.columns[4].title.caption"
+msgid "Штраф"
+msgstr "Штраф"
+
+#: tmainform.gridresult7.columns[5].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresult7.columns[5].title.caption"
 msgid "Результат"
 msgstr "Результат"
 
-#: tmainform.gridresult7.columns[5].title.caption
-msgctxt "tmainform.gridresult7.columns[5].title.caption"
+#: tmainform.gridresult7.columns[6].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresult7.columns[6].title.caption"
 msgid "Отставание"
 msgstr "Отставание"
 
-#: tmainform.gridresult7.columns[6].title.caption
-msgctxt "tmainform.gridresult7.columns[6].title.caption"
-msgid "Кол-во СУ"
-msgstr "Кол-во СУ"
-
 #: tmainform.gridresult8.columns[0].title.caption
+#, fuzzy
 msgctxt "tmainform.gridresult8.columns[0].title.caption"
 msgid "Категория"
 msgstr "Категория"
 
-#: tmainform.gridresult8.columns[10].title.caption
-msgctxt "tmainform.gridresult8.columns[10].title.caption"
-msgid "Результат"
-msgstr "Результат"
-
-#: tmainform.gridresult8.columns[11].title.caption
-msgctxt "tmainform.gridresult8.columns[11].title.caption"
-msgid "Отставание"
-msgstr "Отставание"
-
 #: tmainform.gridresult8.columns[1].title.caption
+#, fuzzy
 msgctxt "tmainform.gridresult8.columns[1].title.caption"
 msgid "Место"
 msgstr "Место"
 
 #: tmainform.gridresult8.columns[2].title.caption
+#, fuzzy
 msgctxt "tmainform.gridresult8.columns[2].title.caption"
 msgid "Номер"
 msgstr "Номер"
 
 #: tmainform.gridresult8.columns[3].title.caption
+#, fuzzy
 msgctxt "tmainform.gridresult8.columns[3].title.caption"
 msgid "Имя"
 msgstr "Имя"
 
 #: tmainform.gridresult8.columns[4].title.caption
+#, fuzzy
 msgctxt "tmainform.gridresult8.columns[4].title.caption"
+msgid "Штраф"
+msgstr "Штраф"
+
+#: tmainform.gridresult8.columns[5].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresult8.columns[5].title.caption"
+msgid "Результат"
+msgstr "Результат"
+
+#: tmainform.gridresult8.columns[6].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresult8.columns[6].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tmainform.gridresultstagesum.columns[0].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagesum.columns[0].title.caption"
+msgid "Категория"
+msgstr "Категория"
+
+#: tmainform.gridresultstagesum.columns[10].title.caption
+#, fuzzy
+#| msgid "Результат"
+msgctxt "tmainform.gridresultstagesum.columns[10].title.caption"
+msgid "СУ 7"
+msgstr "Результат"
+
+#: tmainform.gridresultstagesum.columns[11].title.caption
+#, fuzzy
+#| msgid "Отставание"
+msgctxt "tmainform.gridresultstagesum.columns[11].title.caption"
+msgid "СУ 8"
+msgstr "Отставание"
+
+#: tmainform.gridresultstagesum.columns[12].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagesum.columns[12].title.caption"
+msgid "Результат"
+msgstr "Результат"
+
+#: tmainform.gridresultstagesum.columns[13].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagesum.columns[13].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tmainform.gridresultstagesum.columns[1].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagesum.columns[1].title.caption"
+msgid "Место"
+msgstr "Место"
+
+#: tmainform.gridresultstagesum.columns[2].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagesum.columns[2].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tmainform.gridresultstagesum.columns[3].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagesum.columns[3].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tmainform.gridresultstagesum.columns[4].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagesum.columns[4].title.caption"
 msgid "СУ 1"
 msgstr "СУ 1"
 
-#: tmainform.gridresult8.columns[5].title.caption
-msgctxt "tmainform.gridresult8.columns[5].title.caption"
+#: tmainform.gridresultstagesum.columns[5].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagesum.columns[5].title.caption"
 msgid "СУ 2"
 msgstr "СУ 2"
 
-#: tmainform.gridresult8.columns[6].title.caption
-msgctxt "tmainform.gridresult8.columns[6].title.caption"
+#: tmainform.gridresultstagesum.columns[6].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagesum.columns[6].title.caption"
 msgid "СУ 3"
 msgstr "СУ 3"
 
-#: tmainform.gridresult8.columns[7].title.caption
-msgctxt "tmainform.gridresult8.columns[7].title.caption"
+#: tmainform.gridresultstagesum.columns[7].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagesum.columns[7].title.caption"
 msgid "СУ 4"
 msgstr "СУ 4"
 
-#: tmainform.gridresult8.columns[8].title.caption
-msgctxt "tmainform.gridresult8.columns[8].title.caption"
+#: tmainform.gridresultstagesum.columns[8].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagesum.columns[8].title.caption"
 msgid "СУ 5"
 msgstr "СУ 5"
 
-#: tmainform.gridresult8.columns[9].title.caption
-msgctxt "tmainform.gridresult8.columns[9].title.caption"
+#: tmainform.gridresultstagesum.columns[9].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagesum.columns[9].title.caption"
 msgid "СУ 6"
 msgstr "СУ 6"
+
+#: tmainform.gridresultstagetotal.columns[0].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagetotal.columns[0].title.caption"
+msgid "Категория"
+msgstr "Категория"
+
+#: tmainform.gridresultstagetotal.columns[1].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagetotal.columns[1].title.caption"
+msgid "Место"
+msgstr "Место"
+
+#: tmainform.gridresultstagetotal.columns[2].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagetotal.columns[2].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tmainform.gridresultstagetotal.columns[3].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagetotal.columns[3].title.caption"
+msgid "Имя"
+msgstr "Имя"
+
+#: tmainform.gridresultstagetotal.columns[4].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagetotal.columns[4].title.caption"
+msgid "Результат"
+msgstr "Результат"
+
+#: tmainform.gridresultstagetotal.columns[5].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagetotal.columns[5].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tmainform.gridresultstagetotal.columns[6].title.caption
+#, fuzzy
+msgctxt "tmainform.gridresultstagetotal.columns[6].title.caption"
+msgid "Кол-во СУ"
+msgstr "Кол-во СУ"
 
 #: tmainform.groupbox1.caption
 msgid "Количество участников"
@@ -1457,283 +1584,457 @@ msgid "id"
 msgstr "id"
 
 #: tmainform.rxdbgrid1.columns[10].title.caption
+#, fuzzy
+#| msgid "Телефон"
 msgctxt "tmainform.rxdbgrid1.columns[10].title.caption"
 msgid "Телефон"
 msgstr "Телефон"
 
 #: tmainform.rxdbgrid1.columns[11].title.caption
+#, fuzzy
+#| msgid "Емейл"
 msgctxt "tmainform.rxdbgrid1.columns[11].title.caption"
 msgid "Емейл"
 msgstr "Емейл"
 
 #: tmainform.rxdbgrid1.columns[12].title.caption
+#, fuzzy
+#| msgid "Комментарий"
 msgctxt "tmainform.rxdbgrid1.columns[12].title.caption"
 msgid "Комментарий"
 msgstr "Комментарий"
 
 #: tmainform.rxdbgrid1.columns[13].title.caption
+#, fuzzy
+#| msgid "СУ 1|Поправка"
 msgctxt "tmainform.rxdbgrid1.columns[13].title.caption"
-msgid "СУ 1|Поправка"
+msgid "Старт 1|Поправка"
 msgstr "СУ 1|Поправка"
 
 #: tmainform.rxdbgrid1.columns[14].title.caption
+#, fuzzy
+#| msgid "СУ 1|Старт"
 msgctxt "tmainform.rxdbgrid1.columns[14].title.caption"
-msgid "СУ 1|Старт"
+msgid "Старт 1|Старт"
 msgstr "СУ 1|Старт"
 
 #: tmainform.rxdbgrid1.columns[15].title.caption
+#, fuzzy
+#| msgid "СУ 1|Финиш"
 msgctxt "tmainform.rxdbgrid1.columns[15].title.caption"
-msgid "СУ 1|Финиш"
+msgid "Старт 1|Финиш"
 msgstr "СУ 1|Финиш"
 
 #: tmainform.rxdbgrid1.columns[16].title.caption
+#, fuzzy
+#| msgid "СУ 1|Штраф"
 msgctxt "tmainform.rxdbgrid1.columns[16].title.caption"
-msgid "СУ 1|Штраф"
+msgid "Старт 1|Штраф"
 msgstr "СУ 1|Штраф"
 
 #: tmainform.rxdbgrid1.columns[17].title.caption
+#, fuzzy
+#| msgid "СУ 1|Результат"
 msgctxt "tmainform.rxdbgrid1.columns[17].title.caption"
-msgid "СУ 1|Результат"
+msgid "Старт 1|Результат"
 msgstr "СУ 1|Результат"
 
 #: tmainform.rxdbgrid1.columns[18].title.caption
+#, fuzzy
+#| msgid "СУ 1|Отставание"
 msgctxt "tmainform.rxdbgrid1.columns[18].title.caption"
-msgid "СУ 1|Отставание"
+msgid "Старт 1|Отставание"
 msgstr "СУ 1|Отставание"
 
 #: tmainform.rxdbgrid1.columns[19].title.caption
+#, fuzzy
+#| msgid "СУ 1|Место"
 msgctxt "tmainform.rxdbgrid1.columns[19].title.caption"
-msgid "СУ 1|Место"
+msgid "Старт 1|Место"
 msgstr "СУ 1|Место"
 
 #: tmainform.rxdbgrid1.columns[1].title.caption
+#, fuzzy
+#| msgid "Категория"
 msgctxt "tmainform.rxdbgrid1.columns[1].title.caption"
 msgid "Категория"
 msgstr "Категория"
 
 #: tmainform.rxdbgrid1.columns[20].title.caption
+#, fuzzy
+#| msgid "СУ 2|Поправка"
 msgctxt "tmainform.rxdbgrid1.columns[20].title.caption"
-msgid "СУ 2|Поправка"
+msgid "Старт 2|Поправка"
 msgstr "СУ 2|Поправка"
 
 #: tmainform.rxdbgrid1.columns[21].title.caption
+#, fuzzy
+#| msgid "СУ 2|Старт"
 msgctxt "tmainform.rxdbgrid1.columns[21].title.caption"
-msgid "СУ 2|Старт"
+msgid "Старт 2|Старт"
 msgstr "СУ 2|Старт"
 
 #: tmainform.rxdbgrid1.columns[22].title.caption
+#, fuzzy
+#| msgid "СУ 2|Финиш"
 msgctxt "tmainform.rxdbgrid1.columns[22].title.caption"
-msgid "СУ 2|Финиш"
+msgid "Старт 2|Финиш"
 msgstr "СУ 2|Финиш"
 
 #: tmainform.rxdbgrid1.columns[23].title.caption
+#, fuzzy
+#| msgid "СУ 2|Штраф"
 msgctxt "tmainform.rxdbgrid1.columns[23].title.caption"
-msgid "СУ 2|Штраф"
+msgid "Старт 2|Штраф"
 msgstr "СУ 2|Штраф"
 
 #: tmainform.rxdbgrid1.columns[24].title.caption
+#, fuzzy
+#| msgid "СУ 2|Результат"
 msgctxt "tmainform.rxdbgrid1.columns[24].title.caption"
-msgid "СУ 2|Результат"
+msgid "Старт 2|Результат"
 msgstr "СУ 2|Результат"
 
 #: tmainform.rxdbgrid1.columns[25].title.caption
+#, fuzzy
+#| msgid "СУ 2|Отставание"
 msgctxt "tmainform.rxdbgrid1.columns[25].title.caption"
-msgid "СУ 2|Отставание"
+msgid "Старт 2|Отставание"
 msgstr "СУ 2|Отставание"
 
 #: tmainform.rxdbgrid1.columns[26].title.caption
+#, fuzzy
+#| msgid "СУ 2|Место"
 msgctxt "tmainform.rxdbgrid1.columns[26].title.caption"
-msgid "СУ 2|Место"
+msgid "Старт 2|Место"
 msgstr "СУ 2|Место"
 
 #: tmainform.rxdbgrid1.columns[27].title.caption
+#, fuzzy
+#| msgid "СУ 3|Поправка"
 msgctxt "tmainform.rxdbgrid1.columns[27].title.caption"
-msgid "СУ 3|Поправка"
+msgid "Старт 3|Поправка"
 msgstr "СУ 3|Поправка"
 
 #: tmainform.rxdbgrid1.columns[28].title.caption
+#, fuzzy
+#| msgid "СУ 3|Старт"
 msgctxt "tmainform.rxdbgrid1.columns[28].title.caption"
-msgid "СУ 3|Старт"
+msgid "Старт 3|Старт"
 msgstr "СУ 3|Старт"
 
 #: tmainform.rxdbgrid1.columns[29].title.caption
+#, fuzzy
+#| msgid "СУ 3|Финиш"
 msgctxt "tmainform.rxdbgrid1.columns[29].title.caption"
-msgid "СУ 3|Финиш"
+msgid "Старт 3|Финиш"
 msgstr "СУ 3|Финиш"
 
 #: tmainform.rxdbgrid1.columns[2].title.caption
+#, fuzzy
+#| msgid "Место"
 msgctxt "tmainform.rxdbgrid1.columns[2].title.caption"
 msgid "Место"
 msgstr "Место"
 
 #: tmainform.rxdbgrid1.columns[30].title.caption
+#, fuzzy
+#| msgid "СУ 3|Штраф"
 msgctxt "tmainform.rxdbgrid1.columns[30].title.caption"
-msgid "СУ 3|Штраф"
+msgid "Старт 3|Штраф"
 msgstr "СУ 3|Штраф"
 
 #: tmainform.rxdbgrid1.columns[31].title.caption
+#, fuzzy
+#| msgid "СУ 3|Результат"
 msgctxt "tmainform.rxdbgrid1.columns[31].title.caption"
-msgid "СУ 3|Результат"
+msgid "Старт 3|Результат"
 msgstr "СУ 3|Результат"
 
 #: tmainform.rxdbgrid1.columns[32].title.caption
+#, fuzzy
+#| msgid "СУ 3|Отставание"
 msgctxt "tmainform.rxdbgrid1.columns[32].title.caption"
-msgid "СУ 3|Отставание"
+msgid "Старт 3|Отставание"
 msgstr "СУ 3|Отставание"
 
 #: tmainform.rxdbgrid1.columns[33].title.caption
+#, fuzzy
+#| msgid "СУ 3|Место"
 msgctxt "tmainform.rxdbgrid1.columns[33].title.caption"
-msgid "СУ 3|Место"
+msgid "Старт 3|Место"
 msgstr "СУ 3|Место"
 
 #: tmainform.rxdbgrid1.columns[34].title.caption
+#, fuzzy
+#| msgid "СУ 4|Поправка"
 msgctxt "tmainform.rxdbgrid1.columns[34].title.caption"
-msgid "СУ 4|Поправка"
+msgid "Старт 4|Поправка"
 msgstr "СУ 4|Поправка"
 
 #: tmainform.rxdbgrid1.columns[35].title.caption
+#, fuzzy
+#| msgid "СУ 4|Старт"
 msgctxt "tmainform.rxdbgrid1.columns[35].title.caption"
-msgid "СУ 4|Старт"
+msgid "Старт 4|Старт"
 msgstr "СУ 4|Старт"
 
 #: tmainform.rxdbgrid1.columns[36].title.caption
+#, fuzzy
+#| msgid "СУ 4|Финиш"
 msgctxt "tmainform.rxdbgrid1.columns[36].title.caption"
-msgid "СУ 4|Финиш"
+msgid "Старт 4|Финиш"
 msgstr "СУ 4|Финиш"
 
 #: tmainform.rxdbgrid1.columns[37].title.caption
+#, fuzzy
+#| msgid "СУ 4|Штраф"
 msgctxt "tmainform.rxdbgrid1.columns[37].title.caption"
-msgid "СУ 4|Штраф"
+msgid "Старт 4|Штраф"
 msgstr "СУ 4|Штраф"
 
 #: tmainform.rxdbgrid1.columns[38].title.caption
+#, fuzzy
+#| msgid "СУ 4|Результат"
 msgctxt "tmainform.rxdbgrid1.columns[38].title.caption"
-msgid "СУ 4|Результат"
+msgid "Старт 4|Результат"
 msgstr "СУ 4|Результат"
 
 #: tmainform.rxdbgrid1.columns[39].title.caption
+#, fuzzy
+#| msgid "СУ 4|Отставание"
 msgctxt "tmainform.rxdbgrid1.columns[39].title.caption"
-msgid "СУ 4|Отставание"
+msgid "Старт 4|Отставание"
 msgstr "СУ 4|Отставание"
 
 #: tmainform.rxdbgrid1.columns[3].title.caption
+#, fuzzy
+#| msgid "Номер"
 msgctxt "tmainform.rxdbgrid1.columns[3].title.caption"
 msgid "Номер"
 msgstr "Номер"
 
 #: tmainform.rxdbgrid1.columns[40].title.caption
+#, fuzzy
+#| msgid "СУ 4|Место"
 msgctxt "tmainform.rxdbgrid1.columns[40].title.caption"
-msgid "СУ 4|Место"
+msgid "Старт 4|Место"
 msgstr "СУ 4|Место"
 
 #: tmainform.rxdbgrid1.columns[41].title.caption
+#, fuzzy
+#| msgid "СУ 5|Поправка"
 msgctxt "tmainform.rxdbgrid1.columns[41].title.caption"
-msgid "СУ 5|Поправка"
+msgid "Старт 5|Поправка"
 msgstr "СУ 5|Поправка"
 
 #: tmainform.rxdbgrid1.columns[42].title.caption
+#, fuzzy
+#| msgid "СУ 5|Старт"
 msgctxt "tmainform.rxdbgrid1.columns[42].title.caption"
-msgid "СУ 5|Старт"
+msgid "Старт 5|Старт"
 msgstr "СУ 5|Старт"
 
 #: tmainform.rxdbgrid1.columns[43].title.caption
+#, fuzzy
+#| msgid "СУ 5|Финиш"
 msgctxt "tmainform.rxdbgrid1.columns[43].title.caption"
-msgid "СУ 5|Финиш"
+msgid "Старт 5|Финиш"
 msgstr "СУ 5|Финиш"
 
 #: tmainform.rxdbgrid1.columns[44].title.caption
+#, fuzzy
+#| msgid "СУ 5|Штраф"
 msgctxt "tmainform.rxdbgrid1.columns[44].title.caption"
-msgid "СУ 5|Штраф"
+msgid "Старт 5|Штраф"
 msgstr "СУ 5|Штраф"
 
 #: tmainform.rxdbgrid1.columns[45].title.caption
+#, fuzzy
+#| msgid "СУ 5|Результат"
 msgctxt "tmainform.rxdbgrid1.columns[45].title.caption"
-msgid "СУ 5|Результат"
+msgid "Старт 5|Результат"
 msgstr "СУ 5|Результат"
 
 #: tmainform.rxdbgrid1.columns[46].title.caption
+#, fuzzy
+#| msgid "СУ 5|Отставание"
 msgctxt "tmainform.rxdbgrid1.columns[46].title.caption"
-msgid "СУ 5|Отставание"
+msgid "Старт 5|Отставание"
 msgstr "СУ 5|Отставание"
 
 #: tmainform.rxdbgrid1.columns[47].title.caption
+#, fuzzy
+#| msgid "СУ 5|Место"
 msgctxt "tmainform.rxdbgrid1.columns[47].title.caption"
-msgid "СУ 5|Место"
+msgid "Старт 5|Место"
 msgstr "СУ 5|Место"
 
 #: tmainform.rxdbgrid1.columns[48].title.caption
+#, fuzzy
+#| msgid "СУ 6|Поправка"
 msgctxt "tmainform.rxdbgrid1.columns[48].title.caption"
-msgid "СУ 6|Поправка"
+msgid "Старт 6|Поправка"
 msgstr "СУ 6|Поправка"
 
 #: tmainform.rxdbgrid1.columns[49].title.caption
+#, fuzzy
+#| msgid "СУ 6|Старт"
 msgctxt "tmainform.rxdbgrid1.columns[49].title.caption"
-msgid "СУ 6|Старт"
+msgid "Старт 6|Старт"
 msgstr "СУ 6|Старт"
 
 #: tmainform.rxdbgrid1.columns[4].title.caption
-msgid "Rfid"
+#, fuzzy
+#| msgid "Rfid"
+msgid "rfid"
 msgstr "Rfid"
 
 #: tmainform.rxdbgrid1.columns[50].title.caption
+#, fuzzy
+#| msgid "СУ 6|Финиш"
 msgctxt "tmainform.rxdbgrid1.columns[50].title.caption"
-msgid "СУ 6|Финиш"
+msgid "Старт 6|Финиш"
 msgstr "СУ 6|Финиш"
 
 #: tmainform.rxdbgrid1.columns[51].title.caption
+#, fuzzy
+#| msgid "СУ 6|Штраф"
 msgctxt "tmainform.rxdbgrid1.columns[51].title.caption"
-msgid "СУ 6|Штраф"
+msgid "Старт 6|Штраф"
 msgstr "СУ 6|Штраф"
 
 #: tmainform.rxdbgrid1.columns[52].title.caption
+#, fuzzy
+#| msgid "СУ 6|Результат"
 msgctxt "tmainform.rxdbgrid1.columns[52].title.caption"
-msgid "СУ 6|Результат"
+msgid "Старт 6|Результат"
 msgstr "СУ 6|Результат"
 
 #: tmainform.rxdbgrid1.columns[53].title.caption
+#, fuzzy
+#| msgid "СУ 6|Отставание"
 msgctxt "tmainform.rxdbgrid1.columns[53].title.caption"
-msgid "СУ 6|Отставание"
+msgid "Старт 6|Отставание"
 msgstr "СУ 6|Отставание"
 
 #: tmainform.rxdbgrid1.columns[54].title.caption
+#, fuzzy
+#| msgid "СУ 6|Место"
 msgctxt "tmainform.rxdbgrid1.columns[54].title.caption"
-msgid "СУ 6|Место"
+msgid "Старт 6|Место"
 msgstr "СУ 6|Место"
 
 #: tmainform.rxdbgrid1.columns[55].title.caption
+#, fuzzy
+#| msgid "Итог"
 msgctxt "tmainform.rxdbgrid1.columns[55].title.caption"
-msgid "Итог"
+msgid "Старт 7|Поправка"
 msgstr "Итог"
 
 #: tmainform.rxdbgrid1.columns[56].title.caption
+#, fuzzy
+#| msgid "Отставание"
 msgctxt "tmainform.rxdbgrid1.columns[56].title.caption"
-msgid "Отставание"
+msgid "Старт 7|Старт"
 msgstr "Отставание"
 
 #: tmainform.rxdbgrid1.columns[57].title.caption
+#, fuzzy
+#| msgid "Статус"
 msgctxt "tmainform.rxdbgrid1.columns[57].title.caption"
-msgid "Статус"
+msgid "Старт 7|Финиш"
 msgstr "Статус"
 
+#: tmainform.rxdbgrid1.columns[58].title.caption
+msgid "Старт 7|Штраф"
+msgstr ""
+
+#: tmainform.rxdbgrid1.columns[59].title.caption
+msgid "Старт 7|Результат"
+msgstr ""
+
 #: tmainform.rxdbgrid1.columns[5].title.caption
+#, fuzzy
+#| msgid "Имя"
 msgctxt "tmainform.rxdbgrid1.columns[5].title.caption"
 msgid "Имя"
 msgstr "Имя"
 
+#: tmainform.rxdbgrid1.columns[60].title.caption
+msgid "Старт 7|Отставание"
+msgstr ""
+
+#: tmainform.rxdbgrid1.columns[61].title.caption
+msgid "Старт 7|Место"
+msgstr ""
+
+#: tmainform.rxdbgrid1.columns[62].title.caption
+msgid "Старт 8|Поправка"
+msgstr ""
+
+#: tmainform.rxdbgrid1.columns[63].title.caption
+msgid "Старт 8|Старт"
+msgstr ""
+
+#: tmainform.rxdbgrid1.columns[64].title.caption
+msgid "Старт 8|Финиш"
+msgstr ""
+
+#: tmainform.rxdbgrid1.columns[65].title.caption
+msgid "Старт 8|Штраф"
+msgstr ""
+
+#: tmainform.rxdbgrid1.columns[66].title.caption
+msgid "Старт 8|Результат"
+msgstr ""
+
+#: tmainform.rxdbgrid1.columns[67].title.caption
+msgid "Старт 8|Отставание"
+msgstr ""
+
+#: tmainform.rxdbgrid1.columns[68].title.caption
+msgid "Старт 8|Место"
+msgstr ""
+
+#: tmainform.rxdbgrid1.columns[69].title.caption
+#, fuzzy
+msgctxt "tmainform.rxdbgrid1.columns[69].title.caption"
+msgid "Итог"
+msgstr "Итог"
+
 #: tmainform.rxdbgrid1.columns[6].title.caption
+#, fuzzy
+#| msgid "Никнейм"
 msgid "Никнейм"
 msgstr "Никнейм"
 
+#: tmainform.rxdbgrid1.columns[70].title.caption
+#, fuzzy
+msgctxt "tmainform.rxdbgrid1.columns[70].title.caption"
+msgid "Отставание"
+msgstr "Отставание"
+
+#: tmainform.rxdbgrid1.columns[71].title.caption
+msgid "Статус"
+msgstr ""
+
 #: tmainform.rxdbgrid1.columns[7].title.caption
+#, fuzzy
+#| msgid "Возраст"
 msgid "Возраст"
 msgstr "Возраст"
 
 #: tmainform.rxdbgrid1.columns[8].title.caption
+#, fuzzy
+#| msgid "Команда"
 msgctxt "tmainform.rxdbgrid1.columns[8].title.caption"
 msgid "Команда"
 msgstr "Команда"
 
 #: tmainform.rxdbgrid1.columns[9].title.caption
+#, fuzzy
+#| msgid "Город"
 msgctxt "tmainform.rxdbgrid1.columns[9].title.caption"
 msgid "Город"
 msgstr "Город"
@@ -1811,6 +2112,16 @@ msgstr "СУ 5"
 msgctxt "tmainform.sheetstage6.caption"
 msgid "СУ 6"
 msgstr "СУ 6"
+
+#: tmainform.sheetstage7.caption
+msgctxt "tmainform.sheetstage7.caption"
+msgid "СУ 7"
+msgstr ""
+
+#: tmainform.sheetstage8.caption
+msgctxt "tmainform.sheetstage8.caption"
+msgid "СУ 8"
+msgstr ""
 
 #: tmainform.sheetstagesum.caption
 msgctxt "tmainform.sheetstagesum.caption"
@@ -2399,3 +2710,4 @@ msgstr "Спецучасток"
 #: tstartlistform.timeedit1.text
 msgid "0"
 msgstr "0"
+

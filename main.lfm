@@ -1,9 +1,9 @@
 object MainForm: TMainForm
-  Left = 201
-  Height = 1140
-  Top = 10
+  Left = 244
+  Height = 982
+  Top = 30
   Width = 1644
-  ClientHeight = 1140
+  ClientHeight = 982
   ClientWidth = 1644
   Constraints.MinHeight = 600
   Constraints.MinWidth = 1350
@@ -20,7 +20,7 @@ object MainForm: TMainForm
   OnResize = FormResize
   object DebugSplitter: TSplitter
     Left = 1262
-    Height = 1064
+    Height = 906
     Top = 39
     Width = 8
     Align = alRight
@@ -31,12 +31,12 @@ object MainForm: TMainForm
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 1270
-    Height = 1064
+    Height = 906
     Top = 39
     Width = 374
     Align = alRight
     BevelOuter = bvNone
-    ClientHeight = 1064
+    ClientHeight = 906
     ClientWidth = 374
     Constraints.MinWidth = 374
     ParentFont = False
@@ -49,7 +49,7 @@ object MainForm: TMainForm
       AnchorSideRight.Side = asrBottom
       AnchorSideBottom.Control = ButtonSaveMemo
       Left = 0
-      Height = 1010
+      Height = 852
       Top = 0
       Width = 374
       Anchors = [akTop, akLeft, akRight, akBottom]
@@ -69,7 +69,7 @@ object MainForm: TMainForm
       AnchorSideBottom.Side = asrBottom
       Left = 128
       Height = 38
-      Top = 1018
+      Top = 860
       Width = 112
       Anchors = [akLeft, akBottom]
       BorderSpacing.Around = 8
@@ -85,7 +85,7 @@ object MainForm: TMainForm
       AnchorSideBottom.Side = asrBottom
       Left = 8
       Height = 38
-      Top = 1018
+      Top = 860
       Width = 112
       Anchors = [akLeft, akBottom]
       BorderSpacing.Around = 8
@@ -164,7 +164,7 @@ object MainForm: TMainForm
   object StatusBarPanel: TPanel
     Left = 0
     Height = 37
-    Top = 1103
+    Top = 945
     Width = 1644
     Align = alBottom
     AutoSize = True
@@ -231,22 +231,22 @@ object MainForm: TMainForm
   end
   object MainPanel: TPanel
     Left = 0
-    Height = 1064
+    Height = 906
     Top = 39
     Width = 1262
     Align = alClient
-    ClientHeight = 1064
+    ClientHeight = 906
     ClientWidth = 1262
     TabOrder = 4
     object EditPanel: TPanel
       Left = 909
-      Height = 1062
+      Height = 904
       Top = 1
       Width = 352
       Align = alRight
       AutoSize = True
       BevelOuter = bvNone
-      ClientHeight = 1062
+      ClientHeight = 904
       ClientWidth = 352
       Constraints.MinWidth = 352
       ParentFont = False
@@ -259,7 +259,7 @@ object MainForm: TMainForm
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = Splitter1
         Left = 0
-        Height = 264
+        Height = 214
         Top = 68
         Width = 352
         ColumnDefValues.BlobText = '(данные)'
@@ -380,7 +380,7 @@ object MainForm: TMainForm
         Cursor = crVSplit
         Left = 0
         Height = 8
-        Top = 332
+        Top = 282
         Width = 352
         Align = alNone
         Anchors = [akLeft, akRight]
@@ -393,7 +393,7 @@ object MainForm: TMainForm
         Cursor = crVSplit
         Left = 0
         Height = 8
-        Top = 798
+        Top = 679
         Width = 352
         Align = alNone
         Anchors = [akLeft, akRight]
@@ -407,12 +407,12 @@ object MainForm: TMainForm
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = Splitter2
         Left = 0
-        Height = 458
-        Top = 340
+        Height = 389
+        Top = 290
         Width = 352
         Anchors = [akTop, akLeft, akRight, akBottom]
         BevelOuter = bvNone
-        ClientHeight = 458
+        ClientHeight = 389
         ClientWidth = 352
         Constraints.MinHeight = 300
         ParentFont = False
@@ -424,7 +424,7 @@ object MainForm: TMainForm
           AnchorSideRight.Side = asrBottom
           AnchorSideBottom.Control = ButtonSetFinish
           Left = 0
-          Height = 407
+          Height = 338
           Top = 0
           Width = 352
           Anchors = [akTop, akLeft, akRight, akBottom]
@@ -464,7 +464,7 @@ object MainForm: TMainForm
           AnchorSideBottom.Side = asrBottom
           Left = 8
           Height = 35
-          Top = 415
+          Top = 346
           Width = 101
           Anchors = [akLeft, akBottom]
           AutoSize = True
@@ -482,7 +482,7 @@ object MainForm: TMainForm
           AnchorSideBottom.Side = asrBottom
           Left = 117
           Height = 35
-          Top = 415
+          Top = 346
           Width = 98
           Action = AcSetFinish
           Anchors = [akLeft, akBottom]
@@ -502,12 +502,12 @@ object MainForm: TMainForm
         AnchorSideBottom.Control = EditPanel
         AnchorSideBottom.Side = asrBottom
         Left = 0
-        Height = 256
-        Top = 806
+        Height = 217
+        Top = 687
         Width = 352
         Anchors = [akTop, akLeft, akRight, akBottom]
         Caption = 'Время от стартовой отсечки'
-        ClientHeight = 226
+        ClientHeight = 187
         ClientWidth = 348
         ParentFont = False
         TabOrder = 4
@@ -517,7 +517,7 @@ object MainForm: TMainForm
           AnchorSideBottom.Side = asrBottom
           Left = 8
           Height = 38
-          Top = 180
+          Top = 141
           Width = 112
           Action = AcLoRaClear
           Anchors = [akLeft, akBottom]
@@ -532,7 +532,7 @@ object MainForm: TMainForm
           AnchorSideRight.Side = asrBottom
           AnchorSideBottom.Control = ButtonLoRaClear
           Left = 0
-          Height = 172
+          Height = 133
           Hint = 'Двойной клик на строке с нужной поправкой заносит её в основную таблицу'
           Top = 0
           Width = 348
@@ -683,10 +683,10 @@ object MainForm: TMainForm
         ChildSizing.ShrinkHorizontal = crsHomogenousChildResize
         ChildSizing.ShrinkVertical = crsHomogenousChildResize
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
-        ChildSizing.ControlsPerLine = 6
+        ChildSizing.ControlsPerLine = 8
         ClientHeight = 38
         ClientWidth = 348
-        Columns = 6
+        Columns = 8
         Constraints.MaxHeight = 68
         Constraints.MinHeight = 68
         ItemIndex = 0
@@ -697,6 +697,8 @@ object MainForm: TMainForm
           '4'
           '5'
           '6'
+          '7'
+          '8'
         )
         ParentFont = False
         TabOrder = 5
@@ -705,7 +707,7 @@ object MainForm: TMainForm
     end
     object PageControl1: TPageControl
       Left = 1
-      Height = 1062
+      Height = 904
       Top = 1
       Width = 908
       ActivePage = TabSheet1
@@ -715,19 +717,19 @@ object MainForm: TMainForm
       TabOrder = 1
       object TabSheet1: TTabSheet
         Caption = 'Стартовый'
-        ClientHeight = 1024
+        ClientHeight = 866
         ClientWidth = 900
         ParentFont = False
         object TabSheetMainPanel: TPanel
           AnchorSideRight.Control = DebugSplitter
           AnchorSideRight.Side = asrBottom
           Left = 0
-          Height = 1024
+          Height = 866
           Top = 0
           Width = 900
           Align = alClient
           BevelOuter = bvNone
-          ClientHeight = 1024
+          ClientHeight = 866
           ClientWidth = 900
           Constraints.MinWidth = 720
           ParentFont = False
@@ -745,7 +747,7 @@ object MainForm: TMainForm
           end
           object RxDBGrid1: TMyRxDBGrid
             Left = 0
-            Height = 1024
+            Height = 866
             Top = 0
             Width = 900
             ColumnDefValues.BlobText = '(данные)'
@@ -785,7 +787,6 @@ object MainForm: TMainForm
               end            
               item
                 Alignment = taCenter
-                ReadOnly = True
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Место'
@@ -820,8 +821,9 @@ object MainForm: TMainForm
               item
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'Rfid'
-                Width = 8
+                Title.Caption = 'rfid'
+                Width = 0
+                Visible = False
                 FieldName = 'rfid'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -851,7 +853,8 @@ object MainForm: TMainForm
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Никнейм'
-                Width = 120
+                Width = 0
+                Visible = False
                 FieldName = 'nickname'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -863,11 +866,10 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
-                Alignment = taRightJustify
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Возраст'
-                Width = 8
+                Visible = False
                 FieldName = 'age'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -882,7 +884,8 @@ object MainForm: TMainForm
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Команда'
-                Width = 8
+                Width = 0
+                Visible = False
                 FieldName = 'team'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -897,7 +900,8 @@ object MainForm: TMainForm
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Город'
-                Width = 8
+                Width = 0
+                Visible = False
                 FieldName = 'city'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -912,7 +916,7 @@ object MainForm: TMainForm
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Телефон'
-                Width = 8
+                Visible = False
                 FieldName = 'phone'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -927,7 +931,7 @@ object MainForm: TMainForm
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Емейл'
-                Width = 8
+                Visible = False
                 FieldName = 'email'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -942,7 +946,8 @@ object MainForm: TMainForm
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Комментарий'
-                Width = 8
+                Width = 0
+                Visible = False
                 FieldName = 'comment'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -957,8 +962,8 @@ object MainForm: TMainForm
                 Alignment = taRightJustify
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 1|Поправка'
-                Width = 96
+                Title.Caption = 'Старт 1|Поправка'
+                Width = 100
                 FieldName = 'correction1'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -968,18 +973,13 @@ object MainForm: TMainForm
                 Filter.EmptyFont.Style = [fsItalic]
                 Filter.ItemIndex = -1
                 Footers = <>
-                KeyList.Strings = (
-                  '1=DNF'
-                  '2=DNS'
-                  '3=DSQ'
-                )
               end            
               item
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 1|Старт'
-                Width = 112
+                Title.Caption = 'Старт 1|Старт'
+                Width = 100
                 FieldName = 'starttime1'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -994,8 +994,8 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 1|Финиш'
-                Width = 112
+                Title.Caption = 'Старт 1|Финиш'
+                Width = 120
                 FieldName = 'finishtime1'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1010,8 +1010,8 @@ object MainForm: TMainForm
                 Alignment = taRightJustify
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 1|Штраф'
-                Width = 96
+                Title.Caption = 'Старт 1|Штраф'
+                Width = 68
                 FieldName = 'penalty1'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1021,19 +1021,13 @@ object MainForm: TMainForm
                 Filter.EmptyFont.Style = [fsItalic]
                 Filter.ItemIndex = -1
                 Footers = <>
-                KeyList.Strings = (
-                  '1=DNF'
-                  '2=DNS'
-                  '3=DSQ'
-                )
               end            
               item
                 Alignment = taCenter
                 Color = 9568145
-                ReadOnly = True
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 1|Результат'
+                Title.Caption = 'Старт 1|Результат'
                 Width = 120
                 FieldName = 'result1'
                 EditButtons = <>
@@ -1049,8 +1043,8 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 1|Отставание'
-                Width = 112
+                Title.Caption = 'Старт 1|Отставание'
+                Width = 120
                 FieldName = 'diffleader1'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1065,7 +1059,7 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 1|Место'
+                Title.Caption = 'Старт 1|Место'
                 Width = 68
                 FieldName = 'place1'
                 EditButtons = <>
@@ -1081,8 +1075,8 @@ object MainForm: TMainForm
                 Alignment = taRightJustify
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 2|Поправка'
-                Width = 96
+                Title.Caption = 'Старт 2|Поправка'
+                Width = 100
                 FieldName = 'correction2'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1097,8 +1091,8 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 2|Старт'
-                Width = 112
+                Title.Caption = 'Старт 2|Старт'
+                Width = 100
                 FieldName = 'starttime2'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1113,8 +1107,8 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 2|Финиш'
-                Width = 112
+                Title.Caption = 'Старт 2|Финиш'
+                Width = 120
                 FieldName = 'finishtime2'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1126,10 +1120,11 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
+                Alignment = taRightJustify
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 2|Штраф'
-                Width = 96
+                Title.Caption = 'Старт 2|Штраф'
+                Width = 100
                 FieldName = 'penalty2'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1145,7 +1140,7 @@ object MainForm: TMainForm
                 Color = 9568145
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 2|Результат'
+                Title.Caption = 'Старт 2|Результат'
                 Width = 120
                 FieldName = 'result2'
                 EditButtons = <>
@@ -1161,8 +1156,8 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 2|Отставание'
-                Width = 112
+                Title.Caption = 'Старт 2|Отставание'
+                Width = 120
                 FieldName = 'diffleader2'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1177,7 +1172,7 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 2|Место'
+                Title.Caption = 'Старт 2|Место'
                 Width = 68
                 FieldName = 'place2'
                 EditButtons = <>
@@ -1193,8 +1188,8 @@ object MainForm: TMainForm
                 Alignment = taRightJustify
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 3|Поправка'
-                Width = 96
+                Title.Caption = 'Старт 3|Поправка'
+                Width = 100
                 FieldName = 'correction3'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1209,8 +1204,8 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 3|Старт'
-                Width = 112
+                Title.Caption = 'Старт 3|Старт'
+                Width = 100
                 FieldName = 'starttime3'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1225,8 +1220,8 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 3|Финиш'
-                Width = 112
+                Title.Caption = 'Старт 3|Финиш'
+                Width = 120
                 FieldName = 'finishtime3'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1238,10 +1233,11 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
+                Alignment = taRightJustify
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 3|Штраф'
-                Width = 96
+                Title.Caption = 'Старт 3|Штраф'
+                Width = 100
                 FieldName = 'penalty3'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1257,7 +1253,7 @@ object MainForm: TMainForm
                 Color = 9568145
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 3|Результат'
+                Title.Caption = 'Старт 3|Результат'
                 Width = 120
                 FieldName = 'result3'
                 EditButtons = <>
@@ -1273,8 +1269,8 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 3|Отставание'
-                Width = 112
+                Title.Caption = 'Старт 3|Отставание'
+                Width = 120
                 FieldName = 'diffleader3'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1289,7 +1285,7 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 3|Место'
+                Title.Caption = 'Старт 3|Место'
                 Width = 68
                 FieldName = 'place3'
                 EditButtons = <>
@@ -1305,8 +1301,8 @@ object MainForm: TMainForm
                 Alignment = taRightJustify
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 4|Поправка'
-                Width = 96
+                Title.Caption = 'Старт 4|Поправка'
+                Width = 100
                 FieldName = 'correction4'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1321,8 +1317,8 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 4|Старт'
-                Width = 112
+                Title.Caption = 'Старт 4|Старт'
+                Width = 100
                 FieldName = 'starttime4'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1337,8 +1333,8 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 4|Финиш'
-                Width = 112
+                Title.Caption = 'Старт 4|Финиш'
+                Width = 120
                 FieldName = 'finishtime4'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1350,10 +1346,11 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
+                Alignment = taRightJustify
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 4|Штраф'
-                Width = 96
+                Title.Caption = 'Старт 4|Штраф'
+                Width = 100
                 FieldName = 'penalty4'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1369,7 +1366,7 @@ object MainForm: TMainForm
                 Color = 9568145
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 4|Результат'
+                Title.Caption = 'Старт 4|Результат'
                 Width = 120
                 FieldName = 'result4'
                 EditButtons = <>
@@ -1385,8 +1382,8 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 4|Отставание'
-                Width = 112
+                Title.Caption = 'Старт 4|Отставание'
+                Width = 120
                 FieldName = 'diffleader4'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1401,7 +1398,7 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 4|Место'
+                Title.Caption = 'Старт 4|Место'
                 Width = 68
                 FieldName = 'place4'
                 EditButtons = <>
@@ -1417,8 +1414,8 @@ object MainForm: TMainForm
                 Alignment = taRightJustify
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 5|Поправка'
-                Width = 96
+                Title.Caption = 'Старт 5|Поправка'
+                Width = 100
                 FieldName = 'correction5'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1433,8 +1430,8 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 5|Старт'
-                Width = 112
+                Title.Caption = 'Старт 5|Старт'
+                Width = 100
                 FieldName = 'starttime5'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1449,8 +1446,8 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 5|Финиш'
-                Width = 112
+                Title.Caption = 'Старт 5|Финиш'
+                Width = 120
                 FieldName = 'finishtime5'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1462,10 +1459,11 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
+                Alignment = taRightJustify
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 5|Штраф'
-                Width = 96
+                Title.Caption = 'Старт 5|Штраф'
+                Width = 100
                 FieldName = 'penalty5'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1481,7 +1479,7 @@ object MainForm: TMainForm
                 Color = 9568145
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 5|Результат'
+                Title.Caption = 'Старт 5|Результат'
                 Width = 120
                 FieldName = 'result5'
                 EditButtons = <>
@@ -1497,8 +1495,8 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 5|Отставание'
-                Width = 112
+                Title.Caption = 'Старт 5|Отставание'
+                Width = 120
                 FieldName = 'diffleader5'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1513,7 +1511,7 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 5|Место'
+                Title.Caption = 'Старт 5|Место'
                 Width = 68
                 FieldName = 'place5'
                 EditButtons = <>
@@ -1529,8 +1527,8 @@ object MainForm: TMainForm
                 Alignment = taRightJustify
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 6|Поправка'
-                Width = 96
+                Title.Caption = 'Старт 6|Поправка'
+                Width = 100
                 FieldName = 'correction6'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1545,8 +1543,8 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 6|Старт'
-                Width = 112
+                Title.Caption = 'Старт 6|Старт'
+                Width = 100
                 FieldName = 'starttime6'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1561,8 +1559,8 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 6|Финиш'
-                Width = 112
+                Title.Caption = 'Старт 6|Финиш'
+                Width = 120
                 FieldName = 'finishtime6'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1574,10 +1572,11 @@ object MainForm: TMainForm
                 Footers = <>
               end            
               item
+                Alignment = taRightJustify
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 6|Штраф'
-                Width = 96
+                Title.Caption = 'Старт 6|Штраф'
+                Width = 100
                 FieldName = 'penalty6'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1593,7 +1592,7 @@ object MainForm: TMainForm
                 Color = 9568145
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 6|Результат'
+                Title.Caption = 'Старт 6|Результат'
                 Width = 120
                 FieldName = 'result6'
                 EditButtons = <>
@@ -1609,8 +1608,8 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 6|Отставание'
-                Width = 112
+                Title.Caption = 'Старт 6|Отставание'
+                Width = 120
                 FieldName = 'diffleader6'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1625,9 +1624,235 @@ object MainForm: TMainForm
                 Alignment = taCenter
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
-                Title.Caption = 'СУ 6|Место'
+                Title.Caption = 'Старт 6|Место'
                 Width = 68
                 FieldName = 'place6'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taCenter
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Старт 7|Поправка'
+                Width = 100
+                FieldName = 'correction7'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taCenter
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Старт 7|Старт'
+                Width = 100
+                FieldName = 'starttime7'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taCenter
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Старт 7|Финиш'
+                Width = 120
+                FieldName = 'finishtime7'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taRightJustify
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Старт 7|Штраф'
+                Width = 100
+                FieldName = 'penalty7'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taCenter
+                Color = 9568145
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Старт 7|Результат'
+                Width = 120
+                FieldName = 'result7'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taCenter
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Старт 7|Отставание'
+                Width = 120
+                FieldName = 'diffleader7'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taCenter
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Старт 7|Место'
+                Width = 68
+                FieldName = 'place7'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taRightJustify
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Старт 8|Поправка'
+                Width = 100
+                FieldName = 'correction8'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taCenter
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Старт 8|Старт'
+                Width = 100
+                FieldName = 'starttime8'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taCenter
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Старт 8|Финиш'
+                Width = 120
+                FieldName = 'finishtime8'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taRightJustify
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Старт 8|Штраф'
+                Width = 100
+                FieldName = 'penalty8'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taCenter
+                Color = 9568145
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Старт 8|Результат'
+                Width = 120
+                FieldName = 'result8'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taCenter
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Старт 8|Отставание'
+                Width = 120
+                FieldName = 'diffleader8'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taCenter
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Старт 8|Место'
+                Width = 68
+                FieldName = 'place8'
                 EditButtons = <>
                 Filter.DropDownRows = 0
                 Filter.EmptyValue = '(Пусто)'
@@ -1643,7 +1868,7 @@ object MainForm: TMainForm
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Итог'
-                Width = 120
+                Width = 100
                 FieldName = 'sumresult'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1659,7 +1884,7 @@ object MainForm: TMainForm
                 Title.Alignment = taCenter
                 Title.Orientation = toHorizontal
                 Title.Caption = 'Отставание'
-                Width = 112
+                Width = 100
                 FieldName = 'sumdiffleader'
                 EditButtons = <>
                 Filter.DropDownRows = 0
@@ -1766,7 +1991,7 @@ object MainForm: TMainForm
       end
       object TabSheet2: TTabSheet
         Caption = 'Статистика'
-        ClientHeight = 1024
+        ClientHeight = 866
         ClientWidth = 900
         ParentFont = False
         OnShow = TabSheet2Show
@@ -2092,12 +2317,12 @@ object MainForm: TMainForm
       end
       object TabSheet3: TTabSheet
         Caption = 'Результаты'
-        ClientHeight = 1024
+        ClientHeight = 866
         ClientWidth = 900
         ParentFont = False
         object SheetStage: TPageControl
           Left = 0
-          Height = 1024
+          Height = 866
           Top = 0
           Width = 900
           ActivePage = SheetStage1
@@ -2107,12 +2332,12 @@ object MainForm: TMainForm
           TabOrder = 0
           object SheetStage1: TTabSheet
             Caption = 'СУ 1'
-            ClientHeight = 986
+            ClientHeight = 828
             ClientWidth = 892
             ParentFont = False
             object GridResult1: TRxDBGrid
               Left = 0
-              Height = 986
+              Height = 828
               Top = 0
               Width = 892
               ColumnDefValues.BlobText = '(данные)'
@@ -2305,12 +2530,12 @@ object MainForm: TMainForm
           end
           object SheetStage2: TTabSheet
             Caption = 'СУ 2'
-            ClientHeight = 986
+            ClientHeight = 828
             ClientWidth = 892
             ParentFont = False
             object GridResult2: TRxDBGrid
               Left = 0
-              Height = 986
+              Height = 828
               Top = 0
               Width = 892
               ColumnDefValues.BlobText = '(данные)'
@@ -2503,12 +2728,12 @@ object MainForm: TMainForm
           end
           object SheetStage3: TTabSheet
             Caption = 'СУ 3'
-            ClientHeight = 986
+            ClientHeight = 828
             ClientWidth = 892
             ParentFont = False
             object GridResult3: TRxDBGrid
               Left = 0
-              Height = 986
+              Height = 828
               Top = 0
               Width = 892
               ColumnDefValues.BlobText = '(данные)'
@@ -2701,12 +2926,12 @@ object MainForm: TMainForm
           end
           object SheetStage4: TTabSheet
             Caption = 'СУ 4'
-            ClientHeight = 986
+            ClientHeight = 828
             ClientWidth = 892
             ParentFont = False
             object GridResult4: TRxDBGrid
               Left = 0
-              Height = 986
+              Height = 828
               Top = 0
               Width = 892
               ColumnDefValues.BlobText = '(данные)'
@@ -2899,12 +3124,12 @@ object MainForm: TMainForm
           end
           object SheetStage5: TTabSheet
             Caption = 'СУ 5'
-            ClientHeight = 986
+            ClientHeight = 828
             ClientWidth = 892
             ParentFont = False
             object GridResult5: TRxDBGrid
               Left = 0
-              Height = 986
+              Height = 828
               Top = 0
               Width = 892
               ColumnDefValues.BlobText = '(данные)'
@@ -3097,12 +3322,12 @@ object MainForm: TMainForm
           end
           object SheetStage6: TTabSheet
             Caption = 'СУ 6'
-            ClientHeight = 986
+            ClientHeight = 828
             ClientWidth = 892
             ParentFont = False
             object GridResult6: TRxDBGrid
               Left = 0
-              Height = 986
+              Height = 828
               Top = 0
               Width = 892
               ColumnDefValues.BlobText = '(данные)'
@@ -3293,14 +3518,408 @@ object MainForm: TMainForm
               TabOrder = 0
             end
           end
-          object SheetStageSum: TTabSheet
-            Caption = 'Общий'
-            ClientHeight = 986
+          object SheetStage7: TTabSheet
+            Caption = 'СУ 7'
+            ClientHeight = 828
             ClientWidth = 892
-            ParentFont = False
+            object GridResult7: TRxDBGrid
+              Left = 0
+              Height = 828
+              Top = 0
+              Width = 892
+              ColumnDefValues.BlobText = '(данные)'
+              TitleButtons = False
+              AutoSort = True
+              Columns = <              
+                item
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Категория'
+                  Width = 150
+                  FieldName = 'category'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Место'
+                  Width = 68
+                  FieldName = 'place7'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
+                  Font.Style = [fsBold]
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Номер'
+                  Width = 68
+                  FieldName = 'number'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Имя'
+                  Width = 226
+                  FieldName = 'name'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Штраф'
+                  Width = 96
+                  FieldName = 'penalty7'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
+                  Font.Style = [fsBold]
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Результат'
+                  Width = 150
+                  FieldName = 'result7'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Отставание'
+                  Width = 112
+                  FieldName = 'diffleader7'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end>
+              KeyStrokes = <              
+                item
+                  Command = rxgcShowFindDlg
+                  ShortCut = 16454
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcShowColumnsDlg
+                  ShortCut = 16471
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcShowFilterDlg
+                  ShortCut = 16468
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcShowSortDlg
+                  ShortCut = 16467
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcShowQuickFilter
+                  ShortCut = 16465
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcHideQuickFilter
+                  ShortCut = 16456
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcSelectAll
+                  ShortCut = 16449
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcDeSelectAll
+                  ShortCut = 16429
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcInvertSelection
+                  ShortCut = 16426
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcOptimizeColumnsWidth
+                  ShortCut = 16427
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcCopyCellValue
+                  ShortCut = 16451
+                  Enabled = True
+                end>
+              FooterOptions.DrawFullLine = False
+              SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+              SearchOptions.FromStart = False
+              OptionsRx = []
+              Align = alClient
+              Color = clWindow
+              DrawFullLine = False
+              SelectedColor = clHighlight
+              DataSource = ResultDataSource7
+              FixedCols = 0
+              Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
+              ParentFont = False
+              ReadOnly = True
+              Scrollbars = ssAutoBoth
+              TabOrder = 0
+            end
+          end
+          object SheetStage8: TTabSheet
+            Caption = 'СУ 8'
+            ClientHeight = 828
+            ClientWidth = 892
             object GridResult8: TRxDBGrid
               Left = 0
-              Height = 986
+              Height = 828
+              Top = 0
+              Width = 892
+              ColumnDefValues.BlobText = '(данные)'
+              TitleButtons = False
+              AutoSort = True
+              Columns = <              
+                item
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Категория'
+                  Width = 150
+                  FieldName = 'category'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Место'
+                  Width = 68
+                  FieldName = 'place8'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
+                  Font.Style = [fsBold]
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Номер'
+                  Width = 68
+                  FieldName = 'number'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Имя'
+                  Width = 226
+                  FieldName = 'name'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Штраф'
+                  Width = 96
+                  FieldName = 'penalty8'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
+                  Font.Style = [fsBold]
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Результат'
+                  Width = 150
+                  FieldName = 'result8'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Отставание'
+                  Width = 112
+                  FieldName = 'diffleader8'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end>
+              KeyStrokes = <              
+                item
+                  Command = rxgcShowFindDlg
+                  ShortCut = 16454
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcShowColumnsDlg
+                  ShortCut = 16471
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcShowFilterDlg
+                  ShortCut = 16468
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcShowSortDlg
+                  ShortCut = 16467
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcShowQuickFilter
+                  ShortCut = 16465
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcHideQuickFilter
+                  ShortCut = 16456
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcSelectAll
+                  ShortCut = 16449
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcDeSelectAll
+                  ShortCut = 16429
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcInvertSelection
+                  ShortCut = 16426
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcOptimizeColumnsWidth
+                  ShortCut = 16427
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcCopyCellValue
+                  ShortCut = 16451
+                  Enabled = True
+                end>
+              FooterOptions.DrawFullLine = False
+              SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+              SearchOptions.FromStart = False
+              OptionsRx = []
+              Align = alClient
+              Color = clWindow
+              DrawFullLine = False
+              SelectedColor = clHighlight
+              DataSource = ResultDataSource8
+              FixedCols = 0
+              Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
+              ParentFont = False
+              ReadOnly = True
+              Scrollbars = ssAutoBoth
+              TabOrder = 0
+            end
+          end
+          object SheetStageSum: TTabSheet
+            Caption = 'Общий'
+            ClientHeight = 828
+            ClientWidth = 892
+            ParentFont = False
+            object GridResultStageSum: TRxDBGrid
+              Left = 0
+              Height = 828
               Top = 0
               Width = 892
               ColumnDefValues.BlobText = '(данные)'
@@ -3468,6 +4087,38 @@ object MainForm: TMainForm
                 end              
                 item
                   Alignment = taCenter
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'СУ 7'
+                  Width = 150
+                  FieldName = 'result7'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'СУ 8'
+                  Width = 150
+                  FieldName = 'result8'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
                   Font.Style = [fsBold]
                   Title.Alignment = taCenter
                   Title.Orientation = toHorizontal
@@ -3563,7 +4214,7 @@ object MainForm: TMainForm
               Color = clWindow
               DrawFullLine = False
               SelectedColor = clHighlight
-              DataSource = ResultDataSource8
+              DataSource = ResultDataSourceStageSum
               FixedCols = 0
               Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
               ParentFont = False
@@ -3574,12 +4225,12 @@ object MainForm: TMainForm
           end
           object SheetStageTotal: TTabSheet
             Caption = 'Сквозной'
-            ClientHeight = 986
+            ClientHeight = 828
             ClientWidth = 892
             ParentFont = False
-            object GridResult7: TRxDBGrid
+            object GridResultStageTotal: TRxDBGrid
               Left = 0
-              Height = 986
+              Height = 828
               Top = 0
               Width = 892
               ColumnDefValues.BlobText = '(данные)'
@@ -3762,7 +4413,7 @@ object MainForm: TMainForm
               Color = clWindow
               DrawFullLine = False
               SelectedColor = clHighlight
-              DataSource = ResultDataSource7
+              DataSource = ResultDataSourceStageTotal
               FixedCols = 0
               Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
               ParentFont = False
@@ -4594,10 +5245,20 @@ object MainForm: TMainForm
       ReadOnly = False
       Required = False
     end
+    object MainDataset1status1: TStringField
+      FieldKind = fkData
+      FieldName = 'status1'
+      Index = 20
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
     object MainDataset1starttime2: TStringField
       FieldKind = fkData
       FieldName = 'starttime2'
-      Index = 20
+      Index = 21
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4608,7 +5269,7 @@ object MainForm: TMainForm
     object MainDataset1correction2: TStringField
       FieldKind = fkData
       FieldName = 'correction2'
-      Index = 21
+      Index = 22
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4620,7 +5281,7 @@ object MainForm: TMainForm
     object MainDataset1finishtime2: TStringField
       FieldKind = fkData
       FieldName = 'finishtime2'
-      Index = 22
+      Index = 23
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4631,7 +5292,7 @@ object MainForm: TMainForm
     object MainDataset1penalty2: TStringField
       FieldKind = fkData
       FieldName = 'penalty2'
-      Index = 23
+      Index = 24
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4643,7 +5304,7 @@ object MainForm: TMainForm
     object MainDataset1result2: TStringField
       FieldKind = fkData
       FieldName = 'result2'
-      Index = 24
+      Index = 25
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4654,7 +5315,7 @@ object MainForm: TMainForm
     object MainDataset1diffleader2: TStringField
       FieldKind = fkData
       FieldName = 'diffleader2'
-      Index = 25
+      Index = 26
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4665,16 +5326,26 @@ object MainForm: TMainForm
     object MainDataset1place2: TLongintField
       FieldKind = fkData
       FieldName = 'place2'
-      Index = 26
+      Index = 27
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
     end
+    object MainDataset1status2: TStringField
+      FieldKind = fkData
+      FieldName = 'status2'
+      Index = 28
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
     object MainDataset1starttime3: TStringField
       FieldKind = fkData
       FieldName = 'starttime3'
-      Index = 27
+      Index = 29
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4685,7 +5356,7 @@ object MainForm: TMainForm
     object MainDataset1correction3: TStringField
       FieldKind = fkData
       FieldName = 'correction3'
-      Index = 28
+      Index = 30
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4697,7 +5368,7 @@ object MainForm: TMainForm
     object MainDataset1finishtime3: TStringField
       FieldKind = fkData
       FieldName = 'finishtime3'
-      Index = 29
+      Index = 31
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4708,7 +5379,7 @@ object MainForm: TMainForm
     object MainDataset1penalty3: TStringField
       FieldKind = fkData
       FieldName = 'penalty3'
-      Index = 30
+      Index = 32
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4720,7 +5391,7 @@ object MainForm: TMainForm
     object MainDataset1result3: TStringField
       FieldKind = fkData
       FieldName = 'result3'
-      Index = 31
+      Index = 33
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4731,7 +5402,7 @@ object MainForm: TMainForm
     object MainDataset1diffleader3: TStringField
       FieldKind = fkData
       FieldName = 'diffleader3'
-      Index = 32
+      Index = 34
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4742,16 +5413,26 @@ object MainForm: TMainForm
     object MainDataset1place3: TLongintField
       FieldKind = fkData
       FieldName = 'place3'
-      Index = 33
+      Index = 35
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
     end
+    object MainDataset1status3: TStringField
+      FieldKind = fkData
+      FieldName = 'status3'
+      Index = 36
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
     object MainDataset1starttime4: TStringField
       FieldKind = fkData
       FieldName = 'starttime4'
-      Index = 34
+      Index = 37
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4762,7 +5443,7 @@ object MainForm: TMainForm
     object MainDataset1correction4: TStringField
       FieldKind = fkData
       FieldName = 'correction4'
-      Index = 35
+      Index = 38
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4774,7 +5455,7 @@ object MainForm: TMainForm
     object MainDataset1finishtime4: TStringField
       FieldKind = fkData
       FieldName = 'finishtime4'
-      Index = 36
+      Index = 39
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4785,7 +5466,7 @@ object MainForm: TMainForm
     object MainDataset1penalty4: TStringField
       FieldKind = fkData
       FieldName = 'penalty4'
-      Index = 37
+      Index = 40
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4797,7 +5478,7 @@ object MainForm: TMainForm
     object MainDataset1result4: TStringField
       FieldKind = fkData
       FieldName = 'result4'
-      Index = 38
+      Index = 41
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4808,7 +5489,7 @@ object MainForm: TMainForm
     object MainDataset1diffleader4: TStringField
       FieldKind = fkData
       FieldName = 'diffleader4'
-      Index = 39
+      Index = 42
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4819,16 +5500,26 @@ object MainForm: TMainForm
     object MainDataset1place4: TLongintField
       FieldKind = fkData
       FieldName = 'place4'
-      Index = 40
+      Index = 43
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
     end
+    object MainDataset1status4: TStringField
+      FieldKind = fkData
+      FieldName = 'status4'
+      Index = 44
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
     object MainDataset1starttime5: TStringField
       FieldKind = fkData
       FieldName = 'starttime5'
-      Index = 41
+      Index = 45
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4839,7 +5530,7 @@ object MainForm: TMainForm
     object MainDataset1correction5: TStringField
       FieldKind = fkData
       FieldName = 'correction5'
-      Index = 42
+      Index = 46
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4851,7 +5542,7 @@ object MainForm: TMainForm
     object MainDataset1finishtime5: TStringField
       FieldKind = fkData
       FieldName = 'finishtime5'
-      Index = 43
+      Index = 47
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4862,7 +5553,7 @@ object MainForm: TMainForm
     object MainDataset1penalty5: TStringField
       FieldKind = fkData
       FieldName = 'penalty5'
-      Index = 44
+      Index = 48
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4874,7 +5565,7 @@ object MainForm: TMainForm
     object MainDataset1result5: TStringField
       FieldKind = fkData
       FieldName = 'result5'
-      Index = 45
+      Index = 49
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4885,7 +5576,7 @@ object MainForm: TMainForm
     object MainDataset1diffleader5: TStringField
       FieldKind = fkData
       FieldName = 'diffleader5'
-      Index = 46
+      Index = 50
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4896,16 +5587,26 @@ object MainForm: TMainForm
     object MainDataset1place5: TLongintField
       FieldKind = fkData
       FieldName = 'place5'
-      Index = 47
+      Index = 51
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
     end
+    object MainDataset1status5: TStringField
+      FieldKind = fkData
+      FieldName = 'status5'
+      Index = 52
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
     object MainDataset1starttime6: TStringField
       FieldKind = fkData
       FieldName = 'starttime6'
-      Index = 48
+      Index = 53
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4916,7 +5617,7 @@ object MainForm: TMainForm
     object MainDataset1correction6: TStringField
       FieldKind = fkData
       FieldName = 'correction6'
-      Index = 49
+      Index = 54
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4928,7 +5629,7 @@ object MainForm: TMainForm
     object MainDataset1finishtime6: TStringField
       FieldKind = fkData
       FieldName = 'finishtime6'
-      Index = 50
+      Index = 55
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4939,7 +5640,7 @@ object MainForm: TMainForm
     object MainDataset1penalty6: TStringField
       FieldKind = fkData
       FieldName = 'penalty6'
-      Index = 51
+      Index = 56
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4951,7 +5652,7 @@ object MainForm: TMainForm
     object MainDataset1result6: TStringField
       FieldKind = fkData
       FieldName = 'result6'
-      Index = 52
+      Index = 57
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4962,7 +5663,7 @@ object MainForm: TMainForm
     object MainDataset1diffleader6: TStringField
       FieldKind = fkData
       FieldName = 'diffleader6'
-      Index = 53
+      Index = 58
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4973,7 +5674,177 @@ object MainForm: TMainForm
     object MainDataset1place6: TLongintField
       FieldKind = fkData
       FieldName = 'place6'
-      Index = 54
+      Index = 59
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object MainDataset1status6: TStringField
+      FieldKind = fkData
+      FieldName = 'status6'
+      Index = 60
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object MainDataset1starttime7: TStringField
+      FieldKind = fkData
+      FieldName = 'starttime7'
+      Index = 61
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnChange = RecalcResults
+    end
+    object MainDataset1correction7: TStringField
+      FieldKind = fkData
+      FieldName = 'correction7'
+      Index = 62
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnChange = RecalcResults
+      OnSetText = CheckCorrectionSetText
+    end
+    object MainDataset1finishtime7: TStringField
+      FieldKind = fkData
+      FieldName = 'finishtime7'
+      Index = 63
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnChange = RecalcResults
+    end
+    object MainDataset1penalty7: TStringField
+      FieldKind = fkData
+      FieldName = 'penalty7'
+      Index = 64
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnChange = RecalcResults
+      OnSetText = CheckPenaltySetText
+    end
+    object MainDataset1result7: TStringField
+      FieldKind = fkData
+      FieldName = 'result7'
+      Index = 65
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+    end
+    object MainDataset1diffleader7: TStringField
+      FieldKind = fkData
+      FieldName = 'diffleader7'
+      Index = 66
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+    end
+    object MainDataset1place7: TLongintField
+      FieldKind = fkData
+      FieldName = 'place7'
+      Index = 67
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object MainDataset1status7: TStringField
+      FieldKind = fkData
+      FieldName = 'status7'
+      Index = 68
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object MainDataset1starttime8: TStringField
+      FieldKind = fkData
+      FieldName = 'starttime8'
+      Index = 69
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnChange = RecalcResults
+    end
+    object MainDataset1correction8: TStringField
+      FieldKind = fkData
+      FieldName = 'correction8'
+      Index = 70
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnChange = RecalcResults
+      OnSetText = CheckCorrectionSetText
+    end
+    object MainDataset1finishtime8: TStringField
+      FieldKind = fkData
+      FieldName = 'finishtime8'
+      Index = 71
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnChange = RecalcResults
+    end
+    object MainDataset1penalty8: TStringField
+      FieldKind = fkData
+      FieldName = 'penalty8'
+      Index = 72
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnChange = RecalcResults
+      OnSetText = CheckPenaltySetText
+    end
+    object MainDataset1result8: TStringField
+      FieldKind = fkData
+      FieldName = 'result8'
+      Index = 73
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+    end
+    object MainDataset1diffleader8: TStringField
+      FieldKind = fkData
+      FieldName = 'diffleader8'
+      Index = 74
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+    end
+    object MainDataset1place8: TLongintField
+      FieldKind = fkData
+      FieldName = 'place8'
+      Index = 75
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object MainDataset1status8: TStringField
+      FieldKind = fkData
+      FieldName = 'status8'
+      Index = 76
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4982,7 +5853,7 @@ object MainForm: TMainForm
     object MainDataset1sumresult: TStringField
       FieldKind = fkData
       FieldName = 'sumresult'
-      Index = 55
+      Index = 77
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -4993,7 +5864,7 @@ object MainForm: TMainForm
     object MainDataset1sumdiffleader: TStringField
       FieldKind = fkData
       FieldName = 'sumdiffleader'
-      Index = 56
+      Index = 78
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
@@ -5004,12 +5875,41 @@ object MainForm: TMainForm
     object MainDataset1status: TStringField
       FieldKind = fkData
       FieldName = 'status'
-      Index = 57
+      Index = 79
       LookupCache = False
       ProviderFlags = [pfInUpdate, pfInWhere]
       ReadOnly = False
       Required = False
       OnGetText = MainDataset1statusGetText
+    end
+    object MainDataset1sumstages: TLongintField
+      FieldKind = fkData
+      FieldName = 'sumstages'
+      Index = 80
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object MainDataset1thrudiff: TStringField
+      FieldKind = fkData
+      FieldName = 'thrudiff'
+      Index = 81
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object MainDataset1thruplace: TStringField
+      FieldKind = fkData
+      FieldName = 'thruplace'
+      Index = 82
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
     end
   end
   object SQLite3Connection1: TSQLite3Connection
@@ -5225,7 +6125,7 @@ object MainForm: TMainForm
   end
   object ResultDataSource1: TDataSource
     DataSet = ResultDataset1
-    Left = 1019
+    Left = 1020
     Top = 152
   end
   object ResultDataset1: TSqlite3Dataset
@@ -5283,25 +6183,25 @@ object MainForm: TMainForm
     Left = 1019
     Top = 600
   end
-  object ResultDataset7: TSqlite3Dataset
+  object ResultDatasetStageTotal: TSqlite3Dataset
     TableName = 'main'
-    Left = 1092
-    Top = 684
+    Left = 1352
+    Top = 600
   end
-  object ResultDataSource7: TDataSource
-    DataSet = ResultDataset7
-    Left = 1020
-    Top = 684
+  object ResultDataSourceStageTotal: TDataSource
+    DataSet = ResultDatasetStageTotal
+    Left = 1280
+    Top = 600
   end
-  object ResultDataset8: TSqlite3Dataset
+  object ResultDatasetStageSum: TSqlite3Dataset
     TableName = 'main'
-    Left = 1092
-    Top = 768
+    Left = 1352
+    Top = 696
   end
-  object ResultDataSource8: TDataSource
-    DataSet = ResultDataset8
-    Left = 1020
-    Top = 768
+  object ResultDataSourceStageSum: TDataSource
+    DataSet = ResultDatasetStageSum
+    Left = 1280
+    Top = 696
   end
   object SQLite3Connection2: TSQLite3Connection
     Connected = False
@@ -6288,6 +7188,30 @@ object MainForm: TMainForm
         ExportedName = 'Место6'
       end    
       item
+        FieldName = 'result7'
+        ExportedName = 'Результат7'
+      end    
+      item
+        FieldName = 'diffleader7'
+        ExportedName = 'Отставание7'
+      end    
+      item
+        FieldName = 'place7'
+        ExportedName = 'Место7'
+      end    
+      item
+        FieldName = 'result8'
+        ExportedName = 'Результат8'
+      end    
+      item
+        FieldName = 'diffleader8'
+        ExportedName = 'Отставание8'
+      end    
+      item
+        FieldName = 'place8'
+        ExportedName = 'Место8'
+      end    
+      item
         FieldName = 'sumresult'
         ExportedName = 'Итог'
       end    
@@ -6311,5 +7235,25 @@ object MainForm: TMainForm
     OnTimer = BackupTimerTimer
     Left = 528
     Top = 264
+  end
+  object ResultDataSource7: TDataSource
+    DataSet = ResultDataset7
+    Left = 1019
+    Top = 680
+  end
+  object ResultDataSource8: TDataSource
+    DataSet = ResultDataset8
+    Left = 1016
+    Top = 768
+  end
+  object ResultDataset7: TSqlite3Dataset
+    TableName = 'main'
+    Left = 1092
+    Top = 680
+  end
+  object ResultDataset8: TSqlite3Dataset
+    TableName = 'main'
+    Left = 1092
+    Top = 768
   end
 end

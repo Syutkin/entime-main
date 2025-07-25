@@ -149,7 +149,7 @@ begin
   RxDBGridResults.Columns[4].Width := round(w * 0.07);
 
   w := RxDBGridCat1.Width;
-  for i := 1 to visiblecat do
+  for i := 1 to VISIBLECAT do
   begin
     (FindComponent('RxDBGridCat' + IntToStr(i)) as TRxDBGrid).Columns[0].Width :=
       round(w * 0.1);

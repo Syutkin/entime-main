@@ -15,6 +15,7 @@ type
   { TSettingsForm }
 
   TSettingsForm = class(TForm)
+    ActiveStageLabel: TLabel;
     ButtonLEDTest: TButton;
     ButtonTelegramTest: TButton;
     ButtonPanel1: TButtonPanel;
@@ -23,9 +24,9 @@ type
     CheckBoxHideZeroHour: TCheckBoxThemed;
     CheckBoxShowStageName: TCheckBoxThemed;
     CheckGroup1: TCheckGroup;
+    ComboBoxAStage: TComboBox;
     ComboBoxUpdateInterval: TComboBox;
     ComboBoxLanguage: TComboBox;
-    ComboBoxAStage: TComboBox;
     ComComboBox1: TComboBox;
     ComComboBox2: TComboBox;
     ComComboBox3: TComboBox;
@@ -96,14 +97,15 @@ type
     PanelCOMFinishTimeSettings: TPanel;
     RadioButtonCOMSetStr: TRadioButton;
     RadioButtonCOMSetTime: TRadioButton;
-    SUEdit4: TEdit;
-    SUEdit5: TEdit;
-    SUEdit6: TEdit;
     GroupBoxCategory: TGroupBox;
-    ActiveStageLabel: TLabel;
     SUEdit1: TEdit;
     SUEdit2: TEdit;
     SUEdit3: TEdit;
+    SUEdit4: TEdit;
+    SUEdit5: TEdit;
+    SUEdit6: TEdit;
+    SUEdit7: TEdit;
+    SUEdit8: TEdit;
     GroupBoxStages: TGroupBox;
     LEDAdress: TEdit;
     TreeView1: TTreeView;
@@ -115,7 +117,6 @@ type
     procedure ComboBoxLanguageChange(Sender: TObject);
     procedure EditDropDown(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure Label1Click(Sender: TObject);
     procedure Page2ViewBeforeShow(ASender: TObject; ANewPage: TPage; ANewIndex: integer);
     procedure RunSettings(ActivePage: integer = 0);
     procedure TreeView1Change(Sender: TObject; Node: TTreeNode);
@@ -174,10 +175,15 @@ var
   i: integer;
 begin
   NameEdit.Text := raceName;
-  for i := 1 to maxstages do
+
+  for i := 1 to VISIBLECAT do
   begin
     c := FindComponent('Edit' + IntToStr(i));
     TComboBox(c).Text := cat[i];
+  end;
+
+  for i := 1 to MAXSTAGES do
+  begin
     c := FindComponent('SUEdit' + IntToStr(i));
     TEdit(c).Text := stages[i].Name;
   end;
@@ -246,11 +252,6 @@ begin
   ComComBoBox4.Text := StopBitsToStr(MainForm.Serial.StopBits);
   ComComBoBox5.Text := ParityToStr(MainForm.Serial.Parity);
   ComComBoBox6.Text := FlowControlToStr(MainForm.Serial.FlowControl);
-
-end;
-
-procedure TSettingsForm.Label1Click(Sender: TObject);
-begin
 
 end;
 
@@ -334,7 +335,7 @@ begin
             stages[i].isActive := False;
           stages[i].Name := (FindComponent('SUEdit' + IntToStr(i)) as TEdit).Text;
         end;
-        for i := 1 to visiblecat do
+        for i := 1 to VISIBLECAT do
         begin
           //сохраняем название категорий, которые будут выводиться на окно результатов
           cat[i] := (FindComponent('Edit' + IntToStr(i)) as TComboBox).Text;
@@ -354,7 +355,7 @@ begin
             SQL.Add('INSERT INTO config (key, value) VALUES');
             SQL.Add('("racename", :RACENAME),');
             ParamByName('RACENAME').AsString := raceName;
-            for i := 1 to visiblecat do
+            for i := 1 to VISIBLECAT do
             begin
               SQL.Add('("catname' + IntToStr(i) + '", "' + cat[i] + '"),');
             end;

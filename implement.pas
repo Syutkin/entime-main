@@ -179,7 +179,7 @@ begin
       MainForm.SQLQuery1.Open();
       raceName := MainForm.SQLQuery1.FieldByName('value').AsString;
 
-      for i := 1 to visiblecat do
+      for i := 1 to VISIBLECAT do
       begin
         MainForm.SQLQuery1.Close;
         MainForm.SQLQuery1.SQL.Text :=
@@ -249,13 +249,17 @@ begin
     stages[5].Name := rsSU5;
   if stages[6].Name = '' then
     stages[6].Name := rsSU6;
+  if stages[7].Name = '' then
+    stages[7].Name := rsSU7;
+  if stages[8].Name = '' then
+    stages[8].Name := rsSU8;
 
   for i := 1 to maxstages do
   begin
     c := MainForm.FindComponent('SheetStage' + IntToStr(i));
     TTabSheet(c).Caption := stages[i].Name;
 
-    with MainForm.GridResult8 do
+    with MainForm.GridResultStageSum do
     begin
       ColumnByFieldName('result' + IntToStr(i)).Title.Caption := stages[i].Name;
       if stages[i].isActive then
@@ -329,7 +333,7 @@ begin
     MainForm.CurrentSU.ItemIndex := stages.FirstActiveStage.Key - 1;
     MainForm.SheetStageSum.TabVisible := False;
     MainForm.SheetStage1.Caption := rsTotal;
-    MainForm.GridResult8.ColumnByFieldName('result' + iStr).Visible := False;
+    MainForm.GridResultStageSum.ColumnByFieldName('result' + iStr).Visible := False;
     with MainForm.RxDBGrid1 do
     begin
       if not showStageNameForSingleStage then
@@ -362,10 +366,10 @@ begin
   // Если активных СУ больше одного, включаем показ кол-ва пройденных СУ
   // в сквозном протоколе
   if stages.ActiveStagesCount > 1 then
-    (MainForm.FindComponent('GridResult7') as
+    (MainForm.FindComponent('GridResultStageTotal') as
       TRxDBGrid).ColumnByFieldName('sumstages').Visible := True
   else
-    (MainForm.FindComponent('GridResult7') as
+    (MainForm.FindComponent('GridResultStageTotal') as
       TRxDBGrid).ColumnByFieldName('sumstages').Visible := False;
 
   // Если текущий выбранный СУ неактивен, то выбираем первый активный СУ
@@ -383,7 +387,7 @@ var
   c: TComponent;
   i: integer;
 begin
-  for i := 1 to visiblecat do
+  for i := 1 to VISIBLECAT do
   begin
     c := ResultsForm.FindComponent('GroupBox' + IntToStr(i));
     TGroupBox(c).Caption := cat[i];
@@ -504,7 +508,8 @@ begin
       end;
       if (not stages[2].isActive) and (not stages[3].isActive) and
         (not stages[4].isActive) and (not stages[5].isActive) and
-        (not stages[6].isActive) then
+        (not stages[6].isActive) and (not stages[7].isActive) and
+        (not stages[8].isActive) then
       begin
         d := rsSureWithNumber + ' ' + n + ' ' + logstatus + '?';
         l := rsParticipantWithNumber + ' ' + n + ' ' + logstatus;
@@ -578,7 +583,8 @@ procedure SetGlobalStatus(n: string);
 //высчитывает глобальный статус (status) на основе статусов СУ
 var
   stat: string = 'NULL';
-  st: array[0..6] of integer;
+  // 8 = MAXSTAGES
+  st: array[0..8] of integer;
   k: integer;
 begin
   try
@@ -659,7 +665,8 @@ begin
       n := MainForm.MainDataset1.FieldByName('number').AsString;
       if (not stages[2].isActive) and (not stages[3].isActive) and
         (not stages[4].isActive) and (not stages[5].isActive) and
-        (not stages[6].isActive) then
+        (not stages[6].isActive) and (not stages[7].isActive) and
+        (not stages[8].isActive) then
       begin
         d := rsClearAllStatus + ' ' + n + '?';
         l := rsClearAllStatusLog + ' ' + n;
@@ -686,7 +693,7 @@ begin
       end
       else
       // выделение в общих результатах
-      if (co > commoncols + stagecols * maxstages) then
+      if (co > COMMON_COLS + STAGE_COLS * maxstages) then
       begin
         d := rsClearDSQ + ' ' + n + '?';
         l := rsClearDSQLog + ' ' + n;
@@ -754,6 +761,9 @@ begin
 end;
 
 procedure InitDB(fileName: string);
+var
+  query: string;
+  i: integer;
 begin
   fName := fileName;
   //присваиваем имя файла дб датасетам
@@ -767,7 +777,8 @@ begin
       try
         MainForm.SQLite3Connection1.Open;
         MainForm.SQLTransaction1.Active := True;
-        MainForm.SQLite3Connection1.ExecuteDirect('CREATE TABLE "main" (' +
+
+        query := 'CREATE TABLE "main" (' + //format comment
           ' "id"	    INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,' +
           ' "category"	    VARCHAR,' + ' "sumplace"	  INTEGER,' +
           ' "number"	    INTEGER NOT NULL UNIQUE,' +
@@ -775,34 +786,29 @@ begin
           ' "nickname"	    VARCHAR,' + ' "age"           VARCHAR,' +
           ' "team"          VARCHAR,' + ' "city"          VARCHAR,' +
           ' "phone"         VARCHAR,' + ' "email"         VARCHAR,' +
-          ' "comment"       VARCHAR,' + ' "starttime1"    VARCHAR,' +
-          ' "correction1"   INTEGER,' + ' "finishtime1"   VARCHAR,' +
-          ' "penalty1"	    VARCHAR,' + ' "result1"	  VARCHAR,' +
-          ' "diffleader1"   VARCHAR,' + ' "place1"	  INTEGER,' +
-          ' "status1"       VARCHAR,' + ' "starttime2"	  VARCHAR,' +
-          ' "correction2"   INTEGER,' + ' "finishtime2"   VARCHAR,' +
-          ' "penalty2"	    VARCHAR,' + ' "result2"	  VARCHAR,' +
-          ' "diffleader2"   VARCHAR,' + ' "place2"        INTEGER,' +
-          ' "status2"       VARCHAR,' + ' "starttime3"    VARCHAR,' +
-          ' "correction3"   INTEGER,' + ' "finishtime3"   VARCHAR,' +
-          ' "penalty3"	    VARCHAR,' + ' "result3"	  VARCHAR,' +
-          ' "diffleader3"   VARCHAR,' + ' "place3"        INTEGER,' +
-          ' "status3"       VARCHAR,' + ' "starttime4"	  VARCHAR,' +
-          ' "correction4"   INTEGER,' + ' "finishtime4"   VARCHAR,' +
-          ' "penalty4"	    VARCHAR,' + ' "result4"       VARCHAR,' +
-          ' "diffleader4"   VARCHAR,' + ' "place4"        INTEGER,' +
-          ' "status4"       VARCHAR,' + ' "starttime5"	  VARCHAR,' +
-          ' "correction5"   INTEGER,' + ' "finishtime5"   VARCHAR,' +
-          ' "penalty5"	    VARCHAR,' + ' "result5"	  VARCHAR,' +
-          ' "diffleader5"   VARCHAR,' + ' "place5"        INTEGER,' +
-          ' "status5"       VARCHAR,' + ' "starttime6"    VARCHAR,' +
-          ' "correction6"   INTEGER,' + ' "finishtime6"   VARCHAR,' +
-          ' "penalty6"	    VARCHAR,' + ' "result6"	  VARCHAR,' +
-          ' "diffleader6"   VARCHAR,' + ' "place6"        INTEGER,' +
-          ' "status6"       VARCHAR,' + ' "sumresult"     VARCHAR,' +
-          ' "sumdiffleader" VARCHAR,' + ' "sumstages"     INTEGER,' +
-          ' "thrudiff"      VARCHAR,' + ' "thruplace"     INTEGER,' +
-          ' "status"	    VARCHAR);');
+          ' "comment"       VARCHAR,';
+
+
+        for i := 1 to MAXSTAGES do
+        begin
+          query := query + //f
+            '"starttime' + IntToStr(i) + '"' + ' VARCHAR,' + //sqlite
+            '"correction' + IntToStr(i) + '"' + 'INTEGER,' + //sqlite
+            '"finishtime' + IntToStr(i) + '"' + 'VARCHAR,' + //sqlite
+            '"penalty' + IntToStr(i) + '"' + '   VARCHAR,' + //sqlite
+            '"result' + IntToStr(i) + '"' + '    VARCHAR,' + //sqlite
+            '"diffleader' + IntToStr(i) + '"' + 'VARCHAR,' + //sqlite
+            '"place' + IntToStr(i) + '"' + '     INTEGER,' + //sqlite
+            '"status' + IntToStr(i) + '"' + '    VARCHAR,';
+        end;
+
+        query := query + //format sqlite
+          ' "sumresult"     VARCHAR,' + ' "sumdiffleader" VARCHAR,' + //sqlite
+          ' "sumstages"     INTEGER,' + ' "thrudiff"      VARCHAR,' + //sqlite
+          ' "thruplace"     INTEGER,' + ' "status"	  VARCHAR);'; //sqlite
+
+        MainForm.SQLite3Connection1.ExecuteDirect(query);
+
         MainForm.SQLTransaction1.Commit;
 
         MainForm.SQLite3Connection1.ExecuteDirect('CREATE TABLE "load" (' +
@@ -813,7 +819,8 @@ begin
           ' "email"      VARCHAR,' + ' "comment"    VARCHAR,' +
           ' "starttime1" VARCHAR,' + ' "starttime2" VARCHAR,' +
           ' "starttime3" VARCHAR,' + ' "starttime4" VARCHAR,' +
-          ' "starttime5" VARCHAR,' + ' "starttime6" VARCHAR);');
+          ' "starttime5" VARCHAR,' + ' "starttime6" VARCHAR,' +
+          ' "starttime7" VARCHAR,' + ' "starttime8" VARCHAR);');
         MainForm.SQLTransaction1.Commit;
 
         MainForm.SQLite3Connection1.ExecuteDirect(
@@ -1001,7 +1008,6 @@ begin
               MainForm.SQLQuery1.ParamByName('TIME').Text :=
                 MainForm.sGridResult.Cells[0, row];
               MainForm.SQLQuery1.ParamByName('NUMBER').AsInteger := number;
-              // ToDo: Без close падает, что за ExecSQL тут вообще?
               MainForm.SQLQuery1.Close;
               MainForm.SQLQuery1.ExecSQL;
               //ставим время финиша для номера
@@ -1976,7 +1982,15 @@ begin
 
         MainForm.SQLQuery1.SQL.Clear;
         MainForm.SQLQuery1.SQL.Add(
-          'INSERT INTO load (category, number, name, nickname, age, team, city, phone, email, comment, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6)');
+          'INSERT INTO load (category, number, name, nickname, age, team, city, phone, email, comment,');
+        for i := 1 to MAXSTAGES do
+        begin
+          MainForm.SQLQuery1.SQL.Add('starttime' + IntToStr(i));
+          MainForm.SQLQuery1.SQL.Add(',');
+        end;
+        // Убираем последнюю запятую
+        MainForm.SQLQuery1.SQL.Delete(MainForm.SQLQuery1.SQL.Count - 1);
+        MainForm.SQLQuery1.SQL.Add(')');
         MainForm.SQLQuery1.SQL.Add('VALUES');
         for i := 0 to startItems.Count - 1 do
         begin
@@ -1997,13 +2011,12 @@ begin
 
           //считаем кол-во стартовых времён
           k := TStartItemModel(startItems[i]).startTimes.Count;
-          if k < 6 then
+          if k < MAXSTAGES then
           begin
-            for k := 6 - k downto 1 do
+            for k := MAXSTAGES - k downto 1 do
             begin
-              //если стартов не 6, то заполняем до шести
+              //если стартов не MAXSTAGES, то заполняем до MAXSTAGES
               TStartItemModel(startItems[i]).startTimes.Add('');
-
             end;
           end;
           item.AddStrings(TStartItemModel(startItems[i]).startTimes);
@@ -2027,14 +2040,43 @@ begin
         begin
           SQL.Clear;
           SQL.Add(
-            'INSERT into main (category, number, name, nickname, age, team, city, phone, email, comment, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6)');
+            'INSERT into main (category, number, name, nickname, age, team, city, phone, email, comment,');
+
+          for i := 1 to MAXSTAGES do
+          begin
+            SQL.Add('starttime' + IntToStr(i));
+            SQL.Add(',');
+          end;
+          // Убираем последнюю запятую
+          MainForm.SQLQuery1.SQL.Delete(MainForm.SQLQuery1.SQL.Count - 1);
+
+          SQL.Add(')');
           SQL.Add(
-            'SELECT category, number, name, nickname, age, team, city, phone, email, comment, starttime1, starttime2, starttime3, starttime4, starttime5, starttime6 FROM load WHERE number NOTNULL AND number != "" AND number != 0');
+            'SELECT category, number, name, nickname, age, team, city, phone, email, comment,');
+
+          for i := 1 to MAXSTAGES do
+          begin
+            SQL.Add('starttime' + IntToStr(i));
+            SQL.Add(',');
+          end;
+          // Убираем последнюю запятую
+          MainForm.SQLQuery1.SQL.Delete(MainForm.SQLQuery1.SQL.Count - 1);
+
+          SQL.Add('FROM load WHERE number NOTNULL AND number != "" AND number != 0');
           SQL.Add('ON CONFLICT(number) DO UPDATE SET');
           SQL.Add(
-            'category = excluded.category, name = excluded.name, nickname = excluded.nickname, age = excluded.age, team = excluded.team, city = excluded.city, phone = excluded.phone, email = excluded.email, comment = excluded.comment, starttime1 = excluded.starttime1,');
-          SQL.Add(
-            'starttime2 = excluded.starttime2, starttime3 = excluded.starttime3, starttime4 = excluded.starttime4, starttime5 = excluded.starttime5, starttime6 = excluded.starttime6;');
+            'category = excluded.category, name = excluded.name, nickname = excluded.nickname, age = excluded.age, team = excluded.team, city = excluded.city, phone = excluded.phone, email = excluded.email, comment = excluded.comment,');
+
+          for i := 1 to MAXSTAGES do
+          begin
+            SQL.Add('starttime' + IntToStr(i) + '= excluded.starttime' +
+              IntToStr(i));
+            SQL.Add(',');
+          end;
+          // Убираем последнюю запятую
+          MainForm.SQLQuery1.SQL.Delete(MainForm.SQLQuery1.SQL.Count - 1);
+
+          SQL.Add(';');
           Close;
           ExecSQL;
           SQLTransaction.Commit;
@@ -2052,8 +2094,8 @@ begin
             SQL.Text := 'SELECT category FROM main GROUP BY category';
             Open;
             k := RecordCount;
-            if k > visiblecat then
-              k := visiblecat;
+            if k > VISIBLECAT then
+              k := VISIBLECAT;
             for i := 1 to k do
             begin
               cat[i] := Fields.Fields[0].AsString;
@@ -2062,10 +2104,10 @@ begin
             Close;
             SQL.Clear;
             SQL.Add('INSERT INTO config (key, value) VALUES');
-            for i := 1 to visiblecat do
+            for i := 1 to VISIBLECAT do
             begin
               SQL.Add('("catname' + IntToStr(i) + '", "' + cat[i] + '")');
-              if i < visiblecat then
+              if i < VISIBLECAT then
                 SQL.Add(',');
             end;
             SQL.Add('ON CONFLICT(key) DO UPDATE SET value = excluded.value;');
@@ -2658,7 +2700,7 @@ begin
     begin
       Close;
       SQL.Text := 'SELECT COUNT(*) FROM main ' +
-        'GROUP BY penalty1, penalty2, penalty3, penalty4, penalty5, penalty6;';
+        'GROUP BY penalty1, penalty2, penalty3, penalty4, penalty5, penalty6, penalty7, penalty8;';
       Open();
       First;
       i := 0;
@@ -2678,7 +2720,7 @@ begin
     if (stages.ActiveStagesCount > 1) then
     begin
       // Колонки для активных СУ
-      for i := 1 to maxstages do
+      for i := 1 to MAXSTAGES do
       begin
         if stages[i].isActive then
         begin
@@ -2846,7 +2888,7 @@ begin
     end;
 
     j := 0;
-    with MainForm.ResultDataset7 do
+    with MainForm.ResultDatasetStageTotal do
     begin
       First;
 
@@ -3075,7 +3117,7 @@ begin
   begin
     Dataset := MainForm.MainDataSource1.DataSet;
     FileName := csvfilename;
-    for i := 1 to 6 do
+    for i := 1 to MAXSTAGES do
     begin
       if (stages[i].isActive) then
         // Эта хрень с добавлением/удалением из-за того,
@@ -3423,7 +3465,7 @@ begin
       //сортируем категории по порядку категорий, показываемых в окне результатов
       //категории, которых нет в этом списке, будут первыми
       //s := 0;
-      //for i := visiblecat downto 1 do
+      //for i := VISIBLECAT downto 1 do
       //begin
       //  k := Result.IndexOf(cat[i]);
       //  if k > -1 then
@@ -3511,8 +3553,8 @@ begin
   co := MainForm.RxDBGrid1.SelectedIndex;
   for i := 1 to maxstages do
   begin
-    if (co > commoncols + stagecols * (i - 1)) and
-      (co <= commoncols + stagecols * i) then
+    if (co > COMMON_COLS + STAGE_COLS * (i - 1)) and
+      (co <= COMMON_COLS + STAGE_COLS * i) then
       Result := i;
   end;
 end;

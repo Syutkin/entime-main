@@ -60,6 +60,8 @@ type
     FileExportAllResults: TFileSaveAs;
     FileOpenCSVSum: TFileOpen;
     FileExportSumDays: TFileSaveAs;
+    GridResult7: TRxDBGrid;
+    GridResult8: TRxDBGrid;
     ImageList1: TImageList;
     LoRaPopupOpen: TAction;
     LoRaPopupHideSelected: TAction;
@@ -71,9 +73,36 @@ type
     DataSourceLoRa: TDataSource;
     FileGenerateFinal: TFileSaveAs;
     MainDataset1comment: TStringField;
+    MainDataset1correction7: TStringField;
+    MainDataset1correction8: TStringField;
+    MainDataset1diffleader7: TStringField;
+    MainDataset1diffleader8: TStringField;
     MainDataset1email: TStringField;
+    MainDataset1finishtime7: TStringField;
+    MainDataset1finishtime8: TStringField;
+    MainDataset1penalty7: TStringField;
+    MainDataset1penalty8: TStringField;
     MainDataset1phone: TStringField;
+    MainDataset1place7: TLongintField;
+    MainDataset1place8: TLongintField;
+    MainDataset1result7: TStringField;
+    MainDataset1result8: TStringField;
+    MainDataset1starttime7: TStringField;
+    MainDataset1starttime8: TStringField;
+    MainDataset1status1: TStringField;
+    MainDataset1status2: TStringField;
+    MainDataset1status3: TStringField;
+    MainDataset1status4: TStringField;
+    MainDataset1status5: TStringField;
+    MainDataset1status6: TStringField;
+    MainDataset1status7: TStringField;
+    MainDataset1status8: TStringField;
+    MainDataset1sumstages: TLongintField;
+    MainDataset1thrudiff: TStringField;
+    MainDataset1thruplace: TStringField;
     MenuItem10: TMenuItem;
+    ResultDataset7: TSqlite3Dataset;
+    ResultDataset8: TSqlite3Dataset;
     Separator2: TMenuItem;
     MenuItemCheckUpdate: TMenuItem;
     MenuItemExportAllResults: TMenuItem;
@@ -123,8 +152,8 @@ type
     GridResult4: TRxDBGrid;
     GridResult5: TRxDBGrid;
     GridResult6: TRxDBGrid;
-    GridResult7: TRxDBGrid;
-    GridResult8: TRxDBGrid;
+    GridResultStageTotal: TRxDBGrid;
+    GridResultStageSum: TRxDBGrid;
     HistoryFiles1: THistoryFiles;
     MenuItemAbout: TMenuItem;
     MenuItemCOMClose: TMenuItem;
@@ -148,8 +177,8 @@ type
     ResultDataset4: TSqlite3Dataset;
     ResultDataset5: TSqlite3Dataset;
     ResultDataset6: TSqlite3Dataset;
-    ResultDataset7: TSqlite3Dataset;
-    ResultDataset8: TSqlite3Dataset;
+    ResultDatasetStageTotal: TSqlite3Dataset;
+    ResultDatasetStageSum: TSqlite3Dataset;
     ResultDataSource1: TDataSource;
     FileOpenCSVResult: TFileOpen;
     MainDataset1correction2: TStringField;
@@ -202,6 +231,8 @@ type
     ResultDataSource6: TDataSource;
     ResultDataSource7: TDataSource;
     ResultDataSource8: TDataSource;
+    ResultDataSourceStageTotal: TDataSource;
+    ResultDataSourceStageSum: TDataSource;
     SheetStage: TPageControl;
     Splitter1: TSplitter;
     ResultDataset1: TSqlite3Dataset;
@@ -256,6 +287,8 @@ type
     MainDataset1rfid: TLongintField;
     MainDataset1starttime1: TStringField;
     MainDataset1team: TStringField;
+    SheetStage7: TTabSheet;
+    SheetStage8: TTabSheet;
     TabSheetMainPanel: TPanel;
     EditPanel: TPanel;
     N1: TMenuItem;
@@ -498,14 +531,14 @@ type
 
 const
   //максимальное количество спецучаствок
-  MAXSTAGES: integer = 6;
+  MAXSTAGES: integer = 8;
   //количество категорий в окне результатов
-  visiblecat: integer = 6;
+  VISIBLECAT: integer = 6;
   //первые девять колонок с информацией об участнике
-  commoncols: integer = 12;
+  COMMON_COLS: integer = 12;
   //количество колонок в СУ
-  stagecols: integer = 7;
-  releaseUrl: string = 'https://codeberg.org/Syutkin/entime/releases/tag/';
+  STAGE_COLS: integer = 7;
+  RELEASE_URL: string = 'https://codeberg.org/Syutkin/entime/releases/tag/';
 
 
 
@@ -613,14 +646,13 @@ begin
     'SELECT * from main where correction1 ISNULL AND status1 ISNULL AND starttime1 NOTNULL ORDER BY starttime1';
   StatDataset2.SQL :=
     'SELECT number, name, starttime1 as starttime, strftime(''%H:%M:%S'',julianday(time(''now'', ''localtime'')) - julianday(time(starttime1)) + 0.5) as timeontrack FROM main WHERE julianday(time(''now'', ''localtime'')) > julianday(time(starttime1)) AND finishtime1 ISNULL AND status1 ISNULL ORDER BY starttime';
-  ResultDataset7.SQL :=
+  ResultDatasetStageTotal.SQL :=
     'SELECT category, thruplace as sumplace, number, name, sumresult, thrudiff, sumstages FROM main WHERE sumresult NOTNULL ORDER BY status, thruplace';
-  ResultDataset8.SQL :=
+  ResultDatasetStageSum.SQL :=
     'SELECT * from main WHERE sumresult NOTNULL ORDER BY category, status, sumstages DESC, IFNULL(sumplace,''toend'')';
 
-  for i := 1 to visiblecat do
+  for i := 1 to MAXSTAGES do
   begin
-    //шесть категорий для вывода на окно результатов
     c := FindComponent('ResultDataset' + IntToStr(i));
     TSqlite3Dataset(c).SQL :=
       'SELECT category, place' + IntToStr(i) + ', number, name, penalty' +
@@ -1120,7 +1152,7 @@ end;
 procedure TMainForm.AcCheckUpdateExecute(Sender: TObject);
 begin
   if updateExists and not lastVersionOnline.IsEmpty then
-    OpenURL(releaseUrl + lastVersionOnline)
+    OpenURL(RELEASE_URL + lastVersionOnline)
   else
     CheckUpdateOnline(GetFileVersion, True, lastVersionOnline);
 end;
@@ -1976,7 +2008,7 @@ begin
     begin
       if MessageDlg(format(rsNewVersionAvailable, [LastVersion]),
         TMsgDlgType.mtInformation, mbYesNo, 0) = mrYes then
-        OpenURL(releaseUrl + lastVersionOnline);
+        OpenURL(RELEASE_URL + lastVersionOnline);
 
       //aMsgDlg := CreateMessageDialog(
       //  'Доступна новая версия программы: ' +
