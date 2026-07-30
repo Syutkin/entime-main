@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
   i18n, rxspin, LCLTranslator, Buttons, DBCtrls, ButtonPanel, ComCtrls, Spin,
   LazSerial, Lazsynaser, DataPortHTTP, DividerBevel, CheckBoxThemed,
-  translations, opensslsockets, fphttpclient, rxdbgrid;
+  opensslsockets, fphttpclient, rxdbgrid;
 
 type
 
@@ -27,6 +27,8 @@ type
     ComboBoxAStage: TComboBox;
     ComboBoxUpdateInterval: TComboBox;
     ComboBoxLanguage: TComboBox;
+    CompetitionContentPanel: TPanel;
+    CompetitionScrollBox: TScrollBox;
     ComComboBox1: TComboBox;
     ComComboBox2: TComboBox;
     ComComboBox3: TComboBox;
@@ -70,6 +72,7 @@ type
     LabelBottomline: TLabel;
     LabelNumber: TLabel;
     LeftPanel: TPanel;
+    ActiveStagePanel: TPanel;
     PanelBackup: TPanel;
     SpinBackup: TSpinEdit;
     TelegramResult: TEdit;
@@ -121,7 +124,7 @@ type
     procedure RunSettings(ActivePage: integer = 0);
     procedure TreeView1Change(Sender: TObject; Node: TTreeNode);
   private
-
+    procedure UpdateCollectionTranslations(AUpdateIntervalIndex: integer);
   public
 
   end;
@@ -131,7 +134,7 @@ var
 
 implementation
 
-uses Main, Implement, LazSerialSetup;
+uses Main, Implement, LazSerialSetup, db_sql;
 
   {$R *.lfm}
 
@@ -169,6 +172,34 @@ end;
 
 { TSettingsForm }
 
+procedure TSettingsForm.UpdateCollectionTranslations(
+  AUpdateIntervalIndex: integer);
+begin
+  TreeView1.Items[0].Text := rsSettingsGeneral;
+  TreeView1.Items[1].Text := rsSettingsView;
+  TreeView1.Items[2].Text := rsSettingsCompetition;
+  TreeView1.Items[3].Text := rsSettingsCOMPort;
+  TreeView1.Items[4].Text := rsSettingsLEDPanel;
+  TreeView1.Items[5].Text := rsSettingsTelegramBot;
+
+  if ComboBoxLanguage.Items.Count > 0 then
+    ComboBoxLanguage.Items[0] := rsSystemDefault;
+
+  ComboBoxUpdateInterval.Items.BeginUpdate;
+  try
+    ComboBoxUpdateInterval.Items.Clear;
+    ComboBoxUpdateInterval.Items.Add(rsUpdateEveryTime);
+    ComboBoxUpdateInterval.Items.Add(rsUpdateDaily);
+    ComboBoxUpdateInterval.Items.Add(rsUpdateWeekly);
+    ComboBoxUpdateInterval.Items.Add(rsUpdateMonthly);
+  finally
+    ComboBoxUpdateInterval.Items.EndUpdate;
+  end;
+  if (AUpdateIntervalIndex >= 0) and
+    (AUpdateIntervalIndex < ComboBoxUpdateInterval.Items.Count) then
+    ComboBoxUpdateInterval.ItemIndex := AUpdateIntervalIndex;
+end;
+
 procedure TSettingsForm.FormCreate(Sender: TObject);
 var
   c: TComponent;
@@ -204,6 +235,7 @@ begin
   // Обновления
   CheckBoxUpdateAtStartup.Checked := checkUpdateAtStartup;
   ComboBoxUpdateInterval.Enabled := checkUpdateAtStartup;
+  UpdateCollectionTranslations(ComboBoxUpdateInterval.ItemIndex);
   if checkUpdateIntervalInDays < 0 then
     ComboBoxUpdateInterval.ItemIndex := 0
   else if checkUpdateIntervalInDays < 7 then
@@ -221,6 +253,14 @@ begin
     if stages[i].isActive then
       CheckGroup1.Checked[i - 1] := True;
 
+  if stages.ActiveStagesCount > 0 then
+    ComboBoxAStage.Enabled := True
+  else
+    ComboBoxAStage.Enabled := False;
+
+  ComboBoxAStage.Items.Add(astage);
+  ComboBoxAStage.Text := astage;
+
   CheckBoxHideZeroHour.Checked := zerohour;
   CheckBoxShowStageName.Checked := showStageNameForSingleStage;
 
@@ -229,9 +269,6 @@ begin
 
   //EditCOMSetStr.Text := timemarkstr;
   //EditCOMSetTime.Text:= timemarkformat;
-
-  ComboBoxAStage.Items.Add(astage);
-  ComboBoxAStage.Text := astage;
 
   LEDAdress.Text := ledpaneladress;
   TelegramBotAdressEdit.Text := telegrambotadress;
@@ -351,26 +388,34 @@ begin
         begin
           with MainForm.SQLQuery1 do
           begin
-            SQL.Clear;
-            SQL.Add('INSERT INTO config (key, value) VALUES');
-            SQL.Add('("racename", :RACENAME),');
-            ParamByName('RACENAME').AsString := raceName;
+            SQL.Text := TConfigSql.UpsertByKey;
+
+            ParamByName('KEY').AsString := 'racename';
+            ParamByName('VALUE').AsString := raceName;
+            ExecSQL;
+
             for i := 1 to VISIBLECAT do
             begin
-              SQL.Add('("catname' + IntToStr(i) + '", "' + cat[i] + '"),');
+              ParamByName('KEY').AsString := 'catname' + IntToStr(i);
+              ParamByName('VALUE').AsString := cat[i];
+              ExecSQL;
             end;
+
             for i := 1 to maxstages do
             begin
-              SQL.Add('("stage' + IntToStr(i) + '", "' +
-                BoolToStr(stages[i].isActive, True) + '"),');
-              SQL.Add('("stagename' + IntToStr(i) + '", "' + stages[i].Name + '"),');
+              ParamByName('KEY').AsString := 'stage' + IntToStr(i);
+              ParamByName('VALUE').AsString := BoolToStr(stages[i].isActive, True);
+              ExecSQL;
+
+              ParamByName('KEY').AsString := 'stagename' + IntToStr(i);
+              ParamByName('VALUE').AsString := stages[i].Name;
+              ExecSQL;
             end;
-            SQL.Add('("activestage", "' + astage + '")');
-            //SQL.Add('("timemark", "'+timemark+'"),');
-            //SQL.Add('("timemarkstr", "'+timemarkstr+'"),');
-            //SQL.Add('("timemarkformat", "'+timemarkformat+'")');
-            SQL.Add('ON CONFLICT(key) DO UPDATE SET value = excluded.value;');
+
+            ParamByName('KEY').AsString := 'activestage';
+            ParamByName('VALUE').AsString := astage;
             ExecSQL;
+
             SQLTransaction.Commit;
             Close;
           end;
@@ -535,6 +580,7 @@ procedure TSettingsForm.ComboBoxLanguageChange(Sender: TObject);
 var
   lang: string = '';
   def: boolean = False;
+  updateIntervalIndex: integer;
 begin
   if (Sender as TComboBox).Text = rsSystemDefault then
     def := True
@@ -542,8 +588,9 @@ begin
     lang := 'ru'
   else if (Sender as TComboBox).Text = rsEnglish then
     lang := 'en';
+  updateIntervalIndex := ComboBoxUpdateInterval.ItemIndex;
   MainForm.SetLang(lang);
-  (Sender as TComboBox).Items[0] := rsSystemDefault;
+  UpdateCollectionTranslations(updateIntervalIndex);
   if def then
   begin
     (Sender as TComboBox).Text := rsSystemDefault;
@@ -561,7 +608,7 @@ begin
     begin
       //в окно результатов и в конфиг БД
       Close;
-      SQL.Text := 'SELECT category FROM main GROUP BY category';
+      SQL.Text := TMainSql.SelectCategoryGrouped;
       Open;
       for i := 1 to RecordCount do
       begin

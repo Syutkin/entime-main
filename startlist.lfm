@@ -1,136 +1,28 @@
 object StartlistForm: TStartlistForm
   Left = 419
-  Height = 902
+  Height = 601
   Top = 74
-  Width = 605
+  Width = 403
   Anchors = []
   Caption = 'Параметры стартового протокола'
-  ClientHeight = 902
-  ClientWidth = 605
-  Constraints.MinHeight = 526
-  Constraints.MinWidth = 420
-  DesignTimePPI = 144
+  ClientHeight = 601
+  ClientWidth = 403
+  Constraints.MinHeight = 351
+  Constraints.MinWidth = 280
   Position = poMainFormCenter
   ShowHint = True
-  LCLVersion = '4.0.0.4'
+  LCLVersion = '4.8.0.0'
   OnCreate = FormCreate
-  object TimeEdit1: TTimeEdit
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Label1
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    Left = 8
-    Height = 33
-    Top = 115
-    Width = 589
-    ButtonWidth = 34
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Around = 8
-    NumGlyphs = 1
-    MaxLength = 0
-    TabOrder = 0
-    Text = '0'
-  end
-  object Label1: TLabel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = ComboBoxStageSelection
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    Left = 8
-    Height = 25
-    Top = 82
-    Width = 589
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Around = 8
-    Caption = 'Время старта первого участника'
-    ParentColor = False
-  end
-  object Label2: TLabel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = TimeEdit1
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    Left = 8
-    Height = 25
-    Top = 164
-    Width = 589
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 8
-    BorderSpacing.Around = 8
-    Caption = 'Количество секунд между стартами участников'
-    ParentColor = False
-  end
-  object Label3: TLabel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = SpinEditEx1
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    Left = 8
-    Height = 25
-    Top = 246
-    Width = 589
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 8
-    BorderSpacing.Around = 8
-    Caption = 'Количество минут между категориями'
-    ParentColor = False
-  end
-  object SpinEditEx1: TSpinEditEx
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Label2
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    Left = 8
-    Height = 33
-    Top = 197
-    Width = 589
-    Alignment = taLeftJustify
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Around = 8
-    MaxLength = 0
-    SpinButtonWidth = 26
-    TabOrder = 1
-    MaxValue = 300
-    MinValue = 20
-    NullValue = 0
-    Value = 20
-  end
-  object SpinEditEx2: TSpinEditEx
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Label3
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    Left = 8
-    Height = 33
-    Top = 279
-    Width = 589
-    Alignment = taLeftJustify
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Around = 8
-    MaxLength = 0
-    SpinButtonWidth = 26
-    TabOrder = 2
-    MaxValue = 10
-    MinValue = 1
-    NullValue = 0
-    Value = 1
-  end
   object ButtonPanel1: TButtonPanel
     AnchorSideLeft.Control = Owner
     AnchorSideRight.Control = Owner
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 10
-    Height = 43
-    Top = 849
-    Width = 585
-    BorderSpacing.Around = 10
+    Left = 7
+    Height = 36
+    Top = 558
+    Width = 389
+    BorderSpacing.Around = 7
     OKButton.Name = 'OKButton'
     OKButton.DefaultCaption = True
     HelpButton.Name = 'HelpButton'
@@ -139,184 +31,311 @@ object StartlistForm: TStartlistForm
     CloseButton.DefaultCaption = True
     CancelButton.Name = 'CancelButton'
     CancelButton.DefaultCaption = True
-    TabOrder = 3
+    TabOrder = 1
     ShowButtons = [pbOK, pbCancel]
   end
-  object Label5: TLabel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = SpinEditEx2
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    Left = 8
-    Height = 25
-    Top = 328
-    Width = 589
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Top = 8
-    BorderSpacing.Around = 8
-    Caption = 'Сортировка внутри категории'
-    ParentColor = False
-  end
-  object ComboBoxSortBy: TComboBox
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Label5
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    Left = 8
-    Height = 33
-    Top = 361
-    Width = 589
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Around = 8
-    ItemHeight = 25
-    Style = csDropDownList
-    TabOrder = 4
-    OnChange = ComboBoxSortByChange
-  end
-  object Panel1: TPanel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Label6
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    AnchorSideBottom.Control = Panel2
-    Left = 0
-    Height = 45
-    Top = 433
-    Width = 605
-    Anchors = [akTop, akLeft, akRight]
-    AutoSize = True
-    BevelOuter = bvNone
-    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-    ChildSizing.Layout = cclTopToBottomThenLeftToRight
-    ClientHeight = 45
-    ClientWidth = 605
-    TabOrder = 5
-    object cbDNS: TCheckBoxThemed
-      Left = 8
-      Height = 29
-      Hint = 'Не стартовал в квалификации'
-      Top = 8
-      Width = 194
-      BorderSpacing.Around = 8
-      Caption = 'DNS'
-      Checked = True
-      State = cbChecked
-      TabOrder = 0
-    end
-    object cbDNF: TCheckBoxThemed
-      AnchorSideTop.Side = asrCenter
-      Left = 210
-      Height = 29
-      Hint = 'Не финишировал в квалификации'
-      Top = 8
-      Width = 192
-      BorderSpacing.Around = 8
-      Caption = 'DNF'
-      Checked = True
-      State = cbChecked
-      TabOrder = 1
-    end
-    object cbDSQ: TCheckBoxThemed
-      Left = 410
-      Height = 29
-      Hint = 'Дисквалифицирован'
-      Top = 8
-      Width = 195
-      Caption = 'DSQ'
-      TabOrder = 2
-    end
-  end
-  object Label6: TLabel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = ComboBoxSortBy
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    Left = 8
-    Height = 25
-    Top = 408
-    Width = 589
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Left = 8
-    BorderSpacing.Top = 14
-    BorderSpacing.Right = 8
-    Caption = 'Включать в финальный заезд следующих участников:'
-    ParentColor = False
-  end
-  object Panel2: TPanel
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Panel1
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    AnchorSideRight.Side = asrBottom
-    AnchorSideBottom.Control = ButtonPanel1
-    Left = 8
-    Height = 345
-    Top = 494
-    Width = 589
-    Anchors = [akTop, akLeft, akRight, akBottom]
-    BorderSpacing.Top = 8
-    BorderSpacing.Around = 8
-    BevelOuter = bvNone
-    ClientHeight = 345
-    ClientWidth = 589
-    TabOrder = 6
-    object Label4: TLabel
-      Left = 0
-      Height = 25
-      Top = 0
-      Width = 589
-      Align = alTop
-      Caption = 'Порядок старта категорий'
-      ParentColor = False
-    end
-    object ListBox1: TListBox
-      Left = 0
-      Height = 312
-      Top = 33
-      Width = 589
-      Align = alClient
-      BorderSpacing.Top = 8
-      DragMode = dmAutomatic
-      ItemHeight = 0
-      TabOrder = 0
-      OnDragDrop = ListBox1DragDrop
-      OnDragOver = ListBox1DragOver
-      OnMouseDown = ListBox1MouseDown
-    end
-  end
-  object StageSelected: TLabel
+  object StartlistScrollBox: TScrollBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 8
-    Height = 25
-    Top = 8
-    Width = 589
-    Anchors = [akTop, akLeft, akRight]
-    BorderSpacing.Around = 8
-    Caption = 'Спецучасток'
-    ParentColor = False
-  end
-  object ComboBoxStageSelection: TComboBox
-    AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = StageSelected
-    AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = Owner
-    Left = 8
-    Height = 33
-    Top = 41
-    Width = 589
-    BorderSpacing.Around = 8
-    ItemHeight = 25
-    Items.Strings = (
-      'СУ1'
-    )
-    Style = csDropDownList
-    TabOrder = 7
+    AnchorSideBottom.Control = ButtonPanel1
+    Left = 0
+    Height = 551
+    Top = 0
+    Width = 403
+    HorzScrollBar.Smooth = True
+    VertScrollBar.Smooth = True
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    AutoScroll = True
+    BorderSpacing.Bottom = 7
+    BorderStyle = bsNone
+    TabOrder = 0
+    object TimeEdit1: TTimeEdit
+      AnchorSideLeft.Control = StartlistScrollBox
+      AnchorSideTop.Control = Label1
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = StartlistScrollBox
+      AnchorSideRight.Side = asrBottom
+      Left = 5
+      Height = 32
+      Top = 88
+      Width = 393
+      ButtonWidth = 23
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Around = 5
+      NumGlyphs = 1
+      MaxLength = 0
+      TabOrder = 0
+      Text = '0'
+    end
+    object Label1: TLabel
+      AnchorSideLeft.Control = StartlistScrollBox
+      AnchorSideTop.Control = ComboBoxStageSelection
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = StartlistScrollBox
+      AnchorSideRight.Side = asrBottom
+      Left = 5
+      Height = 18
+      Top = 65
+      Width = 393
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Around = 5
+      Caption = 'Время старта первого участника'
+      ParentColor = False
+    end
+    object Label2: TLabel
+      AnchorSideLeft.Control = StartlistScrollBox
+      AnchorSideTop.Control = TimeEdit1
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = StartlistScrollBox
+      AnchorSideRight.Side = asrBottom
+      Left = 5
+      Height = 18
+      Top = 130
+      Width = 393
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 5
+      BorderSpacing.Around = 5
+      Caption = 'Количество секунд между стартами участников'
+      ParentColor = False
+    end
+    object Label3: TLabel
+      AnchorSideLeft.Control = StartlistScrollBox
+      AnchorSideTop.Control = SpinEditEx1
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = StartlistScrollBox
+      AnchorSideRight.Side = asrBottom
+      Left = 5
+      Height = 18
+      Top = 195
+      Width = 393
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 5
+      BorderSpacing.Around = 5
+      Caption = 'Количество минут между категориями'
+      ParentColor = False
+    end
+    object SpinEditEx1: TSpinEditEx
+      AnchorSideLeft.Control = StartlistScrollBox
+      AnchorSideTop.Control = Label2
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = StartlistScrollBox
+      AnchorSideRight.Side = asrBottom
+      Left = 5
+      Height = 32
+      Top = 153
+      Width = 393
+      Alignment = taLeftJustify
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Around = 5
+      MaxLength = 0
+      SpinButtonWidth = 17
+      TabOrder = 1
+      MaxValue = 300
+      MinValue = 20
+      NullValue = 0
+      Value = 20
+    end
+    object SpinEditEx2: TSpinEditEx
+      AnchorSideLeft.Control = StartlistScrollBox
+      AnchorSideTop.Control = Label3
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = StartlistScrollBox
+      AnchorSideRight.Side = asrBottom
+      Left = 5
+      Height = 32
+      Top = 218
+      Width = 393
+      Alignment = taLeftJustify
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Around = 5
+      MaxLength = 0
+      SpinButtonWidth = 17
+      TabOrder = 2
+      MaxValue = 10
+      MinValue = 1
+      NullValue = 0
+      Value = 1
+    end
+    object Label5: TLabel
+      AnchorSideLeft.Control = StartlistScrollBox
+      AnchorSideTop.Control = SpinEditEx2
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = StartlistScrollBox
+      AnchorSideRight.Side = asrBottom
+      Left = 5
+      Height = 18
+      Top = 260
+      Width = 393
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 5
+      BorderSpacing.Around = 5
+      Caption = 'Сортировка внутри категории'
+      ParentColor = False
+    end
+    object ComboBoxSortBy: TComboBox
+      AnchorSideLeft.Control = StartlistScrollBox
+      AnchorSideTop.Control = Label5
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = StartlistScrollBox
+      AnchorSideRight.Side = asrBottom
+      Left = 5
+      Height = 32
+      Top = 283
+      Width = 393
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Around = 5
+      ItemHeight = 25
+      Style = csDropDownList
+      TabOrder = 4
+      OnChange = ComboBoxSortByChange
+    end
+    object Panel1: TPanel
+      AnchorSideLeft.Control = StartlistScrollBox
+      AnchorSideTop.Control = Label6
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = StartlistScrollBox
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = Panel2
+      Left = 0
+      Height = 32
+      Top = 342
+      Width = 403
+      Anchors = [akTop, akLeft, akRight]
+      AutoSize = True
+      BevelOuter = bvNone
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      ChildSizing.Layout = cclTopToBottomThenLeftToRight
+      ClientHeight = 32
+      ClientWidth = 403
+      TabOrder = 5
+      object cbDNS: TCheckBoxThemed
+        Left = 5
+        Height = 22
+        Hint = 'Не стартовал в квалификации'
+        Top = 5
+        Width = 129
+        BorderSpacing.Around = 5
+        Caption = 'DNS'
+        Checked = True
+        State = cbChecked
+        TabOrder = 0
+      end
+      object cbDNF: TCheckBoxThemed
+        AnchorSideTop.Side = asrCenter
+        Left = 139
+        Height = 22
+        Hint = 'Не финишировал в квалификации'
+        Top = 5
+        Width = 130
+        BorderSpacing.Around = 5
+        Caption = 'DNF'
+        Checked = True
+        State = cbChecked
+        TabOrder = 1
+      end
+      object cbDSQ: TCheckBoxThemed
+        Left = 274
+        Height = 22
+        Hint = 'Дисквалифицирован'
+        Top = 5
+        Width = 129
+        Caption = 'DSQ'
+        TabOrder = 2
+      end
+    end
+    object Label6: TLabel
+      AnchorSideLeft.Control = StartlistScrollBox
+      AnchorSideTop.Control = ComboBoxSortBy
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = StartlistScrollBox
+      AnchorSideRight.Side = asrBottom
+      Left = 5
+      Height = 18
+      Top = 324
+      Width = 393
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 5
+      BorderSpacing.Top = 9
+      BorderSpacing.Right = 5
+      Caption = 'Включать в финальный заезд следующих участников:'
+      ParentColor = False
+    end
+    object Panel2: TPanel
+      AnchorSideLeft.Control = StartlistScrollBox
+      AnchorSideTop.Control = Panel1
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = StartlistScrollBox
+      AnchorSideRight.Side = asrBottom
+      Left = 5
+      Height = 167
+      Top = 384
+      Width = 393
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 5
+      BorderSpacing.Around = 5
+      BevelOuter = bvNone
+      ClientHeight = 167
+      ClientWidth = 393
+      TabOrder = 6
+      object Label4: TLabel
+        Left = 0
+        Height = 18
+        Top = 0
+        Width = 393
+        Align = alTop
+        Caption = 'Порядок старта категорий'
+        ParentColor = False
+      end
+      object ListBox1: TListBox
+        Left = 0
+        Height = 144
+        Top = 23
+        Width = 393
+        Align = alClient
+        BorderSpacing.Top = 5
+        DragMode = dmAutomatic
+        ItemHeight = 0
+        TabOrder = 0
+        TopIndex = -1
+        OnDragDrop = ListBox1DragDrop
+        OnDragOver = ListBox1DragOver
+        OnMouseDown = ListBox1MouseDown
+      end
+    end
+    object StageSelected: TLabel
+      AnchorSideLeft.Control = StartlistScrollBox
+      AnchorSideTop.Control = StartlistScrollBox
+      AnchorSideRight.Control = StartlistScrollBox
+      AnchorSideRight.Side = asrBottom
+      Left = 5
+      Height = 18
+      Top = 5
+      Width = 393
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Around = 5
+      Caption = 'Спецучасток'
+      ParentColor = False
+    end
+    object ComboBoxStageSelection: TComboBox
+      AnchorSideLeft.Control = StartlistScrollBox
+      AnchorSideTop.Control = StageSelected
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = StartlistScrollBox
+      AnchorSideRight.Side = asrBottom
+      Left = 5
+      Height = 32
+      Top = 28
+      Width = 393
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Around = 5
+      ItemHeight = 25
+      Items.Strings = (
+        'СУ1'
+      )
+      Style = csDropDownList
+      TabOrder = 7
+    end
   end
 end

@@ -1,24 +1,23 @@
 object LoRaForm: TLoRaForm
   Left = 709
-  Height = 779
+  Height = 623
   Top = 228
-  Width = 639
+  Width = 511
   Caption = 'LoRaForm'
-  ClientHeight = 779
-  ClientWidth = 639
-  Constraints.MinHeight = 188
-  Constraints.MinWidth = 188
-  DesignTimePPI = 120
+  ClientHeight = 623
+  ClientWidth = 511
+  Constraints.MinHeight = 150
+  Constraints.MinWidth = 150
+  Position = poMainFormCenter
+  LCLVersion = '4.8.0.0'
   OnClose = FormClose
   OnCreate = FormCreate
-  Position = poMainFormCenter
-  LCLVersion = '2.0.10.0'
   object RxDBGridLoRa: TRxDBGrid
     Left = 0
-    Height = 779
+    Height = 623
     Hint = 'Двойной клик на строке с нужной поправкой заносит её в основную таблицу'
     Top = 0
-    Width = 639
+    Width = 511
     ColumnDefValues.BlobText = '(данные)'
     TitleButtons = False
     AutoSort = True
@@ -26,12 +25,12 @@ object LoRaForm: TLoRaForm
       item
         Alignment = taCenter
         Font.Style = [fsBold]
-        MinSize = 12
-        MaxSize = 250
+        MinSize = 10
+        MaxSize = 200
         Title.Alignment = taCenter
         Title.Orientation = toHorizontal
         Title.Caption = 'Номер'
-        Width = 94
+        Width = 75
         FieldName = 'number'
         EditButtons = <>
         Filter.DropDownRows = 0
@@ -44,12 +43,12 @@ object LoRaForm: TLoRaForm
       end    
       item
         Alignment = taRightJustify
-        MinSize = 12
-        MaxSize = 250
+        MinSize = 10
+        MaxSize = 200
         Title.Alignment = taCenter
         Title.Orientation = toHorizontal
         Title.Caption = 'Старт'
-        Width = 125
+        Width = 100
         FieldName = 'starttime'
         EditButtons = <>
         Filter.DropDownRows = 0
@@ -62,12 +61,12 @@ object LoRaForm: TLoRaForm
       end    
       item
         Alignment = taRightJustify
-        MinSize = 12
-        MaxSize = 250
+        MinSize = 10
+        MaxSize = 200
         Title.Alignment = taCenter
         Title.Orientation = toHorizontal
         Title.Caption = 'Поправка'
-        Width = 125
+        Width = 100
         FieldName = 'correction'
         EditButtons = <>
         Filter.DropDownRows = 0
@@ -79,12 +78,12 @@ object LoRaForm: TLoRaForm
         Footers = <>
       end    
       item
-        MinSize = 12
-        MaxSize = 250
+        MinSize = 10
+        MaxSize = 200
         Title.Alignment = taCenter
         Title.Orientation = toHorizontal
         Title.Caption = 'Установлено'
-        Width = 125
+        Width = 100
         FieldName = 'isset'
         EditButtons = <>
         Filter.DropDownRows = 0
@@ -97,12 +96,12 @@ object LoRaForm: TLoRaForm
       end    
       item
         Alignment = taRightJustify
-        MinSize = 12
-        MaxSize = 250
+        MinSize = 10
+        MaxSize = 200
         Title.Alignment = taCenter
         Title.Orientation = toHorizontal
         Title.Caption = 'Время'
-        Width = 125
+        Width = 100
         FieldName = 'timemark'
         EditButtons = <>
         Filter.DropDownRows = 0
@@ -176,9 +175,7 @@ object LoRaForm: TLoRaForm
     Align = alClient
     Color = clWindow
     DrawFullLine = False
-    FocusColor = clRed
     SelectedColor = clHighlight
-    GridLineStyle = psSolid
     DataSource = DataSourceLoRa
     FixedCols = 0
     Options = [dgEditing, dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
@@ -190,27 +187,27 @@ object LoRaForm: TLoRaForm
   end
   object DataSourceLoRa: TDataSource
     DataSet = Sqlite3DatasetLoRa
-    Left = 130
-    Top = 306
+    Left = 104
+    Top = 245
   end
   object Sqlite3DatasetLoRa: TSqlite3Dataset
     PrimaryKey = 'id'
     TableName = 'lora'
-    Left = 130
-    Top = 390
+    Left = 104
+    Top = 312
   end
   object PopupMenu1: TPopupMenu
     Images = MainForm.ImageList1
-    Left = 260
-    Top = 60
+    Left = 208
+    Top = 48
     object MenuItemCopy: TMenuItem
       Action = AcCopy
     end
   end
   object ActionList1: TActionList
     Images = MainForm.ImageList1
-    Left = 350
-    Top = 60
+    Left = 280
+    Top = 48
     object AcCopy: TAction
       Caption = 'Копировать'
       ImageIndex = 24

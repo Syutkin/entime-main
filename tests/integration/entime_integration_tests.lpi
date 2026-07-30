@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="12"/>
+    <PathDelim Value="/"/>
+    <General>
+      <SessionStorage Value="InProjectDir"/>
+      <Title Value="entime_integration_tests"/>
+      <Scaled Value="True"/>
+      <ResourceType Value="res"/>
+    </General>
+    <BuildModes Count="1">
+      <Item1 Name="qt6" Default="True">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="qt6"/>
+        </MacroValues>
+      </Item1>
+    </BuildModes>
+    <RequiredPackages Count="17">
+      <Item1>
+        <PackageName Value="LazControlDsgn"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="FCL"/>
+      </Item2>
+      <Item3>
+        <PackageName Value="LCL"/>
+      </Item3>
+      <Item4>
+        <PackageName Value="LazControls"/>
+      </Item4>
+      <Item5>
+        <PackageName Value="DateTimeCtrls"/>
+      </Item5>
+      <Item6>
+        <PackageName Value="SQLDBLaz"/>
+      </Item6>
+      <Item7>
+        <PackageName Value="sqlite3laz"/>
+      </Item7>
+      <Item8>
+        <PackageName Value="laz_synapse"/>
+      </Item8>
+      <Item9>
+        <PackageName Value="DataPortLasarus"/>
+      </Item9>
+      <Item10>
+        <PackageName Value="LazSerialPort"/>
+      </Item10>
+      <Item11>
+        <PackageName Value="laz_fpspreadsheet"/>
+      </Item11>
+      <Item12>
+        <PackageName Value="rxnew"/>
+      </Item12>
+      <Item13>
+        <PackageName Value="rxdbgrid_export_spreadsheet"/>
+      </Item13>
+      <Item14>
+        <PackageName Value="lazdbexport"/>
+      </Item14>
+      <Item15>
+        <PackageName Value="HistoryLazarus"/>
+      </Item15>
+      <Item16>
+        <PackageName Value="chsdet"/>
+      </Item16>
+      <Item17>
+        <PackageName Value="MyForks"/>
+      </Item17>
+    </RequiredPackages>
+    <Units Count="2">
+      <Unit0>
+        <Filename Value="entime_integration_tests.lpr"/>
+        <IsPartOfProject Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="test_main_integration.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit1>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <PathDelim Value="/"/>
+    <Target>
+      <Filename Value=".test_build/entime_integration_tests"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="../../"/>
+      <OtherUnitFiles Value="../../;."/>
+      <UnitOutputDirectory Value=".test_build/lib/$(TargetCPU)-$(TargetOS)"/>
+    </SearchPaths>
+    <Linking>
+      <Debugging>
+        <GenerateDebugInfo Value="False"/>
+      </Debugging>
+    </Linking>
+  </CompilerOptions>
+</CONFIG>
+

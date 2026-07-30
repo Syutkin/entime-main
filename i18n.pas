@@ -51,6 +51,18 @@ resourcestring
   //языки
   rsSystemDefault = 'Системный';
 
+  //разделы настроек
+  rsSettingsGeneral = 'Общие';
+  rsSettingsView = 'Вид';
+  rsSettingsCompetition = 'Соревнование';
+  rsSettingsCOMPort = 'COM порт';
+  rsSettingsLEDPanel = 'LED панель';
+  rsSettingsTelegramBot = 'Телеграм бот';
+  rsUpdateEveryTime = 'Каждый раз';
+  rsUpdateDaily = 'Один раз в сутки';
+  rsUpdateWeekly = 'Один раз в неделю';
+  rsUpdateMonthly = 'Один раз в месяц';
+
   //экспорт
   rsStartProtocol = 'Стартовый протокол';
   rsFinishProtocol = 'Финишный протокол';
@@ -83,7 +95,7 @@ resourcestring
   rsSetIntervalWarning =
     'Интервал задаётся как целое неотрицательное число миллисекунд';
   rsPenaltyTimeFormat =
-    'Штрафное время вводится в формате мм:сс или чч:мм:сс';
+    'Штрафное время вводится в формате сс, мм:сс или чч:мм:сс';
   rsFinishTimeSet =
     'Установлено финишное время для номера';
   rsDeleteNumber =
@@ -143,11 +155,25 @@ resourcestring
   rsCorrectionAlreadySet =
     'поправка уже установлена. Перезаписать значение?';
   rsCOMOpenError = 'Не удалось открыть порт';
+  rsPortClosed = 'Порт %s закрыт';
+  rsPortConnected = 'Порт %s подключён';
+  rsSerialCanRead = 'Чтение доступно: %s';
+  rsSerialCanWrite = 'Запись доступна: %s';
+  rsSerialReadCount = 'Прочитано: %s';
+  rsSerialWriteCount = 'Записано: %s';
+  rsSerialWait = 'Ожидание: %s';
   rsFinishTimeOpenError =
     'Неверный формат файла с результатами СУ';
   rsCanNotBackup = 'Не удалось сделать резервную копию!';
+  rsBackupCreated = 'Создание резервной копии успешно завершено: %s';
   rsContinueWithLoadingResults =
     'Продолжить загрузку результатов?';
+  rsLoadResultsError =
+    'Ошибка загрузки результатов: ';
+  rsWriteResultsDatabaseError =
+    'Ошибка записи результатов в базу: ';
+  rsAddUnknownResultParticipant =
+    'Участник с номером %d отсутствует в списке участников. Добавить его и загрузить результат?';
   rsClearResultsWOBackup = 'Всё равно очистить результаты?';
   rsFileExists = 'Файл уже существует. Перезаписать?';
   rsFinalFileExists =
@@ -168,11 +194,59 @@ resourcestring
     'результаты финиша не пусты. Вы уверены что хотите сформировать стартовый протокол для данного спецучастка?';
   rsLoadParticipantsListError =
     'Ошибка загрузки списка участников: ';
+  rsWriteParticipantsDatabaseError =
+    'Ошибка записи списка участников в базу: ';
+  rsParticipantsCsvEmpty =
+    'Файл списка участников пуст';
   rsNumberColumnNotFound =
     'Не найдена колонка с номерами участников';
+  rsMultipleNumberColumns =
+    'Найдено колонок с номерами участников: %d. Допустима только одна колонка';
+  rsEmptyParticipantColumnName =
+    'Название колонки %d не должно быть пустым';
+  rsDuplicateParticipantColumnName =
+    'Название колонки повторяется: %s';
+  rsParticipantRowsNotFound =
+    'В файле нет строк с участниками';
+  rsParticipantRowFieldCountMismatch =
+    'В строке %d найдено полей: %d, ожидалось: %d';
+  rsInvalidParticipantNumber =
+    'Некорректный номер участника "%s" в строке %d: требуется целое число больше нуля';
+  rsInvalidParticipantStartTime =
+    'Некорректное время старта "%s" в строке %d, колонка "%s". Допустимые форматы: чч:мм, чч:мм:сс, чч:мм:сс.ммм или чч:мм:сс,ммм';
+  rsDuplicateParticipantNumber =
+    'Номер участника %d повторяется в строках %d и %d';
+  rsDetectedParticipantStages =
+    'Обнаруженные СУ:';
   rsNewVersionAvailable = 'Доступна новая версия программы: %0:s. Перейти на сайт?';
   rsUpdateAvailable = 'Доступно обновление ...';
   rsUpdatesNotFound = 'Нет доступных обновлений.';
+  rsUnknownFileEncoding =
+    'Не удалось определить кодировку файла. Продолжить?';
+  rsUnsupportedFileEncoding =
+    'Неподдерживаемая кодировка файла: %s';
+  rsTooManyParticipantStages =
+    'В файле найдено %d СУ, но поддерживается не более %d. Лишние СУ будут пропущены. Продолжить?';
+  rsResultsCsvEmpty =
+    'Файл результатов пуст';
+  rsUnsupportedResultsColumnCount =
+    'Неподдерживаемое количество колонок: %d. Ожидалось 2, 3 или 6';
+  rsResultsRowFieldCountMismatch =
+    'В строке %d найдено полей: %d, ожидалось: %d';
+  rsResultsRowsNotFound =
+    'В файле нет строк с результатами';
+  rsInvalidResultParticipantNumber =
+    'Некорректный номер участника "%s" в строке %d: требуется целое число больше нуля';
+  rsDuplicateResultParticipantNumber =
+    'Номер участника %d повторяется в строках %d и %d';
+  rsInvalidResultTime =
+    'Некорректное время "%s" в строке %d, поле "%s". Допустимые форматы: чч:мм, чч:мм:сс, чч:мм:сс.ммм или чч:мм:сс,ммм';
+  rsInvalidResultCorrection =
+    'Некорректная поправка "%s" в строке %d: требуется целое число';
+  rsInvalidResultPenalty =
+    'Некорректный штраф "%s" в строке %d. Допустимые форматы: сс, мм:сс или чч:мм:сс';
+  rsInvalidResultStatus =
+    'Некорректный статус "%s" в строке %d. Допустимы DNF, DNS, DSQ или числовые коды 1..3';
 
 const
   rsRussian: string = 'Русский';

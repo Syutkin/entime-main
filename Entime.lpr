@@ -19,7 +19,7 @@ uses
   lazdbexport,
   Result,
   HistoryLazarus,
-  updater;
+  db_sql;
 
   {$R *.res}
 

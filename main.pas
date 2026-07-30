@@ -237,10 +237,8 @@ type
     Splitter1: TSplitter;
     ResultDataset1: TSqlite3Dataset;
     Splitter2: TSplitter;
-    SQLite3Connection2: TSQLite3Connection;
     DatasetLoRa: TSqlite3Dataset;
     SQLQuery2: TSQLQuery;
-    SQLTransaction2: TSQLTransaction;
     StatDataset1id: TAutoIncField;
     StatDataset2name: TStringField;
     StatDataset2number: TLongintField;
@@ -321,6 +319,7 @@ type
     MenuItemOpenCSV: TMenuItem;
     PopupMenu1: TPopupMenu;
     ResultClear: TButton;
+    CorrectionPanel: TPanel;
     RxDBGridCorrection: TRxDBGrid;
     sGridResult: TStringGrid;
     SQLite3Connection1: TSQLite3Connection;
@@ -415,7 +414,6 @@ type
     procedure FileOpenCSVSumAccept(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
-    procedure FormResize(Sender: TObject);
     procedure HistoryFiles1ClickHistoryItem(Sender: TObject; Item: TMenuItem;
       const Filename: string);
     procedure LoRaPopupDefaultExecute(Sender: TObject);
@@ -604,7 +602,9 @@ var
 
 implementation
 
-uses Result, Settings, rxapputils, Implement, exsortsqlite, LoRa, updater;
+uses
+  Result, Settings, rxapputils, Implement, exsortsqlite, LoRa, updater, db_sql,
+  Validators;
 
   {$R *.lfm}
 
@@ -642,25 +642,15 @@ begin
 
   //устанавливаем специальные выборки для датасетов
   //тут, чтобы были на виду
-  CorrectionDataset.SQL :=
-    'SELECT * from main where correction1 ISNULL AND status1 ISNULL AND starttime1 NOTNULL ORDER BY starttime1';
-  StatDataset2.SQL :=
-    'SELECT number, name, starttime1 as starttime, strftime(''%H:%M:%S'',julianday(time(''now'', ''localtime'')) - julianday(time(starttime1)) + 0.5) as timeontrack FROM main WHERE julianday(time(''now'', ''localtime'')) > julianday(time(starttime1)) AND finishtime1 ISNULL AND status1 ISNULL ORDER BY starttime';
-  ResultDatasetStageTotal.SQL :=
-    'SELECT category, thruplace as sumplace, number, name, sumresult, thrudiff, sumstages FROM main WHERE sumresult NOTNULL ORDER BY status, thruplace';
-  ResultDatasetStageSum.SQL :=
-    'SELECT * from main WHERE sumresult NOTNULL ORDER BY category, status, sumstages DESC, IFNULL(sumplace,''toend'')';
+  CorrectionDataset.SQL := TDatasetSql.CorrectionPending(1);
+  StatDataset2.SQL := TDatasetSql.TrackStatus(1);
+  ResultDatasetStageTotal.SQL := TDatasetSql.ResultStageTotal;
+  ResultDatasetStageSum.SQL := TDatasetSql.ResultStageSum;
 
   for i := 1 to MAXSTAGES do
   begin
     c := FindComponent('ResultDataset' + IntToStr(i));
-    TSqlite3Dataset(c).SQL :=
-      'SELECT category, place' + IntToStr(i) + ', number, name, penalty' +
-      IntToStr(i) + ', result' + IntToStr(i) + ', diffleader' +
-      IntToStr(i) + ', CASE status WHEN ''3'' THEN ''3'' ELSE status' +
-      IntToStr(i) + ' END status' + IntToStr(i) + ' from main where result' +
-      IntToStr(i) + ' NOTNULL ORDER BY category, status' + IntToStr(i) +
-      ', place' + IntToStr(i);
+    TSqlite3Dataset(c).SQL := TDatasetSql.ResultStage(i);
   end;
 
   {$IFDEF DEBUG}
@@ -708,7 +698,8 @@ end;
 
 procedure TMainForm.ButtonSaveMemoClick(Sender: TObject);
 begin
-  Memo.Lines.SaveToFile(FormatDateTime('YYYY-MM-DD hh-mm', now) + ' memo log.txt');
+  Memo.Lines.SaveToFile(
+    FormatDateTime('YYYY-MM-DD hh-mm-ss', Now) + ' memo log.txt');
 end;
 
 procedure TMainForm.ButtonClearMemoClick(Sender: TObject);
@@ -821,7 +812,7 @@ end;
 
 procedure TMainForm.FileOpenCSVResultAccept(Sender: TObject);
 begin
-  LoadFinishTime((Sender as TFileOpen).Dialog.FileName);
+  LoadStageResults((Sender as TFileOpen).Dialog.FileName);
 end;
 
 procedure TMainForm.FileOpenCSVSumAccept(Sender: TObject);
@@ -830,8 +821,6 @@ begin
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
-var
-  i: integer;
 begin
   //DataPortHTTP1.Close();
   //DataPortHTTP1.Free;
@@ -970,7 +959,7 @@ procedure TMainForm.AcLoRaClearExecute(Sender: TObject);
 begin
   with SQLQuery1 do
   begin
-    SQL.Text := 'UPDATE lora SET isset = 0 WHERE isset ISNULL;';
+    SQL.Text := TLoRaSql.ResetIsSetNull;
     Close;
     ExecSQL;
     SQLTransaction.Commit;
@@ -1074,11 +1063,10 @@ begin
     with MainForm.SQLQuery1 do
     begin
       //если не существует - создание sumdays
-      SQL.Text :=
-        'CREATE TABLE IF NOT EXISTS sumdays ("id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, "number" INTEGER UNIQUE, "place" INTEGER, "sumresult" VARCHAR, "sumstages" INTEGER, "diffleader" VARCHAR, "status" VARCHAR);';
+      SQL.Text := TSumDaysSql.CreateTableIfNotExists;
       Close;
       ExecSQL;
-      SQL.Text := 'DELETE from sumdays';
+      SQL.Text := TSumDaysSql.DeleteAll;
       ExecSQL;
       SQLTransaction.Commit;
       Close;
@@ -1102,15 +1090,7 @@ begin
       //ставим итоговые места
       with MainForm.SQLQuery1 do
       begin
-        SQL.Clear;
-        SQL.Add('INSERT into sumdays (number, place)');
-        SQL.Add(
-          'SELECT sumdays.number, row_number() over(partition BY category ORDER BY sumdays.sumresult) as place');
-        SQL.Add('FROM main, sumdays');
-        SQL.Add(
-          'WHERE sumdays.sumresult > 0 AND sumdays.sumstages = (SELECT MAX(sumstages) FROM sumdays) AND sumdays.number = main.number');
-        SQL.Add('ORDER BY sumdays.sumresult DESC');
-        SQL.Add('ON CONFLICT(number) DO UPDATE SET place = excluded.place;');
+        SQL.Text := TSumDaysSql.UpsertPlacesByCategory;
         Close;
         ExecSQL;
         SQLTransaction.Commit;
@@ -1486,13 +1466,19 @@ procedure TMainForm.SerialStatus(Sender: TObject; Reason: THookSerialReason;
 begin
   case Reason of
     HR_SerialClose: StatusBarLeft.Panels[2].Text :=
-        'Port ' + Value + ' closed';
-    HR_Connect: StatusBarLeft.Panels[2].Text := 'Port ' + Value + ' connected';
-    HR_CanRead: StatusBarLeft.Panels[2].Text := 'CanRead : ' + Value;
-    HR_CanWrite: StatusBarLeft.Panels[2].Text := 'CanWrite : ' + Value;
-    HR_ReadCount: StatusBarLeft.Panels[2].Text := 'ReadCount : ' + Value;
-    HR_WriteCount: StatusBarLeft.Panels[2].Text := 'WriteCount : ' + Value;
-    HR_Wait: StatusBarLeft.Panels[2].Text := 'Wait : ' + Value;
+        Format(rsPortClosed, [Value]);
+    HR_Connect: StatusBarLeft.Panels[2].Text :=
+        Format(rsPortConnected, [Value]);
+    HR_CanRead: StatusBarLeft.Panels[2].Text :=
+        Format(rsSerialCanRead, [Value]);
+    HR_CanWrite: StatusBarLeft.Panels[2].Text :=
+        Format(rsSerialCanWrite, [Value]);
+    HR_ReadCount: StatusBarLeft.Panels[2].Text :=
+        Format(rsSerialReadCount, [Value]);
+    HR_WriteCount: StatusBarLeft.Panels[2].Text :=
+        Format(rsSerialWriteCount, [Value]);
+    HR_Wait: StatusBarLeft.Panels[2].Text :=
+        Format(rsSerialWait, [Value]);
   end;
 end;
 
@@ -1530,24 +1516,6 @@ begin
   end;
 end;
 
-procedure TMainForm.FormResize(Sender: TObject);
-var
-  h, k: integer;
-begin
-  h := Splitter1.Top;
-  k := PageControl1.Height - Splitter1.Height - sGridResult.Height -
-    sGridResult.BorderSpacing.Bottom - ResultClear.Height -
-    ResultClear.BorderSpacing.Bottom;
-  if h > k then
-  begin
-    h := k;
-    if CurrentSU.Visible then
-      Splitter1.Top := h - CurrentSU.Height
-    else
-      Splitter1.Top := h;
-  end;
-end;
-
 procedure TMainForm.HistoryFiles1ClickHistoryItem(Sender: TObject;
   Item: TMenuItem; const Filename: string);
 begin
@@ -1562,7 +1530,7 @@ end;
 procedure TMainForm.LoRaPopupDefaultExecute(Sender: TObject);
 begin
   MainForm.DatasetLoRa.Close;
-  MainForm.DatasetLoRa.SQL := 'SELECT * FROM lora WHERE isset ISNULL';
+  MainForm.DatasetLoRa.SQL := TLoRaSql.SelectPending;
   try
     MainForm.DatasetLoRa.Open;
     MainForm.LoRaPopupDefault.Checked := False;
@@ -1589,7 +1557,8 @@ begin
     with MainForm.SQLQuery1 do
     begin
       Close;
-      SQL.Text := 'UPDATE lora SET isset = 0 WHERE id = ' + id + ';';
+      SQL.Text := TLoRaSql.SetIsSetById;
+      ParamByName('ID').AsInteger := StrToIntDef(id, 0);
       ExecSQL;
       SQLTransaction.Commit;
       Close;
@@ -1622,9 +1591,11 @@ end;
 procedure TMainForm.LoRaPopupShow15minExecute(Sender: TObject);
 begin
   MainForm.DatasetLoRa.Close;
-  MainForm.DatasetLoRa.SQL :=
-    'SELECT * FROM lora WHERE starttime > "' +
-    FormatDateTime('hh:nn:ss', (Now - 15 / 24 / 60)) + '";';
+  MainForm.DatasetLoRa.SQL := StringReplace(
+    TLoRaSql.SelectStartAfter,
+    ':STARTTIME',
+    '"' + FormatDateTime('hh:nn:ss', (Now - 15 / 24 / 60)) + '"',
+    []);
   try
     MainForm.DatasetLoRa.Open;
     MainForm.LoRaPopupDefault.Checked := False;
@@ -1644,7 +1615,7 @@ end;
 procedure TMainForm.LoRaPopupShowAllExecute(Sender: TObject);
 begin
   MainForm.DatasetLoRa.Close;
-  MainForm.DatasetLoRa.SQL := 'SELECT * FROM lora;';
+  MainForm.DatasetLoRa.SQL := TLoRaSql.SelectAll;
   try
     MainForm.DatasetLoRa.Open;
     MainForm.LoRaPopupDefault.Checked := False;
@@ -1666,17 +1637,18 @@ var
   minstarttime: string;
 begin
   SQLQuery1.Close;
-  SQLQuery1.SQL.Text := 'SELECT min(starttime' + IntToStr(ActiveStageIndex) +
-    ') as starttime FROM main WHERE starttime' + IntToStr(ActiveStageIndex) +
-    ' NOTNULL;';
+  SQLQuery1.SQL.Text := TMainSql.SelectMinStartTime(ActiveStageIndex);
   SQLQuery1.Open();
   minstarttime := SQLQuery1.FieldByName('starttime').AsString;
   Print(minstarttime);
   SQLQuery1.Close;
   SQLTransaction1.Active := False;
   MainForm.DatasetLoRa.Close;
-  MainForm.DatasetLoRa.SQL :=
-    'SELECT * FROM lora WHERE starttime > "' + minstarttime + '";';
+  MainForm.DatasetLoRa.SQL := StringReplace(
+    TLoRaSql.SelectStartAfter,
+    ':STARTTIME',
+    '"' + minstarttime + '"',
+    []);
   try
     MainForm.DatasetLoRa.Open;
     MainForm.LoRaPopupDefault.Checked := False;
@@ -1703,7 +1675,7 @@ var
   i: integer;
 begin
   SQLQuery1.Close;
-  SQLQuery1.SQL.Text := 'SELECT MAX(number) as number FROM main';
+  SQLQuery1.SQL.Text := TMainSql.SelectMaxNumber;
   SQLQuery1.Open();
   if TryStrToInt(MainForm.SQLQuery1.FieldByName('number').AsString, i) then
   begin
@@ -1731,29 +1703,14 @@ end;
 
 procedure TMainForm.CheckPenaltySetText(Sender: TField; const aText: string);
 var
-  t: TDateTime;
-  a: string;
+  normalizedValue: string;
 begin
-  //Memo.Lines.Add('CheckPenaltySetText');
-  a := '00:' + aText;
-  if TryStrToTime(a, t) then
-  begin
-    Sender.AsString := FormatDateTime('hh:nn:ss', t);
-  end
+  if Trim(aText) = '' then
+    Sender.AsString := ''
+  else if TryNormalizeDuration(aText, normalizedValue) then
+    Sender.AsString := normalizedValue
   else
-  begin
-    if TryStrToTime(aText, t) then
-    begin
-      Sender.AsString := FormatDateTime('hh:nn:ss', t);
-    end
-    else
-    begin
-      if aText = '' then
-        Sender.AsString := ''
-      else
-        MessageDlg(rsPenaltyTimeFormat, mtInformation, [mbOK], 0);
-    end;
-  end;
+    MessageDlg(rsPenaltyTimeFormat, mtInformation, [mbOK], 0);
 end;
 
 procedure TMainForm.HideZeroHour(Sender: TField; var aText: string;
@@ -1862,22 +1819,13 @@ end;
 
 procedure TMainForm.CurrentSUClick(Sender: TObject);
 var
-  c: TComponent;
   i: integer;
 begin
   i := (Sender as TRadioGroup).ItemIndex + 1;
   CorrectionDatasetcorrection.FieldName := 'correction' + IntToStr(i);
   RxDBGridCorrection.Columns[1].FieldName := 'correction' + IntToStr(i);
-  CorrectionDataset.SQL :=
-    'SELECT * from main where correction' + IntToStr(i) + ' ISNULL AND status' +
-    IntToStr(i) + ' ISNULL AND starttime' + IntToStr(i) +
-    ' NOTNULL ORDER BY starttime' + IntToStr(i);
-  StatDataset2.SQL := 'SELECT number, name, starttime' + IntToStr(i) +
-    ' as starttime, strftime(''%H:%M:%S'',julianday(time(''now'', ''localtime'')) - julianday(time(starttime'
-    + IntToStr(i) +
-    ')) + 0.5) as timeontrack from main where julianday(time(''now'', ''localtime'')) > julianday(time(starttime'
-    + IntToStr(i) + ')) AND finishtime' + IntToStr(i) + ' ISNULL AND status' +
-    IntToStr(i) + ' ISNULL ORDER BY starttime';
+  CorrectionDataset.SQL := TDatasetSql.CorrectionPending(i);
+  StatDataset2.SQL := TDatasetSql.TrackStatus(i);
   if dbopen then
   begin
     ;

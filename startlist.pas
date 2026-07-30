@@ -39,6 +39,7 @@ type
     ListBox1: TListBox;
     Panel1: TPanel;
     Panel2: TPanel;
+    StartlistScrollBox: TScrollBox;
     SpinEditEx1: TSpinEditEx;
     SpinEditEx2: TSpinEditEx;
     TimeEdit1: TTimeEdit;
@@ -101,7 +102,7 @@ var
 
 implementation
 
-uses Main{, Implement};
+uses Main, db_sql{, Implement};
 
 function RunStartlist(var config: TStartlistConfig): boolean;
 var
@@ -212,11 +213,9 @@ begin
             begin
               with MainForm.SQLQuery1 do
               begin
-                SQL.Clear;
-                SQL.Add('INSERT INTO config (key, value) VALUES');
-                SQL.Add('("stage' + IntToStr(config.selectedStage + 1) +
-                  '", "' + BoolToStr(True, True) + '")');
-                SQL.Add('ON CONFLICT(key) DO UPDATE SET value = excluded.value;');
+                SQL.Text := TConfigSql.UpsertByKey;
+                ParamByName('KEY').AsString := 'stage' + IntToStr(config.selectedStage + 1);
+                ParamByName('VALUE').AsString := BoolToStr(True, True);
                 ExecSQL;
                 SQLTransaction.Commit;
                 Close;
@@ -304,7 +303,7 @@ begin
       CatList := TStringList.Create;
       CatList.Text := startCatList;
       //удаляем текущее время старта, если было установлено
-      SQL.Text := ('UPDATE main SET starttime' + IntToStr(stageIndex) + ' = NULL');
+      SQL.Text := TMainSql.ResetStartTime(stageIndex);
       ExecSQL;
       SQLTransaction.Commit;
       Close;
@@ -312,41 +311,22 @@ begin
       //для каждой категории делаем выборку и ставим время старта
       for i := 0 to CatList.Count - 1 do
       begin
-        SQL.Clear;
-        SQL.Text := 'SELECT number FROM main WHERE category IS "' +
-          CatList.Strings[i] + '"';
-        case sortBy of
-          slByResult:
-          begin
-            if not cbDNS.Checked then
-              SQL.Add('AND sumresult <> ''DNS''');
-            if not cbDNF.Checked then
-              SQL.Add('AND sumresult <> ''DNF''');
-            if not cbDSQ.Checked then
-              SQL.Add('AND sumresult <> ''DSQ''');
-            if (cbDNS.Checked) or (cbDNF.Checked) or (cbDSQ.Checked) then
-              SQL.Add('OR sumresult IS NULL')
-            else
-              SQL.Add('AND sumresult NOTNULL');
-            SQL.Add('ORDER BY sumstages DESC NULLS FIRST, sumresult DESC NULLS FIRST');
-          end;
-          slByNumberAsc:
-            SQL.Add('ORDER BY number ASC');
-          slByNumberDesc:
-            SQL.Add('ORDER BY number DESC');
-          slByNameAsc:
-            SQL.Add('ORDER BY name ASC');
-          slByNameDesc:
-            SQL.Add('ORDER BY name DESC');
-        end;
+        SQL.Text := TStartlistSql.SelectNumbersForCategory(
+          Ord(sortBy),
+          cbDNS.Checked,
+          cbDNF.Checked,
+          cbDSQ.Checked
+          );
+        ParamByName('CATEGORY').AsString := CatList.Strings[i];
         Open;
         while not EOF do
         begin
           number := Fields.Fields[0].AsString;
           Next;
-          MainForm.SQLQuery2.SQL.Text :=
-            'UPDATE main SET starttime' + IntToStr(stageIndex) +
-            ' = "' + FormatDateTime('hh:nn:ss', startTime) + '" WHERE number =' + number;
+          MainForm.SQLQuery2.SQL.Text := TMainSql.UpdateStartTime(stageIndex);
+          MainForm.SQLQuery2.ParamByName('STARTTIME').AsString :=
+            FormatDateTime('hh:nn:ss', startTime);
+          MainForm.SQLQuery2.ParamByName('NUMBER').AsString := number;
           MainForm.SQLQuery2.ExecSQL;
           //кол-во минут
           min := delayBetweenRacers div 60;
@@ -355,10 +335,9 @@ begin
         end;
         startTime := startTime + EncodeTime(0, delayBetweenCategories, 0, 0);
         Close;
-        MainForm.SQLTransaction1.Active := False;
-        MainForm.SQLQuery2.SQLTransaction.Commit;
         MainForm.SQLQuery2.Close;
-        MainForm.SQLTransaction2.Active := False;
+        if SQLTransaction.Active then
+          SQLTransaction.Commit;
       end;
       //ToDo: а то не обновляло в основном окне
       UpdateResults;
