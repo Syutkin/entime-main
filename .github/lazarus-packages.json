@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "repository": "https://packages.lazarus-ide.org",
+  "packages": [
+    { "name": "chsdet", "source": "opm", "archive": "ChsDet.zip", "lpk": ["chsdet.lpk"] },
+    {
+      "name": "Synapse",
+      "source": "git",
+      "repository": "https://github.com/geby/synapse.git",
+      "branch": "master",
+      "archive": "Synapse-git.zip",
+      "directory": "packages/Synapse",
+      "lpk": ["laz_synapse.lpk"]
+    },
+    { "name": "DataPort", "source": "opm", "archive": "DataPort.zip", "lpk": ["dataportlasarus.lpk"] },
+    { "name": "LazSerial", "source": "opm", "archive": "LazSerial.zip", "lpk": ["LazSerialPort.lpk"] },
+    { "name": "FPSpreadsheet", "source": "opm", "archive": "FPSpreadsheet.zip", "lpk": ["laz_fpspreadsheet.lpk"] },
+    { "name": "Rx", "source": "opm", "archive": "Rx.zip", "lpk": ["rxnew.lpk", "rxdbgrid_export_spreadsheet.lpk"] },
+    { "name": "HistoryFiles", "source": "opm", "archive": "HistoryFiles.zip", "lpk": ["HistoryLazarus.lpk"] }
+  ]
+}

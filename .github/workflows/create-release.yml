@@ -1,0 +1,518 @@
+name: Create release
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Operation to perform
+        required: true
+        default: sync_next
+        type: choice
+        options:
+          - sync_next
+          - publish_existing
+          - rebuild_existing
+      target_tag:
+        description: Source tag to import or existing tag to publish; empty selects the next Codeberg tag
+        required: false
+        type: string
+      dry_run:
+        description: Validate and show the planned changes without building, pushing or publishing
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: codeberg-release-sync
+  cancel-in-progress: false
+
+env:
+  CODEBERG_REPOSITORY: https://codeberg.org/Syutkin/entime.git
+  CODEBERG_WEB_URL: https://codeberg.org/Syutkin/entime
+  PYTHONDONTWRITEBYTECODE: '1'
+
+jobs:
+  release:
+    name: Build and publish release
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate checkout and configure Git
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $branch = (git branch --show-current).Trim()
+          if ($branch -ne 'master') {
+            throw "Releases must run from master; current branch is '$branch'."
+          }
+          $status = @(git status --porcelain --untracked-files=all)
+          if ($status.Count -ne 0) {
+            $status | Write-Host
+            throw 'The checkout is not clean before release synchronization.'
+          }
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          "AUTOMATION_DIRECTORY=$(Join-Path $env:GITHUB_WORKSPACE '.github')" |
+            Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "AUTOMATION_COMMIT=$((git rev-parse HEAD).Trim())" |
+            Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          'CONTINUE_PIPELINE=true' | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Run release automation tests
+        run: python -m unittest discover -s .github/tests -v
+
+      - name: Resolve requested release
+        id: release
+        env:
+          MODE: ${{ inputs.mode }}
+          REQUESTED_TAG: ${{ inputs.target_tag }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $sourceTagsPath = Join-Path $env:RUNNER_TEMP 'codeberg-tags.txt'
+          $localTagsPath = Join-Path $env:RUNNER_TEMP 'github-tags.txt'
+
+          if ($env:MODE -eq 'sync_next') {
+            $sourceTags = @(git ls-remote --tags --refs $env:CODEBERG_REPOSITORY |
+              ForEach-Object { (($_ -split '\s+')[-1] -replace '^refs/tags/', '') } |
+              Where-Object { $_ })
+            if ($LASTEXITCODE -ne 0) {
+              throw 'Could not list Codeberg release tags.'
+            }
+            $sourceTags | Set-Content -Path $sourceTagsPath -Encoding utf8
+          } else {
+            Set-Content -Path $sourceTagsPath -Value '' -Encoding utf8
+          }
+          git tag --list | Set-Content -Path $localTagsPath -Encoding utf8
+
+          $selection = @(python .github/scripts/select_release_tag.py `
+            --mode $env:MODE `
+            "--requested-tag=$($env:REQUESTED_TAG)" `
+            --source-tags $sourceTagsPath `
+            --local-tags $localTagsPath)
+          if ($LASTEXITCODE -ne 0) {
+            throw 'Could not resolve the requested release tag.'
+          }
+          $target = ($selection -join "`n").Trim()
+          if (-not $target) {
+            Write-Host 'No newer Codeberg release tag was found.'
+            'CONTINUE_PIPELINE=false' | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+            'should_process=false' | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+            exit 0
+          }
+
+          git rev-parse -q --verify "refs/tags/$target" *> $null
+          $tagExists = $LASTEXITCODE -eq 0
+          $global:LASTEXITCODE = 0
+          if ($env:MODE -ne 'sync_next' -and -not $tagExists) {
+            throw "Local tag $target does not exist."
+          }
+          if ($env:MODE -eq 'sync_next' -and $tagExists) {
+            throw "Local tag $target already exists; sync_next never overwrites tags."
+          }
+
+          gh release view $target --repo $env:GITHUB_REPOSITORY 2>$null
+          $releaseExists = $LASTEXITCODE -eq 0
+          $global:LASTEXITCODE = 0
+          if ($env:MODE -eq 'rebuild_existing' -and -not $releaseExists) {
+            throw "GitHub Release $target does not exist, so there are no locked inputs to restore."
+          }
+          if ($env:MODE -ne 'rebuild_existing' -and $releaseExists) {
+            throw "GitHub Release $target already exists."
+          }
+
+          "target_tag=$target" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          'should_process=true' | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "TARGET_TAG=$target" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          Write-Host "Selected release $target."
+
+      - name: Preserve current changelog and automation
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode != 'sync_next'
+        run: |
+          $changelogPath = Join-Path $env:RUNNER_TEMP 'release-changelog.md'
+          Copy-Item CHANGELOG.md $changelogPath
+          $automationDirectory = Join-Path $env:RUNNER_TEMP 'release-automation'
+          Copy-Item -Recurse -Force .github $automationDirectory
+          "RELEASE_CHANGELOG_PATH=$changelogPath" |
+            Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "AUTOMATION_DIRECTORY=$automationDirectory" |
+            Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Import Codeberg source snapshot
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode == 'sync_next'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $sourceDirectory = Join-Path $env:RUNNER_TEMP 'codeberg-source'
+          $sourceArchive = Join-Path $env:RUNNER_TEMP 'codeberg-source.tar'
+          $applicationDirectory = Join-Path $env:RUNNER_TEMP 'codeberg-application'
+          Remove-Item -Recurse -Force $sourceDirectory, $applicationDirectory -ErrorAction SilentlyContinue
+          Remove-Item -Force $sourceArchive -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Force $sourceDirectory, $applicationDirectory | Out-Null
+
+          git -C $sourceDirectory init --quiet
+          git -C $sourceDirectory fetch --quiet --depth=1 $env:CODEBERG_REPOSITORY `
+            "refs/tags/$($env:TARGET_TAG):refs/tags/$($env:TARGET_TAG)"
+          if ($LASTEXITCODE -ne 0) {
+            throw "Could not fetch Codeberg tag $env:TARGET_TAG."
+          }
+          $treeish = "$($env:TARGET_TAG):entime-main"
+          git -C $sourceDirectory archive --format=tar --output=$sourceArchive $treeish
+          if ($LASTEXITCODE -ne 0) {
+            throw "Codeberg tag $env:TARGET_TAG has no entime-main directory."
+          }
+          tar -xf $sourceArchive -C $applicationDirectory
+          if ($LASTEXITCODE -ne 0) {
+            throw "Could not unpack entime-main from Codeberg tag $env:TARGET_TAG."
+          }
+
+          # Keep GitHub automation and ignored local documentation while replacing
+          # all tracked application files with the selected Codeberg snapshot.
+          git ls-files | Where-Object { -not $_.StartsWith('.github/') } |
+            ForEach-Object { Remove-Item -Force $_ -ErrorAction SilentlyContinue }
+          Get-ChildItem -Force $applicationDirectory |
+            Where-Object { $_.Name -notin @('.git', '.github', 'doc') } |
+            ForEach-Object { Copy-Item -Recurse -Force $_.FullName $env:GITHUB_WORKSPACE }
+
+          git add -A
+          git diff --cached --quiet
+          $diffExitCode = $LASTEXITCODE
+          if ($diffExitCode -eq 0) {
+            Write-Host "Tag $env:TARGET_TAG has no source changes relative to master."
+            'CONTINUE_PIPELINE=false' | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          } elseif ($diffExitCode -ne 1) {
+            throw "git diff failed with exit code $diffExitCode."
+          }
+          $global:LASTEXITCODE = 0
+
+      - name: Validate changelog release notes
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode != 'rebuild_existing'
+        run: |
+          $changelogPath = if ($env:RELEASE_CHANGELOG_PATH) {
+            $env:RELEASE_CHANGELOG_PATH
+          } else {
+            'CHANGELOG.md'
+          }
+          $notesPath = Join-Path $env:RUNNER_TEMP 'base-release-notes.md'
+          python (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/extract_changelog_release_notes.py') `
+            --changelog $changelogPath --tag $env:TARGET_TAG --output $notesPath
+          if ($LASTEXITCODE -ne 0) {
+            throw "CHANGELOG.md has no valid release notes for $env:TARGET_TAG."
+          }
+          "BASE_RELEASE_NOTES=$notesPath" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Report dry run
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.dry_run
+        run: |
+          if ('${{ inputs.mode }}' -eq 'sync_next') {
+            git diff --cached --stat
+            git diff --cached --name-status
+          } else {
+            Write-Host "Would process existing tag $env:TARGET_TAG in mode ${{ inputs.mode }}."
+          }
+          if ($env:BASE_RELEASE_NOTES) {
+            Write-Host 'Release notes:'
+            Get-Content $env:BASE_RELEASE_NOTES | Write-Host
+            if ('${{ inputs.mode }}' -eq 'sync_next') {
+              Write-Host "Source: $env:CODEBERG_WEB_URL/src/tag/$env:TARGET_TAG/entime-main"
+            }
+          }
+          'CONTINUE_PIPELINE=false' | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Create imported release commit and tag
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode == 'sync_next'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          git commit -m "Release $env:TARGET_TAG"
+          git tag -a $env:TARGET_TAG -m "Release $env:TARGET_TAG"
+          git diff --exit-code
+          git diff --cached --exit-code
+          $status = @(git status --porcelain --untracked-files=all)
+          if ($status.Count -ne 0) {
+            $status | Write-Host
+            throw 'The release commit did not capture every source change.'
+          }
+          $exactTag = (git describe --exact-match --tags HEAD).Trim()
+          if ($exactTag -ne $env:TARGET_TAG) {
+            throw "HEAD is tagged as '$exactTag', expected '$env:TARGET_TAG'."
+          }
+
+      - name: Check out existing tag for packaging
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode != 'sync_next'
+        run: git checkout --detach $env:TARGET_TAG
+
+      - name: Prepare locked dependency checksum
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode == 'rebuild_existing'
+        id: locked-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $bootstrap = Join-Path $env:RUNNER_TEMP 'locked-bootstrap'
+          Remove-Item -Recurse -Force $bootstrap -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Force $bootstrap | Out-Null
+          gh release download $env:TARGET_TAG --repo $env:GITHUB_REPOSITORY `
+            --pattern 'lazarus-dependencies.zip.sha256' `
+            --pattern "Entime-$env:TARGET_TAG-win-x64.zip.sha256" `
+            --dir $bootstrap
+          $checksumFile = Join-Path $bootstrap 'lazarus-dependencies.zip.sha256'
+          $checksumText = (Get-Content -Raw $checksumFile).Trim()
+          if ($checksumText -notmatch '(?i)^([0-9a-f]{64})\s+\*?lazarus-dependencies\.zip$') {
+            throw 'The dependency archive checksum asset has an invalid format.'
+          }
+          $dependencySha256 = $Matches[1].ToLowerInvariant()
+          $releaseChecksumFile = Join-Path $bootstrap "Entime-$env:TARGET_TAG-win-x64.zip.sha256"
+          $releaseChecksumText = (Get-Content -Raw $releaseChecksumFile).Trim()
+          $releaseNamePattern = [regex]::Escape("Entime-$env:TARGET_TAG-win-x64.zip")
+          $releaseChecksumPattern = '(?i)^([0-9a-f]{64})\s+\*?' + $releaseNamePattern + '$'
+          if ($releaseChecksumText -notmatch $releaseChecksumPattern) {
+            throw 'The published release archive checksum asset has an invalid format.'
+          }
+          $lockedDirectory = Join-Path $env:RUNNER_TEMP 'locked-dependencies'
+          "LOCKED_DEPENDENCIES=$lockedDirectory" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "dependency_sha256=$dependencySha256" |
+            Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "release_sha256=$($Matches[1].ToLowerInvariant())" |
+            Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "checksum_file=$checksumFile" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "release_checksum_file=$releaseChecksumFile" |
+            Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Cache locked build inputs and package outputs
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode == 'rebuild_existing'
+        id: locked-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/locked-dependencies
+          key: entime-locked-build-${{ runner.os }}-${{ steps.release.outputs.target_tag }}-${{ steps.locked-release.outputs.dependency_sha256 }}-${{ steps.locked-release.outputs.release_sha256 }}
+
+      - name: Download locked build inputs
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode == 'rebuild_existing' && steps.locked-cache.outputs.cache-hit != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          New-Item -ItemType Directory -Force $env:LOCKED_DEPENDENCIES | Out-Null
+          gh release download $env:TARGET_TAG --repo $env:GITHUB_REPOSITORY `
+            --pattern 'build-dependencies.json' `
+            --pattern 'lazarus-dependencies.zip' `
+            --pattern "Entime-$env:TARGET_TAG-win-x64.zip" `
+            --dir $env:LOCKED_DEPENDENCIES
+          Copy-Item '${{ steps.locked-release.outputs.checksum_file }}' `
+            (Join-Path $env:LOCKED_DEPENDENCIES 'lazarus-dependencies.zip.sha256')
+          Copy-Item '${{ steps.locked-release.outputs.release_checksum_file }}' `
+            (Join-Path $env:LOCKED_DEPENDENCIES "Entime-$env:TARGET_TAG-win-x64.zip.sha256")
+
+      - name: Verify and restore locked build inputs
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode == 'rebuild_existing'
+        run: |
+          & (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/restore_locked_dependencies.ps1') `
+            -DependenciesDirectory $env:LOCKED_DEPENDENCIES `
+            -Tag $env:TARGET_TAG
+          "BUILD_DEPENDENCY_MANIFEST=$(Join-Path $env:LOCKED_DEPENDENCIES 'build-dependencies.json')" |
+            Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Resolve Lazarus cache key
+        if: env.CONTINUE_PIPELINE == 'true'
+        id: lazarus-release
+        run: |
+          if ('${{ inputs.mode }}' -eq 'rebuild_existing') {
+            $lock = Get-Content -Raw $env:BUILD_DEPENDENCY_MANIFEST | ConvertFrom-Json
+            $sha256 = $lock.toolchain.lazarus.sha256
+          } else {
+            $resolved = @(& (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/install_official_lazarus.ps1') `
+              -OutputDirectory (Join-Path $env:RUNNER_TEMP 'lazarus-toolchain') -ResolveOnly)
+            if ($LASTEXITCODE -ne 0) {
+              throw 'Could not resolve the current official Lazarus installer.'
+            }
+            $sha256 = ($resolved | Select-Object -Last 1).Trim()
+          }
+          if (-not $sha256) { throw 'Could not resolve the Lazarus installer SHA-256.' }
+          "sha256=$sha256" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Restore installed Lazarus toolchain cache
+        if: env.CONTINUE_PIPELINE == 'true'
+        id: lazarus-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: C:\lazarus
+          key: entime-installed-lazarus-v1-${{ runner.os }}-${{ steps.lazarus-release.outputs.sha256 }}
+
+      - name: Install Lazarus toolchain
+        if: env.CONTINUE_PIPELINE == 'true'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $lazarusDirectory = Join-Path $env:RUNNER_TEMP 'lazarus-toolchain'
+          $lockFile = if ('${{ inputs.mode }}' -eq 'rebuild_existing') {
+            $env:BUILD_DEPENDENCY_MANIFEST
+          } else {
+            ''
+          }
+          if ($lockFile) {
+            & (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/install_official_lazarus.ps1') `
+              -OutputDirectory $lazarusDirectory -LockFile $lockFile
+          } else {
+            & (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/install_official_lazarus.ps1') `
+              -OutputDirectory $lazarusDirectory
+          }
+
+      - name: Save installed Lazarus toolchain cache
+        if: env.CONTINUE_PIPELINE == 'true' && steps.lazarus-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: C:\lazarus
+          key: entime-installed-lazarus-v1-${{ runner.os }}-${{ steps.lazarus-release.outputs.sha256 }}
+
+      - name: Prepare Lazarus package dependencies
+        if: env.CONTINUE_PIPELINE == 'true'
+        run: |
+          if ('${{ inputs.mode }}' -eq 'rebuild_existing') {
+            $directory = Join-Path $env:LOCKED_DEPENDENCIES 'lazarus'
+            & (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/resolve_lazarus_dependencies.ps1') `
+              -Mode locked -OutputDirectory $directory -LockFile $env:BUILD_DEPENDENCY_MANIFEST
+          } else {
+            $directory = Join-Path $env:RUNNER_TEMP 'lazarus-dependencies'
+            & (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/resolve_lazarus_dependencies.ps1') `
+              -Mode latest -OutputDirectory $directory `
+              -ConfigFile (Join-Path $env:AUTOMATION_DIRECTORY 'lazarus-packages.json')
+          }
+          "LAZARUS_DEPENDENCIES=$directory" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Build Windows x64 executable
+        if: env.CONTINUE_PIPELINE == 'true'
+        run: lazbuild --build-mode=Release Entime.lpi
+
+      - name: Download latest OpenSSL 3.5 LTS DLLs
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode != 'rebuild_existing'
+        run: |
+          $openSslDirectory = Join-Path $env:RUNNER_TEMP 'openssl'
+          & (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/download_latest_openssl.ps1') `
+            -OutputDirectory $openSslDirectory
+          "OPENSSL_DEPENDENCIES=$(Join-Path $openSslDirectory 'dll')" |
+            Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Download latest official SQLite DLL
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode != 'rebuild_existing'
+        run: |
+          $sqliteDirectory = Join-Path $env:RUNNER_TEMP 'sqlite'
+          & (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/download_latest_sqlite.ps1') `
+            -OutputDirectory $sqliteDirectory
+          "SQLITE3_PATH=$(Join-Path $sqliteDirectory 'sqlite3.dll')" |
+            Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Restore locked runtime DLL paths
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode == 'rebuild_existing'
+        run: |
+          "OPENSSL_DEPENDENCIES=$(Join-Path $env:LOCKED_DEPENDENCIES 'openssl/dll')" |
+            Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "SQLITE3_PATH=$(Join-Path $env:LOCKED_DEPENDENCIES 'sqlite/sqlite3.dll')" |
+            Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Capture reproducible build inputs
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode != 'rebuild_existing'
+        id: dependencies
+        run: |
+          $outputDirectory = Join-Path $env:RUNNER_TEMP 'dependency-assets'
+          & (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/package_build_dependencies.ps1') `
+            -DependenciesDirectory $env:LAZARUS_DEPENDENCIES `
+            -OpenSslDirectory (Join-Path $env:RUNNER_TEMP 'openssl') `
+            -SqliteDirectory (Join-Path $env:RUNNER_TEMP 'sqlite') `
+            -OutputDirectory $outputDirectory `
+            -GitVersion "$((git --version).Trim())" `
+            -AutomationCommit $env:AUTOMATION_COMMIT `
+            -SourceCommit "$((git rev-parse HEAD).Trim())"
+          $manifestPath = Join-Path $outputDirectory 'build-dependencies.json'
+          "BUILD_DEPENDENCY_MANIFEST=$manifestPath" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "manifest_path=$manifestPath" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "archive_path=$(Join-Path $outputDirectory 'lazarus-dependencies.zip')" |
+            Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "archive_checksum_path=$(Join-Path $outputDirectory 'lazarus-dependencies.zip.sha256')" |
+            Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Package release archive
+        if: env.CONTINUE_PIPELINE == 'true'
+        id: package
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $outputDirectory = Join-Path $env:RUNNER_TEMP 'release-assets'
+          & (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/package_windows_release.ps1') `
+            -Tag $env:TARGET_TAG `
+            -OpenSslDependenciesDirectory $env:OPENSSL_DEPENDENCIES `
+            -SqlitePath $env:SQLITE3_PATH `
+            -DependencyManifestPath $env:BUILD_DEPENDENCY_MANIFEST `
+            -OutputDirectory $outputDirectory
+          $assetPath = Join-Path $outputDirectory "Entime-$env:TARGET_TAG-win-x64.zip"
+          "asset_path=$assetPath" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "checksum_path=$assetPath.sha256" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Compare rebuilt archive with published release
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode == 'rebuild_existing'
+        id: compare
+        continue-on-error: true
+        run: |
+          $rebuiltDirectory = Join-Path $env:RUNNER_TEMP 'rebuilt-assets'
+          New-Item -ItemType Directory -Force $rebuiltDirectory | Out-Null
+          $rebuiltArchive = Join-Path $rebuiltDirectory "Entime-$env:TARGET_TAG-win-x64-rebuilt.zip"
+          Copy-Item '${{ steps.package.outputs.asset_path }}' $rebuiltArchive
+          $rebuiltHash = (Get-FileHash $rebuiltArchive -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$rebuiltHash  $([IO.Path]::GetFileName($rebuiltArchive))" |
+            Set-Content "$rebuiltArchive.sha256" -Encoding ascii -NoNewline
+          "rebuilt_archive=$rebuiltArchive" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "rebuilt_checksum=$rebuiltArchive.sha256" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          & (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/compare_release_archives.ps1') `
+            -PublishedArchive (Join-Path $env:LOCKED_DEPENDENCIES "Entime-$env:TARGET_TAG-win-x64.zip") `
+            -PublishedChecksum (Join-Path $env:LOCKED_DEPENDENCIES "Entime-$env:TARGET_TAG-win-x64.zip.sha256") `
+            -RebuiltArchive $rebuiltArchive
+
+      - name: Upload rebuilt archive
+        if: always() && env.CONTINUE_PIPELINE == 'true' && inputs.mode == 'rebuild_existing' && steps.package.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Entime-${{ steps.release.outputs.target_tag }}-win-x64-rebuilt
+          path: |
+            ${{ steps.compare.outputs.rebuilt_archive }}
+            ${{ steps.compare.outputs.rebuilt_checksum }}
+          if-no-files-found: error
+
+      - name: Fail an unreproducible rebuild
+        if: always() && env.CONTINUE_PIPELINE == 'true' && inputs.mode == 'rebuild_existing' && steps.compare.outcome == 'failure'
+        run: throw 'The rebuilt archive differs from the published release; see the comparison summary and artifact.'
+
+      - name: Upload release files as workflow artifact
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode != 'rebuild_existing'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Entime-${{ steps.release.outputs.target_tag }}-win-x64
+          path: |
+            ${{ steps.package.outputs.asset_path }}
+            ${{ steps.package.outputs.checksum_path }}
+            ${{ steps.dependencies.outputs.manifest_path }}
+            ${{ steps.dependencies.outputs.archive_path }}
+            ${{ steps.dependencies.outputs.archive_checksum_path }}
+          if-no-files-found: error
+
+      - name: Push imported release commit and tag
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode == 'sync_next'
+        run: git push --atomic origin "HEAD:refs/heads/master" "refs/tags/$($env:TARGET_TAG):refs/tags/$($env:TARGET_TAG)"
+
+      - name: Publish GitHub Release
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode != 'rebuild_existing'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create $env:TARGET_TAG `
+            '${{ steps.package.outputs.asset_path }}' `
+            '${{ steps.package.outputs.checksum_path }}' `
+            '${{ steps.dependencies.outputs.manifest_path }}' `
+            '${{ steps.dependencies.outputs.archive_path }}' `
+            '${{ steps.dependencies.outputs.archive_checksum_path }}' `
+            --repo $env:GITHUB_REPOSITORY `
+            --title "Entime $env:TARGET_TAG" `
+            --notes-file "$env:BASE_RELEASE_NOTES"
