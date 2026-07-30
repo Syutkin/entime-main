@@ -175,12 +175,12 @@ jobs:
             throw "Could not unpack entime-main from Codeberg tag $env:TARGET_TAG."
           }
 
-          # Keep GitHub automation and ignored local documentation while replacing
-          # all tracked application files with the selected Codeberg snapshot.
+          # Keep GitHub automation while replacing all tracked application files
+          # with the selected Codeberg snapshot.
           git ls-files | Where-Object { -not $_.StartsWith('.github/') } |
             ForEach-Object { Remove-Item -Force $_ -ErrorAction SilentlyContinue }
           Get-ChildItem -Force $applicationDirectory |
-            Where-Object { $_.Name -notin @('.git', '.github', 'doc') } |
+            Where-Object { $_.Name -notin @('.git', '.github') } |
             ForEach-Object { Copy-Item -Recurse -Force $_.FullName $env:GITHUB_WORKSPACE }
 
           git add -A

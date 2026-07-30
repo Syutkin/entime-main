@@ -178,6 +178,11 @@ class WorkflowTests(unittest.TestCase):
         )[0]
         self.assertIn("CONTINUE_PIPELINE=false", report)
 
+    def test_codeberg_snapshot_excludes_only_git_metadata_and_automation(self):
+        import_step = self.workflow.split("- name: Import Codeberg source snapshot", 1)[1]
+        self.assertIn("@('.git', '.github')", import_step)
+        self.assertNotIn("@('.git', '.github', 'doc')", import_step)
+
     def test_release_does_not_compile_gettext_catalogs(self):
         self.assertNotIn("msgfmt", self.workflow)
         self.assertNotIn("choco install gettext", self.workflow)
