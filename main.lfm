@@ -4588,6 +4588,18 @@ object MainForm: TMainForm
         Action = AcTelegramBot
         AutoCheck = True
       end
+      object Separator4: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemLog: TMenuItem
+        Caption = 'Журнал'
+        object MenuItemOpenLogFile: TMenuItem
+          Action = AcOpenLogFile
+        end
+        object MenuItemOpenLogDirectory: TMenuItem
+          Action = AcOpenLogDirectory
+        end
+      end
     end
     object MenuItemHelp: TMenuItem
       Caption = 'Помощь'
@@ -4678,6 +4690,20 @@ object MainForm: TMainForm
       Caption = 'Настройки'
       ImageIndex = 13
       OnExecute = AcRunSettingsExecute
+    end
+    object AcOpenLogFile: TAction
+      Category = 'Logging'
+      Caption = 'Открыть текущий файл'
+      Hint = 'Открыть текущий файл журнала'
+      OnExecute = AcOpenLogFileExecute
+      OnUpdate = AcOpenLogFileUpdate
+    end
+    object AcOpenLogDirectory: TAction
+      Category = 'Logging'
+      Caption = 'Открыть каталог'
+      Hint = 'Открыть каталог файлов журнала'
+      OnExecute = AcOpenLogDirectoryExecute
+      OnUpdate = AcOpenLogDirectoryUpdate
     end
     object AcUpdateResults: TAction
       Category = 'EditMainDB'
@@ -5032,8 +5058,6 @@ object MainForm: TMainForm
     SQL = 'SELECT * FROM main'
     TableName = 'main'
     AfterInsert = MainDataset1AfterInsert
-    BeforeDelete = MainDataset1BeforeDelete
-    AfterDelete = MainDataset1AfterDelete
     Left = 152
     Top = 304
     object MainDataset1id: TAutoIncField

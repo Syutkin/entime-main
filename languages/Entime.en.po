@@ -12,9 +12,10 @@ msgstr ""
 "X-Generator: Poedit 3.6\n"
 
 #: i18n.rsadddayresults
+#, object-pascal-format
 msgctxt "i18n.rsadddayresults"
-msgid "Добавить результаты дня"
-msgstr "Add day results"
+msgid "Добавить результаты дня %d?"
+msgstr "Add day results %d?"
 
 #: i18n.rsaddunknownresultparticipant
 #, object-pascal-format
@@ -27,11 +28,51 @@ msgctxt "i18n.rsage"
 msgid "ГР"
 msgstr "Birthday"
 
+#: i18n.rsallresultsexported
+#, object-pascal-format
+msgctxt "i18n.rsallresultsexported"
+msgid "Все результаты экспортированы: %s"
+msgstr "All results exported: %s"
+
+#: i18n.rsapplicationshutdown
+msgctxt "i18n.rsapplicationshutdown"
+msgid "Завершение работы программы"
+msgstr "Application shutdown"
+
+#: i18n.rsautomaticupdatecheckfailed
+#, object-pascal-format
+msgctxt "i18n.rsautomaticupdatecheckfailed"
+msgid "Автоматическая проверка обновлений не выполнена; приложение продолжает работу: %s"
+msgstr "Automatic update check failed; the application continues running: %s"
+
+#: i18n.rsautomaticupdatecheckstarted
+msgctxt "i18n.rsautomaticupdatecheckstarted"
+msgid "Запущена автоматическая проверка обновлений"
+msgstr "Automatic update check started"
+
 #: i18n.rsbackupcreated
 #, object-pascal-format
 msgctxt "i18n.rsbackupcreated"
 msgid "Создание резервной копии успешно завершено: %s"
 msgstr "Backup successfully created: %s"
+
+#: i18n.rsbackupcreateerror
+#, object-pascal-format
+msgctxt "i18n.rsbackupcreateerror"
+msgid "Не удалось создать резервную копию \"%s\": %s; резервная копия пропущена"
+msgstr "Failed to create backup \"%s\": %s; backup skipped"
+
+#: i18n.rsbackupdirectorycreateerror
+#, object-pascal-format
+msgctxt "i18n.rsbackupdirectorycreateerror"
+msgid "Не удалось создать каталог резервных копий: %s; резервная копия пропущена"
+msgstr "Failed to create backup directory: %s; backup skipped"
+
+#: i18n.rsbackupfileinvalid
+#, object-pascal-format
+msgctxt "i18n.rsbackupfileinvalid"
+msgid "Резервная копия не создана или пуста: %s; резервная копия пропущена"
+msgstr "Backup was not created or is empty: %s; backup skipped"
 
 #: i18n.rsbynameasc
 msgctxt "i18n.rsbynameasc"
@@ -103,63 +144,144 @@ msgctxt "i18n.rscategory"
 msgid "Категория"
 msgstr "Category"
 
+#: i18n.rscategorylistloaderror
+#, object-pascal-format
+msgctxt "i18n.rscategorylistloaderror"
+msgid "Не удалось загрузить список категорий: %s"
+msgstr "Unable to load category list: %s"
+
+#: i18n.rscheckforupdates
+msgctxt "i18n.rscheckforupdates"
+msgid "Проверить обновления ..."
+msgstr "Check for updates ..."
+
+#: i18n.rscheckingforupdates
+msgctxt "i18n.rscheckingforupdates"
+msgid "Проверка обновлений ..."
+msgstr "Checking for updates ..."
+
 #: i18n.rscity
 msgctxt "i18n.rscity"
 msgid "Город"
 msgstr "City"
 
 #: i18n.rsclearallstatus
+#, object-pascal-format
 msgctxt "i18n.rsclearallstatus"
-msgid "Действительно убрать DNS/DNF/DSQ с участника номер"
-msgstr "Really remove DNS/DNF/DSQ from participant number"
+msgid "Действительно убрать DNS/DNF/DSQ с участника номер %s?"
+msgstr "Really remove DNS/DNF/DSQ from participant number %s?"
 
 #: i18n.rsclearallstatuslog
+#, object-pascal-format
 msgctxt "i18n.rsclearallstatuslog"
-msgid "DNS/DNF/DSQ убрано с участника номер"
-msgstr "DNS/DNF/DSQ removed from participant number"
+msgid "DNS/DNF/DSQ убрано с участника номер %s"
+msgstr "DNS/DNF/DSQ removed from participant number %s"
 
 #: i18n.rscleardsq
+#, object-pascal-format
 msgctxt "i18n.rscleardsq"
-msgid "Действительно убрать DSQ с участника номер"
-msgstr "Really remove DSQ from participant number"
+msgid "Действительно убрать DSQ с участника номер %s?"
+msgstr "Really remove DSQ from participant number %s?"
 
 #: i18n.rscleardsqlog
+#, object-pascal-format
 msgctxt "i18n.rscleardsqlog"
-msgid "DSQ убрана с участника номер"
-msgstr "DSQ removed from participant number"
+msgid "DSQ убрана с участника номер %s"
+msgstr "DSQ removed from participant number %s"
+
+#: i18n.rsclearnamedstagestatus
+#, object-pascal-format
+msgctxt "i18n.rsclearnamedstagestatus"
+msgid "Действительно убрать DNS/DNF с участника номер %s на СУ %d: %s?"
+msgstr "Really remove DNS/DNF from participant number %s on stage %d: %s?"
+
+#: i18n.rsclearnamedstagestatuslog
+#, object-pascal-format
+msgctxt "i18n.rsclearnamedstagestatuslog"
+msgid "DNS/DNF убрано с участника номер %s на СУ %d: %s"
+msgstr "DNS/DNF removed from participant number %s on stage %d: %s"
 
 #: i18n.rsclearresults
 msgctxt "i18n.rsclearresults"
 msgid "Действительно удалить все результаты?"
 msgstr "Really delete all results?"
 
-#: i18n.rsclearresultswobackup
-msgid "Всё равно очистить результаты?"
-msgstr "Clear results anyway?"
+#: i18n.rsclearresultswithoutbackup
+#, object-pascal-format
+msgctxt "i18n.rsclearresultswithoutbackup"
+msgid "Не удалось сделать резервную копию!%sВсё равно очистить результаты?"
+msgstr "Failed to create backup!%sClear results anyway?"
 
 #: i18n.rsclearstatus
+#, object-pascal-format
 msgctxt "i18n.rsclearstatus"
-msgid "Действительно убрать DNS/DNF с участника номер"
-msgstr "Really remove DNS/DNF from participant number"
+msgid "Действительно убрать DNS/DNF с участника номер %s на СУ %d?"
+msgstr "Really remove DNS/DNF from participant number %s on stage %d?"
 
 #: i18n.rsclearstatuslog
+#, object-pascal-format
 msgctxt "i18n.rsclearstatuslog"
-msgid "DNS/DNF убрано с участника номер"
-msgstr "DNS/DNF removed from participant number"
+msgid "DNS/DNF убрано с участника номер %s на СУ %d"
+msgstr "DNS/DNF removed from participant number %s on stage %d"
 
-#: i18n.rscomopenerror
-msgctxt "i18n.rscomopenerror"
-msgid "Не удалось открыть порт"
-msgstr "Failed to open port"
+#: i18n.rscodepage
+#, object-pascal-format
+msgctxt "i18n.rscodepage"
+msgid "Кодировка: %s"
+msgstr "Codepage: %s"
+
+#: i18n.rscomopenerrordetails
+#, object-pascal-format
+msgctxt "i18n.rscomopenerrordetails"
+msgid "Не удалось открыть порт %s: %s"
+msgstr "Failed to open port %s: %s"
+
+#: i18n.rscompetitionfilecreateerror
+#, object-pascal-format
+msgctxt "i18n.rscompetitionfilecreateerror"
+msgid "Не удалось создать файл соревнований \"%s\": %s"
+msgstr "Failed to create competition file \"%s\": %s"
+
+#: i18n.rscompetitionfileopenerror
+#, object-pascal-format
+msgctxt "i18n.rscompetitionfileopenerror"
+msgid "Не удалось открыть файл соревнований \"%s\": %s"
+msgstr "Failed to open competition file \"%s\": %s"
+
+#: i18n.rscompetitionsettingsloaderror
+#, object-pascal-format
+msgctxt "i18n.rscompetitionsettingsloaderror"
+msgid "Не удалось загрузить настройки соревнования: %s"
+msgstr "Unable to load competition settings: %s"
 
 #: i18n.rsconfignotfound
 msgctxt "i18n.rsconfignotfound"
 msgid "Файл настроек не найден, создание файла настроек по умолчанию"
 msgstr "Config file not found, creating default config file"
 
-#: i18n.rscontinuewithloadingresults
-msgid "Продолжить загрузку результатов?"
-msgstr "Continue loading results?"
+#: i18n.rsconfirmparticipantnamedstagestatus
+#, object-pascal-format
+msgctxt "i18n.rsconfirmparticipantnamedstagestatus"
+msgid "Уверены, что участник под номером %s %s на СУ %d: %s?"
+msgstr "Are you sure participant number %s %s on stage %d: %s?"
+
+#: i18n.rsconfirmparticipantstagestatus
+#, object-pascal-format
+msgctxt "i18n.rsconfirmparticipantstagestatus"
+msgid "Уверены, что участник под номером %s %s на СУ %d?"
+msgstr "Are you sure participant number %s %s on stage %d?"
+
+#: i18n.rsconfirmparticipantstatus
+#, object-pascal-format
+msgctxt "i18n.rsconfirmparticipantstatus"
+msgid "Уверены, что участник под номером %s %s?"
+msgstr "Are you sure participant number %s %s?"
+
+#: i18n.rscontinueloadingresultswithoutbackup
+#, object-pascal-format
+msgctxt "i18n.rscontinueloadingresultswithoutbackup"
+msgid "Не удалось сделать резервную копию!%sПродолжить загрузку результатов?"
+msgstr "Failed to create backup!%sContinue loading results?"
 
 #: i18n.rscorrection
 msgctxt "i18n.rscorrection"
@@ -167,9 +289,16 @@ msgid "Поправка"
 msgstr "Correction"
 
 #: i18n.rscorrectionalreadyset
+#, object-pascal-format
 msgctxt "i18n.rscorrectionalreadyset"
-msgid "поправка уже установлена. Перезаписать значение?"
-msgstr "correction already set. Overwrite value?"
+msgid "Номеру %s поправка уже установлена. Перезаписать значение?"
+msgstr "Correction is already set for participant number %s. Overwrite value?"
+
+#: i18n.rscsvresultsexported
+#, object-pascal-format
+msgctxt "i18n.rscsvresultsexported"
+msgid "Результаты экспортированы в CSV: %s"
+msgstr "Results exported to CSV: %s"
 
 #: i18n.rscsvresultsexporterror
 msgctxt "i18n.rscsvresultsexporterror"
@@ -187,34 +316,57 @@ msgid "Текущие результаты"
 msgstr "Current results"
 
 #: i18n.rsdatabaseopenerror
+#, object-pascal-format
 msgctxt "i18n.rsdatabaseopenerror"
-msgid "Ошибка открытия базы: "
-msgstr "Database open error: "
+msgid "Ошибка открытия базы: %s"
+msgstr "Database open error: %s"
+
+#: i18n.rsdatabaserefresherror
+#, object-pascal-format
+msgctxt "i18n.rsdatabaserefresherror"
+msgid "Не удалось обновить данные (%d ошибок). Первая ошибка: %s"
+msgstr "Unable to refresh data (%d errors). First error: %s"
+
+#: i18n.rsdayresultsimported
+#, object-pascal-format
+msgctxt "i18n.rsdayresultsimported"
+msgid "Результаты дня импортированы: %d; файл: %s"
+msgstr "Day results imported: %d; file: %s"
+
+#: i18n.rsdayresultsimporterror
+#, object-pascal-format
+msgctxt "i18n.rsdayresultsimporterror"
+msgid "Не удалось импортировать результаты дня из файла \"%s\": %s"
+msgstr "Failed to import day results from file \"%s\": %s"
+
+#: i18n.rsdayresultsrowsnotfound
+msgctxt "i18n.rsdayresultsrowsnotfound"
+msgid "Файл не содержит результатов дня"
+msgstr "The file contains no day results"
 
 #: i18n.rsdbfileclosed
+#, object-pascal-format
 msgctxt "i18n.rsdbfileclosed"
-msgid "Файл соревнований закрыт:"
-msgstr "Competition file closed:"
+msgid "Файл соревнований закрыт: %s"
+msgstr "Competition file closed: %s"
 
 #: i18n.rsdbfileopen
+#, object-pascal-format
 msgctxt "i18n.rsdbfileopen"
-msgid "Файл соревнований открыт:"
-msgstr "Competition file opened:"
-
-#: i18n.rsdeleted
-msgctxt "i18n.rsdeleted"
-msgid "удалён"
-msgstr "deleted"
+msgid "Файл соревнований открыт: %s"
+msgstr "Competition file opened: %s"
 
 #: i18n.rsdeletenumber
+#, object-pascal-format
 msgctxt "i18n.rsdeletenumber"
-msgid "Действительно удалить участника c номером"
-msgstr "Really delete participant with number"
+msgid "Действительно удалить участника c номером %s?"
+msgstr "Really delete participant number %s?"
 
 #: i18n.rsdetectedparticipantstages
+#, object-pascal-format
 msgctxt "i18n.rsdetectedparticipantstages"
-msgid "Обнаруженные СУ:"
-msgstr "Detected stages:"
+msgid "Обнаруженные СУ: %s"
+msgstr "Detected stages: %s"
 
 #: i18n.rsdidnotfinish
 msgctxt "i18n.rsdidnotfinish"
@@ -227,24 +379,15 @@ msgid "не стартовал"
 msgstr "did not start"
 
 #: i18n.rsdidnotstartsetfinish
+#, object-pascal-format
 msgctxt "i18n.rsdidnotstartsetfinish"
-msgid "не числится в списке стартовавших, но не финишировавших. Всё равно установить финишное время?"
-msgstr "not in the list of starters but not finishers. Set finish time anyway?"
+msgid "Номер %d не числится в списке стартовавших, но не финишировавших. Всё равно установить финишное время?"
+msgstr "Participant number %d is not in the list of starters who have not finished. Set finish time anyway?"
 
 #: i18n.rsdiffleader
 msgctxt "i18n.rsdiffleader"
 msgid "Отставание"
 msgstr "Gap"
-
-#: i18n.rsdisqualified
-msgctxt "i18n.rsdisqualified"
-msgid "дисквалифицирован"
-msgstr "disqualified"
-
-#: i18n.rsdonotexist
-msgctxt "i18n.rsdonotexist"
-msgid "не существует"
-msgstr "does not exist"
 
 #: i18n.rsduplicateparticipantcolumnname
 #, object-pascal-format
@@ -271,16 +414,30 @@ msgid "Название колонки %d не должно быть пусты�
 msgstr "Column %d must have a name"
 
 #: i18n.rsenterstarttime
+#, object-pascal-format
 msgctxt "i18n.rsenterstarttime"
-msgid "Введите новое время старта для номера"
-msgstr "Enter new start time for number"
+msgid "Введите новое время старта для номера %s на СУ: %s"
+msgstr "Enter a new start time for participant number %s on stage: %s"
+
+#: i18n.rsexportfileerror
+#, object-pascal-format
+msgctxt "i18n.rsexportfileerror"
+msgid "Не удалось экспортировать файл \"%s\": %s"
+msgstr "Failed to export file \"%s\": %s"
 
 #: i18n.rsexportfinish
 msgctxt "i18n.rsexportfinish"
 msgid "Экспорт результатов"
 msgstr "Export results"
 
+#: i18n.rsexportreportparameters
+#, object-pascal-format
+msgctxt "i18n.rsexportreportparameters"
+msgid "Параметры отчёта: групп штрафов — %d"
+msgstr "Report parameters: penalty groups — %d"
+
 #: i18n.rsexporttimetosu
+msgctxt "i18n.rsexporttimetosu"
 msgid "Экспортировать результаты СУ:"
 msgstr "Export results for stage:"
 
@@ -314,10 +471,23 @@ msgctxt "i18n.rsfinishprotocol"
 msgid "Финишный протокол"
 msgstr "Finish protocol"
 
+#: i18n.rsfinishresultscheckerror
+#, object-pascal-format
+msgctxt "i18n.rsfinishresultscheckerror"
+msgid "Не удалось проверить наличие финишных результатов: %s"
+msgstr "Unable to check for finish results: %s"
+
 #: i18n.rsfinishresultsnotempty
+#, object-pascal-format
 msgctxt "i18n.rsfinishresultsnotempty"
-msgid "результаты финиша не пусты. Вы уверены что хотите сформировать стартовый протокол для данного спецучастка?"
-msgstr "finish results are not empty. Are you sure you want to generate start list for this stage?"
+msgid "На СУ %s результаты финиша не пусты. Вы уверены что хотите сформировать стартовый протокол для данного спецучастка?"
+msgstr "Stage %s finish results are not empty. Are you sure you want to generate a start list for this stage?"
+
+#: i18n.rsfinishskippedparticipantmissing
+#, object-pascal-format
+msgctxt "i18n.rsfinishskippedparticipantmissing"
+msgid "Финиш пропущен: участник с номером %s отсутствует"
+msgstr "Finish skipped: participant number %s is missing"
 
 #: i18n.rsfinishthruprotocol
 msgctxt "i18n.rsfinishthruprotocol"
@@ -334,15 +504,46 @@ msgctxt "i18n.rsfinishtimeopenerror"
 msgid "Неверный формат файла с результатами СУ"
 msgstr "Invalid stage results file format"
 
-#: i18n.rsfinishtimeset
-msgctxt "i18n.rsfinishtimeset"
-msgid "Установлено финишное время для номера"
-msgstr "Finish time set for number"
+#: i18n.rsfinishtimesetforstages
+#, object-pascal-format
+msgctxt "i18n.rsfinishtimesetforstages"
+msgid "Установлено финишное время для номера %d; СУ: %s"
+msgstr "Finish time set for participant number %d; stages: %s"
+
+#: i18n.rsfullresultsexported
+#, object-pascal-format
+msgctxt "i18n.rsfullresultsexported"
+msgid "Итоговый протокол экспортирован: %s"
+msgstr "Final report exported: %s"
 
 #: i18n.rsgeneratestartlist
+#, object-pascal-format
 msgctxt "i18n.rsgeneratestartlist"
-msgid "Стартовый протокол финального заезда сформирован"
-msgstr "Final start list generated"
+msgid "Стартовый протокол финального заезда сформирован: %s"
+msgstr "Final start list generated: %s"
+
+#: i18n.rshttprequestmetadata
+#, object-pascal-format
+msgctxt "i18n.rshttprequestmetadata"
+msgid "HTTP-запрос: %s; параметров: %d"
+msgstr "HTTP request: %s; parameters: %d"
+
+#: i18n.rshttprequestnotstarted
+msgctxt "i18n.rshttprequestnotstarted"
+msgid "не удалось запустить HTTP-запрос"
+msgstr "failed to start HTTP request"
+
+#: i18n.rshttpresponsemetadata
+#, object-pascal-format
+msgctxt "i18n.rshttpresponsemetadata"
+msgid "HTTP-ответ: %d %s; заголовков: %d; байт: %d"
+msgstr "HTTP response: %d %s; headers: %d; bytes: %d"
+
+#: i18n.rshttpresponsereceived
+#, object-pascal-format
+msgctxt "i18n.rshttpresponsereceived"
+msgid "Получен HTTP-ответ: %d байт"
+msgstr "HTTP response received: %d bytes"
 
 #: i18n.rsimportfinish
 msgctxt "i18n.rsimportfinish"
@@ -350,14 +551,16 @@ msgid "Импорт результатов"
 msgstr "Import results"
 
 #: i18n.rsimportfinishtime
+#, object-pascal-format
 msgctxt "i18n.rsimportfinishtime"
-msgid "Финишное время для СУ"
-msgstr "Finish time for stage"
+msgid "Финишное время для СУ %d: %s загружено"
+msgstr "Finish time for stage %d: %s loaded"
 
 #: i18n.rsimportstarttime
+#, object-pascal-format
 msgctxt "i18n.rsimportstarttime"
-msgid "Стартовый протокол для СУ"
-msgstr "Start list for stage"
+msgid "Стартовый протокол для СУ %d: %s загружен"
+msgstr "Start list for stage %d: %s loaded"
 
 #: i18n.rsincorrectcorrection
 msgctxt "i18n.rsincorrectcorrection"
@@ -406,20 +609,37 @@ msgctxt "i18n.rsinvalidresulttime"
 msgid "Некорректное время \"%s\" в строке %d, поле \"%s\". Допустимые форматы: чч:мм, чч:мм:сс, чч:мм:сс.ммм или чч:мм:сс,ммм"
 msgstr "Invalid time \"%s\" in row %d, field \"%s\". Supported formats: hh:mm, hh:mm:ss, hh:mm:ss.mmm, or hh:mm:ss,mmm"
 
+#: i18n.rslanguagechanged
+#, object-pascal-format
+msgctxt "i18n.rslanguagechanged"
+msgid "Язык приложения изменён: %s"
+msgstr "Application language changed: %s"
+
+#: i18n.rsledpaneldisabled
+msgctxt "i18n.rsledpaneldisabled"
+msgid "LED-панель выключена"
+msgstr "LED panel disabled"
+
+#: i18n.rsledpanelenabled
+msgctxt "i18n.rsledpanelenabled"
+msgid "LED-панель включена"
+msgstr "LED panel enabled"
+
+#: i18n.rsledpanelerror
+#, object-pascal-format
+msgctxt "i18n.rsledpanelerror"
+msgid "Ошибка LED-панели: %s"
+msgstr "LED Panel error: %s"
+
+#: i18n.rsledpaneltestsucceeded
+msgctxt "i18n.rsledpaneltestsucceeded"
+msgid "Проверка LED-панели выполнена успешно"
+msgstr "LED panel test completed successfully"
+
 #: i18n.rsloadcsvparticipants
 msgctxt "i18n.rsloadcsvparticipants"
 msgid "Список участников загружен"
 msgstr "Participants list loaded"
-
-#: i18n.rsloaded
-msgctxt "i18n.rsloaded"
-msgid "загружен"
-msgstr "loaded"
-
-#: i18n.rsloaded_o
-msgctxt "i18n.rsloaded_o"
-msgid "загружено"
-msgstr "loaded"
 
 #: i18n.rsloadingconfig
 msgctxt "i18n.rsloadingconfig"
@@ -436,6 +656,64 @@ msgctxt "i18n.rsloadresultserror"
 msgid "Ошибка загрузки результатов: "
 msgstr "Results import error: "
 
+#: i18n.rslogdirectoryopenerror
+#, object-pascal-format
+msgctxt "i18n.rslogdirectoryopenerror"
+msgid "Не удалось открыть каталог журнала: %s"
+msgstr "Failed to open log directory: %s"
+
+#: i18n.rslogfileopenerror
+#, object-pascal-format
+msgctxt "i18n.rslogfileopenerror"
+msgid "Не удалось открыть файл журнала: %s"
+msgstr "Failed to open log file: %s"
+
+#: i18n.rsloracorrectionskippedparticipantmissing
+#, object-pascal-format
+msgctxt "i18n.rsloracorrectionskippedparticipantmissing"
+msgid "Поправка LoRa пропущена: участник с номером %s отсутствует"
+msgstr "LoRa correction skipped: participant number %s is missing"
+
+#: i18n.rslorarecordhidden
+#, object-pascal-format
+msgctxt "i18n.rslorarecordhidden"
+msgid "Запись LoRa скрыта: %s"
+msgstr "LoRa record hidden: %s"
+
+#: i18n.rslorarecordsloaderror
+#, object-pascal-format
+msgctxt "i18n.rslorarecordsloaderror"
+msgid "Не удалось загрузить записи LoRa: %s"
+msgstr "Unable to load LoRa records: %s"
+
+#: i18n.rslorarecordsrefreshwarning
+#, object-pascal-format
+msgctxt "i18n.rslorarecordsrefreshwarning"
+msgid "Изменение сохранено, но список LoRa не обновлён: %s"
+msgstr "The change was saved, but the LoRa list was not refreshed: %s"
+
+#: i18n.rslorarecordsreset
+msgctxt "i18n.rslorarecordsreset"
+msgid "Состояние записей LoRa сброшено"
+msgstr "LoRa record state reset"
+
+#: i18n.rsmanualupdatecheckstarted
+msgctxt "i18n.rsmanualupdatecheckstarted"
+msgid "Запущена ручная проверка обновлений"
+msgstr "Manual update check started"
+
+#: i18n.rsmodulesynchronizationerror
+#, object-pascal-format
+msgctxt "i18n.rsmodulesynchronizationerror"
+msgid "Не удалось синхронизировать модуль через порт %s: %s"
+msgstr "Failed to synchronize module through port %s: %s"
+
+#: i18n.rsmodulesynchronized
+#, object-pascal-format
+msgctxt "i18n.rsmodulesynchronized"
+msgid "Синхронизация модуля через порт %s завершена: %d"
+msgstr "Module synchronization through port %s completed: %d"
+
 #: i18n.rsmultiplenumbercolumns
 #, object-pascal-format
 msgctxt "i18n.rsmultiplenumbercolumns"
@@ -448,9 +726,10 @@ msgid "Имя"
 msgstr "Name"
 
 #: i18n.rsnewfilecreated
+#, object-pascal-format
 msgctxt "i18n.rsnewfilecreated"
-msgid "Файл соревнований создан"
-msgstr "Competition file created"
+msgid "Файл соревнований создан: %s"
+msgstr "Competition file created: %s"
 
 #: i18n.rsnewfileexistunknow
 msgctxt "i18n.rsnewfileexistunknow"
@@ -464,8 +743,15 @@ msgstr "Failed to create competition file"
 
 #: i18n.rsnewversionavailable
 #, object-pascal-format
+msgctxt "i18n.rsnewversionavailable"
 msgid "Доступна новая версия программы: %0:s. Перейти на сайт?"
 msgstr "Update available: %0:s. Go to download page?"
+
+#: i18n.rsnewversionfound
+#, object-pascal-format
+msgctxt "i18n.rsnewversionfound"
+msgid "Доступна новая версия программы: %s"
+msgstr "Update available: %s"
 
 #: i18n.rsnickname
 msgctxt "i18n.rsnickname"
@@ -482,15 +768,41 @@ msgctxt "i18n.rsnumbercolumnnotfound"
 msgid "Не найдена колонка с номерами участников"
 msgstr "Participant numbers column not found"
 
-#: i18n.rsnumberu
-msgctxt "i18n.rsnumberu"
-msgid "Номеру"
-msgstr "To number"
+#: i18n.rsopenstartlistfile
+#, object-pascal-format
+msgctxt "i18n.rsopenstartlistfile"
+msgid "Открытие файла стартового протокола: %s"
+msgstr "Open startlist file: %s"
 
-#: i18n.rsonstage
-msgctxt "i18n.rsonstage"
-msgid "на СУ"
-msgstr "on stage"
+#: i18n.rsparticipantcorrectionset
+#, object-pascal-format
+msgctxt "i18n.rsparticipantcorrectionset"
+msgid "Номеру %s установлена поправка на СУ %d: %s"
+msgstr "Correction set for participant number %s on stage %d: %s"
+
+#: i18n.rsparticipantdeleted
+#, object-pascal-format
+msgctxt "i18n.rsparticipantdeleted"
+msgid "Участник с номером %s удалён"
+msgstr "Participant number %s deleted"
+
+#: i18n.rsparticipantdisqualified
+#, object-pascal-format
+msgctxt "i18n.rsparticipantdisqualified"
+msgid "Участник с номером %s дисквалифицирован"
+msgstr "Participant number %s disqualified"
+
+#: i18n.rsparticipantdoesnotexist
+#, object-pascal-format
+msgctxt "i18n.rsparticipantdoesnotexist"
+msgid "Номер %s не существует"
+msgstr "Participant number %s does not exist"
+
+#: i18n.rsparticipantnamedstagestatusset
+#, object-pascal-format
+msgctxt "i18n.rsparticipantnamedstagestatusset"
+msgid "Участник с номером %s %s на СУ %d: %s"
+msgstr "Participant number %s %s on stage %d: %s"
 
 #: i18n.rsparticipantrowfieldcountmismatch
 #, object-pascal-format
@@ -503,15 +815,94 @@ msgctxt "i18n.rsparticipantrowsnotfound"
 msgid "В файле нет строк с участниками"
 msgstr "The file contains no participant rows"
 
+#: i18n.rsparticipantsaveerror
+#, object-pascal-format
+msgctxt "i18n.rsparticipantsaveerror"
+msgid "Не удалось сохранить данные номера %s: %s"
+msgstr "Failed to save participant number %s: %s"
+
 #: i18n.rsparticipantscsvempty
 msgctxt "i18n.rsparticipantscsvempty"
 msgid "Файл списка участников пуст"
 msgstr "Participants list file is empty"
 
-#: i18n.rsparticipantwithnumber
-msgctxt "i18n.rsparticipantwithnumber"
-msgid "Участник с номером"
-msgstr "Participant with number"
+#: i18n.rsparticipantsimported
+#, object-pascal-format
+msgctxt "i18n.rsparticipantsimported"
+msgid "Участники импортированы: %d; файл: %s"
+msgstr "Participants imported: %d; file: %s"
+
+#: i18n.rsparticipantsimporterror
+#, object-pascal-format
+msgctxt "i18n.rsparticipantsimporterror"
+msgid "Не удалось импортировать участников из файла \"%s\": %s"
+msgstr "Failed to import participants from file \"%s\": %s"
+
+#: i18n.rsparticipantsimportpartial
+#, object-pascal-format
+msgctxt "i18n.rsparticipantsimportpartial"
+msgid "Участники импортированы с пропусками: %d; использовано СУ: %d из %d; файл: %s"
+msgstr "Participants imported with omissions: %d; stages used: %d of %d; file: %s"
+
+#: i18n.rsparticipantstagesaveerror
+#, object-pascal-format
+msgctxt "i18n.rsparticipantstagesaveerror"
+msgid "Не удалось сохранить данные номера %s на СУ %d: %s"
+msgstr "Failed to save participant number %s on stage %d: %s"
+
+#: i18n.rsparticipantstagessaveerror
+#, object-pascal-format
+msgctxt "i18n.rsparticipantstagessaveerror"
+msgid "Не удалось сохранить данные номера %s на СУ %s: %s"
+msgstr "Failed to save participant number %s on stages %s: %s"
+
+#: i18n.rsparticipantstagestatusset
+#, object-pascal-format
+msgctxt "i18n.rsparticipantstagestatusset"
+msgid "Участник с номером %s %s на СУ %d"
+msgstr "Participant number %s %s on stage %d"
+
+#: i18n.rsparticipantstagevalueupdated
+#, object-pascal-format
+msgctxt "i18n.rsparticipantstagevalueupdated"
+msgid "Номеру %s изменено поле «%s» на СУ %d: %s"
+msgstr "Participant number %s updated field “%s” on stage %d: %s"
+
+#: i18n.rsparticipantstarttimeset
+#, object-pascal-format
+msgctxt "i18n.rsparticipantstarttimeset"
+msgid "Номеру %s установлено время старта на СУ %d: %s"
+msgstr "Start time set for participant number %s on stage %d: %s"
+
+#: i18n.rsparticipantstatusesloaderror
+#, object-pascal-format
+msgctxt "i18n.rsparticipantstatusesloaderror"
+msgid "Не удалось загрузить статусы участников: %s"
+msgstr "Unable to load participant statuses: %s"
+
+#: i18n.rsparticipantstatusesrecalculated
+#, object-pascal-format
+msgctxt "i18n.rsparticipantstatusesrecalculated"
+msgid "Глобальные статусы пересчитаны: %d"
+msgstr "Global statuses recalculated: %d"
+
+#: i18n.rsparticipantstatusrecalculationerror
+#, object-pascal-format
+msgctxt "i18n.rsparticipantstatusrecalculationerror"
+msgid "Не удалось пересчитать статус номера %s: %s"
+msgstr "Failed to recalculate status for participant number %s: %s"
+
+#: i18n.rsparticipantstatusset
+#, object-pascal-format
+msgctxt "i18n.rsparticipantstatusset"
+msgid "Участник с номером %s %s"
+msgstr "Participant number %s %s"
+
+#: i18n.rsparticipantupdated
+#, object-pascal-format
+msgctxt "i18n.rsparticipantupdated"
+msgid "Данные участника с номером %s изменены"
+msgstr "Participant number %s updated"
 
 #: i18n.rspenalty
 msgctxt "i18n.rspenalty"
@@ -540,15 +931,28 @@ msgctxt "i18n.rsportconnected"
 msgid "Порт %s подключён"
 msgstr "Port %s connected"
 
+#: i18n.rsportconnectionlost
+#, object-pascal-format
+msgctxt "i18n.rsportconnectionlost"
+msgid "Потеряна связь с портом %s; ожидается автоматическое восстановление"
+msgstr "Connection to port %s lost; waiting for automatic recovery"
+
+#: i18n.rsportconnectionrestored
+#, object-pascal-format
+msgctxt "i18n.rsportconnectionrestored"
+msgid "Связь с портом %s восстановлена"
+msgstr "Connection to port %s restored"
+
 #: i18n.rsqualificationresults
 msgctxt "i18n.rsqualificationresults"
 msgid "По результатам квалификации"
 msgstr "By qualification results"
 
 #: i18n.rsreallydisqualifynumber
+#, object-pascal-format
 msgctxt "i18n.rsreallydisqualifynumber"
-msgid "Действительно дисквалифицировать участника под номером"
-msgstr "Really disqualify participant with number"
+msgid "Действительно дисквалифицировать участника под номером %s?"
+msgstr "Really disqualify participant number %s?"
 
 #: i18n.rsresult
 msgctxt "i18n.rsresult"
@@ -565,15 +969,46 @@ msgctxt "i18n.rsresultscleared"
 msgid "Результаты соревнований удалены!"
 msgstr "Competition results cleared!"
 
+#: i18n.rsresultsclearerror
+#, object-pascal-format
+msgctxt "i18n.rsresultsclearerror"
+msgid "Не удалось удалить результаты соревнования: %s"
+msgstr "Unable to clear competition results: %s"
+
 #: i18n.rsresultscsvempty
 msgctxt "i18n.rsresultscsvempty"
 msgid "Файл результатов пуст"
 msgstr "The results file is empty"
 
 #: i18n.rsresultsexportedtofile
+#, object-pascal-format
 msgctxt "i18n.rsresultsexportedtofile"
-msgid "Финишный протокол экспортирован в файл"
-msgstr "Finish protocol exported to file"
+msgid "Финишный протокол экспортирован в файл %s"
+msgstr "Finish protocol exported to file %s"
+
+#: i18n.rsresultsimported
+#, object-pascal-format
+msgctxt "i18n.rsresultsimported"
+msgid "Результаты импортированы для СУ %d (%s): %d; файл: %s"
+msgstr "Results imported for stage %d (%s): %d; file: %s"
+
+#: i18n.rsresultsimporterror
+#, object-pascal-format
+msgctxt "i18n.rsresultsimporterror"
+msgid "Не удалось импортировать результаты из файла \"%s\": %s"
+msgstr "Failed to import results from file \"%s\": %s"
+
+#: i18n.rsresultsimportformat
+#, object-pascal-format
+msgctxt "i18n.rsresultsimportformat"
+msgid "Формат файла результатов: %d колонок"
+msgstr "Results file format: %d columns"
+
+#: i18n.rsresultsimportpartial
+#, object-pascal-format
+msgctxt "i18n.rsresultsimportpartial"
+msgid "Результаты импортированы частично для СУ %d (%s): %d из %d; файл: %s"
+msgstr "Results partially imported for stage %d (%s): %d of %d; file: %s"
 
 #: i18n.rsresultsrowfieldcountmismatch
 #, object-pascal-format
@@ -608,11 +1043,29 @@ msgctxt "i18n.rsserialcanwrite"
 msgid "Запись доступна: %s"
 msgstr "Can write: %s"
 
+#: i18n.rsserialfinish
+#, object-pascal-format
+msgctxt "i18n.rsserialfinish"
+msgid "Финиш -> %s"
+msgstr "Finish -> %s"
+
+#: i18n.rsserialraw
+#, object-pascal-format
+msgctxt "i18n.rsserialraw"
+msgid "Исходные данные -> %s"
+msgstr "Raw -> %s"
+
 #: i18n.rsserialreadcount
 #, object-pascal-format
 msgctxt "i18n.rsserialreadcount"
 msgid "Прочитано: %s"
 msgstr "Read count: %s"
+
+#: i18n.rsserialstart
+#, object-pascal-format
+msgctxt "i18n.rsserialstart"
+msgid "Старт -> %s, %s"
+msgstr "Start -> %s, %s"
 
 #: i18n.rsserialwait
 #, object-pascal-format
@@ -652,6 +1105,7 @@ msgid "COM порт"
 msgstr "COM port"
 
 #: i18n.rssettingsgeneral
+msgctxt "i18n.rssettingsgeneral"
 msgid "Общие"
 msgstr "General"
 
@@ -660,7 +1114,19 @@ msgctxt "i18n.rssettingsledpanel"
 msgid "LED панель"
 msgstr "LED panel"
 
+#: i18n.rssettingsloaded
+#, object-pascal-format
+msgctxt "i18n.rssettingsloaded"
+msgid "Настройки загружены: %s"
+msgstr "Settings loaded: %s"
+
+#: i18n.rssettingssaved
+msgctxt "i18n.rssettingssaved"
+msgid "Настройки сохранены"
+msgstr "Settings saved"
+
 #: i18n.rssettingstelegrambot
+msgctxt "i18n.rssettingstelegrambot"
 msgid "Телеграм бот"
 msgstr "Telegram bot"
 
@@ -670,9 +1136,22 @@ msgid "Вид"
 msgstr "View"
 
 #: i18n.rsshowncategories
+#, object-pascal-format
 msgctxt "i18n.rsshowncategories"
-msgid "Категории для показа в окне результатов:"
-msgstr "Categories to show in results window:"
+msgid "Категории для показа в окне результатов: %s"
+msgstr "Categories to show in results window: %s"
+
+#: i18n.rsstageresultscalculationerror
+#, object-pascal-format
+msgctxt "i18n.rsstageresultscalculationerror"
+msgid "Не удалось пересчитать результаты СУ: %s"
+msgstr "Unable to recalculate stage results: %s"
+
+#: i18n.rsstageresultsexported
+#, object-pascal-format
+msgctxt "i18n.rsstageresultsexported"
+msgid "Результаты СУ %d (%s) экспортированы: %s"
+msgstr "Stage %d results (%s) exported: %s"
 
 #: i18n.rsstartfilecopyerror
 msgctxt "i18n.rsstartfilecopyerror"
@@ -684,15 +1163,22 @@ msgctxt "i18n.rsstartfilecreated"
 msgid "Файл для стартовых ворот создан"
 msgstr "Start gate file created"
 
+#: i18n.rsstartlistexported
+#, object-pascal-format
+msgctxt "i18n.rsstartlistexported"
+msgid "Стартовый протокол экспортирован: %s"
+msgstr "Start list exported: %s"
+
 #: i18n.rsstartlistfileexists
 msgctxt "i18n.rsstartlistfileexists"
 msgid "Файл стартового протокола уже существует. Перезаписать?"
 msgstr "Start list file already exists. Overwrite?"
 
 #: i18n.rsstartprogram
+#, object-pascal-format
 msgctxt "i18n.rsstartprogram"
-msgid "Запуск программы"
-msgstr "Program start"
+msgid "Запуск программы %s"
+msgstr "Starting program %s"
 
 #: i18n.rsstartprotocol
 msgctxt "i18n.rsstartprotocol"
@@ -749,22 +1235,30 @@ msgctxt "i18n.rssu8"
 msgid "СУ 8"
 msgstr "Stage 8"
 
+#: i18n.rssumdaysexported
+#, object-pascal-format
+msgctxt "i18n.rssumdaysexported"
+msgid "Сводные результаты по дням экспортированы: %s"
+msgstr "Combined day results exported: %s"
+
 #: i18n.rssumresult
 msgctxt "i18n.rssumresult"
 msgid "Итог"
 msgstr "Total"
+
+#: i18n.rssumresultscalculationerror
+#, object-pascal-format
+msgctxt "i18n.rssumresultscalculationerror"
+msgid "Не удалось пересчитать суммарные результаты: %s"
+msgstr "Unable to recalculate summary results: %s"
 
 #: i18n.rssumstages
 msgctxt "i18n.rssumstages"
 msgid "Кол-во СУ"
 msgstr "Stages count"
 
-#: i18n.rssurewithnumber
-msgctxt "i18n.rssurewithnumber"
-msgid "Уверены, что участник под номером"
-msgstr "Are you sure participant with number"
-
 #: i18n.rssystemdefault
+msgctxt "i18n.rssystemdefault"
 msgid "Системный"
 msgstr "System default"
 
@@ -773,10 +1267,38 @@ msgctxt "i18n.rsteam"
 msgid "Команда"
 msgstr "Team"
 
+#: i18n.rstelegrambotdisabled
+msgctxt "i18n.rstelegrambotdisabled"
+msgid "Telegram-бот выключен"
+msgstr "Telegram bot disabled"
+
+#: i18n.rstelegrambotenabled
+msgctxt "i18n.rstelegrambotenabled"
+msgid "Telegram-бот включён"
+msgstr "Telegram bot enabled"
+
+#: i18n.rstelegramboterror
+#, object-pascal-format
+msgctxt "i18n.rstelegramboterror"
+msgid "Ошибка Telegram-бота: %s"
+msgstr "Telegram Bot error: %s"
+
 #: i18n.rstelegrambotsendingerror
+#, object-pascal-format
 msgctxt "i18n.rstelegrambotsendingerror"
-msgid "Ошибка отправки данных в телеграм бота: "
-msgstr "Error sending data to Telegram bot: "
+msgid "Ошибка отправки данных в Telegram-бота: %s"
+msgstr "Error sending data to Telegram bot: %s"
+
+#: i18n.rstelegrambottestsucceeded
+msgctxt "i18n.rstelegrambottestsucceeded"
+msgid "Проверка Telegram-бота выполнена успешно"
+msgstr "Telegram bot test completed successfully"
+
+#: i18n.rsthruresultscalculationerror
+#, object-pascal-format
+msgctxt "i18n.rsthruresultscalculationerror"
+msgid "Не удалось пересчитать сквозные результаты: %s"
+msgstr "Unable to recalculate overall results: %s"
 
 #: i18n.rstimetostart
 msgctxt "i18n.rstimetostart"
@@ -799,6 +1321,11 @@ msgctxt "i18n.rsunknownfileencoding"
 msgid "Не удалось определить кодировку файла. Продолжить?"
 msgstr "Failed to detect file encoding. Continue?"
 
+#: i18n.rsunknownfileencodingcontinued
+msgctxt "i18n.rsunknownfileencodingcontinued"
+msgid "Кодировка файла не определена; импорт продолжен без преобразования"
+msgstr "File encoding was not detected; import continued without conversion"
+
 #: i18n.rsunsupportedfileencoding
 #, object-pascal-format
 msgctxt "i18n.rsunsupportedfileencoding"
@@ -812,10 +1339,28 @@ msgid "Неподдерживаемое количество колонок: %d.
 msgstr "Unsupported column count: %d. Expected 2, 3, or 6"
 
 #: i18n.rsupdateavailable
+msgctxt "i18n.rsupdateavailable"
 msgid "Доступно обновление ..."
 msgstr "Update available ..."
 
+#: i18n.rsupdatecheckcancelled
+msgctxt "i18n.rsupdatecheckcancelled"
+msgid "Проверка обновлений отменена"
+msgstr "Update check cancelled"
+
+#: i18n.rsupdatecheckfailed
+#, object-pascal-format
+msgctxt "i18n.rsupdatecheckfailed"
+msgid "Не удалось проверить обновления: %s"
+msgstr "Unable to check for updates: %s"
+
+#: i18n.rsupdatecheckstartfailed
+msgctxt "i18n.rsupdatecheckstartfailed"
+msgid "Не удалось запустить проверку обновлений"
+msgstr "Unable to start update check"
+
 #: i18n.rsupdatedaily
+msgctxt "i18n.rsupdatedaily"
 msgid "Один раз в сутки"
 msgstr "Once a day"
 
@@ -825,23 +1370,28 @@ msgid "Ошибка обновления результатов: "
 msgstr "Error updating results: "
 
 #: i18n.rsupdateeverytime
+msgctxt "i18n.rsupdateeverytime"
 msgid "Каждый раз"
 msgstr "Every time"
 
 #: i18n.rsupdatefinishtime
+#, object-pascal-format
 msgctxt "i18n.rsupdatefinishtime"
-msgid "Обновить финишное время для номера"
-msgstr "Update finish time for number"
+msgid "Обновить финишное время для номера %d?"
+msgstr "Update finish time for participant number %d?"
 
 #: i18n.rsupdatemonthly
+msgctxt "i18n.rsupdatemonthly"
 msgid "Один раз в месяц"
 msgstr "Once a month"
 
 #: i18n.rsupdatesnotfound
+msgctxt "i18n.rsupdatesnotfound"
 msgid "Нет доступных обновлений."
 msgstr "There are currently no updates available."
 
 #: i18n.rsupdateweekly
+msgctxt "i18n.rsupdateweekly"
 msgid "Один раз в неделю"
 msgstr "Once a week"
 
@@ -953,6 +1503,22 @@ msgstr "Clear"
 #: tmainform.acloraclear.hint
 msgid "Убирает ненужные значение поправки"
 msgstr "Removes unnecessary correction values"
+
+#: tmainform.acopenlogdirectory.caption
+msgid "Открыть каталог"
+msgstr "Open directory"
+
+#: tmainform.acopenlogdirectory.hint
+msgid "Открыть каталог файлов журнала"
+msgstr "Open log files directory"
+
+#: tmainform.acopenlogfile.caption
+msgid "Открыть текущий файл"
+msgstr "Open current file"
+
+#: tmainform.acopenlogfile.hint
+msgid "Открыть текущий файл журнала"
+msgstr "Open current log file"
 
 #: tmainform.acrunracesettings.caption
 msgid "Параметры соревнования"
@@ -1739,6 +2305,10 @@ msgstr "File"
 #: tmainform.menuitemhelp.caption
 msgid "Помощь"
 msgstr "Help"
+
+#: tmainform.menuitemlog.caption
+msgid "Журнал"
+msgstr "Log"
 
 #: tmainform.menuitemmonitormode.caption
 msgid "Режим монитора"

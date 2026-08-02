@@ -1329,21 +1329,26 @@ begin
 end;
 
 procedure TDatasetSqlTests.TrackStatus_ReturnsStartedRowsWithoutFinishAndWithoutStageStatus;
+var
+  TrackSql: string;
 begin
   InsertMainRow(201);
   InsertMainRow(202);
   InsertMainRow(203);
   InsertMainRow(204);
   InsertMainRow(205);
-  ExecSql('UPDATE main SET starttime1 = time(''now'', ''localtime'', ''-00:10:00'') WHERE number = 201;');
-  ExecSql('UPDATE main SET starttime1 = time(''now'', ''localtime'', ''+00:10:00'') WHERE number = 202;');
-  ExecSql('UPDATE main SET starttime1 = time(''now'', ''localtime'', ''-00:05:00''), finishtime1 = ''10:10:10.100'' WHERE number = 203;');
-  ExecSql('UPDATE main SET starttime1 = time(''now'', ''localtime'', ''-00:06:00''), status1 = ''1'' WHERE number = 204;');
-  ExecSql('UPDATE main SET starttime1 = time(''now'', ''localtime'', ''-00:20:00'') WHERE number = 205;');
+  ExecSql('UPDATE main SET starttime1 = ''11:50:00.000'' WHERE number = 201;');
+  ExecSql('UPDATE main SET starttime1 = ''12:10:00.000'' WHERE number = 202;');
+  ExecSql('UPDATE main SET starttime1 = ''11:55:00.000'', finishtime1 = ''12:00:00.000'' WHERE number = 203;');
+  ExecSql('UPDATE main SET starttime1 = ''11:54:00.000'', status1 = ''1'' WHERE number = 204;');
+  ExecSql('UPDATE main SET starttime1 = ''11:40:00.000'' WHERE number = 205;');
 
-  AssertEquals(2, CountRows(TDatasetSql.TrackStatus(1)));
+  TrackSql := StringReplace(TDatasetSql.TrackStatus(1),
+    'time(''now'', ''localtime'')', 'time(''12:00:00'')', [rfReplaceAll]);
 
-  OpenBySql(TDatasetSql.TrackStatus(1));
+  AssertEquals(2, CountRows(TrackSql));
+
+  OpenBySql(TrackSql);
   AssertEquals(205, FQuery.FieldByName('number').AsInteger);
   AssertTrue(FQuery.FieldByName('timeontrack').AsString <> '');
   FQuery.Next;

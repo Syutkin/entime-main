@@ -13,6 +13,7 @@ fi
 FPC_TARGET="$(fpc -iTP)-$(fpc -iTO)"
 LAZUTILS_UNITS_DIR="${LAZUTILS_UNITS_DIR:-/usr/lib/lazarus/components/lazutils/lib/$FPC_TARGET}"
 CHSDET_UNITS_DIR="${CHSDET_UNITS_DIR:-$HOME/.lazarus/onlinepackagemanager/packages/chsdet/lib/$FPC_TARGET}"
+SYNAPSE_UNITS_DIR="${SYNAPSE_UNITS_DIR:-$HOME/.lazarus/onlinepackagemanager/packages/synapse40.1/lib/$FPC_TARGET}"
 
 if [[ ! -d "$TESTS_DIR" ]]; then
   echo "Error: tests directory not found: $TESTS_DIR"
@@ -26,6 +27,11 @@ fi
 
 if [[ ! -d "$CHSDET_UNITS_DIR" ]]; then
   echo "Error: chsdet units directory not found: $CHSDET_UNITS_DIR"
+  exit 1
+fi
+
+if [[ ! -d "$SYNAPSE_UNITS_DIR" ]]; then
+  echo "Error: Synapse units directory not found: $SYNAPSE_UNITS_DIR"
   exit 1
 fi
 
@@ -53,6 +59,7 @@ for runner in "${TEST_RUNNERS[@]}"; do
   echo "==> Compiling $test_name"
   if ! fpc -Fu"$ROOT_DIR" -Fu"$TESTS_DIR" \
     -Fu"$LAZUTILS_UNITS_DIR" -Fu"$CHSDET_UNITS_DIR" \
+    -Fu"$SYNAPSE_UNITS_DIR" \
     -FU"$BUILD_DIR" -FE"$BUILD_DIR" "$runner" >/dev/null; then
     echo "Compilation failed: $test_name"
     failures=$((failures + 1))

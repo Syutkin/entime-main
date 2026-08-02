@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.8.2] - 2026-08-03
+
+### Added
+
+- Добавлено журналирование основных действий приложения в файл и интерфейс.
+
+### Fixed
+
+- Исправлена возможная задержка запуска приложения при отсутствии интернета.
+
 ## [0.8.1] - 2026-07-27
 
 ### Added
@@ -173,3 +183,18 @@
 - Настройки соревнования не загружались при открытии базы данных.
 - Изменения не сохранялись при открытии базы данных.
 - Исправлена компоновка интерфейса при изменении размера окна.
+
+[0.8.2]: https://codeberg.org/Syutkin/entime/src/tag/0.8.2
+[0.8.1]: https://codeberg.org/Syutkin/entime/src/tag/0.8.1
+[0.8.0]: https://codeberg.org/Syutkin/entime/src/tag/0.8.0
+[0.7.24]: https://codeberg.org/Syutkin/entime/src/tag/0.7.24
+[0.7.23]: https://codeberg.org/Syutkin/entime/src/tag/0.7.23
+[0.7.22]: https://codeberg.org/Syutkin/entime/src/tag/0.7.22
+[0.7.21]: https://codeberg.org/Syutkin/entime/src/tag/0.7.21
+[0.7.20]: https://codeberg.org/Syutkin/entime/src/tag/0.7.20
+[0.7.19]: https://codeberg.org/Syutkin/entime/src/tag/0.7.19
+[0.7.18]: https://codeberg.org/Syutkin/entime/src/tag/0.7.18
+[0.7.17]: https://codeberg.org/Syutkin/entime/src/tag/0.7.17
+[0.7.16]: https://codeberg.org/Syutkin/entime/src/tag/0.7.16
+[0.7.14]: https://codeberg.org/Syutkin/entime/src/tag/0.7.14
+[0.7.13]: https://codeberg.org/Syutkin/entime/src/tag/0.7.13

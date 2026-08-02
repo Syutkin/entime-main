@@ -9,7 +9,7 @@ uses
   ComCtrls, StdCtrls, strutils, sqldb, sqlite3conn, LazUTF8, Forms,
   ButtonPanel, Math, fileutil, LazFileUtils, DB, dateutils, DateTimePicker,
   opensslsockets, fphttpclient, nsCore, chsdIntf, fpcsvexport,
-  fpstypes, fpspreadsheet, LCLIntf, LConvEncoding;
+  fpstypes, fpspreadsheet, LCLIntf, LConvEncoding, app_logger;
 
 type
   TMessageDlgHandler = function(const Msg: string; DlgType: TMsgDlgType;
@@ -27,12 +27,13 @@ procedure RefreshAll;
 procedure RefreshResults;
 procedure LoadConfig;
 procedure LoadIniCategory;
-procedure SetfName(fName: string);
+procedure SetfName(AFileName: string);
 procedure SetMessageDlgHandler(AHandler: TMessageDlgHandler);
 procedure ResetMessageDlgHandler;
+function AskMessageDlg(const Msg: string; DlgType: TMsgDlgType;
+  Buttons: TMsgDlgButtons; HelpCtx: longint): integer;
 procedure SetStageSelectionHandler(AHandler: TStageSelectionHandler);
 procedure ResetStageSelectionHandler;
-procedure Log(msglog: string);
 //procedure OpenDB;
 procedure SetStatus(const status: string);
 procedure SetDNS;
@@ -57,8 +58,8 @@ procedure LoadParticipantsList(FileName: string);
 procedure LoadStageResults(FileName: string);
 procedure ExportFinishTime(FileName: string; stageIndex: integer);
 procedure ExportAllResults(FileName: string);
-procedure ExportSumDays(FileName: string);
-procedure ExportAllResultsToXLSX(FileName: string);
+function ExportSumDays(FileName: string): boolean;
+function ExportAllResultsToXLSX(FileName: string): boolean;
 procedure GetFinishTime(FinishTime: TDateTime);
 procedure SetLoRaTime(StartTime: TDateTime; correction: string);
 //procedure GenerateStartlistFromQualifier(FileName: string);
@@ -67,9 +68,6 @@ procedure ExportCSVResults(FileName: string);
 procedure ParseSerial(Str: string);
 procedure SQLQueryToCSV(FileName: string; Query: TSQLQuery; headers: boolean = False);
 procedure AddDayResult(FileName: string);
-procedure Print(Str: string);
-procedure Print(Int: integer);
-procedure Print(Bool: boolean);
 
 function InputComboSelectStage(const ACaption, APrompt: string): integer;
 function CatStartList: TStringList;
@@ -80,7 +78,7 @@ function CheckPenaltyInput(key: char): char;
 function GetSelectedStage: integer;
 function ActiveStageIndex: integer;
 function IsFinishesExists(stageIndex: integer): boolean;
-function BackupBD: boolean;
+function BackupBD(ASuccessView: TAppLogView = alvStatus): boolean;
 function HideLeadingZeroHour(Sender: TField): string;
 function HideLeadingZeroHour(time: string): string;
 function FormatNumber(number: integer): string;
@@ -103,6 +101,7 @@ uses Main, Result, Startlist, StartItemModel, CsvParser, db_sql,
 var
   MessageDlgHandler: TMessageDlgHandler = nil;
   StageSelectionHandler: TStageSelectionHandler = nil;
+  LoRaRefreshWarningShown: boolean = False;
 
 function AskMessageDlg(const Msg: string; DlgType: TMsgDlgType;
   Buttons: TMsgDlgButtons; HelpCtx: longint): integer;
@@ -230,7 +229,11 @@ var
   n, row, id: integer;
   c: TComponent;
   db: boolean;
+  refreshErrorCount: integer;
+  firstRefreshError, messageText: string;
 begin
+  refreshErrorCount := 0;
+  firstRefreshError := '';
   db := dbnotempty;
   if db then
   begin
@@ -256,11 +259,19 @@ begin
       except
         On E: Exception do
         begin
-          MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-          Log(rsDatabaseOpenError + E.Message);
+          Inc(refreshErrorCount);
+          if firstRefreshError = '' then
+            firstRefreshError := c.Name + ': ' + E.Message;
         end;
       end;
     end;
+  end;
+  if refreshErrorCount > 0 then
+  begin
+    messageText := Format(rsDatabaseRefreshError,
+      [refreshErrorCount, firstRefreshError]);
+    AppLog(messageText, allError, alvStatus, alsDatabase);
+    MessageDlg(messageText, mtError, [mbOK], 0);
   end;
   RefreshResults;
   if db then
@@ -276,9 +287,12 @@ end;
 
 procedure RefreshResults;
 var
-  n: integer;
+  n, refreshErrorCount: integer;
   c: TComponent;
+  firstRefreshError, messageText: string;
 begin
+  refreshErrorCount := 0;
+  firstRefreshError := '';
   for n := 0 to ResultsForm.ComponentCount - 1 do
   begin
     c := ResultsForm.Components[n];
@@ -296,11 +310,19 @@ begin
       except
         On E: Exception do
         begin
-          MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-          Log(rsDatabaseOpenError + E.Message);
+          Inc(refreshErrorCount);
+          if firstRefreshError = '' then
+            firstRefreshError := c.Name + ': ' + E.Message;
         end;
       end;
     end;
+  end;
+  if refreshErrorCount > 0 then
+  begin
+    messageText := Format(rsDatabaseRefreshError,
+      [refreshErrorCount, firstRefreshError]);
+    AppLog(messageText, allError, alvStatus, alsDatabase);
+    MessageDlg(messageText, mtError, [mbOK], 0);
   end;
 end;
 
@@ -352,8 +374,9 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(rsDatabaseOpenError + E.Message);
+      iStr := Format(rsCompetitionSettingsLoadError, [E.Message]);
+      AppLog(iStr, allError, alvStatus, alsDatabase);
+      MessageDlg(iStr, mtError, [mbOK], 0);
     end;
   end;
 
@@ -533,22 +556,23 @@ begin
     rsCurrentResults + ': ' + stages[StrToInt(astage)].Name;
 end;
 
-procedure SetfName(fName: string);
+procedure SetfName(AFileName: string);
 var
   n: integer;
   c: TComponent;
 begin
+  fName := AFileName;
   for n := 0 to MainForm.ComponentCount - 1 do
   begin
     c := MainForm.Components[n];
     if c is TSqlite3Dataset then
     begin
-      TSqlite3Dataset(c).FileName := fName;
+      TSqlite3Dataset(c).FileName := AFileName;
     end;
     if c is TSQLite3Connection then
     begin
       TSQLite3Connection(c).Close;
-      TSQLite3Connection(c).DatabaseName := fName;
+      TSQLite3Connection(c).DatabaseName := AFileName;
     end;
     if c is TSQLTransaction then
     begin
@@ -564,11 +588,11 @@ begin
     c := ResultsForm.Components[n];
     if c is TSqlite3Dataset then
     begin
-      TSqlite3Dataset(c).FileName := fName;
+      TSqlite3Dataset(c).FileName := AFileName;
     end;
   end;
-  MainForm.Caption := NAME_VERSION + ' ' + fName;
-  MainForm.HistoryFiles1.UpdateList(fName);
+  MainForm.Caption := NAME_VERSION + ' ' + AFileName;
+  MainForm.HistoryFiles1.UpdateList(AFileName);
 end;
 
 procedure SetMessageDlgHandler(AHandler: TMessageDlgHandler);
@@ -591,13 +615,6 @@ begin
   StageSelectionHandler := nil;
 end;
 
-procedure Log(msglog: string);
-begin
-  msglog := FormatDateTime('hh:nn:ss', now) + ' ' + msglog;
-  MainForm.ComboBoxLog.Items.Add(msglog);
-  MainForm.ComboBoxLog.Text := msglog;
-end;
-
 //procedure OpenDB;
 //begin
 //  //присваиваем имя файла дб датасетам
@@ -606,7 +623,7 @@ end;
 //  LoadIniCategory;
 //  // --> close-open dataset в Main и затем в settings (RefreshResults)
 //  RefreshAll;
-//  Log(rsDBFileOpen + ' ' + fName);
+//  AppLog(rsDBFileOpen + ' ' + fName, allInfo, alvStatus);
 //end;
 
 procedure SetStatus(const status: string);
@@ -658,49 +675,49 @@ begin
         (not stages[6].isActive) and (not stages[7].isActive) and
         (not stages[8].isActive) then
       begin
-        d := rsSureWithNumber + ' ' + n + ' ' + logstatus + '?';
-        l := rsParticipantWithNumber + ' ' + n + ' ' + logstatus;
+        d := Format(rsConfirmParticipantStatus, [n, logstatus]);
+        l := Format(rsParticipantStatusSet, [n, logstatus]);
       end
       else
       begin
         if rsSU + ' ' + IntToStr(i) = stages[i].Name then
         begin
-          d := rsSureWithNumber + ' ' + n + ' ' + logstatus + ' ' +
-            rsOnStage + ' ' + IntToStr(i) + '?';
-          l := rsParticipantWithNumber + ' ' + n + ' ' + logstatus +
-            ' ' + rsOnStage + ' ' + IntToStr(i);
+          d := Format(rsConfirmParticipantStageStatus, [n, logstatus, i]);
+          l := Format(rsParticipantStageStatusSet, [n, logstatus, i]);
         end
         else
         begin
-          d := rsSureWithNumber + ' ' + n + ' ' + logstatus + ' ' +
-            rsOnStage + ' ' + IntToStr(i) + ': ' + stages[i].Name + '?';
-          l := rsParticipantWithNumber + ' ' + n + ' ' + logstatus +
-            ' ' + rsOnStage + ' ' + IntToStr(i) + ': ' + stages[i].Name;
+          d := Format(rsConfirmParticipantNamedStageStatus,
+            [n, logstatus, i, stages[i].Name]);
+          l := Format(rsParticipantNamedStageStatusSet,
+            [n, logstatus, i, stages[i].Name]);
         end;
       end;
-      if MessageDlg(d, mtWarning, [mbYes, mbNo], 0) = mrYes then
+      if AskMessageDlg(d, mtWarning, [mbYes, mbNo], 0) = mrYes then
       begin
         TMainSql.ExecUpdateStageStatus(MainForm.SQLQuery1, i, status, s, n);
         SetGlobalStatus(n);
         UpdateResults;
-        Log(l);
+        AppLog(l, allInfo, alvStatus, alsResults);
       end;
     end
     else
     begin
-      if MessageDlg(rsReallyDisqualifyNumber + ' ' + n + '?', mtWarning,
+      if AskMessageDlg(Format(rsReallyDisqualifyNumber, [n]), mtWarning,
         [mbYes, mbNo], 0) = mrYes then
       begin
         TMainSql.ExecUpdateOnlyGlobalStatusDsq(MainForm.SQLQuery1, n);
         UpdateResults;
-        Log(rsParticipantWithNumber + ' ' + n + ' ' + rsDisqualified);
+        AppLog(Format(rsParticipantDisqualified, [n]),
+          allInfo, alvStatus, alsResults);
       end;
     end;
   except
     On E: Exception do
     begin
-      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(rsDatabaseOpenError + E.Message);
+      l := Format(rsParticipantStageSaveError, [n, i, E.Message]);
+      AppLog(l, allError, alvStatus, alsResults);
+      AskMessageDlg(l, mtError, [mbOK], 0);
     end;
   end;
 end;
@@ -713,10 +730,10 @@ var
   st: array[0..8] of integer;
   k: integer;
 begin
-  try
-    with MainForm.SQLQuery1 do
-    begin
-      TMainSql.OpenByNumber(MainForm.SQLQuery1, StrToIntDef(n, 0));
+  with MainForm.SQLQuery1 do
+  begin
+    TMainSql.OpenByNumber(MainForm.SQLQuery1, StrToIntDef(n, 0));
+    try
       if FieldByName('status').AsString <> '3' then
       begin
         //если не общий дисквал, то считаем
@@ -740,13 +757,8 @@ begin
         end;
         TMainSql.ExecUpdateGlobalStatus(MainForm.SQLQuery1, stat, n);
       end;
+    finally
       Close;
-    end;
-  except
-    On E: Exception do
-    begin
-      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(rsDatabaseOpenError + E.Message);
     end;
   end;
 end;
@@ -754,17 +766,31 @@ end;
 procedure RecalculateStatus(n: TStringList);
 var
   i: integer;
+  messageText: string;
 begin
-  if dbnotempty then
-  begin
-    try
-      for i := 0 to n.Count - 1 do
-      begin
-        SetGlobalStatus(n[i]);
+  try
+    if dbnotempty then
+    begin
+      try
+        for i := 0 to n.Count - 1 do
+          SetGlobalStatus(n[i]);
+        AppLog(Format(rsParticipantStatusesRecalculated, [n.Count]),
+          allDebug, alvDetails, alsResults);
+      except
+        on E: Exception do
+        begin
+          if (i >= 0) and (i < n.Count) then
+            messageText := Format(rsParticipantStatusRecalculationError,
+              [n[i], E.Message])
+          else
+            messageText := E.Message;
+          AppLog(messageText, allError, alvStatus, alsResults);
+          AskMessageDlg(messageText, mtError, [mbOK], 0);
+        end;
       end;
-    finally
-      n.Free;
     end;
+  finally
+    n.Free;
   end;
 end;
 
@@ -784,30 +810,28 @@ begin
         (not stages[6].isActive) and (not stages[7].isActive) and
         (not stages[8].isActive) then
       begin
-        d := rsClearAllStatus + ' ' + n + '?';
-        l := rsClearAllStatusLog + ' ' + n;
-        if MessageDlg(d, mtWarning, [mbYes, mbNo], 0) = mrYes then
+        d := Format(rsClearAllStatus, [n]);
+        l := Format(rsClearAllStatusLog, [n]);
+        if AskMessageDlg(d, mtWarning, [mbYes, mbNo], 0) = mrYes then
         begin
           TMainSql.ExecClearStatusAllForStage(MainForm.SQLQuery1, i, n);
           SetGlobalStatus(n);
           UpdateResults;
-          Log(l);
-          Print('1');
+          AppLog(l, allInfo, alvStatus, alsResults);
         end;
       end
       else
       // выделение в общих результатах
       if (co > COMMON_COLS + STAGE_COLS * maxstages) then
       begin
-        d := rsClearDSQ + ' ' + n + '?';
-        l := rsClearDSQLog + ' ' + n;
-        if MessageDlg(d, mtWarning, [mbYes, mbNo], 0) = mrYes then
+        d := Format(rsClearDSQ, [n]);
+        l := Format(rsClearDSQLog, [n]);
+        if AskMessageDlg(d, mtWarning, [mbYes, mbNo], 0) = mrYes then
         begin
           TMainSql.ExecClearOnlyGlobalStatus(MainForm.SQLQuery1, n);
           SetGlobalStatus(n);
           UpdateResults;
-          Log(l);
-          Print('2');
+          AppLog(l, allInfo, alvStatus, alsResults);
         end;
       end
       else
@@ -815,38 +839,40 @@ begin
         i := GetSelectedStage;
         if rsSU + ' ' + IntToStr(i) = stages[i].Name then
         begin
-          d := rsClearStatus + ' ' + n + ' ' + rsOnStage + ' ' + IntToStr(i) + '?';
-          l := rsClearStatusLog + ' ' + n + ' ' + rsOnStage + ' ' + IntToStr(i);
+          d := Format(rsClearStatus, [n, i]);
+          l := Format(rsClearStatusLog, [n, i]);
         end
         else
         begin
-          d := rsClearStatus + ' ' + n + ' ' + rsOnStage + ' ' +
-            IntToStr(i) + ': ' + stages[i].Name + '?';
-          l := rsClearStatusLog + ' ' + n + ' ' + rsOnStage + ' ' +
-            IntToStr(i) + ': ' + stages[i].Name;
+          d := Format(rsClearNamedStageStatus, [n, i, stages[i].Name]);
+          l := Format(rsClearNamedStageStatusLog, [n, i, stages[i].Name]);
         end;
-        if MessageDlg(d, mtWarning, [mbYes, mbNo], 0) = mrYes then
+        if AskMessageDlg(d, mtWarning, [mbYes, mbNo], 0) = mrYes then
         begin
           TMainSql.ExecClearStageStatus(MainForm.SQLQuery1, i, n);
           SetGlobalStatus(n);
           UpdateResults;
-          Log(l);
-          Print('3');
+          AppLog(l, allInfo, alvStatus, alsResults);
         end;
       end;
     end;
   except
     On E: Exception do
     begin
-      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(rsDatabaseOpenError + E.Message);
+      n := MainForm.MainDataset1.FieldByName('number').AsString;
+      i := GetSelectedStage;
+      l := Format(rsParticipantStageSaveError, [n, i, E.Message]);
+      AppLog(l, allError, alvStatus, alsResults);
+      AskMessageDlg(l, mtError, [mbOK], 0);
     end;
   end;
 end;
 
 procedure InitDB(fileName: string);
+var
+  messageText: string;
 begin
-  fName := fileName;
+  fName := ExpandFileName(fileName);
   //присваиваем имя файла дб датасетам
   SetfName(fName);
   try
@@ -861,14 +887,20 @@ begin
         TSchemaSql.ExecCreateTables(MainForm.SQLite3Connection1, MAXSTAGES,
           rsCat1, rsCat2, rsCat3, rsCat4, rsCat5, ExtractFileNameOnly(fName));
         MainForm.SQLTransaction1.Active := False;
-        Log(rsNewFileCreated + ': ' + fName);
+        AppLog(Format(rsNewFileCreated, [fName]), allInfo, alvStatus,
+          alsDatabase);
       except
-        MainForm.SQLTransaction1.Active := False;
-        MessageDlg(rsNewFileNotCreated, mtError, [mbOK], 0);
-        Log(rsNewFileNotCreated);
-        Screen.Cursor := crDefault;
-        // Если файл не создан, не пытаемся его открыть
-        Exit;
+        on E: Exception do
+        begin
+          MainForm.SQLTransaction1.Active := False;
+          messageText := Format(rsCompetitionFileCreateError,
+            [fName, E.Message]);
+          AppLog(messageText, allError, alvStatus, alsDatabase);
+          AskMessageDlg(messageText, mtError, [mbOK], 0);
+          Screen.Cursor := crDefault;
+          // Если файл не создан, не пытаемся его открыть
+          Exit;
+        end;
       end;
       Screen.Cursor := crDefault;
     end;
@@ -878,10 +910,14 @@ begin
     LoadIniCategory;
     // --> close-open dataset в Main и затем в settings (RefreshResults)
     RefreshAll;
-    Log(rsDBFileOpen + ' ' + fName);
+    AppLog(Format(rsDBFileOpen, [fName]), allInfo, alvStatus, alsDatabase);
   except
-    MessageDlg(rsNewFileExistUnknow, mtError, [mbOK], 0);
-    Log(rsNewFileExistUnknow);
+    on E: Exception do
+    begin
+      messageText := Format(rsCompetitionFileOpenError, [fName, E.Message]);
+      AppLog(messageText, allError, alvStatus, alsDatabase);
+      AskMessageDlg(messageText, mtError, [mbOK], 0);
+    end;
   end;
 end;
 
@@ -890,7 +926,8 @@ var
   row, number, leadernumber, currentplace, i: integer;
   setfinish: boolean = False;
   checkedStages: array of integer;
-  currentresult, bottomline, currentcategory, st, leaderresult, upperline, pName: string;
+  currentresult, bottomline, currentcategory, st, leaderresult, upperline,
+  pName, checkedStageText, messageText: string;
   currentdiff: string = '';
 
   //Отправка в телегу
@@ -900,9 +937,12 @@ var
   item: string;
   l: TStringstream;
   http: tfphttpclient;
+  telegramRequestFailed: boolean;
 begin
   Screen.Cursor := crSQLWait;
   checkedStages := nil;
+  checkedStageText := '';
+  number := 0;
   try
     try
       for row := MainForm.sGridResult.RowCount - 1 downto 1 do
@@ -923,8 +963,8 @@ begin
             if MainForm.SQLQuery2.FieldByName('number').AsInteger <> number then
             begin
               //проверяем что номер в данный момент находится на трассе
-              if MessageDlg(rsNumber + ' ' + IntToStr(number) + ' ' +
-                rsDidNotStartSetFinish, mtWarning, [mbYes, mbNo], 0) = mrYes then
+              if MessageDlg(Format(rsDidNotStartSetFinish, [number]),
+                mtWarning, [mbYes, mbNo], 0) = mrYes then
                 setfinish := True
               else
                 setfinish := False;
@@ -940,8 +980,8 @@ begin
                 if MainForm.SQLQuery1.FieldByName('result' +
                   IntToStr(i)).AsString <> '' then
                 begin
-                  if MessageDlg(rsUpdateFinishTime + ' ' + IntToStr(number) +
-                    '?', mtWarning, [mbYes, mbNo], 0) = mrYes then
+                  if MessageDlg(Format(rsUpdateFinishTime, [number]),
+                    mtWarning, [mbYes, mbNo], 0) = mrYes then
                     setfinish := True
                   else
                     setfinish := False;
@@ -973,6 +1013,14 @@ begin
                   checkedStages[High(checkedStages)] := i;
                 end;
               end;
+              checkedStageText := '';
+              for i := 0 to High(checkedStages) do
+              begin
+                if checkedStageText <> '' then
+                  checkedStageText := checkedStageText + ', ';
+                checkedStageText := checkedStageText +
+                  IntToStr(checkedStages[i]);
+              end;
               TMainSql.ExecUpdateFinishForCheckedStages(
                 MainForm.SQLQuery1,
                 checkedStages,
@@ -983,7 +1031,9 @@ begin
               UpdateResults;
               //ставим результат
               MainForm.sGridResult.DeleteRow(row);
-              Log(rsFinishTimeSet + ' ' + IntToStr(number));
+              AppLog(Format(rsFinishTimeSetForStages,
+                [number, checkedStageText]),
+                allInfo, alvStatus, alsResults);
 
               //если используется LED панель или телеграм бот, добываем для них данные
               if Mainform.AcLEDPanel.Checked or Mainform.AcTelegramBot.Checked then
@@ -1081,8 +1131,9 @@ begin
                 MainForm.DataPortHTTP1.Params.Clear;
                 MainForm.DataPortHTTP1.Params.Add('upperline=' + upperline);
                 MainForm.DataPortHTTP1.Params.Add('bottomline=' + bottomline);
-                Print(MainForm.DataPortHTTP1.Params.Text);
-                Print(MainForm.DataPortHTTP1.Url);
+                AppLog(Format(rsHTTPRequestMetadata,
+                  ['POST', MainForm.DataPortHTTP1.Params.Count]), allDebug,
+                  alvDetails, alsHTTP);
                 MainForm.DataPortHTTP1.Open();
                 MainForm.DataPortHTTP1.Push('');
               end;
@@ -1126,9 +1177,6 @@ begin
                 with http do
                 try
                   QueryParams := TStringList.Create;
-                  //AddHeader('Authorization', 'AccessToken MjtAFOrgYUrsfCC7KPLpAi03N4Od17Bh');
-                  //AddHeader('X-User-Authorization', 'Basic aW5mb0BzcG1hc2gucnU6NTE0NzU4');
-                  //AddHeader('Content-Type', 'application/json;charset=UTF-8');
                   with QueryParams do
                   begin
                     if not IntToStr(number).IsEmpty then
@@ -1145,22 +1193,42 @@ begin
                       Values['place'] := EncodeURLElement(IntToStr(currentplace));
                   end;
                   AURL := telegrambotadress;
+                  s := '';
                   for item in QueryParams do
                     s := s + '&' + item;
                   AURL := AURL + '?' + s.Substring(1);
+                  AppLog(Format(rsHTTPRequestMetadata,
+                    ['GET', QueryParams.Count]), allDebug, alvDetails,
+                    alsTelegram);
+                  telegramRequestFailed := False;
                   try
                     httpmethod('GET', AURL, l, []);
                   except
                     On E: Exception do
                     begin
-                      //MessageDlg(rsTelegramBotSendingError + E.Message, mtError, [mbOK], 0);
-                      Log(rsTelegramBotSendingError + E.Message);
+                      telegramRequestFailed := True;
+                      messageText := StringReplace(E.Message, AURL,
+                        '[redacted]', [rfReplaceAll, rfIgnoreCase]);
+                      if telegrambotadress <> '' then
+                        messageText := StringReplace(messageText,
+                          telegrambotadress, '[redacted]',
+                          [rfReplaceAll, rfIgnoreCase]);
+                      AppLog(Format(rsTelegramBotSendingError, [messageText]),
+                        allError, alvStatus, alsTelegram);
                     end;
                   end;
-                  Print(IntToStr(ResponseStatusCode) + ' ' +
-                    ResponseStatusText);
-                  Print(ResponseHeaders.Text);
-                  Print(l.DataString);
+                  if not telegramRequestFailed then
+                  begin
+                    AppLog(Format(rsHTTPResponseMetadata, [ResponseStatusCode,
+                      ResponseStatusText, ResponseHeaders.Count, l.Size]),
+                      allDebug, alvDetails, alsTelegram);
+                    if (ResponseStatusCode < 200) or
+                      (ResponseStatusCode >= 300) then
+                      AppLog(Format(rsTelegramBotSendingError,
+                        [IntToStr(ResponseStatusCode) + ' ' +
+                        ResponseStatusText]), allError, alvStatus,
+                        alsTelegram);
+                  end;
 
                 finally
                   Free;
@@ -1168,32 +1236,21 @@ begin
                   l.Free;
                 end;
 
-                //end;
-
-                //MainForm.DataPortHTTPTelegramBot.Params.Clear;
-                //MainForm.DataPortHTTPTelegramBot.Params.Add('number=' + IntToStr(number));
-                //MainForm.DataPortHTTPTelegramBot.Params.Add('name=' + name);
-                //MainForm.DataPortHTTPTelegramBot.Params.Add('category=' + currentcategory);
-                //MainForm.DataPortHTTPTelegramBot.Params.Add('result=' + FormatTime(currentresult));
-                //MainForm.DataPortHTTPTelegramBot.Params.Add('diff=' + currentdiff);
-                //MainForm.DataPortHTTPTelegramBot.Params.Add('place=' + IntToStr(currentplace));
-
-                //Print(MainForm.DataPortHTTPTelegramBot.Params.Text);
-                //Print(MainForm.DataPortHTTPTelegramBot.Url);
-                //MainForm.DataPortHTTPTelegramBot.Open();
-                //MainForm.DataPortHTTPTelegramBot.Push('');
               end;
             end;
           end
           else
-            Log(rsNumber + ' ' + IntToStr(number) + ' ' + rsDoNotExist);
+            AppLog(Format(rsFinishSkippedParticipantMissing,
+              [IntToStr(number)]), allWarning, alvStatus, alsResults);
         end;
       end;
     except
       On E: Exception do
       begin
-        MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-        Log(rsDatabaseOpenError + E.Message);
+        messageText := Format(rsParticipantStagesSaveError,
+          [IntToStr(number), checkedStageText, E.Message]);
+        AppLog(messageText, allError, alvStatus, alsResults);
+        AskMessageDlg(messageText, mtError, [mbOK], 0);
       end;
     end;
   finally
@@ -1206,15 +1263,16 @@ end;
 
 procedure SetCorrectionFromLoRa;
 var
-  n, correction, id: string;
+  n, correction, id, messageText: string;
   setcorrection: boolean;
-  numberValue, correctionValue, idValue: integer;
+  numberValue, correctionValue, idValue, stageIndex: integer;
 begin
   if dbopen and not MainForm.DatasetLoRa.IsEmpty then
   begin
     n := MainForm.DatasetLoRa.FieldByName('number').AsString;
     correction := MainForm.DatasetLoRa.FieldByName('correction').AsString;
     id := MainForm.DatasetLoRa.FieldByName('id').AsString;
+    stageIndex := ActiveStageIndex;
     if n <> '' then
     begin
       numberValue := StrToIntDef(n, 0);
@@ -1223,7 +1281,7 @@ begin
       if TMainSql.OpenByNumber(MainForm.SQLQuery1, numberValue) then
       begin
         if MainForm.SQLQuery1.FieldByName('correction' + IntToStr(
-          ActiveStageIndex)).AsString = '' then
+          stageIndex)).AsString = '' then
           //если поправки нет
         begin
           setcorrection := True;
@@ -1231,7 +1289,7 @@ begin
         else
           //если поправка есть спрашиваем переписать или нет
         begin
-          if MessageDlg(rsNumberu + ' ' + n + ' ' + rsCorrectionAlreadySet,
+          if AskMessageDlg(Format(rsCorrectionAlreadySet, [n]),
             mtWarning, [mbYes, mbNo], 0) = mrYes then
             setcorrection := True
           else
@@ -1239,15 +1297,28 @@ begin
         end;
         if setcorrection then
         begin
-          TMainSql.ExecUpdateCorrection(MainForm.SQLQuery1, ActiveStageIndex,
-            correctionValue, numberValue);
-          TLoRaSql.ExecSetIsSetByIdAndValue(MainForm.SQLQuery1, 1, idValue);
-          UpdateResults;
+          try
+            TMainSql.ExecUpdateCorrection(MainForm.SQLQuery1, stageIndex,
+              correctionValue, numberValue);
+            TLoRaSql.ExecSetIsSetByIdAndValue(MainForm.SQLQuery1, 1, idValue);
+            UpdateResults;
+            AppLog(Format(rsParticipantCorrectionSet,
+              [n, stageIndex, correction]), allInfo, alvStatus, alsResults);
+          except
+            on E: Exception do
+            begin
+              messageText := Format(rsParticipantStageSaveError,
+                [n, stageIndex, E.Message]);
+              AppLog(messageText, allError, alvStatus, alsResults);
+              AskMessageDlg(messageText, mtError, [mbOK], 0);
+            end;
+          end;
         end;
       end
       else
       begin
-        Log(rsNumber + ' ' + n + ' ' + rsDoNotExist);
+        AppLog(Format(rsLoRaCorrectionSkippedParticipantMissing, [n]),
+          allWarning, alvStatus, alsLoRa);
       end;
       MainForm.SQLQuery1.Close;
       MainForm.SQLite3Connection1.Close;
@@ -1304,8 +1375,10 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(rsDatabaseOpenError + E.Message);
+      AppLog(Format(rsStageResultsCalculationError, [E.Message]), allError,
+        alvStatus, alsResults);
+      MessageDlg(Format(rsStageResultsCalculationError, [E.Message]),
+        mtError, [mbOK], 0);
     end;
   end;
 end;
@@ -1437,8 +1510,10 @@ begin
       MainForm.SQLQuery1.Close;
       if MainForm.SQLQuery1.SQLTransaction.Active then
         MainForm.SQLQuery1.SQLTransaction.Rollback;
-      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(rsDatabaseOpenError + E.Message);
+      AppLog(Format(rsSumResultsCalculationError, [E.Message]), allError,
+        alvStatus, alsResults);
+      MessageDlg(Format(rsSumResultsCalculationError, [E.Message]),
+        mtError, [mbOK], 0);
     end;
   end;
 end;
@@ -1475,8 +1550,10 @@ begin
     begin
       MainForm.SQLQuery1.Close;
       MainForm.SQLQuery1.SQLTransaction.Active := False;
-      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(rsDatabaseOpenError + E.Message);
+      AppLog(Format(rsThruResultsCalculationError, [E.Message]), allError,
+        alvStatus, alsResults);
+      MessageDlg(Format(rsThruResultsCalculationError, [E.Message]),
+        mtError, [mbOK], 0);
     end;
   end;
 end;
@@ -1488,7 +1565,7 @@ begin
   if silent or (MessageDlg(rsClearResults, mtWarning, [mbYes, mbNo], 0) = mrYes) then
     if not BackupBD then
     begin
-      if MessageDlg(rsCanNotBackup + sLineBreak + rsClearResultsWOBackup,
+      if MessageDlg(Format(rsClearResultsWithoutBackup, [sLineBreak]),
         mtWarning, [mbYes, mbNo], 0) = mrNo then
         Exit;
     end;
@@ -1509,12 +1586,14 @@ begin
         Close;
         RefreshAll;
       end;
-      Log(rsResultsCleared);
+      AppLog(rsResultsCleared, allInfo, alvStatus, alsResults);
     except
       On E: Exception do
       begin
-        MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-        Log(rsDatabaseOpenError + E.Message);
+        AppLog(Format(rsResultsClearError, [E.Message]), allError, alvStatus,
+          alsResults);
+        MessageDlg(Format(rsResultsClearError, [E.Message]), mtError,
+          [mbOK], 0);
       end;
     end;
   end;
@@ -1544,20 +1623,33 @@ end;
 procedure SetStarttimeFromPopup;
 var
   t: TDateTime;
-  n: string;
+  n, startTimeText, messageText: string;
   st: integer;
 begin
   if dbnotempty then
   begin
     n := MainForm.MainDataset1.FieldByName('number').AsString;
     st := GetSelectedStage;
-    t := InputDateTime(rsTimeToStart, rsEnterStartTime + ' ' + n +
-      ' ' + rsOnStage + ': ' + stages[st].Name);
+    t := InputDateTime(rsTimeToStart,
+      Format(rsEnterStartTime, [n, stages[st].Name]));
     if t > 0 then
     begin
-      TMainSql.ExecUpdateStartTimeForNumber(MainForm.SQLQuery1, st,
-        TimeToStr(t), StrToIntDef(n, 0));
-      UpdateResults;
+      startTimeText := TimeToStr(t);
+      try
+        TMainSql.ExecUpdateStartTimeForNumber(MainForm.SQLQuery1, st,
+          startTimeText, StrToIntDef(n, 0));
+        UpdateResults;
+        AppLog(Format(rsParticipantStartTimeSet, [n, st, startTimeText]),
+          allInfo, alvStatus, alsResults);
+      except
+        on E: Exception do
+        begin
+          messageText := Format(rsParticipantStageSaveError,
+            [n, st, E.Message]);
+          AppLog(messageText, allError, alvStatus, alsResults);
+          AskMessageDlg(messageText, mtError, [mbOK], 0);
+        end;
+      end;
     end;
   end;
 end;
@@ -1584,19 +1676,20 @@ procedure LoadParticipantsList(FileName: string);
 var
   i, k: integer;
   startItem: TStartItemModel;
-  encodingName, csvText: string;
+  canonicalFileName, encodingName, csvText, detectedStageNamesText: string;
   about: rAboutHolder;
   parser: TParticipantsCsvParser;
   parseResult: TParticipantsCsvParseResult;
-  importTransactionStarted: boolean;
+  importTransactionStarted, partialStageImport: boolean;
 
   procedure ReportLoadError(const APrefix, ADetails: string);
   var
     messageText: string;
   begin
-    messageText := APrefix + ADetails;
+    messageText := Format(rsParticipantsImportError,
+      [canonicalFileName, APrefix + ADetails]);
+    AppLog(messageText, allError, alvStatus, alsImport);
     AskMessageDlg(messageText, mtError, [mbOK], 0);
-    Log(messageText);
   end;
 
   procedure BindLoadRowParameters(const AStartItem: TStartItemModel);
@@ -1632,38 +1725,54 @@ begin
     parser := nil;
     parseResult := nil;
     importTransactionStarted := False;
+    partialStageImport := False;
+    canonicalFileName := ExpandFileName(FileName);
     try
       try
         csd_GetAbout(about);
-        Print(about.About);
+        AppLog(about.About, allDebug, alvDetails, alsImport);
 
-        Print('Open startlist file: ' + FileName);
+        AppLog(Format(rsOpenStartListFile, [canonicalFileName]), allDebug,
+          alvDetails, alsImport);
         parser := TParticipantsCsvParser.Create;
-        csvText := parser.ReadFile(FileName, encodingName);
+        csvText := parser.ReadFile(canonicalFileName, encodingName);
 
-        Print('Codepage: ' + encodingName);
+        AppLog(Format(rsCodepage, [encodingName]), allDebug, alvDetails,
+          alsImport);
 
         // Для неизвестной кодировки решение принимает пользователь.
-        if SameText(encodingName, 'Unknown') and
-          (AskMessageDlg(rsUnknownFileEncoding, mtWarning, [mbYes, mbNo], 0) <>
-          mrYes) then
+        if SameText(encodingName, 'Unknown') then
         begin
-          Exit;
+          if AskMessageDlg(rsUnknownFileEncoding, mtWarning,
+            [mbYes, mbNo], 0) <> mrYes then
+            Exit;
+          AppLog(rsUnknownFileEncodingContinued, allWarning, alvDetails,
+            alsImport);
         end;
 
         parseResult := parser.Parse(csvText, MAXSTAGES);
         FreeAndNil(parser);
 
-        Print(rsDetectedParticipantStages);
+        detectedStageNamesText := '';
         for i := 0 to parseResult.StageNames.Count - 1 do
-          Print(parseResult.StageNames[i]);
+        begin
+          if detectedStageNamesText <> '' then
+            detectedStageNamesText := detectedStageNamesText + ', ';
+          detectedStageNamesText := detectedStageNamesText +
+            parseResult.StageNames[i];
+        end;
+        AppLog(Format(rsDetectedParticipantStages, [detectedStageNamesText]),
+          allDebug, alvDetails, alsImport);
 
         // Предупреждаем о пропуске СУ до изменения данных в базе.
-        if (parseResult.DetectedStageCount > MAXSTAGES) and
-          (AskMessageDlg(Format(rsTooManyParticipantStages,
-          [parseResult.DetectedStageCount, MAXSTAGES]), mtWarning,
-          [mbYes, mbNo], 0) <> mrYes) then
-          Exit;
+        if parseResult.DetectedStageCount > MAXSTAGES then
+        begin
+          if AskMessageDlg(Format(rsTooManyParticipantStages,
+            [parseResult.DetectedStageCount, MAXSTAGES]), mtWarning,
+            [mbYes, mbNo], 0) <> mrYes then
+            Exit;
+          partialStageImport := True;
+        end;
 
         // Все изменения импорта выполняются атомарно.
         try
@@ -1754,7 +1863,14 @@ begin
           LoadIniCategory;
         end;
         RefreshAll;
-        Log(rsLoadCSVParticipants);
+        AppLog(Format(rsParticipantsImported,
+          [parseResult.StartItems.Count, canonicalFileName]), allInfo,
+          alvStatus, alsImport);
+        if partialStageImport then
+          AppLog(Format(rsParticipantsImportPartial,
+            [parseResult.StartItems.Count, MAXSTAGES,
+            parseResult.DetectedStageCount, canonicalFileName]), allWarning,
+            alvStatus, alsImport);
         MainForm.SQLQuery1.Close;
       except
         On E: ECsvParserError do
@@ -1818,21 +1934,22 @@ end;
 
 procedure LoadStageResults(FileName: string);
 var
-  importfinish, i: integer;
+  importfinish, i, formatColumnCount, skippedItemCount: integer;
   parser: TResultsCsvParser;
   parseResult: TResultsCsvParseResult;
   item: TResultImportItem;
   itemsToImport: TList;
-  csvText, encodingName: string;
+  canonicalFileName, csvText, encodingName: string;
   backupCreated, importTransactionStarted: boolean;
 
   procedure ReportLoadError(const APrefix, ADetails: string);
   var
     messageText: string;
   begin
-    messageText := APrefix + ADetails;
+    messageText := Format(rsResultsImportError,
+      [canonicalFileName, APrefix + ADetails]);
+    AppLog(messageText, allError, alvStatus, alsImport);
     AskMessageDlg(messageText, mtError, [mbOK], 0);
-    Log(messageText);
   end;
 
   function InsertStatement(const AFormat: TResultsCsvFormat): string;
@@ -1972,10 +2089,14 @@ begin
   parseResult := nil;
   itemsToImport := TList.Create;
   importTransactionStarted := False;
+  skippedItemCount := 0;
+  canonicalFileName := ExpandFileName(FileName);
   try
     try
       parser := TResultsCsvParser.Create;
-      csvText := parser.ReadFile(FileName, encodingName);
+      csvText := parser.ReadFile(canonicalFileName, encodingName);
+      AppLog(Format(rsCodepage, [encodingName]), allDebug, alvDetails,
+        alsImport);
 
       if SameText(encodingName, 'Unknown') then
       begin
@@ -1984,9 +2105,18 @@ begin
         begin
           Exit;
         end;
+        AppLog(rsUnknownFileEncodingContinued, allWarning, alvDetails,
+          alsImport);
       end;
 
       parseResult := parser.Parse(csvText);
+      case parseResult.Format of
+        rcfFullStage: formatColumnCount := 6;
+        rcfStart: formatColumnCount := 3;
+        rcfFinish: formatColumnCount := 2;
+      end;
+      AppLog(Format(rsResultsImportFormat, [formatColumnCount]), allDebug,
+        alvDetails, alsImport);
 
       // Выбираем СУ только после успешной проверки файла.
       importfinish := InputComboSelectStage(rsImportFinish, rsSetTimeToSU);
@@ -1997,6 +2127,7 @@ begin
 
       // Неизвестного участника добавляем только с согласия пользователя.
       CollectItemsToImport;
+      skippedItemCount := parseResult.Items.Count - itemsToImport.Count;
       if itemsToImport.Count = 0 then
       begin
         Exit;
@@ -2004,12 +2135,12 @@ begin
 
       // Делаем резервную копию до начала изменений в базе.
       backupCreated := BackupBD;
-      if not backupCreated and
-        (AskMessageDlg(rsCanNotBackup + sLineBreak +
-        rsContinueWithLoadingResults, mtWarning,
-        [mbYes, mbNo], 0) = mrNo) then
+      if not backupCreated then
       begin
-        Exit;
+        if AskMessageDlg(Format(rsContinueLoadingResultsWithoutBackup,
+          [sLineBreak]), mtWarning,
+          [mbYes, mbNo], 0) = mrNo then
+          Exit;
       end;
 
       MainForm.SQLQuery1.Close;
@@ -2064,22 +2195,24 @@ begin
           begin
             RecalculateStatus(GetAllStageStatus(importfinish));
             UpdateResults;
-            Log(rsImportFinishtime + ' ' + IntToStr(importfinish) +
-              ': ' + stages[importfinish].Name + ' ' + rsLoaded_o);
           end;
         rcfStart:
           begin
             UpdateResults;
-            Log(rsImportStarttime + ' ' + IntToStr(importfinish) +
-              ': ' + stages[importfinish].Name + ' ' + rsLoaded);
           end;
         rcfFinish:
           begin
             UpdateResults;
-            Log(rsImportFinishtime + ' ' + IntToStr(importfinish) +
-              ': ' + stages[importfinish].Name + ' ' + rsLoaded_o);
           end;
       end;
+      AppLog(Format(rsResultsImported,
+        [importfinish, stages[importfinish].Name, itemsToImport.Count,
+        canonicalFileName]), allInfo, alvStatus, alsImport);
+      if skippedItemCount > 0 then
+        AppLog(Format(rsResultsImportPartial,
+          [importfinish, stages[importfinish].Name, itemsToImport.Count,
+          parseResult.Items.Count, canonicalFileName]), allWarning,
+          alvStatus, alsImport);
     except
       On E: ECsvParserError do
         ReportLoadError(rsLoadResultsError, FormatResultsCsvError(E));
@@ -2100,26 +2233,68 @@ end;
 
 procedure ExportFinishTime(FileName: string; stageIndex: integer);
 var
-  index: string;
+  canonicalFileName, messageText: string;
 begin
-  index := IntToStr(stageIndex);
-  MainForm.SQLQuery1.SQL.Text := TMainSql.ExportFinishTime(StrToIntDef(index, 1));
-  SQLQueryToCSV(FileName, MainForm.SQLQuery1);
+  canonicalFileName := ExpandFileName(FileName);
+  try
+    MainForm.SQLQuery1.SQL.Text := TMainSql.ExportFinishTime(stageIndex);
+    SQLQueryToCSV(canonicalFileName, MainForm.SQLQuery1);
+    AppLog(Format(rsStageResultsExported,
+      [stageIndex, stages[stageIndex].Name, canonicalFileName]), allInfo,
+      alvStatus, alsExport);
+  except
+    on E: Exception do
+    begin
+      messageText := Format(rsExportFileError, [canonicalFileName, E.Message]);
+      AppLog(messageText, allError, alvStatus, alsExport);
+      AskMessageDlg(messageText, mtError, [mbOK], 0);
+    end;
+  end;
 end;
 
 procedure ExportAllResults(FileName: string);
+var
+  canonicalFileName, messageText: string;
 begin
-  MainForm.SQLQuery1.SQL.Text := TMainSql.ExportAllResults;
-  SQLQueryToCSV(FileName, MainForm.SQLQuery1, True);
+  canonicalFileName := ExpandFileName(FileName);
+  try
+    MainForm.SQLQuery1.SQL.Text := TMainSql.ExportAllResults;
+    SQLQueryToCSV(canonicalFileName, MainForm.SQLQuery1, True);
+    AppLog(Format(rsAllResultsExported, [canonicalFileName]), allInfo,
+      alvStatus, alsExport);
+  except
+    on E: Exception do
+    begin
+      messageText := Format(rsExportFileError, [canonicalFileName, E.Message]);
+      AppLog(messageText, allError, alvStatus, alsExport);
+      AskMessageDlg(messageText, mtError, [mbOK], 0);
+    end;
+  end;
 end;
 
-procedure ExportSumDays(FileName: string);
+function ExportSumDays(FileName: string): boolean;
+var
+  canonicalFileName, messageText: string;
 begin
-  MainForm.SQLQuery1.SQL.Text := TMainSql.ExportSumDays;
-  SQLQueryToCSV(FileName, MainForm.SQLQuery1, True);
+  Result := False;
+  canonicalFileName := ExpandFileName(FileName);
+  try
+    MainForm.SQLQuery1.SQL.Text := TMainSql.ExportSumDays;
+    SQLQueryToCSV(canonicalFileName, MainForm.SQLQuery1, True);
+    AppLog(Format(rsSumDaysExported, [canonicalFileName]), allInfo,
+      alvStatus, alsExport);
+    Result := True;
+  except
+    on E: Exception do
+    begin
+      messageText := Format(rsExportFileError, [canonicalFileName, E.Message]);
+      AppLog(messageText, allError, alvStatus, alsExport);
+      AskMessageDlg(messageText, mtError, [mbOK], 0);
+    end;
+  end;
 end;
 
-procedure ExportAllResultsToXLSX(FileName: string);
+function ExportAllResultsToXLSX(FileName: string): boolean;
 var
   //sql: string;
   //fileName: string;
@@ -2131,8 +2306,13 @@ var
   normalFont, categoryFont, legendFont: TsFont;
   inormalFont, icategoryFont, ilegendFont: integer;
   showPenalty: boolean = False;
+  exportSucceeded: boolean;
+  canonicalFileName, messageText: string;
 begin
-  if not FileExists(FileName) or
+  Result := False;
+  canonicalFileName := ExpandFileName(FileName);
+  exportSucceeded := False;
+  if not FileExists(canonicalFileName) or
     (MessageDlg(rsFileExists, mtWarning, [mbOK, mbCancel], 0) = mrOk) then
   begin
     // Create the spreadsheet
@@ -2180,7 +2360,8 @@ begin
     // Если есть штрафы в таблице, заносим их в результаты,
     // в противном случае не показываем эти столбцы
     i := TMainSql.GetPenaltyGroupsCount(MainForm.SQLQuery1);
-    print(IntToStr(i));
+    AppLog(Format(rsExportReportParameters, [i]), allDebug, alvDetails,
+      alsExport);
     if (i > 1) then
     begin
       showPenalty := True;
@@ -2423,9 +2604,18 @@ begin
     try
       begin
         //MyWorkbook.WriteToFile(MyDir + 'test' + STR_EXCEL_EXTENSION, OUTPUT_FORMAT);
-        MyWorkbook.WriteToFile(FileName, True);
-        Log(rsResultsExportedToFile + ' ' + FileName);
-        OpenDocument(FileName);
+        try
+          MyWorkbook.WriteToFile(canonicalFileName, True);
+          exportSucceeded := True;
+        except
+          on E: Exception do
+          begin
+            messageText := Format(rsExportFileError,
+              [canonicalFileName, E.Message]);
+            AppLog(messageText, allError, alvStatus, alsExport);
+            AskMessageDlg(messageText, mtError, [mbOK], 0);
+          end;
+        end;
       end;
     finally
       begin
@@ -2437,6 +2627,12 @@ begin
         ColumnstageName.Free;
         stageNames.Free;
       end;
+    end;
+    if exportSucceeded then
+    begin
+      AppLog(Format(rsFullResultsExported, [canonicalFileName]), allInfo,
+        alvStatus, alsExport);
+      Result := True;
     end;
   end;
 end;
@@ -2484,11 +2680,16 @@ begin
     MainForm.DatasetLoRa.Close;
     try
       MainForm.DatasetLoRa.Open;
+      LoRaRefreshWarningShown := False;
     except
       On E: Exception do
       begin
-        MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-        Log(rsDatabaseOpenError + E.Message);
+        if not LoRaRefreshWarningShown then
+        begin
+          AppLog(Format(rsLoRaRecordsRefreshWarning, [E.Message]), allWarning,
+            alvStatus, alsLoRa);
+          LoRaRefreshWarningShown := True;
+        end;
       end;
     end;
   end;
@@ -2552,11 +2753,13 @@ procedure ExportCSVStartList(FileName: string);
 var
   i, k, fieldIndex: integer;
   fieldName: string = 'starttime';
-  csvfilename: string;
+  canonicalFileName, messageText: string;
+  exportSucceeded: boolean;
 begin
-  csvfilename := FileName;
+  canonicalFileName := ExpandFileName(FileName);
+  exportSucceeded := False;
 
-  if FileExists(FileName) then
+  if FileExists(canonicalFileName) then
   begin
     if MessageDlg(rsStartListFileExists, mtWarning, [mbYes, mbNo], 0) <> mrYes then
       exit;
@@ -2565,7 +2768,7 @@ begin
   with MainForm.CSVStartListExporter do
   begin
     Dataset := MainForm.MainDataSource1.DataSet;
-    FileName := csvfilename;
+    FileName := canonicalFileName;
     for i := 1 to MAXSTAGES do
     begin
       if (stages[i].isActive) then
@@ -2579,23 +2782,35 @@ begin
     end;
 
     try
-      Execute;
+      try
+        Execute;
+        exportSucceeded := True;
+      except
+        on E: Exception do
+        begin
+          messageText := Format(rsExportFileError,
+            [canonicalFileName, E.Message]);
+          AppLog(messageText, allError, alvStatus, alsExport);
+          AskMessageDlg(messageText, mtError, [mbOK], 0);
+        end;
+      end;
     finally
-      begin
         for k := ExportFields.Count - 1 downto 10 do
           ExportFields.Delete(k);
-      end;
     end;
+    if exportSucceeded then
+      AppLog(Format(rsStartListExported, [canonicalFileName]), allInfo,
+        alvStatus, alsExport);
   end;
 end;
 
 procedure ExportCSVResults(FileName: string);
 var
-  csvfilename: string;
+  canonicalFileName, messageText: string;
 begin
-  csvfilename := FileName;
+  canonicalFileName := ExpandFileName(FileName);
 
-  if FileExists(FileName) then
+  if FileExists(canonicalFileName) then
   begin
     if MessageDlg(rsCSVResultsFileExists, mtWarning, [mbYes, mbNo], 0) <> mrYes then
       exit;
@@ -2604,15 +2819,18 @@ begin
   with MainForm.CSVResultsExporter do
   begin
     Dataset := MainForm.MainDataSource1.DataSet;
-    FileName := csvfilename;
-    Log(FileName);
+    FileName := canonicalFileName;
     try
       Execute;
+      AppLog(Format(rsCSVResultsExported, [canonicalFileName]), allInfo,
+        alvStatus, alsExport);
     except
       On E: Exception do
       begin
-        MessageDlg(rsCSVResultsExportError + E.Message, mtError, [mbOK], 0);
-        Log(rsCSVResultsExportError + E.Message);
+        messageText := Format(rsExportFileError,
+          [canonicalFileName, E.Message]);
+        AppLog(messageText, allError, alvStatus, alsExport);
+        AskMessageDlg(messageText, mtError, [mbOK], 0);
       end;
     end;
   end;
@@ -2633,20 +2851,23 @@ begin
     try
       ParseList.Delimiter := ';';
       ParseList.DelimitedText := parse;
-      if TryStrToTime(ParseList[0], LoRaStartTime) then
+      if (ParseList.Count >= 2) and
+        TryStrToTime(ParseList[0], LoRaStartTime) then
       begin
         if TryStrToInt(ParseList[1], LoRacorrection) then
         begin
           SetLoRaTime(LoRaStartTime, ParseList[1]);
-          Print('Start -> ' + ParseList[0] + ', ' + ParseList[1]);
+          AppLog(Format(rsSerialStart, [ParseList[0], ParseList[1]]),
+            allDebug, alvDetails, alsSerial);
         end
         //не удалось разобрать пакет, ошибка в поправке
         else
-          Print('Raw -> ' + Str);
+          AppLog(Format(rsSerialRaw, [Str]), allDebug, alvDetails,
+            alsSerial);
       end
       //не удалось разобрать пакет, ошибка во времени старта
       else
-        Print('Raw -> ' + Str);
+        AppLog(Format(rsSerialRaw, [Str]), allDebug, alvDetails, alsSerial);
     finally
       ParseList.Free;
     end;
@@ -2661,16 +2882,18 @@ begin
         if TryStrToTime(parse, FinishTime) then
         begin
           GetFinishTime(FinishTime);
-          Print('Finish -> ' + parse);
+          AppLog(Format(rsSerialFinish, [parse]), allDebug, alvDetails,
+            alsSerial);
         end
         //не удалось разобрать пакет, ошибка во времени финиша
         else
-          Print('Raw -> ' + Str);
+          AppLog(Format(rsSerialRaw, [Str]), allDebug, alvDetails,
+            alsSerial);
       end;
     end
     //не удалось разобрать пакет
     else
-      Print('Raw -> ' + Str);
+      AppLog(Format(rsSerialRaw, [Str]), allDebug, alvDetails, alsSerial);
   end;
 end;
 
@@ -2682,8 +2905,8 @@ var
 begin
   if dbopen then
   begin
+    ocsvStrings := TStringList.Create;
     try
-      ocsvStrings := TStringList.Create;
       Query.Close;
       Query.Open;
       if headers then
@@ -2720,6 +2943,7 @@ begin
       ocsvStrings.SaveToFile(FileName);
     finally
       ocsvStrings.Free;
+      Query.Close;
       Query.SQLTransaction.Active := False;
     end;
   end;
@@ -2728,127 +2952,97 @@ end;
 procedure AddDayResult(FileName: string);
 var
   ocsvStrings: TStringList;
-  i, k: integer;
+  i, k, importedCount: integer;
+  canonicalFileName, csvLine, insertSql, messageText: string;
+  importTransactionStarted: boolean;
 begin
-  if dbopen then
-  begin
-    Screen.Cursor := crSQLWait;
+  if not dbopen then
+    Exit;
+
+  Screen.Cursor := crSQLWait;
+  ocsvStrings := TStringList.Create;
+  importTransactionStarted := False;
+  canonicalFileName := ExpandFileName(FileName);
+  try
     try
-      TLoadSql.ExecDeleteLoad(MainForm.SQLQuery1);
-
-      ocsvStrings := TStringList.Create;
-      try
-        ocsvStrings.LoadFromFile(FileName);
-        MainForm.SQLQuery1.SQL.Clear;
-        MainForm.SQLQuery1.SQL.Add(TLoadSql.AddDayInsertLoadHeader);
-        for  i := ocsvStrings.Count - 1 downto 0 do
+      ocsvStrings.LoadFromFile(canonicalFileName);
+      MainForm.SQLQuery1.SQL.Clear;
+      MainForm.SQLQuery1.SQL.Add(TLoadSql.AddDayInsertLoadHeader);
+      for i := ocsvStrings.Count - 1 downto 0 do
+      begin
+        csvLine := ocsvStrings.ValueFromIndex[i];
+        // Удаляем комментарии и пустые строки до формирования SQL.
+        if (csvLine = '') or (Pos('#', Trim(csvLine)) = 1) then
         begin
-          //удаляем комментарии (#)
-          if Pos('#', Trim(ocsvStrings.ValueFromIndex[i])) = 1 then
-          begin
-            ocsvStrings.Delete(i);
-            continue;
-          end;
-          k := CountOccurrences(';', ocsvStrings.ValueFromIndex[i]);
-          //остатки от копирования
-          //TODO: посчитать реальное значение, сделать обработку возможной ошибки
-          //считаем кол-во разделителей(;), чтобы понять сколько стартовых времён
-          if k < 13 then
-          begin
-            //экранируем ' в SQL запросе
-            ocsvStrings.ValueFromIndex[i] :=
-              ReplaceStr(ocsvStrings.ValueFromIndex[i], '''', '''''');
-            ocsvStrings.ValueFromIndex[i] :=
-              ReplaceStr(ocsvStrings.ValueFromIndex[i], ';', ''',''');
-          end;
-          MainForm.SQLQuery1.SQL.Add(
-            TLoadSql.ValuesRowFromEscaped(ocsvStrings.ValueFromIndex[i]));
-          //если строка не последняя(первая, т.к. загрузка в обратном порядке) ставим запятую
-          //if i <> ocsvStrings.Count - 1 then
-          //if i <> 0 then
-          MainForm.SQLQuery1.SQL.Add(TLoadSql.SqlComma);
+          ocsvStrings.Delete(i);
+          Continue;
         end;
-        MainForm.SQLQuery1.SQL.Delete(MainForm.SQLQuery1.SQL.LastIndexOf(','));
-        MainForm.SQLQuery1.SQL.Add(TLoadSql.SqlSemicolon);
-        {$IFDEF Windows}
-        MainForm.SQLQuery1.SQL.Text :=
-          WinCPToUTF8(MainForm.SQLQuery1.SQL.Text);
-        {$ENDIF}
-        try
-          begin
-            MainForm.SQLQuery1.Close;
-            MainForm.SQLQuery1.ExecSQL;
-            //ставим результат ноль, если DNS/DNF/DSQ
-            MainForm.SQLQuery1.SQL.Text := TLoadSql.AddDayNormalizeResult;
-            MainForm.SQLQuery1.Close;
-            MainForm.SQLQuery1.ExecSQL;
-            MainForm.SQLQuery1.SQL.Text := TLoadSql.AddDayNormalizeStages;
-            MainForm.SQLQuery1.Close;
-            MainForm.SQLQuery1.ExecSQL;
-            MainForm.SQLQuery1.SQL.Text := TLoadSql.AddDayNormalizeStatus;
-            MainForm.SQLQuery1.Close;
-            MainForm.SQLQuery1.ExecSQL;
-            MainForm.SQLQuery1.SQLTransaction.Commit;
-          end;
-        except
-          On E: Exception do
-          begin
-            MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-            Log(rsDatabaseOpenError + E.Message);
-          end;
+
+        k := CountOccurrences(';', csvLine);
+        // Остатки от копирования: короткие строки преобразуем в список SQL-полей.
+        if k < 13 then
+        begin
+          csvLine := ReplaceStr(csvLine, '''', '''''');
+          csvLine := ReplaceStr(csvLine, ';', ''',''');
         end;
-        MainForm.SQLQuery1.Close;
-      finally
-        ocsvStrings.Free;
+        MainForm.SQLQuery1.SQL.Add(TLoadSql.ValuesRowFromEscaped(csvLine));
+        MainForm.SQLQuery1.SQL.Add(TLoadSql.SqlComma);
       end;
 
-      with MainForm.SQLQuery1 do
-      begin
-        SQL.Text := TLoadSql.AddDayUpsertSumdays;
-        Close;
-        ExecSQL;
-        SQLTransaction.Commit;
-        Close;
-      end;
+      importedCount := ocsvStrings.Count;
+      if importedCount = 0 then
+        raise Exception.Create(rsDayResultsRowsNotFound);
 
-      //ToDo: если время не время (например, DNF/DSQ), то при конвертации получается NULL и соответственно сумма тоже NULL
-      //В этом случае нужно ставить время 00:00:00 (SQL или программно)
+      MainForm.SQLQuery1.SQL.Delete(MainForm.SQLQuery1.SQL.Count - 1);
+      MainForm.SQLQuery1.SQL.Add(TLoadSql.SqlSemicolon);
+      insertSql := MainForm.SQLQuery1.SQL.Text;
+      {$IFDEF Windows}
+      insertSql := WinCPToUTF8(insertSql);
+      {$ENDIF}
 
-      //INSERT into sumdays (number, sumresult, sumstages, status)
-      //SELECT number, starttime1, age, starttime2 FROM load WHERE number NOTNULL
-      //ON CONFLICT (number) DO UPDATE SET
-      //sumresult = strftime('%H:%M:%f',julianday(excluded.sumresult) + julianday(sumresult) +0.5),
-      //sumstages = excluded.sumstages + sumstages,
-      //status = excluded.status + status
+      MainForm.SQLQuery1.Close;
+      if MainForm.SQLQuery1.SQLTransaction.Active then
+        MainForm.SQLQuery1.SQLTransaction.Commit;
+      MainForm.SQLQuery1.SQLTransaction.StartTransaction;
+      importTransactionStarted := True;
 
-      Screen.Cursor := crDefault;
+      MainForm.SQLQuery1.SQL.Text := TLoadSql.DeleteLoadStatement;
+      MainForm.SQLQuery1.ExecSQL;
+      MainForm.SQLQuery1.SQL.Text := insertSql;
+      MainForm.SQLQuery1.ExecSQL;
+      // Ставим результат ноль, если DNS/DNF/DSQ.
+      MainForm.SQLQuery1.SQL.Text := TLoadSql.AddDayNormalizeResult;
+      MainForm.SQLQuery1.ExecSQL;
+      MainForm.SQLQuery1.SQL.Text := TLoadSql.AddDayNormalizeStages;
+      MainForm.SQLQuery1.ExecSQL;
+      MainForm.SQLQuery1.SQL.Text := TLoadSql.AddDayNormalizeStatus;
+      MainForm.SQLQuery1.ExecSQL;
+      MainForm.SQLQuery1.SQL.Text := TLoadSql.AddDayUpsertSumdays;
+      MainForm.SQLQuery1.ExecSQL;
+      MainForm.SQLQuery1.SQLTransaction.Commit;
+      importTransactionStarted := False;
+      MainForm.SQLQuery1.Close;
+
+      AppLog(Format(rsDayResultsImported,
+        [importedCount, canonicalFileName]), allInfo, alvStatus, alsImport);
     except
-      On E: Exception do
+      on E: Exception do
       begin
-        MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-        Log(rsDatabaseOpenError + E.Message);
-        Screen.Cursor := crDefault;
+        if importTransactionStarted and
+          MainForm.SQLQuery1.SQLTransaction.Active then
+          MainForm.SQLQuery1.SQLTransaction.Rollback;
+        importTransactionStarted := False;
+        MainForm.SQLQuery1.Close;
+        messageText := Format(rsDayResultsImportError,
+          [canonicalFileName, E.Message]);
+        AppLog(messageText, allError, alvStatus, alsImport);
+        AskMessageDlg(messageText, mtError, [mbOK], 0);
       end;
     end;
+  finally
+    ocsvStrings.Free;
+    Screen.Cursor := crDefault;
   end;
-end;
-
-procedure Print(Str: string);
-begin
-  MainForm.Memo.Lines.Add(Str);
-end;
-
-procedure Print(Int: integer);
-begin
-  MainForm.Memo.Lines.Add(IntToStr(Int));
-end;
-
-procedure Print(Bool: boolean);
-begin
-  if bool then
-    MainForm.Memo.Lines.Add('True')
-  else
-    MainForm.Memo.Lines.Add('False');
 end;
 
 function CountOccurrences(ASubString: string; AString: string): integer;
@@ -2903,7 +3097,10 @@ begin
     except
       on E: Exception do
       begin
-        MessageDlg(E.Message, mtError, [mbOK], 0);
+        AppLog(Format(rsCategoryListLoadError, [E.Message]), allError,
+          alvStatus, alsDatabase);
+        MessageDlg(Format(rsCategoryListLoadError, [E.Message]), mtError,
+          [mbOK], 0);
         MainForm.SQLTransaction1.Active := False;
       end;
     end;
@@ -2938,8 +3135,10 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(rsDatabaseOpenError + E.Message);
+      AppLog(Format(rsParticipantStatusesLoadError, [E.Message]), allError,
+        alvStatus, alsResults);
+      MessageDlg(Format(rsParticipantStatusesLoadError, [E.Message]),
+        mtError, [mbOK], 0);
     end;
   end;
 end;
@@ -3014,44 +3213,54 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(rsDatabaseOpenError + E.Message);
+      AppLog(Format(rsFinishResultsCheckError, [E.Message]), allError,
+        alvStatus, alsResults);
+      MessageDlg(Format(rsFinishResultsCheckError, [E.Message]), mtError,
+        [mbOK], 0);
     end;
   end;
 end;
 
-function BackupBD: boolean;
+function BackupBD(ASuccessView: TAppLogView): boolean;
 var
   backupfolder: string = 'backup';
-  backupfile: string;
+  backupDirectory, backupfile: string;
 begin
-  Result := True;
-  if not DirectoryExists(ExtractFilePath(fName) + backupfolder) then
+  Result := False;
+  backupDirectory := CreateAbsolutePath(backupfolder, ExtractFilePath(fName));
+  if not DirectoryExists(backupDirectory) then
   begin
-    if not CreateDir(ExtractFilePath(fName) + backupfolder) then
+    if not CreateDir(backupDirectory) then
     begin
-      Result := False;
+      AppLog(Format(rsBackupDirectoryCreateError, [backupDirectory]),
+        allWarning, alvDetails, alsDatabase);
       Exit;
     end;
   end;
   backupfile := CreateAbsolutePath(FormatDateTime('YYYY-MM-DD hh-mm-ss', now) +
-    ' ' + ExtractFileName(fname), ExtractFilePath(fName) + backupfolder);
+    ' ' + ExtractFileName(fname), backupDirectory);
 
-  MainForm.SQLite3Connection1.Close();
-  MainForm.SQLite3Connection1.ExecuteDirect(TSchemaSql.EndTransaction);
-  MainForm.SQLite3Connection1.ExecuteDirect(TSchemaSql.VacuumInto(backupfile));
-  MainForm.SQLite3Connection1.ExecuteDirect(TSchemaSql.BeginTransaction);
-  MainForm.SQLTransaction1.Commit;
-  MainForm.SQLTransaction1.Active := False;
+  try
+    MainForm.SQLite3Connection1.Close();
+    MainForm.SQLite3Connection1.ExecuteDirect(TSchemaSql.EndTransaction);
+    MainForm.SQLite3Connection1.ExecuteDirect(TSchemaSql.VacuumInto(backupfile));
+    MainForm.SQLite3Connection1.ExecuteDirect(TSchemaSql.BeginTransaction);
+    MainForm.SQLTransaction1.Commit;
+    MainForm.SQLTransaction1.Active := False;
 
-  if (FileExists(backupfile)) and (FileSize(backupfile) > 0) then
-  begin
-    Result := True;
-    Log(Format(rsBackupCreated, [backupfile]));
-  end
-  else
-  begin
-    Result := False;
+    if (FileExists(backupfile)) and (FileSize(backupfile) > 0) then
+    begin
+      Result := True;
+      AppLog(Format(rsBackupCreated, [backupfile]), allInfo, ASuccessView,
+        alsDatabase);
+    end
+    else
+      AppLog(Format(rsBackupFileInvalid, [backupfile]), allWarning,
+        alvDetails, alsDatabase);
+  except
+    on E: Exception do
+      AppLog(Format(rsBackupCreateError, [backupfile, E.Message]), allWarning,
+        alvDetails, alsDatabase);
   end;
 end;
 

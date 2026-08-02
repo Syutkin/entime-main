@@ -134,7 +134,7 @@ var
 
 implementation
 
-uses Main, Implement, LazSerialSetup, db_sql;
+uses Main, Implement, LazSerialSetup, db_sql, app_logger;
 
   {$R *.lfm}
 
@@ -428,8 +428,10 @@ begin
           RecalculateStatus(GetAllStageStatus(0));
           UpdateResults;
         end;
-        Log(rsShownCategories + ' ' + cat[1] + ', ' + cat[2] + ', ' +
-          cat[3] + ', ' + cat[4] + ', ' + cat[5] + ', ' + cat[6]);
+        AppLog(Format(rsShownCategories, [cat[1] + ', ' + cat[2] + ', ' +
+          cat[3] + ', ' + cat[4] + ', ' + cat[5] + ', ' + cat[6]]),
+          allDebug, alvNone, alsApplication);
+        AppLog(rsSettingsSaved, allInfo, alvStatus, alsApplication);
       end;
     finally
       Free;
@@ -466,30 +468,35 @@ begin
   MainForm.DataPortHTTP1.Url := 'http://' + ledpaneladress + '/post';
   MainForm.DataPortHTTP1.Params.Clear;
   if not string(LEDSingleline.Text).IsEmpty then
-  begin
-    Print(LEDSingleline.Text);
-    MainForm.DataPortHTTP1.Params.Add('singleline=' + LEDSingleline.Text);
-  end
+    MainForm.DataPortHTTP1.Params.Add('singleline=' + LEDSingleline.Text)
   else
   begin
-    Print(LEDUpperline.Text);
-    Print(LEDBottomline.Text);
     MainForm.DataPortHTTP1.Params.Add('upperline=' + LEDUpperline.Text);
     MainForm.DataPortHTTP1.Params.Add('bottomline=' + LEDBottomline.Text);
   end;
-  Print(MainForm.DataPortHTTP1.Params.Text);
+  AppLog(Format(rsHTTPRequestMetadata,
+    ['POST', MainForm.DataPortHTTP1.Params.Count]), allDebug, alvDetails,
+    alsHTTP);
+  MainForm.LEDPanelTestPending := True;
   MainForm.DataPortHTTP1.Open();
-  MainForm.DataPortHTTP1.Push('');
+  if not MainForm.DataPortHTTP1.Push('') and MainForm.LEDPanelTestPending then
+  begin
+    MainForm.LEDPanelTestPending := False;
+    AppLog(Format(rsLEDPanelError, [rsHTTPRequestNotStarted]), allError,
+      alvStatus, alsHTTP);
+  end;
 end;
 
 procedure TSettingsForm.ButtonTelegramTestClick(Sender: TObject);
 var
   QueryParams: TStrings = nil;
-  AURL: string;
+  AURL: string = '';
   s: string = '';
   item: string;
+  errorMessage: string;
   l: TStringstream;
   http: tfphttpclient;
+  requestFailed: boolean;
 begin
   telegrambotadress := TelegramBotAdressEdit.Text;
   l := TStringStream.Create('');
@@ -497,9 +504,6 @@ begin
   with http do
   try
     QueryParams := TStringList.Create;
-    //AddHeader('Authorization', 'AccessToken MjtAFOrgYUrsfCC7KPLpAi03N4Od17Bh');
-    //AddHeader('X-User-Authorization', 'Basic aW5mb0BzcG1hc2gucnU6NTE0NzU4');
-    //AddHeader('Content-Type', 'text/html;charset=UTF-8');
     with QueryParams do
     begin
       if not string(TelegramNumber.Text).IsEmpty then
@@ -520,22 +524,39 @@ begin
       s := s + '&' + item;
     AURL := AURL + '?' + s.Substring(1);
 
+    AppLog(Format(rsHTTPRequestMetadata, ['GET', QueryParams.Count]),
+      allDebug, alvDetails, alsTelegram);
+    requestFailed := False;
     try
       httpmethod('GET', AURL, l, []);
     except
       On E: Exception do
       begin
-        Log(rsTelegramBotSendingError + E.Message);
+        requestFailed := True;
+        errorMessage := StringReplace(E.Message, AURL, '[redacted]',
+          [rfReplaceAll, rfIgnoreCase]);
+        if telegrambotadress <> '' then
+          errorMessage := StringReplace(errorMessage, telegrambotadress,
+            '[redacted]', [rfReplaceAll, rfIgnoreCase]);
+        AppLog(Format(rsTelegramBotSendingError, [errorMessage]), allError,
+          alvStatus, alsTelegram);
       end;
-
     end;
-    MainForm.Memo.Lines.Append(IntToStr(ResponseStatusCode) + ' ' +
-      ResponseStatusText);
-    MainForm.Memo.Lines.Append(ResponseHeaders.Text);
-    MainForm.Memo.Lines.Append(l.DataString);
+
+    if not requestFailed then
+    begin
+      AppLog(Format(rsHTTPResponseMetadata, [ResponseStatusCode,
+        ResponseStatusText, ResponseHeaders.Count, l.Size]), allDebug,
+        alvDetails, alsTelegram);
+      if (ResponseStatusCode >= 200) and (ResponseStatusCode < 300) then
+        AppLog(rsTelegramBotTestSucceeded, allInfo, alvStatus, alsTelegram)
+      else
+        AppLog(Format(rsTelegramBotSendingError,
+          [IntToStr(ResponseStatusCode) + ' ' + ResponseStatusText]),
+          allError, alvStatus, alsTelegram);
+    end;
 
   finally
-    MainForm.Memo.Lines.Append(AURL);
     Free;
     QueryParams.Free;
     l.Free;
@@ -580,6 +601,7 @@ procedure TSettingsForm.ComboBoxLanguageChange(Sender: TObject);
 var
   lang: string = '';
   def: boolean = False;
+  languageChanged: boolean;
   updateIntervalIndex: integer;
 begin
   if (Sender as TComboBox).Text = rsSystemDefault then
@@ -588,9 +610,17 @@ begin
     lang := 'ru'
   else if (Sender as TComboBox).Text = rsEnglish then
     lang := 'en';
+  languageChanged := lang <> CurrentLang;
   updateIntervalIndex := ComboBoxUpdateInterval.ItemIndex;
   MainForm.SetLang(lang);
   UpdateCollectionTranslations(updateIntervalIndex);
+  if languageChanged then
+  begin
+    if lang = '' then
+      lang := 'system';
+    AppLog(Format(rsLanguageChanged, [lang]), allInfo, alvStatus,
+      alsApplication);
+  end;
   if def then
   begin
     (Sender as TComboBox).Text := rsSystemDefault;

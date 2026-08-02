@@ -102,7 +102,7 @@ var
 
 implementation
 
-uses Main, db_sql{, Implement};
+uses Main, db_sql, app_logger{, Implement};
 
 function RunStartlist(var config: TStartlistConfig): boolean;
 var
@@ -182,7 +182,8 @@ begin
         // проверяем есть ли результаты в выбранном спецучастке
         // если есть, то запрашиваем подтверждение
         if (not IsFinishesExists(config.selectedStage + 1)) or
-          (MessageDlg(ComboBoxStageSelection.Text + ' ' + rsFinishResultsNotEmpty,
+          (MessageDlg(Format(rsFinishResultsNotEmpty,
+          [ComboBoxStageSelection.Text]),
           mtWarning, [mbYes, mbNo], 0) = mrYes) then
         begin
           GenerateStartlist(
@@ -192,7 +193,8 @@ begin
             config.delayBetweenRacers,
             config.delayBetweenCategories,
             sortBy);
-          Log(rsGenerateStartList + ': ' + ComboBoxSortBy.Text);
+          AppLog(Format(rsGenerateStartList, [ComboBoxSortBy.Text]),
+            allInfo, alvStatus, alsResults);
 
           //Если спецучасток с формируемым на нём временем не активен,
           //то активируем его

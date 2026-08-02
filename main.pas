@@ -7,7 +7,7 @@ unit Main;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Dialogs, StdCtrls, LazSerial,
+  Classes, SysUtils, StrUtils, FileUtil, Forms, Dialogs, StdCtrls, LazSerial,
   lazserialsetup, synaser, HistoryFiles, DataPortHTTP, ComCtrls, ExtCtrls,
   LCLType, LResources, Menus, ActnList, StdActns, Grids, rxdbgrid, rxlookup,
   rxdbcomb, rxtoolbar, RxTimeEdit, RxIniPropStorage, rxspin, RxAboutDialog,
@@ -16,7 +16,7 @@ uses
   i18n, gettext, LCLTranslator, translations,
   VersionSupport, LazUTF8, PropertyStorage, Buttons, DBCtrls,
   Types, Clipbrd, lclintf, DataPort, fpDBExport, Startlist, MyRxDBGrid,
-  stagemodel;
+  stagemodel, updater, app_logger;
 
 type
 
@@ -29,6 +29,8 @@ type
     AcSetFinish: TAction;
     AcClearResults: TAction;
     AcRunSettings: TAction;
+    AcOpenLogFile: TAction;
+    AcOpenLogDirectory: TAction;
     AcDeleteNumber: TAction;
     AcSetDNF: TAction;
     AcSetDNS: TAction;
@@ -101,6 +103,7 @@ type
     MainDataset1thrudiff: TStringField;
     MainDataset1thruplace: TStringField;
     MenuItem10: TMenuItem;
+    Separator4: TMenuItem;
     ResultDataset7: TSqlite3Dataset;
     ResultDataset8: TSqlite3Dataset;
     Separator2: TMenuItem;
@@ -163,6 +166,9 @@ type
     N4: TMenuItem;
     MenuItemCOMOpen: TMenuItem;
     MenuItemSettings: TMenuItem;
+    MenuItemLog: TMenuItem;
+    MenuItemOpenLogFile: TMenuItem;
+    MenuItemOpenLogDirectory: TMenuItem;
     PanelLoRa: TGroupBox;
     PanelResult: TPanel;
     PopupMenuLoRa: TPopupMenu;
@@ -393,6 +399,10 @@ type
     procedure AcSyncModuleExecute(Sender: TObject);
     procedure AcUpdateResultsExecute(Sender: TObject);
     procedure AcRunSettingsExecute(Sender: TObject);
+    procedure AcOpenLogFileExecute(Sender: TObject);
+    procedure AcOpenLogFileUpdate(Sender: TObject);
+    procedure AcOpenLogDirectoryExecute(Sender: TObject);
+    procedure AcOpenLogDirectoryUpdate(Sender: TObject);
     procedure AcSetFinishExecute(Sender: TObject);
     procedure AcClearResultsExecute(Sender: TObject);
     procedure AcViewResultsExecute(Sender: TObject);
@@ -423,9 +433,7 @@ type
     procedure LoRaPopupShow15minExecute(Sender: TObject);
     procedure LoRaPopupShowAllExecute(Sender: TObject);
     procedure LoRaPopupShowFromStartExecute(Sender: TObject);
-    procedure MainDataset1AfterDelete(DataSet: TSqlite3DataSet);
     procedure MainDataset1AfterInsert(DataSet: TSqlite3DataSet);
-    procedure MainDataset1BeforeDelete(DataSet: TSqlite3DataSet);
     procedure CheckPenaltySetText(Sender: TField; const aText: string);
     procedure HideZeroHour(Sender: TField; var aText: string; DisplayText: boolean);
     procedure MainDataSource1StateChange(Sender: TObject);
@@ -512,16 +520,24 @@ type
     procedure Timer1Timer(Sender: TObject);
     procedure CheckDBOpen(Sender: TObject);
     procedure SetLang(ALang: string);
-
-    //functions
-    function CheckUpdateOnline(ACurrentVersion: string; ForceCheck: bool;
-      out LastVersion: string): boolean;
   private
     { private declarations }
-
+    FClosing: boolean;
+    FLEDPanelTestPending: boolean;
+    FPendingParticipantLogMessage: string;
+    FSerialCloseRequested: boolean;
+    FSerialConnectionLost: boolean;
+    FUpdateCheckController: TUpdateCheckController;
+    procedure AppLogEntryReceived(const AEntry: TAppLogEntry);
+    procedure EnsureUpdateCheckController;
+    procedure StartAutomaticUpdateCheck(Data: PtrInt);
+    procedure UpdateCheckCompleted(Sender: TObject; AMode: TUpdateCheckMode;
+      const AResult: TUpdateCheckResult);
 
   public
     { public declarations }
+    property LEDPanelTestPending: boolean read FLEDPanelTestPending
+      write FLEDPanelTestPending;
 
   end;
 
@@ -603,7 +619,7 @@ var
 implementation
 
 uses
-  Result, Settings, rxapputils, Implement, exsortsqlite, LoRa, updater, db_sql,
+  Result, Settings, rxapputils, Implement, exsortsqlite, LoRa, db_sql,
   Validators;
 
   {$R *.lfm}
@@ -615,9 +631,8 @@ var
   c: TComponent;
   i: integer;
 begin
+  SetAppLogEvent(@AppLogEntryReceived);
   NAME_VERSION := Application.Title + ' v' + GetFileVersion;
-
-  Log(rsStartProgram + ' ' + NAME_VERSION);
   stages := TStages.Create(MAXSTAGES);
 
   //stages := TStageDictionary.Create;
@@ -630,7 +645,9 @@ begin
   HistoryFiles1.IniFile := UTF8ToSys(GetDefaultIniName);
   //для хранения там же, где и RxINIPropStorage
   HistoryFiles1.UpdateParentMenu;
-  //  Log(rsShownCategories+' '+cat[1]+', '+cat[2]+', '+cat[3]+', '+cat[4]+', '+cat[5]+', '+cat[6]);
+  //  AppLog(rsShownCategories + ' ' + cat[1] + ', ' + cat[2] + ', ' +
+  //    cat[3] + ', ' + cat[4] + ', ' + cat[5] + ', ' + cat[6],
+  //    allInfo, alvStatus);
   Memo.Lines.Add('File version = ' + GetFileVersion);
   //  Memo.Lines.Add('Product version = ' + GetProductVersion);
   Memo.Lines.Add('');
@@ -670,25 +687,67 @@ begin
   //categoriesAtStartlist := TStringList.Create;
 
   startlistConfig := TStartlistConfig.Create;
+  FClosing := False;
+  FLEDPanelTestPending := False;
+  FSerialCloseRequested := False;
+  FSerialConnectionLost := False;
+  EnsureUpdateCheckController;
+end;
+
+procedure TMainForm.AppLogEntryReceived(const AEntry: TAppLogEntry);
+var
+  viewText: string;
+  i, trimCount: integer;
+  loggingSettings: TLoggingSettings;
+begin
+  loggingSettings := CurrentLoggingSettings;
+  case AEntry.View of
+    alvStatus:
+    begin
+      viewText := FormatDateTime(loggingSettings.ComboBoxTimestampFormat,
+        AEntry.CreatedAt) + ' ' + AEntry.MessageText;
+      ComboBoxLog.Items.Add(viewText);
+      while ComboBoxLog.Items.Count > loggingSettings.ComboBoxMaxItems do
+        ComboBoxLog.Items.Delete(0);
+      ComboBoxLog.Text := viewText;
+    end;
+    alvDetails:
+    begin
+      viewText := AEntry.MessageText;
+      if loggingSettings.MemoAddTimestamp then
+        viewText := FormatDateTime(loggingSettings.ComboBoxTimestampFormat,
+          AEntry.CreatedAt) + ' ' + viewText;
+      Memo.Lines.Add(viewText);
+      if Memo.Lines.Count > loggingSettings.MemoMaxLines then
+      begin
+        trimCount := loggingSettings.MemoTrimLines;
+        if trimCount > Memo.Lines.Count then
+          trimCount := Memo.Lines.Count;
+        Memo.Lines.BeginUpdate;
+        try
+          for i := 1 to trimCount do
+            Memo.Lines.Delete(0);
+        finally
+          Memo.Lines.EndUpdate;
+        end;
+      end;
+    end;
+  end;
 end;
 
 
 procedure TMainForm.SyncButtonClick(Sender: TObject);
-//пробуем с текущим временем
-var
-  tpress: integer;
 begin
-  tpress := DateTimeToUnix(Now);
-  //uses dateutils
-  while tpress = DateTimeToUnix(Now) do
-  begin
-  end;
-  Serial.WriteData('T' + IntToStr(DateTimeToUnix(Now)));
+  AcSyncModuleExecute(Sender);
 end;
 
 procedure TMainForm.BCloseClick(Sender: TObject);
 begin
-  Serial.Close;
+  if Serial.Active then
+  begin
+    FSerialCloseRequested := True;
+    Serial.Close;
+  end;
 end;
 
 procedure TMainForm.ButtonFinishTestClick(Sender: TObject);
@@ -763,7 +822,9 @@ procedure TMainForm.FileCloseExecute(Sender: TObject);
 var
   n: integer;
   c: TComponent;
+  closedFileName: string;
 begin
+  closedFileName := fName;
   MainForm.Caption := NAME_VERSION;
 
   for n := 0 to MainForm.ComponentCount - 1 do
@@ -788,7 +849,9 @@ begin
 
   SetfName('');
 
-  Log(rsDBFileClosed + ' ' + fName);
+  if closedFileName <> '' then
+    AppLog(Format(rsDBFileClosed, [closedFileName]), allInfo, alvStatus,
+      alsDatabase);
 end;
 
 procedure TMainForm.FileGenerateFinalAccept(Sender: TObject);
@@ -822,6 +885,11 @@ end;
 
 procedure TMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
+  SetAppLogEvent(nil);
+  FClosing := True;
+  Application.RemoveAsyncCalls(Self);
+  FreeAndNil(FUpdateCheckController);
+
   //DataPortHTTP1.Close();
   //DataPortHTTP1.Free;
   DataPortHTTP1.Close();
@@ -857,12 +925,29 @@ begin
 end;
 
 procedure TMainForm.AcDeleteNumberExecute(Sender: TObject);
+var
+  n, messageText: string;
 begin
   if dbopen and dbnotempty then
   begin
-    MainDataset1.Delete;
-    MainDataset1.ApplyUpdates;
-    RefreshAll;
+    n := MainDataset1.FieldByName('number').AsString;
+    if AskMessageDlg(Format(rsDeleteNumber, [n]), mtWarning,
+      [mbYes, mbNo], 0) <> mrYes then
+      Exit;
+    try
+      MainDataset1.Delete;
+      MainDataset1.ApplyUpdates;
+      RefreshAll;
+      AppLog(Format(rsParticipantDeleted, [n]),
+        allInfo, alvStatus, alsResults);
+    except
+      on E: Exception do
+      begin
+        messageText := Format(rsParticipantSaveError, [n, E.Message]);
+        AppLog(messageText, allError, alvStatus, alsResults);
+        AskMessageDlg(messageText, mtError, [mbOK], 0);
+      end;
+    end;
   end;
 end;
 
@@ -888,14 +973,36 @@ end;
 
 procedure TMainForm.AcSyncModuleExecute(Sender: TObject);
 var
-  tpress: integer;
+  tpress, syncTime: integer;
+  messageText: string;
 begin
   tpress := DateTimeToUnix(Now);
   //uses dateutils
   while tpress = DateTimeToUnix(Now) do
   begin
   end;
-  Serial.WriteData('T' + IntToStr(DateTimeToUnix(Now)));
+  syncTime := DateTimeToUnix(Now);
+  try
+    Serial.WriteData('T' + IntToStr(syncTime));
+    if Serial.SynSer.LastError = 0 then
+      AppLog(Format(rsModuleSynchronized, [Serial.Device, syncTime]),
+        allInfo, alvStatus, alsSerial)
+    else
+    begin
+      messageText := Format(rsModuleSynchronizationError,
+        [Serial.Device, Serial.SynSer.LastErrorDesc]);
+      AppLog(messageText, allError, alvStatus, alsSerial);
+      AskMessageDlg(messageText, mtError, [mbOK], 0);
+    end;
+  except
+    on E: Exception do
+    begin
+      messageText := Format(rsModuleSynchronizationError,
+        [Serial.Device, E.Message]);
+      AppLog(messageText, allError, alvStatus, alsSerial);
+      AskMessageDlg(messageText, mtError, [mbOK], 0);
+    end;
+  end;
 end;
 
 procedure TMainForm.AcSetDNSCorExecute(Sender: TObject);
@@ -918,6 +1025,56 @@ begin
   SettingsForm.RunSettings;
 end;
 
+procedure TMainForm.AcOpenLogFileExecute(Sender: TObject);
+var
+  logFileName, messageText: string;
+begin
+  logFileName := CurrentAppLogFileName;
+  if (logFileName = '') or not FileExists(logFileName) then
+    Exit;
+
+  if not OpenDocument(logFileName) then
+  begin
+    messageText := Format(rsLogFileOpenError, [logFileName]);
+    AppLog(messageText, allError, alvDetails, alsApplication);
+    MessageDlg(messageText, mtError, [mbOK], 0);
+  end;
+end;
+
+procedure TMainForm.AcOpenLogFileUpdate(Sender: TObject);
+begin
+  TAction(Sender).Enabled := FileExists(CurrentAppLogFileName);
+end;
+
+procedure TMainForm.AcOpenLogDirectoryExecute(Sender: TObject);
+var
+  logDirectory, logFileName, messageText: string;
+begin
+  logFileName := CurrentAppLogFileName;
+  if logFileName = '' then
+    Exit;
+
+  logDirectory := ExtractFileDir(logFileName);
+  if not DirectoryExists(logDirectory) then
+    Exit;
+
+  if not OpenDocument(logDirectory) then
+  begin
+    messageText := Format(rsLogDirectoryOpenError, [logDirectory]);
+    AppLog(messageText, allError, alvDetails, alsApplication);
+    MessageDlg(messageText, mtError, [mbOK], 0);
+  end;
+end;
+
+procedure TMainForm.AcOpenLogDirectoryUpdate(Sender: TObject);
+var
+  logFileName: string;
+begin
+  logFileName := CurrentAppLogFileName;
+  TAction(Sender).Enabled := (logFileName <> '') and
+    DirectoryExists(ExtractFileDir(logFileName));
+end;
+
 procedure TMainForm.AcSetFinishExecute(Sender: TObject);
 begin
   SetFinish;
@@ -929,14 +1086,17 @@ begin
 end;
 
 procedure TMainForm.AcCOMOpenExecute(Sender: TObject);
+var
+  messageText: string;
 begin
   try
     Serial.Open;
   except
     On E: Exception do
     begin
-      MessageDlg(rsCOMOpenError + ' ' + Serial.Device, mtError, [mbOK], 0);
-      Log(rsCOMOpenError + ' ' + Serial.Device);
+      messageText := Format(rsCOMOpenErrorDetails, [Serial.Device, E.Message]);
+      AppLog(messageText, allError, alvStatus, alsSerial);
+      AskMessageDlg(messageText, mtError, [mbOK], 0);
     end;
   end;
 end;
@@ -948,11 +1108,17 @@ end;
 
 procedure TMainForm.AcLEDPanelExecute(Sender: TObject);
 begin
-  //ledpanelactive := AcLEDPanel.Checked;
   if AcLEDPanel.Checked then
-    DataPortHTTP1.Open()
+  begin
+    DataPortHTTP1.Open();
+    if DataPortHTTP1.Active then
+      AppLog(rsLEDPanelEnabled, allInfo, alvStatus, alsHTTP);
+  end
   else
+  begin
     DataPortHTTP1.Close();
+    AppLog(rsLEDPanelDisabled, allInfo, alvStatus, alsHTTP);
+  end;
 end;
 
 procedure TMainForm.AcLoRaClearExecute(Sender: TObject);
@@ -964,6 +1130,7 @@ begin
     ExecSQL;
     SQLTransaction.Commit;
     Close;
+    AppLog(rsLoRaRecordsReset, allInfo, alvStatus, alsLoRa);
     //обновляем датасет
     DatasetLoRa.Close;
     try
@@ -971,8 +1138,10 @@ begin
     except
       On E: Exception do
       begin
-        MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-        Log(rsDatabaseOpenError + E.Message);
+        AppLog(Format(rsLoRaRecordsRefreshWarning, [E.Message]), allWarning,
+          alvStatus, alsLoRa);
+        AskMessageDlg(Format(rsLoRaRecordsRefreshWarning, [E.Message]),
+          mtWarning, [mbOK], 0);
       end;
     end;
   end;
@@ -986,10 +1155,10 @@ end;
 
 procedure TMainForm.AcTelegramBotExecute(Sender: TObject);
 begin
-  //if AcTelegramBot.Checked then
-  //DataPortHTTPTelegramBot.Open()
-  //else
-  //DataPortHTTPTelegramBot.Close();
+  if AcTelegramBot.Checked then
+    AppLog(rsTelegramBotEnabled, allInfo, alvStatus, alsTelegram)
+  else
+    AppLog(rsTelegramBotDisabled, allInfo, alvStatus, alsTelegram);
 end;
 
 procedure TMainForm.AcSetStarttimeExecute(Sender: TObject);
@@ -999,7 +1168,7 @@ end;
 
 procedure TMainForm.BackupTimerTimer(Sender: TObject);
 begin
-  if dbopen then BackupBD;
+  if dbopen then BackupBD(alvNone);
 end;
 
 procedure TMainForm.CheckDBOpenAndRaceMode(Sender: TObject);
@@ -1022,25 +1191,46 @@ begin
 end;
 
 procedure TMainForm.DataPortHTTP1DataAppear(Sender: TObject);
+var
+  response: string;
 begin
-  Print((Sender as TDataPortHTTP).Pull());
+  response := (Sender as TDataPortHTTP).Pull();
+  AppLog(Format(rsHTTPResponseReceived, [Length(response)]), allDebug,
+    alvDetails, alsHTTP);
+  if FLEDPanelTestPending then
+  begin
+    FLEDPanelTestPending := False;
+    AppLog(rsLEDPanelTestSucceeded, allInfo, alvStatus, alsHTTP);
+  end;
 end;
 
 procedure TMainForm.DataPortHTTP1Error(Sender: TObject; const AMsg: string);
 begin
-  Print('LED Panel error: ' + AMsg);
-  //AcLEDPanel.Checked := False;
+  FLEDPanelTestPending := False;
+  AppLog(Format(rsLEDPanelError, [AMsg]), allError, alvStatus, alsHTTP);
 end;
 
 procedure TMainForm.DataPortHTTPTelegramBotDataAppear(Sender: TObject);
+var
+  response: string;
 begin
-  Print((Sender as TDataPortHTTP).Pull());
+  response := (Sender as TDataPortHTTP).Pull();
+  AppLog(Format(rsHTTPResponseReceived, [Length(response)]), allDebug,
+    alvDetails, alsTelegram);
 end;
 
 procedure TMainForm.DataPortHTTPTelegramBotError(Sender: TObject;
   const AMsg: ansistring);
+var
+  errorMessage: string;
 begin
-  Print('Telegram Bot error: ' + AMsg);
+  errorMessage := AMsg;
+  if (Sender as TDataPortHTTP).Url <> '' then
+    errorMessage := StringReplace(errorMessage,
+      (Sender as TDataPortHTTP).Url, '[redacted]',
+      [rfReplaceAll, rfIgnoreCase]);
+  AppLog(Format(rsTelegramBotError, [errorMessage]), allError, alvStatus,
+    alsTelegram);
 end;
 
 procedure TMainForm.FileExportCSVResultsAccept(Sender: TObject);
@@ -1072,7 +1262,7 @@ begin
       Close;
     end;
 
-    while MessageDlg(rsAddDayResults + ' ' + IntToStr(i) + '?',
+    while MessageDlg(Format(rsAddDayResults, [i]),
         mtConfirmation, [mbYes, mbNo], 0) = mrYes do
     begin
       if FileOpenCSVSum.Dialog.Execute then
@@ -1082,7 +1272,7 @@ begin
       end;
     end;
 
-    //Print('i = ' + IntToStr(i));
+    //AppLog('i = ' + IntToStr(i), allDebug, alvDetails);
 
     if (i > 2) and (MessageDlg(rsSaveResults, mtConfirmation, [mbYes, mbNo], 0) =
       mrYes) then
@@ -1099,19 +1289,32 @@ begin
       end;
       if FileExportSumDays.Dialog.Execute then
       begin
-        ExportSumDays(FileExportSumDays.Dialog.FileName);
-        OpenDocument(FileExportSumDays.Dialog.FileName);
+        if ExportSumDays(FileExportSumDays.Dialog.FileName) then
+          OpenDocument(ExpandFileName(FileExportSumDays.Dialog.FileName));
       end;
     end;
   end;
 end;
 
 procedure TMainForm.ComboBox1CategoryEditingDone(Sender: TObject);
+var
+  n, messageText: string;
 begin
-  MainDataset1.Edit;
-  MainDataset1.FieldByName('category').AsString := TComboBox(Sender).Text;
-  MainDataset1.ApplyUpdates;
-  StatDataset1.RefetchData;
+  n := MainDataset1.FieldByName('number').AsString;
+  try
+    MainDataset1.Edit;
+    MainDataset1.FieldByName('category').AsString := TComboBox(Sender).Text;
+    MainDataset1.ApplyUpdates;
+    StatDataset1.RefetchData;
+    AppLog(Format(rsParticipantUpdated, [n]), allInfo, alvStatus, alsResults);
+  except
+    on E: Exception do
+    begin
+      messageText := Format(rsParticipantSaveError, [n, E.Message]);
+      AppLog(messageText, allError, alvStatus, alsResults);
+      AskMessageDlg(messageText, mtError, [mbOK], 0);
+    end;
+  end;
 end;
 
 procedure TMainForm.COMStatus(Sender: TObject);
@@ -1121,7 +1324,11 @@ end;
 
 procedure TMainForm.AcCOMCloseExecute(Sender: TObject);
 begin
-  Serial.Close;
+  if Serial.Active then
+  begin
+    FSerialCloseRequested := True;
+    Serial.Close;
+  end;
 end;
 
 procedure TMainForm.AcCheckDBOpenUpdate(Sender: TObject);
@@ -1130,44 +1337,125 @@ begin
 end;
 
 procedure TMainForm.AcCheckUpdateExecute(Sender: TObject);
+var
+  checkStarted: boolean;
+  messageText: string;
 begin
+  if FClosing then
+    Exit;
+
   if updateExists and not lastVersionOnline.IsEmpty then
     OpenURL(RELEASE_URL + lastVersionOnline)
   else
-    CheckUpdateOnline(GetFileVersion, True, lastVersionOnline);
+  begin
+    EnsureUpdateCheckController;
+    try
+      checkStarted := Assigned(FUpdateCheckController) and
+        FUpdateCheckController.StartManual(GetFileVersion);
+    except
+      on E: Exception do
+      begin
+        messageText := Format(rsUpdateCheckFailed, [E.Message]);
+        AppLog(messageText, allError, alvStatus, alsUpdater);
+        MessageDlg(messageText, TMsgDlgType.mtError, [mbOK], 0);
+        Exit;
+      end;
+    end;
+    if checkStarted then
+      AppLog(rsManualUpdateCheckStarted, allDebug, alvNone, alsUpdater)
+    else
+    begin
+      AppLog(rsUpdateCheckStartFailed, allError, alvStatus, alsUpdater);
+      MessageDlg(rsUpdateCheckStartFailed, TMsgDlgType.mtError, [mbOK], 0);
+    end;
+  end;
 end;
 
 procedure TMainForm.AcCheckUpdateUpdate(Sender: TObject);
 begin
-  if updateExists then (Sender as TAction).Caption := rsUpdateAvailable;
+  EnsureUpdateCheckController;
+  if Assigned(FUpdateCheckController) and FUpdateCheckController.Busy then
+  begin
+    TAction(Sender).Caption := rsCheckingForUpdates;
+    TAction(Sender).Enabled := False;
+  end
+  else
+  begin
+    TAction(Sender).Enabled := True;
+    if updateExists then
+      TAction(Sender).Caption := rsUpdateAvailable
+    else
+      TAction(Sender).Caption := rsCheckForUpdates;
+  end;
 end;
 
 procedure TMainForm.RxDBGridCorrectionEditingDone(Sender: TObject);
+var
+  n, correction, messageText: string;
+  stageIndex: integer;
 begin
   if dbopen then
   begin
     if CorrectionDataset.Modified then
     begin
-      CorrectionDataset.ApplyUpdates;
-      UpdateResults;
+      n := CorrectionDataset.FieldByName('number').AsString;
+      stageIndex := GetSelectedStage;
+      correction := CorrectionDataset.FieldByName(
+        'correction' + IntToStr(stageIndex)).AsString;
+      try
+        CorrectionDataset.ApplyUpdates;
+        UpdateResults;
+        AppLog(Format(rsParticipantCorrectionSet,
+          [n, stageIndex, correction]), allInfo, alvStatus, alsResults);
+      except
+        on E: Exception do
+        begin
+          messageText := Format(rsParticipantStageSaveError,
+            [n, stageIndex, E.Message]);
+          AppLog(messageText, allError, alvStatus, alsResults);
+          AskMessageDlg(messageText, mtError, [mbOK], 0);
+        end;
+      end;
     end;
   end;
 end;
 
 procedure TMainForm.RxDBSpinEdit1EditingDone(Sender: TObject);
+var
+  n, messageText: string;
 begin
-  MainDataset1.ApplyUpdates;
+  if MainDataset1.Modified then
+  begin
+    n := MainDataset1.FieldByName('number').AsString;
+    try
+      MainDataset1.ApplyUpdates;
+      AppLog(Format(rsParticipantUpdated, [n]), allInfo, alvStatus, alsResults);
+    except
+      on E: Exception do
+      begin
+        messageText := Format(rsParticipantSaveError, [n, E.Message]);
+        AppLog(messageText, allError, alvStatus, alsResults);
+        AskMessageDlg(messageText, mtError, [mbOK], 0);
+      end;
+    end;
+  end;
 end;
 
 procedure TMainForm.RxIniPropStorage1RestoreProperties(Sender: TObject);
 begin
+  AppLog(Format(rsSettingsLoaded, [GetDefaultIniName]), allDebug, alvNone,
+    alsApplication);
+  AppLog(Format(rsStartProgram, [NAME_VERSION]), allInfo, alvStatus,
+    alsApplication);
   StatusBarLeft.Panels[1].Text := Serial.Device;
   if AcLEDPanel.Checked then
     DataPortHTTP1.Open();
   AcViewMemoExecute(AcViewMemo);
 
-  // Check update online
-  CheckUpdateOnline(GetFileVersion, False, lastVersionOnline);
+  // Start the online check only after the application event loop is running.
+  if IsAutomaticUpdateCheckDue(checkUpdateAtStartup,
+    checkUpdateIntervalInDays, lastUpdateCheckoutTime, Now) then
+    Application.QueueAsyncCall(@StartAutomaticUpdateCheck, 0);
 
   // Do automatic backup
   BackupTimer.Enabled := doAutomaticBackup;
@@ -1394,7 +1682,7 @@ begin
     FileCloseExecute(nil);
   //fName := FileOpenDB.Dialog.FileName;
   //OpenDB;
-  //Log(rsDBFileOpen+' '+fName);
+  //AppLog(rsDBFileOpen + ' ' + fName, allInfo, alvStatus);
   InitDB(FileOpenDB.Dialog.FileName);
 end;
 
@@ -1421,8 +1709,12 @@ begin
 end;
 
 procedure TMainForm.FileExportFullAccept(Sender: TObject);
+var
+  exportFileName: string;
 begin
-  ExportAllResultsToXLSX(TFileSaveAs(Sender).Dialog.FileName);
+  exportFileName := TFileSaveAs(Sender).Dialog.FileName;
+  if ExportAllResultsToXLSX(exportFileName) then
+    OpenDocument(ExpandFileName(exportFileName));
 end;
 
 
@@ -1465,10 +1757,43 @@ procedure TMainForm.SerialStatus(Sender: TObject; Reason: THookSerialReason;
   const Value: string);
 begin
   case Reason of
-    HR_SerialClose: StatusBarLeft.Panels[2].Text :=
-        Format(rsPortClosed, [Value]);
-    HR_Connect: StatusBarLeft.Panels[2].Text :=
-        Format(rsPortConnected, [Value]);
+    HR_SerialClose:
+      begin
+        StatusBarLeft.Panels[2].Text := Format(rsPortClosed, [Value]);
+        if FSerialCloseRequested then
+        begin
+          if not FClosing then
+            AppLog(Format(rsPortClosed, [Value]), allInfo, alvStatus,
+              alsSerial);
+          FSerialConnectionLost := False;
+        end
+        else
+        begin
+          if not FClosing and not FSerialConnectionLost then
+            AppLog(Format(rsPortConnectionLost, [Value]), allWarning,
+              alvStatus, alsSerial);
+          FSerialConnectionLost := True;
+        end;
+        FSerialCloseRequested := False;
+      end;
+    HR_Connect:
+      begin
+        if FSerialConnectionLost then
+        begin
+          StatusBarLeft.Panels[2].Text :=
+            Format(rsPortConnectionRestored, [Value]);
+          AppLog(Format(rsPortConnectionRestored, [Value]), allInfo,
+            alvStatus, alsSerial);
+        end
+        else
+        begin
+          StatusBarLeft.Panels[2].Text := Format(rsPortConnected, [Value]);
+          AppLog(Format(rsPortConnected, [Value]), allInfo, alvStatus,
+            alsSerial);
+        end;
+        FSerialCloseRequested := False;
+        FSerialConnectionLost := False;
+      end;
     HR_CanRead: StatusBarLeft.Panels[2].Text :=
         Format(rsSerialCanRead, [Value]);
     HR_CanWrite: StatusBarLeft.Panels[2].Text :=
@@ -1524,7 +1849,6 @@ begin
   //fName := FileName;
   //OpenDB;
   InitDB(FileName);
-  Log(rsDBFileOpen + ' ' + fName);
 end;
 
 procedure TMainForm.LoRaPopupDefaultExecute(Sender: TObject);
@@ -1541,8 +1865,10 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(rsDatabaseOpenError + E.Message);
+      AppLog(Format(rsLoRaRecordsLoadError, [E.Message]), allError, alvStatus,
+        alsLoRa);
+      MessageDlg(Format(rsLoRaRecordsLoadError, [E.Message]), mtError,
+        [mbOK], 0);
     end;
   end;
 end;
@@ -1565,14 +1891,17 @@ begin
     end;
     MainForm.SQLite3Connection1.Close;
     MainForm.SQLTransaction1.Active := False;
+    AppLog(Format(rsLoRaRecordHidden, [id]), allInfo, alvStatus, alsLoRa);
     MainForm.DatasetLoRa.Close;
     try
       MainForm.DatasetLoRa.Open;
     except
       On E: Exception do
       begin
-        MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-        Log(rsDatabaseOpenError + E.Message);
+        AppLog(Format(rsLoRaRecordsRefreshWarning, [E.Message]), allWarning,
+          alvStatus, alsLoRa);
+        AskMessageDlg(Format(rsLoRaRecordsRefreshWarning, [E.Message]),
+          mtWarning, [mbOK], 0);
       end;
     end;
   end;
@@ -1606,8 +1935,10 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(rsDatabaseOpenError + E.Message);
+      AppLog(Format(rsLoRaRecordsLoadError, [E.Message]), allError, alvStatus,
+        alsLoRa);
+      MessageDlg(Format(rsLoRaRecordsLoadError, [E.Message]), mtError,
+        [mbOK], 0);
     end;
   end;
 end;
@@ -1626,8 +1957,10 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(rsDatabaseOpenError + E.Message);
+      AppLog(Format(rsLoRaRecordsLoadError, [E.Message]), allError, alvStatus,
+        alsLoRa);
+      MessageDlg(Format(rsLoRaRecordsLoadError, [E.Message]), mtError,
+        [mbOK], 0);
     end;
   end;
 end;
@@ -1640,7 +1973,6 @@ begin
   SQLQuery1.SQL.Text := TMainSql.SelectMinStartTime(ActiveStageIndex);
   SQLQuery1.Open();
   minstarttime := SQLQuery1.FieldByName('starttime').AsString;
-  Print(minstarttime);
   SQLQuery1.Close;
   SQLTransaction1.Active := False;
   MainForm.DatasetLoRa.Close;
@@ -1659,15 +1991,12 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(rsDatabaseOpenError + E.Message);
+      AppLog(Format(rsLoRaRecordsLoadError, [E.Message]), allError, alvStatus,
+        alsLoRa);
+      MessageDlg(Format(rsLoRaRecordsLoadError, [E.Message]), mtError,
+        [mbOK], 0);
     end;
   end;
-end;
-
-procedure TMainForm.MainDataset1AfterDelete(DataSet: TSqlite3DataSet);
-begin
-  Dataset.ApplyUpdates;
 end;
 
 procedure TMainForm.MainDataset1AfterInsert(DataSet: TSqlite3DataSet);
@@ -1688,17 +2017,6 @@ begin
   SQLTransaction1.Active := False;
   DataSet.FieldByName('number').AsInteger := i;
   DataSet.ApplyUpdates;
-end;
-
-procedure TMainForm.MainDataset1BeforeDelete(DataSet: TSqlite3DataSet);
-var
-  n: string;
-begin
-  n := DataSet.Fields.FieldByName('number').AsString;
-  if MessageDlg(rsDeleteNumber + ' ' + n, mtWarning, [mbYes, mbNo], 0) <> mrYes then
-    abort
-  else
-    Log(rsParticipantWithNumber + ' ' + n + ' ' + rsDeleted);
 end;
 
 procedure TMainForm.CheckPenaltySetText(Sender: TField; const aText: string);
@@ -1756,30 +2074,45 @@ end;
 
 procedure TMainForm.MenuItem5Click(Sender: TObject);
 begin
-  //DataPortHTTPTelegramBot.Close();
-  //DataPortHTTPTelegramBot.Method:=THttpMethods.httpGet;
-  //DataPortHTTPTelegramBot.Url := 'http://127.0.0.1/';
-  //DataPortHTTPTelegramBot.Params.Clear;
-  //DataPortHTTPTelegramBot.Params.Add('upperline=upperline123');
-  //DataPortHTTPTelegramBot.Params.Add('bottomline=bottomline123');
-  //DataPortHTTPTelegramBot.Open();
-
-  //Print(DataPortHTTPTelegramBot.Url);
-  //DataPortHTTPTelegramBot.Push('');
-  //s := TFPCustomHTTPClient.SimpleGet('http://192.168.1.136/get?upperline=1%20%2010:10,123&bottomline=Фамилия');
-  //Print(s);
-
 end;
 
 procedure TMainForm.RecalcResults(Sender: TField);
+var
+  n, fieldCaption, messageText: string;
+  stageIndex: integer;
 begin
-  MainDataset1.ApplyUpdates;
-  if CheckBoxAutomaticUpdateResutls.Checked then
-    UpdateResults
+  n := MainDataset1.FieldByName('number').AsString;
+  stageIndex := StrToIntDef(RightStr(Sender.FieldName, 1), GetSelectedStage);
+  if StartsText('starttime', Sender.FieldName) then
+    fieldCaption := rsStarttime
+  else if StartsText('finishtime', Sender.FieldName) then
+    fieldCaption := rsFinishtime
+  else if StartsText('correction', Sender.FieldName) then
+    fieldCaption := rsCorrection
+  else if StartsText('penalty', Sender.FieldName) then
+    fieldCaption := rsPenalty
   else
-  begin
-    CorrectionDataset.Close;
-    CorrectionDataset.Open;
+    fieldCaption := Sender.FieldName;
+  try
+    MainDataset1.ApplyUpdates;
+    if CheckBoxAutomaticUpdateResutls.Checked then
+      UpdateResults
+    else
+    begin
+      CorrectionDataset.Close;
+      CorrectionDataset.Open;
+    end;
+    FPendingParticipantLogMessage := Format(rsParticipantStageValueUpdated,
+      [n, fieldCaption, stageIndex, Sender.AsString]);
+  except
+    on E: Exception do
+    begin
+      FPendingParticipantLogMessage := '';
+      messageText := Format(rsParticipantStageSaveError,
+        [n, stageIndex, E.Message]);
+      AppLog(messageText, allError, alvStatus, alsResults);
+      AskMessageDlg(messageText, mtError, [mbOK], 0);
+    end;
   end;
 end;
 
@@ -1837,11 +2170,33 @@ begin
 end;
 
 procedure TMainForm.RxDBGrid1EditingDone(Sender: TObject);
+var
+  n, messageText: string;
 begin
   if dbopen then
   begin
-    MainDataset1.ApplyUpdates;
-    RefreshResults;
+    if FPendingParticipantLogMessage <> '' then
+    begin
+      AppLog(FPendingParticipantLogMessage, allInfo, alvStatus, alsResults);
+      FPendingParticipantLogMessage := '';
+      Exit;
+    end;
+    if not MainDataset1.Modified then
+      Exit;
+    n := MainDataset1.FieldByName('number').AsString;
+    try
+      MainDataset1.ApplyUpdates;
+      RefreshResults;
+      AppLog(Format(rsParticipantUpdated, [n]), allInfo, alvStatus,
+        alsResults);
+    except
+      on E: Exception do
+      begin
+        messageText := Format(rsParticipantSaveError, [n, E.Message]);
+        AppLog(messageText, allError, alvStatus, alsResults);
+        AskMessageDlg(messageText, mtError, [mbOK], 0);
+      end;
+    end;
     //CorrectionDataset.RefetchData;
   end;
 end;
@@ -1935,54 +2290,115 @@ begin
   //CurrentLang := lang;
 end;
 
-function TMainForm.CheckUpdateOnline(ACurrentVersion: string;
-  ForceCheck: bool; out LastVersion: string): boolean;
-var
-  U: TUpdater;
+procedure TMainForm.EnsureUpdateCheckController;
 begin
-  Result := False;
-  if ForceCheck or (checkUpdateAtStartup and
-    ((checkUpdateIntervalInDays < 0) or
-    (IncDay(lastUpdateCheckoutTime, checkUpdateIntervalInDays) < Now))) then
-  begin
-    U := TUpdater.Create;
-    try
-      updateExists := U.NewVersionAvailable(ACurrentVersion, LastVersion);
-    finally
-      U.Free;
-    end;
+  if not FClosing and not Assigned(FUpdateCheckController) then
+    FUpdateCheckController := TUpdateCheckController.Create(
+      @CreateDefaultUpdateChecker, @UpdateCheckCompleted);
+end;
 
-    if updateExists then
-    begin
-      if MessageDlg(format(rsNewVersionAvailable, [LastVersion]),
-        TMsgDlgType.mtInformation, mbYesNo, 0) = mrYes then
-        OpenURL(RELEASE_URL + lastVersionOnline);
+procedure TMainForm.StartAutomaticUpdateCheck(Data: PtrInt);
+begin
+  if FClosing then
+    Exit;
 
-      //aMsgDlg := CreateMessageDialog(
-      //  'Доступна новая версия программы: ' +
-      //  LastVersion, TMsgDlgType.mtInformation, mbOKCancel);
+  EnsureUpdateCheckController;
+  try
+    if Assigned(FUpdateCheckController) and
+      FUpdateCheckController.StartAutomatic(GetFileVersion,
+        checkUpdateAtStartup, checkUpdateIntervalInDays,
+        lastUpdateCheckoutTime, Now) then
+      AppLog(rsAutomaticUpdateCheckStarted, allDebug, alvNone, alsUpdater);
+  except
+    on E: Exception do
+      AppLog(Format(rsAutomaticUpdateCheckFailed, [E.Message]), allWarning,
+        alvNone, alsUpdater);
+  end;
+end;
 
-      //for i := 0 to aMsgDlg.ComponentCount - 1 do
-      //begin
-      //  if (aMsgDlg.Components[i] is TBitBtn) then
-      //  begin
-      //    TBitBtn(aMsgDlg.Components[i]).Caption :=
-      //      'Новый заголовок кнопки';
-      //  end;
-      //end;
+procedure TMainForm.UpdateCheckCompleted(Sender: TObject;
+  AMode: TUpdateCheckMode; const AResult: TUpdateCheckResult);
+var
+  logLevel: TAppLogLevel;
+  logMessage: string;
+  logView: TAppLogView;
+begin
+  if FClosing then
+    Exit;
 
-      //aMsgDlg.ShowModal;
-    end
+  if UpdateCheckSucceeded(AResult.Status) then
+    lastUpdateCheckoutTime := Now;
+
+  case AResult.Status of
+    ucsUpdateAvailable:
+      begin
+        updateExists := True;
+        lastVersionOnline := AResult.LastVersion;
+      end;
+    ucsUpToDate:
+      begin
+        updateExists := False;
+        lastVersionOnline := AResult.LastVersion;
+      end;
+  end;
+
+  case AResult.Status of
+    ucsUpdateAvailable:
+      logLevel := allInfo;
+    ucsUpToDate:
+      if AMode = ucmManual then
+        logLevel := allInfo
+      else
+        logLevel := allDebug;
+    ucsFailed:
+      if AMode = ucmManual then
+        logLevel := allError
+      else
+        logLevel := allWarning;
     else
-    begin
-      if ForceCheck and not LastVersion.IsEmpty then
+      logLevel := allDebug;
+  end;
+
+  if logLevel in [allInfo, allError] then
+    logView := alvStatus
+  else
+    logView := alvNone;
+
+  case AResult.Status of
+    ucsUpdateAvailable:
+      logMessage := Format(rsNewVersionFound, [AResult.LastVersion]);
+    ucsUpToDate:
+      logMessage := rsUpdatesNotFound;
+    ucsFailed:
+      if AMode = ucmManual then
+        logMessage := Format(rsUpdateCheckFailed, [AResult.ErrorMessage])
+      else
+        logMessage := Format(rsAutomaticUpdateCheckFailed,
+          [AResult.ErrorMessage]);
+    else
+      logMessage := rsUpdateCheckCancelled;
+  end;
+  AppLog(logMessage, logLevel, logView, alsUpdater);
+
+  case UpdateCheckNotification(AMode, AResult.Status) of
+    ucnUpdateAvailable:
+      begin
+        if MessageDlg(Format(rsNewVersionAvailable, [AResult.LastVersion]),
+          TMsgDlgType.mtInformation, mbYesNo, 0) = mrYes then
+          OpenURL(RELEASE_URL + AResult.LastVersion);
+      end;
+    ucnUpToDate:
       begin
         MessageDlg(rsUpdatesNotFound, TMsgDlgType.mtInformation, [mbOK], 0);
       end;
+    ucnFailure:
+      begin
+        MessageDlg(Format(rsUpdateCheckFailed, [AResult.ErrorMessage]),
+          TMsgDlgType.mtError, [mbOK], 0);
+      end;
+    ucnNone:
+    begin
     end;
-
-    if not LastVersion.IsEmpty then
-      lastUpdateCheckoutTime := Now;
   end;
 end;
 

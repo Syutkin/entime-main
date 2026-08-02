@@ -21,7 +21,6 @@ resourcestring
   rsSumstages = 'Кол-во СУ';
 
   rsNumber = 'Номер';
-  rsNumberu = 'Номеру';
   rsName = 'Имя';
   rsNickname = 'Ник';
   rsAge = 'ГР';
@@ -81,63 +80,155 @@ resourcestring
   rsIncorrectCorrection =
     'Некорректное значение поправки, введите верное значение';
   rsUpdateError = 'Ошибка обновления результатов: ';
-  rsDatabaseOpenError = 'Ошибка открытия базы: ';
+  rsDatabaseOpenError = 'Ошибка открытия базы: %s';
+  rsDatabaseRefreshError =
+    'Не удалось обновить данные (%d ошибок). Первая ошибка: %s';
+  rsCompetitionSettingsLoadError =
+    'Не удалось загрузить настройки соревнования: %s';
+  rsStageResultsCalculationError =
+    'Не удалось пересчитать результаты СУ: %s';
+  rsSumResultsCalculationError =
+    'Не удалось пересчитать суммарные результаты: %s';
+  rsThruResultsCalculationError =
+    'Не удалось пересчитать сквозные результаты: %s';
+  rsResultsClearError =
+    'Не удалось удалить результаты соревнования: %s';
+  rsCategoryListLoadError = 'Не удалось загрузить список категорий: %s';
+  rsParticipantStatusesLoadError =
+    'Не удалось загрузить статусы участников: %s';
+  rsFinishResultsCheckError =
+    'Не удалось проверить наличие финишных результатов: %s';
   rsTelegramBotSendingError =
-    'Ошибка отправки данных в телеграм бота: ';
-  rsNewFileCreated = 'Файл соревнований создан';
+    'Ошибка отправки данных в Telegram-бота: %s';
+  rsNewFileCreated = 'Файл соревнований создан: %s';
   rsNewFileNotCreated =
     'Не удалось создать файл соревнований';
   rsNewFileExistUnknow =
     'Не удалось проверить существование указанного файла';
+  rsCompetitionFileCreateError =
+    'Не удалось создать файл соревнований "%s": %s';
+  rsCompetitionFileOpenError =
+    'Не удалось открыть файл соревнований "%s": %s';
   rsClearResults = 'Действительно удалить все результаты?';
-  rsUpdateFinishTime = 'Обновить финишное время для номера';
-  rsDoNotExist = 'не существует';
+  rsUpdateFinishTime = 'Обновить финишное время для номера %d?';
   rsSetIntervalWarning =
     'Интервал задаётся как целое неотрицательное число миллисекунд';
   rsPenaltyTimeFormat =
     'Штрафное время вводится в формате сс, мм:сс или чч:мм:сс';
-  rsFinishTimeSet =
-    'Установлено финишное время для номера';
-  rsDeleteNumber =
-    'Действительно удалить участника c номером';
+  rsFinishTimeSetForStages =
+    'Установлено финишное время для номера %d; СУ: %s';
+  rsDeleteNumber = 'Действительно удалить участника c номером %s?';
+  rsParticipantDeleted = 'Участник с номером %s удалён';
+  rsParticipantUpdated = 'Данные участника с номером %s изменены';
+  rsParticipantCorrectionSet =
+    'Номеру %s установлена поправка на СУ %d: %s';
+  rsParticipantStartTimeSet =
+    'Номеру %s установлено время старта на СУ %d: %s';
+  rsParticipantStageValueUpdated =
+    'Номеру %s изменено поле «%s» на СУ %d: %s';
+  rsParticipantSaveError =
+    'Не удалось сохранить данные номера %s: %s';
+  rsParticipantStageSaveError =
+    'Не удалось сохранить данные номера %s на СУ %d: %s';
+  rsParticipantStagesSaveError =
+    'Не удалось сохранить данные номера %s на СУ %s: %s';
+  rsParticipantStatusesRecalculated =
+    'Глобальные статусы пересчитаны: %d';
+  rsParticipantStatusRecalculationError =
+    'Не удалось пересчитать статус номера %s: %s';
   rsLoadingConfig = 'Загрузка настроек из файла';
   rsConfigNotFound =
     'Файл настроек не найден, создание файла настроек по умолчанию';
   rsShownCategories =
-    'Категории для показа в окне результатов:';
-  rsStartProgram = 'Запуск программы';
+    'Категории для показа в окне результатов: %s';
+  rsSettingsLoaded = 'Настройки загружены: %s';
+  rsSettingsSaved = 'Настройки сохранены';
+  rsLanguageChanged = 'Язык приложения изменён: %s';
+  rsStartProgram = 'Запуск программы %s';
+  rsApplicationShutdown = 'Завершение работы программы';
+  rsCodepage = 'Кодировка: %s';
+  rsLEDPanelError = 'Ошибка LED-панели: %s';
+  rsLEDPanelEnabled = 'LED-панель включена';
+  rsLEDPanelDisabled = 'LED-панель выключена';
+  rsLEDPanelTestSucceeded = 'Проверка LED-панели выполнена успешно';
+  rsTelegramBotEnabled = 'Telegram-бот включён';
+  rsTelegramBotDisabled = 'Telegram-бот выключен';
+  rsTelegramBotTestSucceeded = 'Проверка Telegram-бота выполнена успешно';
+  rsHTTPRequestMetadata = 'HTTP-запрос: %s; параметров: %d';
+  rsHTTPResponseMetadata =
+    'HTTP-ответ: %d %s; заголовков: %d; байт: %d';
+  rsHTTPResponseReceived = 'Получен HTTP-ответ: %d байт';
+  rsHTTPRequestNotStarted = 'не удалось запустить HTTP-запрос';
+  rsOpenStartListFile = 'Открытие файла стартового протокола: %s';
+  rsSerialFinish = 'Финиш -> %s';
+  rsSerialRaw = 'Исходные данные -> %s';
+  rsSerialStart = 'Старт -> %s, %s';
+  rsTelegramBotError = 'Ошибка Telegram-бота: %s';
   rsLoadCSVParticipants = 'Список участников загружен';
-  rsImportFinishtime = 'Финишное время для СУ';
-  rsImportStarttime = 'Стартовый протокол для СУ';
-  rsLoaded = 'загружен';
-  rsLoaded_o = 'загружено';
-  rsDBFileClosed = 'Файл соревнований закрыт:';
-  rsDBFileOpen = 'Файл соревнований открыт:';
+  rsImportFinishtime = 'Финишное время для СУ %d: %s загружено';
+  rsImportStarttime = 'Стартовый протокол для СУ %d: %s загружен';
+  rsParticipantsImported = 'Участники импортированы: %d; файл: %s';
+  rsParticipantsImportPartial =
+    'Участники импортированы с пропусками: %d; использовано СУ: %d из %d; файл: %s';
+  rsResultsImported =
+    'Результаты импортированы для СУ %d (%s): %d; файл: %s';
+  rsResultsImportPartial =
+    'Результаты импортированы частично для СУ %d (%s): %d из %d; файл: %s';
+  rsDayResultsImported = 'Результаты дня импортированы: %d; файл: %s';
+  rsResultsImportFormat = 'Формат файла результатов: %d колонок';
+  rsDBFileClosed = 'Файл соревнований закрыт: %s';
+  rsDBFileOpen = 'Файл соревнований открыт: %s';
+  rsLogDirectoryOpenError = 'Не удалось открыть каталог журнала: %s';
+  rsLogFileOpenError = 'Не удалось открыть файл журнала: %s';
   rsResultsCleared = 'Результаты соревнований удалены!';
   rsResultsExportedToFile =
-    'Финишный протокол экспортирован в файл';
+    'Финишный протокол экспортирован в файл %s';
+  rsStageResultsExported =
+    'Результаты СУ %d (%s) экспортированы: %s';
+  rsAllResultsExported = 'Все результаты экспортированы: %s';
+  rsSumDaysExported = 'Сводные результаты по дням экспортированы: %s';
+  rsStartListExported = 'Стартовый протокол экспортирован: %s';
+  rsCSVResultsExported = 'Результаты экспортированы в CSV: %s';
+  rsFullResultsExported = 'Итоговый протокол экспортирован: %s';
+  rsExportFileError = 'Не удалось экспортировать файл "%s": %s';
+  rsExportReportParameters = 'Параметры отчёта: групп штрафов — %d';
   rsResultsThruExportedToFile =
     'Сквозной протокол экспортирован в файл';
-  rsParticipantWithNumber = 'Участник с номером';
   rsDidNotStart = 'не стартовал';
-  rsOnStage = 'на СУ';
   rsDidNotFinish = 'не финишировал';
-  rsDeleted = 'удалён';
-  rsSureWithNumber = 'Уверены, что участник под номером';
+  rsConfirmParticipantStatus =
+    'Уверены, что участник под номером %s %s?';
+  rsParticipantStatusSet = 'Участник с номером %s %s';
+  rsConfirmParticipantStageStatus =
+    'Уверены, что участник под номером %s %s на СУ %d?';
+  rsParticipantStageStatusSet = 'Участник с номером %s %s на СУ %d';
+  rsConfirmParticipantNamedStageStatus =
+    'Уверены, что участник под номером %s %s на СУ %d: %s?';
+  rsParticipantNamedStageStatusSet =
+    'Участник с номером %s %s на СУ %d: %s';
   rsReallyDisqualifyNumber =
-    'Действительно дисквалифицировать участника под номером';
-  rsDisqualified = 'дисквалифицирован';
+    'Действительно дисквалифицировать участника под номером %s?';
+  rsParticipantDisqualified = 'Участник с номером %s дисквалифицирован';
+  rsParticipantDoesNotExist = 'Номер %s не существует';
+  rsFinishSkippedParticipantMissing =
+    'Финиш пропущен: участник с номером %s отсутствует';
+  rsLoRaCorrectionSkippedParticipantMissing =
+    'Поправка LoRa пропущена: участник с номером %s отсутствует';
   rsCurrentResults = 'Текущие результаты';
   rsClearStatus =
-    'Действительно убрать DNS/DNF с участника номер';
-  rsClearStatusLog = 'DNS/DNF убрано с участника номер';
+    'Действительно убрать DNS/DNF с участника номер %s на СУ %d?';
+  rsClearStatusLog = 'DNS/DNF убрано с участника номер %s на СУ %d';
+  rsClearNamedStageStatus =
+    'Действительно убрать DNS/DNF с участника номер %s на СУ %d: %s?';
+  rsClearNamedStageStatusLog =
+    'DNS/DNF убрано с участника номер %s на СУ %d: %s';
   rsClearAllStatus =
-    'Действительно убрать DNS/DNF/DSQ с участника номер';
-  rsClearAllStatusLog = 'DNS/DNF/DSQ убрано с участника номер';
-  rsClearDSQ = 'Действительно убрать DSQ с участника номер';
-  rsClearDSQLog = 'DSQ убрана с участника номер';
+    'Действительно убрать DNS/DNF/DSQ с участника номер %s?';
+  rsClearAllStatusLog = 'DNS/DNF/DSQ убрано с участника номер %s';
+  rsClearDSQ = 'Действительно убрать DSQ с участника номер %s?';
+  rsClearDSQLog = 'DSQ убрана с участника номер %s';
   rsDidNotStartSetFinish =
-    'не числится в списке стартовавших, но не финишировавших. Всё равно установить финишное время?';
+    'Номер %d не числится в списке стартовавших, но не финишировавших. Всё равно установить финишное время?';
   rsImportFinish = 'Импорт результатов';
   rsSetTimeToSU = 'Проставить результаты для СУ:';
   rsExportFinish = 'Экспорт результатов';
@@ -149,14 +240,26 @@ resourcestring
   rsFileCopyError = 'Ошибка создания файла финала';
   rsStartFileCopyError = 'Ошибка создания стартового файла';
   rsGenerateStartList =
-    'Стартовый протокол финального заезда сформирован';
+    'Стартовый протокол финального заезда сформирован: %s';
   rsQualificationResults = 'По результатам квалификации';
   rsStartFileCreated = 'Файл для стартовых ворот создан';
   rsCorrectionAlreadySet =
-    'поправка уже установлена. Перезаписать значение?';
-  rsCOMOpenError = 'Не удалось открыть порт';
+    'Номеру %s поправка уже установлена. Перезаписать значение?';
+  rsCOMOpenErrorDetails = 'Не удалось открыть порт %s: %s';
   rsPortClosed = 'Порт %s закрыт';
   rsPortConnected = 'Порт %s подключён';
+  rsPortConnectionLost =
+    'Потеряна связь с портом %s; ожидается автоматическое восстановление';
+  rsPortConnectionRestored = 'Связь с портом %s восстановлена';
+  rsModuleSynchronized =
+    'Синхронизация модуля через порт %s завершена: %d';
+  rsModuleSynchronizationError =
+    'Не удалось синхронизировать модуль через порт %s: %s';
+  rsLoRaRecordsReset = 'Состояние записей LoRa сброшено';
+  rsLoRaRecordHidden = 'Запись LoRa скрыта: %s';
+  rsLoRaRecordsLoadError = 'Не удалось загрузить записи LoRa: %s';
+  rsLoRaRecordsRefreshWarning =
+    'Изменение сохранено, но список LoRa не обновлён: %s';
   rsSerialCanRead = 'Чтение доступно: %s';
   rsSerialCanWrite = 'Запись доступна: %s';
   rsSerialReadCount = 'Прочитано: %s';
@@ -165,16 +268,30 @@ resourcestring
   rsFinishTimeOpenError =
     'Неверный формат файла с результатами СУ';
   rsCanNotBackup = 'Не удалось сделать резервную копию!';
+  rsClearResultsWithoutBackup =
+    'Не удалось сделать резервную копию!%sВсё равно очистить результаты?';
+  rsContinueLoadingResultsWithoutBackup =
+    'Не удалось сделать резервную копию!%sПродолжить загрузку результатов?';
   rsBackupCreated = 'Создание резервной копии успешно завершено: %s';
-  rsContinueWithLoadingResults =
-    'Продолжить загрузку результатов?';
+  rsBackupDirectoryCreateError =
+    'Не удалось создать каталог резервных копий: %s; резервная копия пропущена';
+  rsBackupCreateError =
+    'Не удалось создать резервную копию "%s": %s; резервная копия пропущена';
+  rsBackupFileInvalid =
+    'Резервная копия не создана или пуста: %s; резервная копия пропущена';
   rsLoadResultsError =
     'Ошибка загрузки результатов: ';
   rsWriteResultsDatabaseError =
     'Ошибка записи результатов в базу: ';
+  rsParticipantsImportError =
+    'Не удалось импортировать участников из файла "%s": %s';
+  rsResultsImportError =
+    'Не удалось импортировать результаты из файла "%s": %s';
+  rsDayResultsImportError =
+    'Не удалось импортировать результаты дня из файла "%s": %s';
+  rsDayResultsRowsNotFound = 'Файл не содержит результатов дня';
   rsAddUnknownResultParticipant =
     'Участник с номером %d отсутствует в списке участников. Добавить его и загрузить результат?';
-  rsClearResultsWOBackup = 'Всё равно очистить результаты?';
   rsFileExists = 'Файл уже существует. Перезаписать?';
   rsFinalFileExists =
     'Файл финала уже существует. Перезаписать?';
@@ -187,11 +304,11 @@ resourcestring
   rsCanNotDeleteFile = 'Не удалось перезаписать файл';
   rsTimeToStart = 'Время старта';
   rsEnterStartTime =
-    'Введите новое время старта для номера';
-  rsAddDayResults = 'Добавить результаты дня';
+    'Введите новое время старта для номера %s на СУ: %s';
+  rsAddDayResults = 'Добавить результаты дня %d?';
   rsSaveResults = 'Сохранить результаты?';
   rsFinishResultsNotEmpty =
-    'результаты финиша не пусты. Вы уверены что хотите сформировать стартовый протокол для данного спецучастка?';
+    'На СУ %s результаты финиша не пусты. Вы уверены что хотите сформировать стартовый протокол для данного спецучастка?';
   rsLoadParticipantsListError =
     'Ошибка загрузки списка участников: ';
   rsWriteParticipantsDatabaseError =
@@ -216,13 +333,24 @@ resourcestring
     'Некорректное время старта "%s" в строке %d, колонка "%s". Допустимые форматы: чч:мм, чч:мм:сс, чч:мм:сс.ммм или чч:мм:сс,ммм';
   rsDuplicateParticipantNumber =
     'Номер участника %d повторяется в строках %d и %d';
-  rsDetectedParticipantStages =
-    'Обнаруженные СУ:';
+  rsDetectedParticipantStages = 'Обнаруженные СУ: %s';
   rsNewVersionAvailable = 'Доступна новая версия программы: %0:s. Перейти на сайт?';
+  rsNewVersionFound = 'Доступна новая версия программы: %s';
+  rsCheckForUpdates = 'Проверить обновления ...';
+  rsCheckingForUpdates = 'Проверка обновлений ...';
   rsUpdateAvailable = 'Доступно обновление ...';
+  rsUpdateCheckFailed = 'Не удалось проверить обновления: %s';
+  rsAutomaticUpdateCheckFailed =
+    'Автоматическая проверка обновлений не выполнена; приложение продолжает работу: %s';
+  rsManualUpdateCheckStarted = 'Запущена ручная проверка обновлений';
+  rsAutomaticUpdateCheckStarted = 'Запущена автоматическая проверка обновлений';
+  rsUpdateCheckStartFailed = 'Не удалось запустить проверку обновлений';
+  rsUpdateCheckCancelled = 'Проверка обновлений отменена';
   rsUpdatesNotFound = 'Нет доступных обновлений.';
   rsUnknownFileEncoding =
     'Не удалось определить кодировку файла. Продолжить?';
+  rsUnknownFileEncodingContinued =
+    'Кодировка файла не определена; импорт продолжен без преобразования';
   rsUnsupportedFileEncoding =
     'Неподдерживаемая кодировка файла: %s';
   rsTooManyParticipantStages =

@@ -36,7 +36,7 @@ var
 
 implementation
 
-uses Main, Implement;
+uses Main, Implement, app_logger;
 
 procedure RunLoRa;
 begin
@@ -55,6 +55,8 @@ end;
 { TLoRaForm }
 
 procedure TLoRaForm.FormCreate(Sender: TObject);
+var
+  messageText: string;
 begin
   Sqlite3DatasetLoRa.FileName := fName;
   try
@@ -62,8 +64,9 @@ begin
   except
     On E: Exception do
     begin
-      MessageDlg(rsDatabaseOpenError + E.Message, mtError, [mbOK], 0);
-      Log(rsDatabaseOpenError + E.Message);
+      messageText := Format(rsDatabaseOpenError, [E.Message]);
+      AppLog(messageText, allError, alvStatus, alsLoRa);
+      MessageDlg(messageText, mtError, [mbOK], 0);
     end;
   end;
 end;

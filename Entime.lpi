@@ -27,8 +27,8 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="8"/>
-      <RevisionNr Value="1"/>
-      <BuildNr Value="145"/>
+      <RevisionNr Value="2"/>
+      <BuildNr Value="152"/>
       <Language Value="0419"/>
       <CharSet Value="04B0"/>
       <Attributes pvaDebug="True"/>
@@ -210,7 +210,7 @@
         <PackageName Value="MyForks"/>
       </Item17>
     </RequiredPackages>
-    <Units Count="17">
+    <Units Count="18">
       <Unit0>
         <Filename Value="Entime.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -305,6 +305,10 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="ResultsCsvParser"/>
       </Unit16>
+      <Unit17>
+        <Filename Value="app_logger.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit17>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
