@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.3] - 2026-08-21
+
+### Fixed
+
+- Исправлена ошибка загрузки Serial-компонента при запуске Windows-версии.
+
 ## [0.8.2] - 2026-08-03
 
 ### Added
@@ -184,6 +190,7 @@
 - Изменения не сохранялись при открытии базы данных.
 - Исправлена компоновка интерфейса при изменении размера окна.
 
+[0.8.3]: https://codeberg.org/Syutkin/entime/src/tag/0.8.3
 [0.8.2]: https://codeberg.org/Syutkin/entime/src/tag/0.8.2
 [0.8.1]: https://codeberg.org/Syutkin/entime/src/tag/0.8.1
 [0.8.0]: https://codeberg.org/Syutkin/entime/src/tag/0.8.0

@@ -4436,7 +4436,6 @@ object MainForm: TMainForm
     SynSer.ConvertLineEnd = False
     SynSer.AtTimeout = 1000
     SynSer.InterPacketTimeout = True
-    SynSer.NonBlock = False
     Device = 'COM1'
     RcvLineCRLF = True
     OnRxData = SerialRxData
