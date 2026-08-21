@@ -51,9 +51,8 @@ jobs:
       - name: Validate checkout and configure Git
         run: |
           $ErrorActionPreference = 'Stop'
-          $branch = (git branch --show-current).Trim()
-          if ($branch -ne 'master') {
-            throw "Releases must run from master; current branch is '$branch'."
+          if ($env:GITHUB_REF_TYPE -ne 'branch' -or -not $env:GITHUB_REF_NAME) {
+            throw "Releases must run from a branch; current ref is '$env:GITHUB_REF'."
           }
           $status = @(git status --porcelain --untracked-files=all)
           if ($status.Count -ne 0) {
@@ -65,6 +64,8 @@ jobs:
           "AUTOMATION_DIRECTORY=$(Join-Path $env:GITHUB_WORKSPACE '.github')" |
             Out-File $env:GITHUB_ENV -Append -Encoding utf8
           "AUTOMATION_COMMIT=$((git rev-parse HEAD).Trim())" |
+            Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "AUTOMATION_BRANCH=$env:GITHUB_REF_NAME" |
             Out-File $env:GITHUB_ENV -Append -Encoding utf8
           'CONTINUE_PIPELINE=true' | Out-File $env:GITHUB_ENV -Append -Encoding utf8
 
@@ -135,6 +136,48 @@ jobs:
           'should_process=true' | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
           "TARGET_TAG=$target" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
           Write-Host "Selected release $target."
+
+      - name: Select versioned release profile
+        if: env.CONTINUE_PIPELINE == 'true'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $profileJson = python .github/scripts/select_release_profile.py --tag $env:TARGET_TAG
+          if ($LASTEXITCODE -ne 0) {
+            throw "Could not select a release profile for $env:TARGET_TAG."
+          }
+          $profile = $profileJson | ConvertFrom-Json
+          "RELEASE_PROFILE=$($profile.profile)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "PROJECT_FILE=$($profile.project_file)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "RELEASE_BUILD_MODE=$($profile.build_mode)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "RELEASE_EXECUTABLE_PATH=$($profile.executable_path)" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          Write-Host "Selected $($profile.profile) profile for $env:TARGET_TAG: project=$($profile.project_file), mode=$($profile.build_mode), executable=$($profile.executable_path)."
+
+      - name: Select versioned Lazarus packages
+        if: env.CONTINUE_PIPELINE == 'true'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $packageConfig = Join-Path $env:RUNNER_TEMP 'lazarus-packages-resolved.json'
+          python .github/scripts/select_lazarus_packages.py `
+            --config .github/lazarus-packages.json `
+            --tag $env:TARGET_TAG `
+            --output $packageConfig
+          if ($LASTEXITCODE -ne 0) {
+            throw "Could not select Lazarus packages for $env:TARGET_TAG."
+          }
+          $resolvedPackages = Get-Content -Raw $packageConfig | ConvertFrom-Json
+          $blePackages = @(
+            $resolvedPackages.packages |
+              Where-Object { $_.name -in @('SimpleBlePascal', 'LazBle') } |
+              ForEach-Object { $_.name } |
+              Sort-Object -Unique
+          )
+          if ($blePackages.Count -notin @(0, 2)) {
+            throw 'The selected package set must contain both BLE packages or neither of them.'
+          }
+          "USES_SIMPLEBLE=$(($blePackages.Count -eq 2).ToString().ToLowerInvariant())" |
+            Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "LAZARUS_PACKAGES_CONFIG=$packageConfig" |
+            Out-File $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Preserve current changelog and automation
         if: env.CONTINUE_PIPELINE == 'true' && inputs.mode != 'sync_next'
@@ -249,6 +292,14 @@ jobs:
       - name: Check out existing tag for packaging
         if: env.CONTINUE_PIPELINE == 'true' && inputs.mode != 'sync_next'
         run: git checkout --detach $env:TARGET_TAG
+
+      - name: Validate versioned release profile
+        if: env.CONTINUE_PIPELINE == 'true'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (-not (Test-Path $env:PROJECT_FILE -PathType Leaf)) {
+            throw "$env:TARGET_TAG uses the '$env:RELEASE_PROFILE' release profile, but $env:PROJECT_FILE is missing."
+          }
 
       - name: Prepare locked dependency checksum
         if: env.CONTINUE_PIPELINE == 'true' && inputs.mode == 'rebuild_existing'
@@ -381,13 +432,20 @@ jobs:
             $directory = Join-Path $env:RUNNER_TEMP 'lazarus-dependencies'
             & (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/resolve_lazarus_dependencies.ps1') `
               -Mode latest -OutputDirectory $directory `
-              -ConfigFile (Join-Path $env:AUTOMATION_DIRECTORY 'lazarus-packages.json')
+              -ConfigFile $env:LAZARUS_PACKAGES_CONFIG
           }
           "LAZARUS_DEPENDENCIES=$directory" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
 
-      - name: Build Windows x64 executable
-        if: env.CONTINUE_PIPELINE == 'true'
-        run: lazbuild --build-mode=Release Entime.lpi
+      - name: Download latest SimpleCBLE Windows x64 DLLs
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode != 'rebuild_existing' && env.USES_SIMPLEBLE == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          $simpleBleDirectory = Join-Path $env:RUNNER_TEMP 'simpleble'
+          & (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/download_latest_simpleble.ps1') `
+            -OutputDirectory $simpleBleDirectory
+          "SIMPLEBLE_DEPENDENCIES=$simpleBleDirectory" |
+            Out-File $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Download latest OpenSSL 3.5 LTS DLLs
         if: env.CONTINUE_PIPELINE == 'true' && inputs.mode != 'rebuild_existing'
@@ -414,16 +472,76 @@ jobs:
             Out-File $env:GITHUB_ENV -Append -Encoding utf8
           "SQLITE3_PATH=$(Join-Path $env:LOCKED_DEPENDENCIES 'sqlite/sqlite3.dll')" |
             Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          $simpleBleDirectory = Join-Path $env:LOCKED_DEPENDENCIES 'simpleble/dll'
+          if (Test-Path $simpleBleDirectory) {
+            "SIMPLEBLE_DEPENDENCIES=$simpleBleDirectory" |
+              Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          }
+
+      - name: Run Windows test suites
+        if: env.CONTINUE_PIPELINE == 'true'
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $runtimeDirectories = @(
+            $env:OPENSSL_DEPENDENCIES,
+            $env:SIMPLEBLE_DEPENDENCIES,
+            (Split-Path -Parent $env:SQLITE3_PATH)
+          ) | Where-Object { $_ }
+          $env:PATH = (@($runtimeDirectories) + @($env:PATH)) -join ';'
+
+          $unitProject = 'tests/entimetests.lpi'
+          if (Test-Path $unitProject) {
+            lazbuild --no-write-project --ws=win32 --build-mode=windows $unitProject
+            if ($LASTEXITCODE -ne 0) { throw 'Could not build the unit tests.' }
+            $unitBinary = 'tests/.test_build/entimetests.exe'
+            if (-not (Test-Path $unitBinary)) {
+              throw "Unit test binary was not produced: $unitBinary"
+            }
+            & $unitBinary --all --format=plain
+            if ($LASTEXITCODE -ne 0) { throw 'Unit tests failed.' }
+          } else {
+            Write-Host 'Skipping unit tests: this historical tag has no tests/entimetests.lpi.'
+          }
+
+          $integrationProject = 'tests/integration/entimeintegrationtests.lpi'
+          if (Test-Path $integrationProject) {
+            lazbuild --no-write-project --ws=win32 --build-mode=windows $integrationProject
+            if ($LASTEXITCODE -ne 0) { throw 'Could not build the integration tests.' }
+            $integrationBinary = 'tests/integration/.test_build/entimeintegrationtests.exe'
+            if (-not (Test-Path $integrationBinary)) {
+              throw "Integration test binary was not produced: $integrationBinary"
+            }
+            $testHome = Join-Path $env:RUNNER_TEMP 'entime-test-home'
+            New-Item -ItemType Directory -Force $testHome | Out-Null
+            $env:ENTIME_ROOT = $env:GITHUB_WORKSPACE
+            $env:HOME = $testHome
+            $env:APPDATA = $testHome
+            $env:LOCALAPPDATA = $testHome
+            & $integrationBinary --all --format=plain
+            if ($LASTEXITCODE -ne 0) { throw 'Integration tests failed.' }
+          } else {
+            Write-Host 'Skipping integration tests: this historical tag has no tests/integration/entimeintegrationtests.lpi.'
+          }
+
+      - name: Build Windows x64 executable
+        if: env.CONTINUE_PIPELINE == 'true'
+        run: lazbuild --no-write-project --ws=win32 --build-mode=$env:RELEASE_BUILD_MODE $env:PROJECT_FILE
 
       - name: Capture reproducible build inputs
         if: env.CONTINUE_PIPELINE == 'true' && inputs.mode != 'rebuild_existing'
         id: dependencies
         run: |
           $outputDirectory = Join-Path $env:RUNNER_TEMP 'dependency-assets'
+          $simpleBleDirectory = if ($env:USES_SIMPLEBLE -eq 'true') {
+            Join-Path $env:RUNNER_TEMP 'simpleble'
+          } else {
+            ''
+          }
           & (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/package_build_dependencies.ps1') `
             -DependenciesDirectory $env:LAZARUS_DEPENDENCIES `
             -OpenSslDirectory (Join-Path $env:RUNNER_TEMP 'openssl') `
             -SqliteDirectory (Join-Path $env:RUNNER_TEMP 'sqlite') `
+            -SimpleBleDirectory $simpleBleDirectory `
             -OutputDirectory $outputDirectory `
             -GitVersion "$((git --version).Trim())" `
             -AutomationCommit $env:AUTOMATION_COMMIT `
@@ -444,8 +562,10 @@ jobs:
           $outputDirectory = Join-Path $env:RUNNER_TEMP 'release-assets'
           & (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/package_windows_release.ps1') `
             -Tag $env:TARGET_TAG `
+            -ExecutablePath $env:RELEASE_EXECUTABLE_PATH `
             -OpenSslDependenciesDirectory $env:OPENSSL_DEPENDENCIES `
             -SqlitePath $env:SQLITE3_PATH `
+            -SimpleBleDependenciesDirectory $env:SIMPLEBLE_DEPENDENCIES `
             -DependencyManifestPath $env:BUILD_DEPENDENCY_MANIFEST `
             -OutputDirectory $outputDirectory
           $assetPath = Join-Path $outputDirectory "Entime-$env:TARGET_TAG-win-x64.zip"
@@ -500,7 +620,7 @@ jobs:
 
       - name: Push imported release commit and tag
         if: env.CONTINUE_PIPELINE == 'true' && inputs.mode == 'sync_next'
-        run: git push --atomic origin "HEAD:refs/heads/master" "refs/tags/$($env:TARGET_TAG):refs/tags/$($env:TARGET_TAG)"
+        run: git push --atomic origin "HEAD:refs/heads/$env:AUTOMATION_BRANCH" "refs/tags/$($env:TARGET_TAG):refs/tags/$($env:TARGET_TAG)"
 
       - name: Publish GitHub Release
         if: env.CONTINUE_PIPELINE == 'true' && inputs.mode != 'rebuild_existing'

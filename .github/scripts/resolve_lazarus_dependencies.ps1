@@ -26,6 +26,54 @@ function Find-PackageFile([string]$Root, [string]$Name) {
     return $file.FullName
 }
 
+function Resolve-GitTarget($Package) {
+    $selector = if ($Package.selector) { [string]$Package.selector } elseif ($Package.branch) { 'branch' } else { '' }
+    if ($selector -eq 'branch') {
+        if (-not $Package.branch) {
+            throw "Git package $($Package.name) with selector 'branch' has no branch."
+        }
+        return [PSCustomObject]@{
+            selector = 'branch'
+            ref = [string]$Package.branch
+            description = "branch $($Package.branch)"
+            branch = [string]$Package.branch
+            tag = $null
+        }
+    }
+    if ($selector -eq 'latest_tag') {
+        $refs = @(& git ls-remote --tags --refs $Package.repository)
+        if ($LASTEXITCODE -ne 0) {
+            throw "Could not list tags for Git package $($Package.name)."
+        }
+        $candidates = @(
+            foreach ($line in $refs) {
+                if ($line -match '\s+refs/tags/(v?(\d+)\.(\d+)\.(\d+))$') {
+                    [PSCustomObject]@{
+                        tag = $Matches[1]
+                        version = [version]::new(
+                            [int]$Matches[2],
+                            [int]$Matches[3],
+                            [int]$Matches[4]
+                        )
+                    }
+                }
+            }
+        )
+        $selected = $candidates | Sort-Object version -Descending | Select-Object -First 1
+        if (-not $selected) {
+            throw "Git package $($Package.name) has no stable SemVer tags."
+        }
+        return [PSCustomObject]@{
+            selector = 'latest_tag'
+            ref = [string]$selected.tag
+            description = "tag $($selected.tag)"
+            branch = $null
+            tag = [string]$selected.tag
+        }
+    }
+    throw "Unsupported Git selector '$selector' for package $($Package.name)."
+}
+
 New-Item -ItemType Directory -Force $OutputDirectory | Out-Null
 $packagesRoot = Join-Path $OutputDirectory 'packages'
 New-Item -ItemType Directory -Force $packagesRoot | Out-Null
@@ -36,16 +84,17 @@ if ($Mode -eq 'latest') {
     foreach ($package in $configuration.packages) {
         $archivePath = Join-Path $OutputDirectory $package.archive
         if ($package.source -eq 'git') {
+            $target = Resolve-GitTarget $package
             $packageDirectory = Join-Path $OutputDirectory $package.directory
             $checkoutDirectory = Join-Path (
                 Join-Path $OutputDirectory 'git-checkouts'
             ) ($package.archive -replace '\.zip$', '')
             New-Item -ItemType Directory -Force (Split-Path $checkoutDirectory -Parent) |
                 Out-Null
-            & git clone --depth 1 --single-branch --branch $package.branch `
+            & git clone --depth 1 --single-branch --branch $target.ref `
                 $package.repository $checkoutDirectory
             if ($LASTEXITCODE -ne 0) {
-                throw "Could not clone $($package.repository) branch $($package.branch)."
+                throw "Could not clone $($package.repository) at $($target.description)."
             }
             $commit = ((& git -C $checkoutDirectory rev-parse HEAD) |
                 Select-Object -Last 1).Trim().ToLowerInvariant()
@@ -58,17 +107,20 @@ if ($Mode -eq 'latest') {
                 throw "Could not archive Git package $($package.name) at $commit."
             }
             Expand-Archive -Path $archivePath -DestinationPath $packageDirectory -Force
-            $resolved += [PSCustomObject]@{
+            $metadata = [ordered]@{
                 name = $package.name
                 source = 'git'
                 repository = $package.repository
-                branch = $package.branch
+                selector = $target.selector
                 commit = $commit
                 archive = $package.archive
                 sha256 = (Get-FileHash -Path $archivePath -Algorithm SHA256).Hash.ToLowerInvariant()
                 directory = $package.directory
                 lpk = @($package.lpk)
             }
+            if ($target.branch) { $metadata['branch'] = $target.branch }
+            if ($target.tag) { $metadata['tag'] = $target.tag }
+            $resolved += [PSCustomObject]$metadata
         } elseif (-not $package.source -or $package.source -eq 'opm') {
             $packageDirectory = Join-Path $packagesRoot ($package.archive -replace '\.zip$', '')
             $url = "$($configuration.repository.TrimEnd('/'))/$($package.archive)"
@@ -102,11 +154,11 @@ if ($Mode -eq 'latest') {
     $lock = Get-Content -Raw $LockFile | ConvertFrom-Json
     foreach ($package in $lock.packages) {
         if ($package.source -eq 'git') {
-            if (
-                -not $package.repository -or
-                -not $package.branch -or
-                $package.commit -notmatch '^[0-9a-f]{40}$'
-            ) {
+            $selector = if ($package.selector) { [string]$package.selector } elseif ($package.branch) { 'branch' } else { '' }
+            $selectorMetadataIsValid =
+                (($selector -eq 'branch') -and $package.branch) -or
+                (($selector -eq 'latest_tag') -and $package.tag)
+            if (-not $package.repository -or -not $selectorMetadataIsValid -or $package.commit -notmatch '^[0-9a-f]{40}$') {
                 throw "Locked Git metadata for package $($package.name) is incomplete."
             }
         }
@@ -137,8 +189,14 @@ foreach ($package in $lock.packages) {
     }
 }
 
-# MyForks is project source and is recorded separately from downloaded packages.
-$myForksPath = (Resolve-Path 'myforks.lpk').Path
+# MyForks moved under packages in current sources. The fallback keeps historical
+# release tags reproducible with the current automation.
+$myForksCandidate = @('packages/myforks/myforks.lpk', 'myforks.lpk') |
+    Where-Object { Test-Path $_ } | Select-Object -First 1
+if (-not $myForksCandidate) {
+    throw 'Could not find the project package myforks.lpk.'
+}
+$myForksPath = (Resolve-Path $myForksCandidate).Path
 & lazbuild --add-package-link $myForksPath
 if ($LASTEXITCODE -ne 0) { throw 'Could not register project package myforks.lpk.' }
 & lazbuild $myForksPath

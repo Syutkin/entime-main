@@ -3,9 +3,12 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$Tag,
     [Parameter(Mandatory = $true)]
+    [string]$ExecutablePath,
+    [Parameter(Mandatory = $true)]
     [string]$OpenSslDependenciesDirectory,
     [Parameter(Mandatory = $true)]
     [string]$SqlitePath,
+    [string]$SimpleBleDependenciesDirectory = '',
     [Parameter(Mandatory = $true)]
     [string]$DependencyManifestPath,
     [Parameter(Mandatory = $true)]
@@ -28,6 +31,16 @@ $expectedSampleEntries = @(
 $manifest = Get-Content -Raw $DependencyManifestPath | ConvertFrom-Json
 if (-not $manifest.runtime_files) {
     throw 'The dependency manifest has no runtime DLL hashes.'
+}
+$bleRuntimeNames = @('simplecble.dll', 'simpleble.dll')
+$requiredBleDependencies = @(
+    $manifest.runtime_files |
+        Where-Object { $_.name -in $bleRuntimeNames } |
+        ForEach-Object { $_.name } |
+        Sort-Object -Unique
+)
+if ($requiredBleDependencies.Count -notin @(0, 2)) {
+    throw 'The dependency manifest must contain both SimpleBLE runtime DLLs or neither of them.'
 }
 
 function Assert-ExpectedHash([string]$Path, [string]$Name) {
@@ -66,8 +79,8 @@ function Assert-PeX64([string]$Path) {
     }
 }
 
-if (-not (Test-Path 'release/Entime.exe')) {
-    throw 'Release build did not produce release/Entime.exe.'
+if (-not (Test-Path $ExecutablePath)) {
+    throw "Release build did not produce $ExecutablePath."
 }
 if (-not (Test-Path 'languages')) {
     throw 'The languages directory is missing.'
@@ -91,6 +104,14 @@ foreach ($fileName in $requiredOpenSslDependencies) {
     }
     Assert-ExpectedHash $sourcePath $fileName
 }
+foreach ($fileName in $requiredBleDependencies) {
+    $sourcePath = Join-Path $SimpleBleDependenciesDirectory $fileName
+    if (-not (Test-Path $sourcePath)) {
+        throw "Required dependency is missing: $sourcePath"
+    }
+    Assert-ExpectedHash $sourcePath $fileName
+    Assert-PeX64 $sourcePath
+}
 
 $archiveBaseName = "Entime-$Tag-win-x64"
 $stageDirectory = Join-Path $OutputDirectory "$archiveBaseName-stage"
@@ -100,7 +121,7 @@ Remove-Item -Recurse -Force $stageDirectory -ErrorAction SilentlyContinue
 Remove-Item -Force $archivePath, $checksumPath -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force $stageDirectory | Out-Null
 
-Copy-Item 'release/Entime.exe' (Join-Path $stageDirectory 'Entime.exe')
+Copy-Item $ExecutablePath (Join-Path $stageDirectory 'Entime.exe')
 foreach ($fileName in $requiredOpenSslDependencies) {
     Copy-Item (Join-Path $OpenSslDependenciesDirectory $fileName) (Join-Path $stageDirectory $fileName)
 }
@@ -109,6 +130,9 @@ if (-not (Test-Path $SqlitePath)) {
 }
 Assert-ExpectedHash $SqlitePath 'sqlite3.dll'
 Copy-Item $SqlitePath (Join-Path $stageDirectory 'sqlite3.dll')
+foreach ($fileName in $requiredBleDependencies) {
+    Copy-Item (Join-Path $SimpleBleDependenciesDirectory $fileName) (Join-Path $stageDirectory $fileName)
+}
 $languagesStageDirectory = Join-Path $stageDirectory 'languages'
 New-Item -ItemType Directory -Force $languagesStageDirectory | Out-Null
 foreach ($languageFile in $languageFiles) {
@@ -133,7 +157,13 @@ $archiveEntries = @(tar -tf $archivePath)
 if ($archiveEntries | Where-Object { $_ -match '(^|/)Entime-[^/]+-win-x64-stage/' }) {
     throw 'Archive contains an unexpected staging-directory prefix.'
 }
-foreach ($requiredPath in @('Entime.exe', 'libcrypto-3-x64.dll', 'libssl-3-x64.dll', 'sqlite3.dll')) {
+$requiredArchivePaths = @(
+    'Entime.exe',
+    'libcrypto-3-x64.dll',
+    'libssl-3-x64.dll',
+    'sqlite3.dll'
+) + $requiredBleDependencies
+foreach ($requiredPath in $requiredArchivePaths) {
     if ($archiveEntries -notcontains $requiredPath) {
         throw "Archive is missing $requiredPath."
     }
@@ -162,7 +192,17 @@ if ($languageDifference.Count -ne 0) {
 if ($actualLanguageEntries | Where-Object { $_ -match '\.(?:mo|pot)$' }) {
     throw 'Runtime archive must not contain MO catalogs or POT templates.'
 }
-$allowedRoots = @('Entime.exe', 'libcrypto-3-x64.dll', 'libssl-3-x64.dll', 'sqlite3.dll', 'languages', 'samples')
+if ($normalizedArchiveEntries | Where-Object { $_ -like 'sql/*' }) {
+    throw 'Runtime archive must not contain the build-time SQL schema.'
+}
+$allowedRoots = @(
+    'Entime.exe',
+    'libcrypto-3-x64.dll',
+    'libssl-3-x64.dll',
+    'sqlite3.dll',
+    'languages',
+    'samples'
+) + $requiredBleDependencies
 foreach ($entry in $archiveEntries) {
     $root = (($entry -replace '\\', '/') -split '/')[0]
     if ($root -and $root -notin $allowedRoots) {
@@ -175,8 +215,11 @@ Remove-Item -Recurse -Force $verificationDirectory -ErrorAction SilentlyContinue
 Expand-Archive $archivePath -DestinationPath $verificationDirectory -Force
 $extractedExecutable = Join-Path $verificationDirectory 'Entime.exe'
 Assert-PeX64 $extractedExecutable
-foreach ($runtimeName in @('libcrypto-3-x64.dll', 'libssl-3-x64.dll', 'sqlite3.dll')) {
+foreach ($runtimeName in @('libcrypto-3-x64.dll', 'libssl-3-x64.dll', 'sqlite3.dll') + $requiredBleDependencies) {
     Assert-ExpectedHash (Join-Path $verificationDirectory $runtimeName) $runtimeName
+}
+foreach ($runtimeName in $requiredBleDependencies) {
+    Assert-PeX64 (Join-Path $verificationDirectory $runtimeName)
 }
 Remove-Item -Recurse -Force $verificationDirectory
 Write-Host "Created $archivePath"

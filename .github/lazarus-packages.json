@@ -1,21 +1,43 @@
 {
-  "schema": 1,
+  "schema": 2,
   "repository": "https://packages.lazarus-ide.org",
   "packages": [
-    { "name": "chsdet", "source": "opm", "archive": "ChsDet.zip", "lpk": ["chsdet.lpk"] },
+    { "name": "chsdet", "entime_version_range": "*", "source": "opm", "archive": "ChsDet.zip", "lpk": ["chsdet.lpk"] },
     {
       "name": "Synapse",
+      "entime_version_range": "*",
       "source": "git",
       "repository": "https://github.com/geby/synapse.git",
+      "selector": "branch",
       "branch": "master",
       "archive": "Synapse-git.zip",
       "directory": "packages/Synapse",
       "lpk": ["laz_synapse.lpk"]
     },
-    { "name": "DataPort", "source": "opm", "archive": "DataPort.zip", "lpk": ["dataportlasarus.lpk"] },
-    { "name": "LazSerial", "source": "opm", "archive": "LazSerial.zip", "lpk": ["LazSerialPort.lpk"] },
-    { "name": "FPSpreadsheet", "source": "opm", "archive": "FPSpreadsheet.zip", "lpk": ["laz_fpspreadsheet.lpk"] },
-    { "name": "Rx", "source": "opm", "archive": "Rx.zip", "lpk": ["rxnew.lpk", "rxdbgrid_export_spreadsheet.lpk"] },
-    { "name": "HistoryFiles", "source": "opm", "archive": "HistoryFiles.zip", "lpk": ["HistoryLazarus.lpk"] }
+    {
+      "name": "SimpleBlePascal",
+      "entime_version_range": ">=0.9.0",
+      "source": "git",
+      "repository": "https://github.com/Syutkin/Pascal-Bindings-For-SimpleBLE-Library.git",
+      "selector": "latest_tag",
+      "archive": "SimpleBlePascal-git.zip",
+      "directory": "packages/SimpleBlePascal",
+      "lpk": ["simpleblepascal.lpk"]
+    },
+    {
+      "name": "LazBle",
+      "entime_version_range": ">=0.9.0",
+      "source": "git",
+      "repository": "https://github.com/Syutkin/LazBle.git",
+      "selector": "latest_tag",
+      "archive": "LazBle-git.zip",
+      "directory": "packages/LazBle",
+      "lpk": ["lazble.lpk", "lazblelcl.lpk"]
+    },
+    { "name": "DataPort", "entime_version_range": "<0.9.0", "source": "opm", "archive": "DataPort.zip", "lpk": ["dataportlasarus.lpk"] },
+    { "name": "LazSerial", "entime_version_range": "*", "source": "opm", "archive": "LazSerial.zip", "lpk": ["LazSerialPort.lpk"] },
+    { "name": "FPSpreadsheet", "entime_version_range": "*", "source": "opm", "archive": "FPSpreadsheet.zip", "lpk": ["laz_fpspreadsheet.lpk"] },
+    { "name": "Rx", "entime_version_range": "*", "source": "opm", "archive": "Rx.zip", "lpk": ["rxnew.lpk", "rxdbgrid_export_spreadsheet.lpk"] },
+    { "name": "HistoryFiles", "entime_version_range": "*", "source": "opm", "archive": "HistoryFiles.zip", "lpk": ["HistoryLazarus.lpk"] }
   ]
 }

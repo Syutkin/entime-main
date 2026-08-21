@@ -74,11 +74,11 @@ if ($environmentNotes.Count -gt 0 -and $env:GITHUB_STEP_SUMMARY) {
 
 foreach ($package in $manifest.packages) {
     if ($package.source -eq 'git') {
-        if (
-            -not $package.repository -or
-            -not $package.branch -or
-            $package.commit -notmatch '^[0-9a-f]{40}$'
-        ) {
+        $selector = if ($package.selector) { [string]$package.selector } elseif ($package.branch) { 'branch' } else { '' }
+        $selectorMetadataIsValid =
+            (($selector -eq 'branch') -and $package.branch) -or
+            (($selector -eq 'latest_tag') -and $package.tag)
+        if (-not $package.repository -or -not $selectorMetadataIsValid -or $package.commit -notmatch '^[0-9a-f]{40}$') {
             throw "Locked Git metadata for package $($package.name) is incomplete."
         }
     }
@@ -97,6 +97,20 @@ $runtimePaths = @{
     'libssl-3-x64.dll' = Join-Path $DependenciesDirectory 'openssl/dll/libssl-3-x64.dll'
     'sqlite3.dll' = Join-Path $DependenciesDirectory 'sqlite/sqlite3.dll'
 }
+$bleRuntimeNames = @('simplecble.dll', 'simpleble.dll')
+$lockedBleRuntimeNames = @(
+    $manifest.runtime_files |
+        Where-Object { $_.name -in $bleRuntimeNames } |
+        ForEach-Object { $_.name } |
+        Sort-Object -Unique
+)
+if ($lockedBleRuntimeNames.Count -notin @(0, 2)) {
+    throw 'The locked manifest must contain both SimpleBLE runtime DLLs or neither of them.'
+}
+if ($lockedBleRuntimeNames.Count -eq 2) {
+    $runtimePaths['simplecble.dll'] = Join-Path $DependenciesDirectory 'simpleble/dll/simplecble.dll'
+    $runtimePaths['simpleble.dll'] = Join-Path $DependenciesDirectory 'simpleble/dll/simpleble.dll'
+}
 foreach ($runtimeFile in $manifest.runtime_files) {
     if (-not $runtimePaths.ContainsKey($runtimeFile.name)) {
         throw "Unexpected runtime file '$($runtimeFile.name)' in the locked manifest."
@@ -110,7 +124,7 @@ foreach ($runtimeFile in $manifest.runtime_files) {
         throw "SHA-256 mismatch for locked runtime file $($runtimeFile.name)."
     }
 }
-foreach ($name in $runtimePaths.Keys) {
+foreach ($name in @('libcrypto-3-x64.dll', 'libssl-3-x64.dll', 'sqlite3.dll')) {
     if (-not ($manifest.runtime_files | Where-Object { $_.name -eq $name })) {
         throw "The locked manifest has no SHA-256 for $name."
     }

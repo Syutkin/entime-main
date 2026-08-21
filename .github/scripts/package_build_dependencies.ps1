@@ -3,6 +3,7 @@ param(
     [Parameter(Mandatory = $true)] [string]$DependenciesDirectory,
     [Parameter(Mandatory = $true)] [string]$OpenSslDirectory,
     [Parameter(Mandatory = $true)] [string]$SqliteDirectory,
+    [string]$SimpleBleDirectory = '',
     [Parameter(Mandatory = $true)] [string]$OutputDirectory,
     [Parameter(Mandatory = $true)] [string]$GitVersion,
     [Parameter(Mandatory = $true)] [string]$AutomationCommit,
@@ -12,7 +13,7 @@ param(
 $ErrorActionPreference = 'Stop'
 New-Item -ItemType Directory -Force $OutputDirectory | Out-Null
 $manifest = Get-Content -Raw (Join-Path $DependenciesDirectory 'build-dependencies.json') | ConvertFrom-Json
-$manifest.schema = 2
+$manifest.schema = 3
 $manifest.toolchain | Add-Member -Force -NotePropertyName git -NotePropertyValue $GitVersion
 $manifest | Add-Member -Force -NotePropertyName build_environment -NotePropertyValue ([ordered]@{
     runner_os = $env:RUNNER_OS
@@ -23,16 +24,29 @@ $manifest | Add-Member -Force -NotePropertyName build_environment -NotePropertyV
     source_commit = $SourceCommit
     workflow_ref = $env:GITHUB_WORKFLOW_REF
 })
-$manifest | Add-Member -NotePropertyName runtime -NotePropertyValue ([ordered]@{
+$runtimeMetadata = [ordered]@{
     openssl = (Get-Content -Raw (Join-Path $OpenSslDirectory 'openssl-dependency.json') | ConvertFrom-Json)
     sqlite = (Get-Content -Raw (Join-Path $SqliteDirectory 'sqlite-dependency.json') | ConvertFrom-Json)
-}) -Force
+}
+$runtimeInputs = @(
+    @{ name = 'libcrypto-3-x64.dll'; path = (Join-Path $OpenSslDirectory 'dll/libcrypto-3-x64.dll'); source = 'openssl' },
+    @{ name = 'libssl-3-x64.dll'; path = (Join-Path $OpenSslDirectory 'dll/libssl-3-x64.dll'); source = 'openssl' },
+    @{ name = 'sqlite3.dll'; path = (Join-Path $SqliteDirectory 'sqlite3.dll'); source = 'sqlite' }
+)
+if ($SimpleBleDirectory) {
+    $simpleBleMetadataPath = Join-Path $SimpleBleDirectory 'simpleble-dependency.json'
+    if (-not (Test-Path $simpleBleMetadataPath)) {
+        throw "SimpleBLE dependency metadata is missing: $simpleBleMetadataPath"
+    }
+    $runtimeMetadata['simpleble'] = Get-Content -Raw $simpleBleMetadataPath | ConvertFrom-Json
+    $runtimeInputs += @(
+        @{ name = 'simplecble.dll'; path = (Join-Path $SimpleBleDirectory 'simplecble.dll'); source = 'simpleble' },
+        @{ name = 'simpleble.dll'; path = (Join-Path $SimpleBleDirectory 'simpleble.dll'); source = 'simpleble' }
+    )
+}
+$manifest | Add-Member -NotePropertyName runtime -NotePropertyValue $runtimeMetadata -Force
 $runtimeFiles = @(
-    foreach ($runtime in @(
-        @{ name = 'libcrypto-3-x64.dll'; path = (Join-Path $OpenSslDirectory 'dll/libcrypto-3-x64.dll'); source = 'openssl' },
-        @{ name = 'libssl-3-x64.dll'; path = (Join-Path $OpenSslDirectory 'dll/libssl-3-x64.dll'); source = 'openssl' },
-        @{ name = 'sqlite3.dll'; path = (Join-Path $SqliteDirectory 'sqlite3.dll'); source = 'sqlite' }
-    )) {
+    foreach ($runtime in $runtimeInputs) {
         if (-not (Test-Path $runtime.path)) {
             throw "Runtime dependency $($runtime.name) is missing."
         }
@@ -64,6 +78,13 @@ foreach ($dll in @('libcrypto-3-x64.dll', 'libssl-3-x64.dll')) {
 $sqliteStaging = Join-Path $staging 'sqlite'
 New-Item -ItemType Directory -Force $sqliteStaging | Out-Null
 Copy-Item -Force (Join-Path $SqliteDirectory 'sqlite3.dll') (Join-Path $sqliteStaging 'sqlite3.dll')
+if ($SimpleBleDirectory) {
+    $simpleBleStaging = Join-Path $staging 'simpleble/dll'
+    New-Item -ItemType Directory -Force $simpleBleStaging | Out-Null
+    foreach ($dll in @('simplecble.dll', 'simpleble.dll')) {
+        Copy-Item -Force (Join-Path $SimpleBleDirectory $dll) (Join-Path $simpleBleStaging $dll)
+    }
+}
 Copy-Item -Force $manifestPath (Join-Path $staging 'build-dependencies.json')
 $archive = Join-Path $OutputDirectory 'lazarus-dependencies.zip'
 Compress-Archive -Path (Join-Path $staging '*') -DestinationPath $archive -Force
