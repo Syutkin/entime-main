@@ -187,6 +187,30 @@ class PackageVersionTests(unittest.TestCase):
                 self.assertIn("LazBle", names)
                 self.assertNotIn("DataPort", names)
 
+    def test_lazserial_source_changes_at_0_9_0(self):
+        legacy = package_versions.select_package_configuration(
+            self.configuration, "0.8.3"
+        )
+        current = package_versions.select_package_configuration(
+            self.configuration, "0.9.0"
+        )
+        legacy_lazserial = next(
+            package for package in legacy["packages"] if package["name"] == "LazSerial"
+        )
+        current_lazserial = next(
+            package for package in current["packages"] if package["name"] == "LazSerial"
+        )
+
+        self.assertEqual(legacy_lazserial["source"], "opm")
+        self.assertEqual(legacy_lazserial["archive"], "LazSerial.zip")
+        self.assertEqual(current_lazserial["source"], "git")
+        self.assertEqual(
+            current_lazserial["repository"],
+            "https://github.com/Syutkin/TLazSerial.git",
+        )
+        self.assertEqual(current_lazserial["selector"], "branch")
+        self.assertEqual(current_lazserial["branch"], "master")
+
     def test_comparator_ranges_support_and_or(self):
         self.assertTrue(
             package_versions.version_matches((0, 8, 3), ">=0.8.0 <0.9.0")
