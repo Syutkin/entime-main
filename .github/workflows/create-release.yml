@@ -134,8 +134,14 @@ jobs:
 
           "target_tag=$target" | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
           'should_process=true' | Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
+          $isPrerelease = $target.Contains('-')
+          "is_prerelease=$(($isPrerelease).ToString().ToLowerInvariant())" |
+            Out-File $env:GITHUB_OUTPUT -Append -Encoding utf8
           "TARGET_TAG=$target" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
-          Write-Host "Selected release $target."
+          "IS_PRERELEASE=$(($isPrerelease).ToString().ToLowerInvariant())" |
+            Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          $releaseKind = if ($isPrerelease) { 'prerelease' } else { 'stable release' }
+          Write-Host "Selected $releaseKind $target."
 
       - name: Select versioned release profile
         if: env.CONTINUE_PIPELINE == 'true'
@@ -627,12 +633,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create $env:TARGET_TAG `
-            '${{ steps.package.outputs.asset_path }}' `
-            '${{ steps.package.outputs.checksum_path }}' `
-            '${{ steps.dependencies.outputs.manifest_path }}' `
-            '${{ steps.dependencies.outputs.archive_path }}' `
-            '${{ steps.dependencies.outputs.archive_checksum_path }}' `
-            --repo $env:GITHUB_REPOSITORY `
-            --title "Entime $env:TARGET_TAG" `
-            --notes-file "$env:BASE_RELEASE_NOTES"
+          $releaseArguments = @(
+            $env:TARGET_TAG,
+            '${{ steps.package.outputs.asset_path }}',
+            '${{ steps.package.outputs.checksum_path }}',
+            '${{ steps.dependencies.outputs.manifest_path }}',
+            '${{ steps.dependencies.outputs.archive_path }}',
+            '${{ steps.dependencies.outputs.archive_checksum_path }}',
+            '--repo', $env:GITHUB_REPOSITORY,
+            '--title', "Entime $env:TARGET_TAG",
+            '--notes-file', $env:BASE_RELEASE_NOTES
+          )
+          if ($env:IS_PRERELEASE -eq 'true') {
+            $releaseArguments += '--prerelease'
+          }
+          gh release create @releaseArguments

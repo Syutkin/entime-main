@@ -8,7 +8,12 @@ import json
 import re
 
 
-SEMVER_PATTERN = re.compile(r"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$")
+SEMVER_PATTERN = re.compile(
+    r"^(0|[1-9][0-9]*)\."
+    r"(0|[1-9][0-9]*)\."
+    r"(0|[1-9][0-9]*)"
+    r"(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$"
+)
 CURRENT_LAYOUT_SINCE = (0, 9, 0)
 
 
@@ -16,7 +21,18 @@ def parse_version(tag: str) -> tuple[int, int, int]:
     match = SEMVER_PATTERN.fullmatch(tag)
     if match is None:
         raise ValueError(f"Invalid release tag: {tag!r}.")
-    return tuple(int(part) for part in match.groups())
+    prerelease = match.group(4)
+    if prerelease is not None:
+        for identifier in prerelease.split("."):
+            if (
+                identifier.isdigit()
+                and len(identifier) > 1
+                and identifier[0] == "0"
+            ):
+                raise ValueError(f"Invalid release tag: {tag!r}.")
+    # Layout selection follows the numeric application version. The suffix
+    # only controls release precedence and publication as a prerelease.
+    return tuple(int(part) for part in match.groups()[:3])
 
 
 def select_release_profile(tag: str) -> dict[str, object]:

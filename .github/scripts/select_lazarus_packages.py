@@ -11,15 +11,28 @@ from pathlib import Path
 
 
 SEMVER = r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)"
-SEMVER_PATTERN = re.compile(rf"^{SEMVER}$")
+SEMVER_PATTERN = re.compile(
+    rf"^{SEMVER}(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$"
+)
 COMPARATOR_PATTERN = re.compile(rf"^(<=|>=|<|>|=)?{SEMVER}$")
 
 
 def parse_version(value: str) -> tuple[int, int, int]:
     match = SEMVER_PATTERN.fullmatch(value)
     if match is None:
-        raise ValueError(f"Invalid stable SemVer: {value!r}.")
-    return tuple(int(part) for part in match.groups())
+        raise ValueError(f"Invalid release SemVer: {value!r}.")
+    prerelease = match.group(4)
+    if prerelease is not None:
+        for identifier in prerelease.split("."):
+            if (
+                identifier.isdigit()
+                and len(identifier) > 1
+                and identifier[0] == "0"
+            ):
+                raise ValueError(f"Invalid release SemVer: {value!r}.")
+    # Dependency ranges follow the numeric application version. A prerelease
+    # uses exactly the same project dependencies as its future stable release.
+    return tuple(int(part) for part in match.groups()[:3])
 
 
 def comparator_matches(version: tuple[int, int, int], expression: str) -> bool:

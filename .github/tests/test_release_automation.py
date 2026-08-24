@@ -66,6 +66,20 @@ class ChangelogTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             changelog.extract_section("## [0.8.1]\n\n## [0.8.0]\n", "0.8.1")
 
+    def test_prerelease_version_section(self):
+        text = """# Changelog
+
+## [0.9.0-beta.1] - 2026-08-25
+
+### Added
+
+- Beta release.
+"""
+        self.assertEqual(
+            changelog.extract_section(text, "0.9.0-beta.1"),
+            "### Added\n\n- Beta release.\n",
+        )
+
 
 class ReleaseTagTests(unittest.TestCase):
     def test_next_tag_is_semantically_sorted(self):
@@ -86,11 +100,57 @@ class ReleaseTagTests(unittest.TestCase):
         )
         self.assertEqual(selected, "0.10.0")
 
+    def test_prereleases_are_sorted_by_semver_before_the_stable_version(self):
+        source = [
+            "0.9.0",
+            "0.9.0-rc.1",
+            "0.9.0-beta.10",
+            "0.9.0-beta.2",
+            "0.9.0-beta.1",
+        ]
+        self.assertEqual(
+            release_tags.select_release_tag("sync_next", "", source, ["0.8.3"]),
+            "0.9.0-beta.1",
+        )
+        self.assertEqual(
+            release_tags.select_release_tag(
+                "sync_next", "", source, ["0.9.0-beta.1"]
+            ),
+            "0.9.0-beta.2",
+        )
+        self.assertEqual(
+            release_tags.select_release_tag(
+                "sync_next", "", source, ["0.9.0-rc.1"]
+            ),
+            "0.9.0",
+        )
+
+    def test_requested_newer_prerelease_tag(self):
+        selected = release_tags.select_release_tag(
+            "sync_next",
+            "0.9.0-beta.2",
+            ["0.9.0-beta.1", "0.9.0-beta.2"],
+            ["0.9.0-beta.1"],
+        )
+        self.assertEqual(selected, "0.9.0-beta.2")
+
+    def test_release_kind_is_derived_from_validated_tag(self):
+        self.assertFalse(release_tags.is_prerelease("0.9.0"))
+        self.assertTrue(release_tags.is_prerelease("0.9.0-beta.1"))
+
     def test_no_new_tag_is_a_successful_empty_result(self):
         self.assertIsNone(
             release_tags.select_release_tag(
                 "sync_next", "", ["0.8.0"], ["0.8.0"]
             )
+        )
+
+    def test_empty_local_repository_selects_the_first_supported_tag(self):
+        self.assertEqual(
+            release_tags.select_release_tag(
+                "sync_next", "", ["0.0.0-0", "0.0.0-alpha"], []
+            ),
+            "0.0.0-0",
         )
 
     def test_invalid_sync_requests_fail(self):
@@ -107,6 +167,18 @@ class ReleaseTagTests(unittest.TestCase):
                 "sync_next", "v0.8.1", ["v0.8.1"], ["0.8.0"]
             )
 
+    def test_invalid_prerelease_tags_fail(self):
+        for tag in (
+            "0.9.0-",
+            "0.9.0-.beta",
+            "0.9.0-beta.",
+            "0.9.0-beta..1",
+            "0.9.0-beta.01",
+            "0.9.0+build",
+        ):
+            with self.subTest(tag=tag), self.assertRaises(ValueError):
+                release_tags.version_key(tag)
+
     def test_existing_modes_require_an_existing_tag(self):
         for mode in ("publish_existing", "rebuild_existing"):
             with self.subTest(mode=mode):
@@ -116,6 +188,15 @@ class ReleaseTagTests(unittest.TestCase):
                     ),
                     "0.7.13",
                 )
+                self.assertEqual(
+                    release_tags.select_release_tag(
+                        mode,
+                        "0.9.0-beta.1",
+                        [],
+                        ["0.7.13", "0.9.0-beta.1"],
+                    ),
+                    "0.9.0-beta.1",
+                )
                 with self.assertRaises(ValueError):
                     release_tags.select_release_tag(mode, "", [], ["0.7.13"])
                 with self.assertRaises(ValueError):
@@ -124,14 +205,16 @@ class ReleaseTagTests(unittest.TestCase):
 
 class ReleaseProfileTests(unittest.TestCase):
     def test_legacy_profile_is_used_before_0_9_0(self):
-        profile = release_profiles.select_release_profile("0.8.3")
-        self.assertEqual(profile["profile"], "legacy")
-        self.assertEqual(profile["project_file"], "Entime.lpi")
-        self.assertEqual(profile["build_mode"], "Release")
-        self.assertEqual(profile["executable_path"], "release/Entime.exe")
+        for tag in ("0.8.3", "0.8.4-beta.1"):
+            with self.subTest(tag=tag):
+                profile = release_profiles.select_release_profile(tag)
+                self.assertEqual(profile["profile"], "legacy")
+                self.assertEqual(profile["project_file"], "Entime.lpi")
+                self.assertEqual(profile["build_mode"], "Release")
+                self.assertEqual(profile["executable_path"], "release/Entime.exe")
 
     def test_current_profile_starts_at_0_9_0_and_includes_later_major_versions(self):
-        for tag in ("0.9.0", "0.9.1", "1.0.0"):
+        for tag in ("0.9.0-beta.1", "0.9.0", "0.9.1-rc.2", "1.0.0"):
             with self.subTest(tag=tag):
                 profile = release_profiles.select_release_profile(tag)
                 self.assertEqual(profile["profile"], "current")
@@ -142,7 +225,7 @@ class ReleaseProfileTests(unittest.TestCase):
                 )
 
     def test_invalid_release_tag_fails(self):
-        for tag in ("v0.9.0", "0.9", "0.09.0", ""):
+        for tag in ("v0.9.0", "0.9", "0.09.0", "0.9.0-beta.01", ""):
             with self.subTest(tag=tag), self.assertRaises(ValueError):
                 release_profiles.select_release_profile(tag)
 
@@ -180,7 +263,7 @@ class PackageVersionTests(unittest.TestCase):
         )
 
     def test_current_versions_replace_dataport_with_ble_packages(self):
-        for tag in ("0.9.0", "0.9.1", "1.0.0"):
+        for tag in ("0.9.0-beta.1", "0.9.0", "0.9.1-rc.2", "1.0.0"):
             with self.subTest(tag=tag):
                 names = self.selected_names(tag)
                 self.assertIn("SimpleBlePascal", names)
@@ -339,7 +422,7 @@ class WorkflowTests(unittest.TestCase):
     def test_release_notes_are_exact_changelog_section(self):
         self.assertNotIn("- name: Create release notes", self.workflow)
         publish_step = self.workflow.split("- name: Publish GitHub Release", 1)[1]
-        self.assertIn('--notes-file "$env:BASE_RELEASE_NOTES"', publish_step)
+        self.assertIn("'--notes-file', $env:BASE_RELEASE_NOTES", publish_step)
         self.assertNotIn("Archive SHA-256", self.workflow)
         self.assertNotIn("## Source", self.workflow)
 
@@ -392,6 +475,15 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("-ConfigFile $env:LAZARUS_PACKAGES_CONFIG", self.workflow)
         self.assertIn("$blePackages.Count -notin @(0, 2)", self.workflow)
         self.assertIn("USES_SIMPLEBLE=$(($blePackages.Count -eq 2)", self.workflow)
+
+    def test_prerelease_uses_the_same_pipeline_and_is_marked_on_publish(self):
+        self.assertIn("$isPrerelease = $target.Contains('-')", self.workflow)
+        self.assertIn("IS_PRERELEASE=", self.workflow)
+        publish_step = self.workflow.split("- name: Publish GitHub Release", 1)[1]
+        self.assertIn("if ($env:IS_PRERELEASE -eq 'true')", publish_step)
+        self.assertIn("$releaseArguments += '--prerelease'", publish_step)
+        self.assertIn("gh release create @releaseArguments", publish_step)
+        self.assertEqual(self.workflow.count("- name: Publish GitHub Release"), 1)
 
     def test_simplecble_latest_release_asset_supplies_both_dlls(self):
         self.assertIn(
