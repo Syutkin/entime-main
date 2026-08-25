@@ -1,0 +1,50 @@
+object StageSettingsFrame: TStageSettingsFrame
+  Left = 0
+  Height = 34
+  Top = 0
+  Width = 299
+  ClientHeight = 34
+  ClientWidth = 299
+  TabOrder = 0
+  object ActiveCheckBox: TCheckBox
+    AnchorSideLeft.Control = StageSettingsFrame
+    AnchorSideTop.Control = StageSettingsFrame
+    AnchorSideTop.Side = asrCenter
+    Left = 4
+    Height = 23
+    Top = 5
+    Width = 24
+    BorderSpacing.Left = 4
+    OnChange = ControlChange
+    TabOrder = 0
+  end
+  object StageLabel: TLabel
+    AnchorSideLeft.Control = ActiveCheckBox
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = StageSettingsFrame
+    AnchorSideTop.Side = asrCenter
+    Left = 32
+    Height = 18
+    Top = 8
+    Width = 50
+    BorderSpacing.Left = 4
+    Caption = 'СУ'
+    ParentColor = False
+  end
+  object StageNameEdit: TEdit
+    AnchorSideLeft.Control = StageLabel
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = StageSettingsFrame
+    AnchorSideRight.Control = StageSettingsFrame
+    AnchorSideRight.Side = asrBottom
+    Left = 86
+    Height = 32
+    Top = 1
+    Width = 209
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 4
+    BorderSpacing.Right = 4
+    OnChange = ControlChange
+    TabOrder = 1
+  end
+end

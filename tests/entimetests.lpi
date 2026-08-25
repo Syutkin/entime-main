@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="12"/>
+    <PathDelim Value="/"/>
+    <General>
+      <SessionStorage Value="InProjectDir"/>
+      <Title Value="EntimeTests"/>
+      <ResourceType Value="res"/>
+      <Resources Count="1">
+        <Resource_0 FileName="$(ProjPath)/../resources/sql/schema.sql" Type="RCDATA" ResourceName="ENTIME_SCHEMA"/>
+      </Resources>
+    </General>
+    <BuildModes Count="1">
+      <Item1 Name="qt6" Default="True">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="qt6"/>
+        </MacroValues>
+      </Item1>
+    </BuildModes>
+    <RequiredPackages Count="8">
+      <Item1>
+        <PackageName Value="FCL"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="LCL"/>
+      </Item2>
+      <Item3>
+        <PackageName Value="LazUtils"/>
+      </Item3>
+      <Item4>
+        <PackageName Value="SQLDBLaz"/>
+      </Item4>
+      <Item5>
+        <PackageName Value="laz_synapse"/>
+      </Item5>
+      <Item6>
+        <PackageName Value="chsdet"/>
+      </Item6>
+      <Item7>
+        <PackageName Value="LazBle"/>
+      </Item7>
+      <Item8>
+        <PackageName Value="LazSerialPort"/>
+      </Item8>
+    </RequiredPackages>
+    <Units Count="1">
+      <Unit0>
+        <Filename Value="entimetests.lpr"/>
+        <IsPartOfProject Value="True"/>
+      </Unit0>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <PathDelim Value="/"/>
+    <Target>
+      <Filename Value=".test_build/entimetests"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="../src/include"/>
+      <OtherUnitFiles Value="../src/ui;../src/domain;../src/application;../src/data;../src/import;../src/infrastructure;support;unit/domain;unit/application;unit/data;unit/import;unit/infrastructure;unit/ui;."/>
+      <UnitOutputDirectory Value=".test_build/lib/$(TargetCPU)-$(TargetOS)/$(LCLWidgetType)"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <IncludeAssertionCode Value="True"/>
+      </SyntaxOptions>
+    </Parsing>
+    <CodeGeneration>
+      <Checks>
+        <IOChecks Value="True"/>
+        <RangeChecks Value="True"/>
+        <OverflowChecks Value="True"/>
+      </Checks>
+    </CodeGeneration>
+    <Linking>
+      <Debugging>
+        <GenerateDebugInfo Value="False"/>
+      </Debugging>
+    </Linking>
+  </CompilerOptions>
+</CONFIG>

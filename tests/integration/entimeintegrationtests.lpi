@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="12"/>
+    <PathDelim Value="/"/>
+    <General>
+      <SessionStorage Value="InProjectDir"/>
+      <Title Value="EntimeIntegrationTests"/>
+      <Scaled Value="True"/>
+      <ResourceType Value="res"/>
+      <Resources Count="1">
+        <Resource_0 FileName="$(ProjPath)/../../resources/sql/schema.sql" Type="RCDATA" ResourceName="ENTIME_SCHEMA"/>
+      </Resources>
+    </General>
+    <BuildModes Count="1">
+      <Item1 Name="qt6" Default="True">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="qt6"/>
+        </MacroValues>
+      </Item1>
+    </BuildModes>
+    <RequiredPackages Count="16">
+      <Item1>
+        <PackageName Value="FCL"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="LCL"/>
+      </Item2>
+      <Item3>
+        <PackageName Value="LazControls"/>
+      </Item3>
+      <Item4>
+        <PackageName Value="DateTimeCtrls"/>
+      </Item4>
+      <Item5>
+        <PackageName Value="SQLDBLaz"/>
+      </Item5>
+      <Item6>
+        <PackageName Value="laz_synapse"/>
+      </Item6>
+      <Item7>
+        <PackageName Value="LazSerialPort"/>
+      </Item7>
+      <Item8>
+        <PackageName Value="laz_fpspreadsheet"/>
+      </Item8>
+      <Item9>
+        <PackageName Value="rxnew"/>
+      </Item9>
+      <Item10>
+        <PackageName Value="rxdbgrid_export_spreadsheet"/>
+      </Item10>
+      <Item11>
+        <PackageName Value="lazdbexport"/>
+      </Item11>
+      <Item12>
+        <PackageName Value="HistoryLazarus"/>
+      </Item12>
+      <Item13>
+        <PackageName Value="chsdet"/>
+      </Item13>
+      <Item14>
+        <PackageName Value="MyForks"/>
+      </Item14>
+      <Item15>
+        <PackageName Value="LazBle"/>
+      </Item15>
+      <Item16>
+        <PackageName Value="LazBleLCL"/>
+      </Item16>
+    </RequiredPackages>
+    <Units Count="8">
+      <Unit0>
+        <Filename Value="entimeintegrationtests.lpr"/>
+        <IsPartOfProject Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="mainintegrationtests.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="../../src/infrastructure/bletimingtransport.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="BleTimingTransport"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="../support/fakelazblebackend.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="FakeLazBleBackend"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="competitionexportservicetests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CompetitionExportServiceTests"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="../../src/infrastructure/transportstreamframer.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TransportStreamFramer"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="../../src/infrastructure/firmwareresponseprotocol.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="FirmwareResponseProtocol"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="../../src/infrastructure/transportstreamprocessor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TransportStreamProcessor"/>
+      </Unit7>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <PathDelim Value="/"/>
+    <Target>
+      <Filename Value=".test_build/entimeintegrationtests"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="../../src/include"/>
+      <OtherUnitFiles Value="../../src/ui;../../src/domain;../../src/application;../../src/data;../../src/import;../../src/infrastructure;../support;."/>
+      <UnitOutputDirectory Value=".test_build/lib/$(TargetCPU)-$(TargetOS)/$(LCLWidgetType)"/>
+    </SearchPaths>
+    <Linking>
+      <Debugging>
+        <GenerateDebugInfo Value="False"/>
+      </Debugging>
+    </Linking>
+  </CompilerOptions>
+</CONFIG>

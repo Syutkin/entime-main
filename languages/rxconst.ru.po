@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: ru\n"
-"X-Generator: Poedit 2.2.3\n"
+"X-Generator: Poedit 2.2\n"
 
 #: rxconst.sabout
 msgid "About"
@@ -36,6 +36,7 @@ msgid "Button align"
 msgstr "Выравнивание кнопок"
 
 #: rxconst.sbuttonalign1
+msgctxt "rxconst.sbuttonalign1"
 msgid "None"
 msgstr "Нет"
 
@@ -52,12 +53,17 @@ msgid "Close"
 msgstr "Закрыть"
 
 #: rxconst.scloseaftersec
+#, object-pascal-format
 msgid "Close after %d sec"
 msgstr "Будет закрыто через %d секунд"
 
 #: rxconst.scloseallexceptthis
 msgid "Close all except this"
 msgstr "Закрыть все окна, за исключением этого"
+
+#: rxconst.scloseallquestion
+msgid "Close all window?"
+msgstr "Закрыть все окна?"
 
 #: rxconst.scloseallwindows
 msgid "Close all windows"
@@ -104,8 +110,9 @@ msgid "Not assigned task panel"
 msgstr "Не указана панель задач"
 
 #: rxconst.sexptcontrolnotfound
+#, object-pascal-format
 msgid "Control not found in validate %s."
-msgstr "Элемент управления не найден в валидаторе %s."
+msgstr "Элемент управления не найден в валидаторе %s"
 
 #: rxconst.sfilenotexec
 msgid "File specified is not an executable file, dynamic-link library, or icon file"
@@ -124,6 +131,7 @@ msgid "Flat buttons"
 msgstr "Плавающие кнопки"
 
 #: rxconst.sfolderlistererr
+#, object-pascal-format
 msgid "%s. Not assigned property MenuItem"
 msgstr "%s. Не определено свойство MenuItem"
 
@@ -139,7 +147,12 @@ msgstr "Версия FPC : "
 msgid "General"
 msgstr "Общее"
 
+#: rxconst.sgrabkey
+msgid "Grab key"
+msgstr "Захватить клавишу"
+
 #: rxconst.shistorydesc
+#, object-pascal-format
 msgid "History - \"%s\""
 msgstr "История - \"%s\""
 
@@ -152,6 +165,7 @@ msgid "License"
 msgstr "Лицензия"
 
 #: rxconst.sloadliberror
+#, object-pascal-format
 msgid "Could not load '%s' library"
 msgstr "Невозможно загрузить библиотеку '%s'"
 
@@ -172,8 +186,13 @@ msgid "Options"
 msgstr "Параметры"
 
 #: rxconst.soutofrange
+#, object-pascal-format
 msgid "Out of range %d %d %d %d"
 msgstr "За границами диапазона %d %d %d %d"
+
+#: rxconst.spressthekey
+msgid "Press the key"
+msgstr "Нажмите клавишу"
 
 #: rxconst.sprevmonth
 msgid "Previous Month|"
@@ -183,17 +202,79 @@ msgstr "Превыдущий месяц|"
 msgid "Previous Year|"
 msgstr "Превыдущий год|"
 
+#: rxconst.squestion
+msgid "Question"
+msgstr "Вопрос"
+
 #: rxconst.sreqvalue
+#, object-pascal-format
 msgid "Error. Expected value for field %s."
 msgstr "Поле %s. Требуется значение"
+
+#: rxconst.srxbyte
+msgid "B"
+msgstr ""
+
+#: rxconst.srxcloseformvalidatoreditor
+msgid "Rx close form validator editor"
+msgstr "Редактор RxCloseFormValidator"
+
+#: rxconst.srxgigabyte
+msgid "GB"
+msgstr ""
+
+#: rxconst.srxkilobyte
+msgid "KB"
+msgstr ""
+
+#: rxconst.srxlogindlgbtnmore
+msgid "More >>"
+msgstr "Больше >>"
+
+#: rxconst.srxlogindlgdatabase
+msgid "Database"
+msgstr "База данных"
+
+#: rxconst.srxmegabyte
+msgid "MB"
+msgstr ""
+
+#: rxconst.srxnotdefinedfilename
+msgid "Not defined file name"
+msgstr "Не указано имя файла"
 
 #: rxconst.srxstrholdertexteditor
 msgid "Rx string holder editor"
 msgstr "Редактор RxStrHolder"
 
+#: rxconst.srxterrabyte
+msgid "TB"
+msgstr ""
+
 #: rxconst.srxtextfolderitem
 msgid "Item "
 msgstr "Строка "
+
+#: rxconst.srxtextfoldersynhighlighter
+msgid "Highlighter"
+msgstr "Подсветка синтаксиса"
+
+#: rxconst.srxtextfoldersynhtml
+msgid "HTML"
+msgstr "Синтаксис HTML"
+
+#: rxconst.srxtextfoldersynnone
+msgctxt "rxconst.srxtextfoldersynnone"
+msgid "None"
+msgstr "Нет"
+
+#: rxconst.srxtextfoldersynsql
+msgid "SQL"
+msgstr "Синтаксис SQL"
+
+#: rxconst.srxtextfoldersynxml
+msgid "XML"
+msgstr "Синтаксис XML"
 
 #: rxconst.srxtextholderadd
 msgid "Add"
@@ -202,6 +283,14 @@ msgstr "Добавить"
 #: rxconst.srxtextholdereditor
 msgid "RxTextHolder editor"
 msgstr "Редактор RxTextHolder"
+
+#: rxconst.srxtextholdermovedown
+msgid "Down"
+msgstr "Вниз"
+
+#: rxconst.srxtextholdermoveup
+msgid "Up"
+msgstr "Вверх"
 
 #: rxconst.srxtextholderremove
 msgid "Remove"
@@ -215,6 +304,14 @@ msgstr "Название"
 msgid "Rx text holder editor"
 msgstr "Редактор RxTextHolder"
 
+#: rxconst.srxtoolpaneleditor
+msgid "Rx toolpanel editor"
+msgstr "Редактор RxToolPanel"
+
+#: rxconst.srxviewspaneleditor
+msgid "Rx views panel editor"
+msgstr "Редактор RxViewsPanel"
+
 #: rxconst.ssecondhalfofyear
 msgid "Second half of year"
 msgstr "Вторая половина года"
@@ -222,6 +319,14 @@ msgstr "Вторая половина года"
 #: rxconst.ssecondquarter
 msgid "Second quarter"
 msgstr "Второй квартал"
+
+#: rxconst.sseparator
+msgid "Separator"
+msgstr "Разделитель"
+
+#: rxconst.sshortcut
+msgid "ShortCut"
+msgstr "Быстрый вызов"
 
 #: rxconst.sshowcaption
 msgid "Show caption"
@@ -272,22 +377,27 @@ msgid "Transparent"
 msgstr "Прозрачно"
 
 #: rxconst.svariableisnotboolean
+#, object-pascal-format
 msgid "Variable %s is not boolean"
 msgstr "Переменная %s не логического типа"
 
 #: rxconst.svariableisnotdt
+#, object-pascal-format
 msgid "Variable %s is not date/time"
 msgstr "Переменная %s не дата/время"
 
 #: rxconst.svariableisnotfloat
+#, object-pascal-format
 msgid "Variable %s is not float"
 msgstr "Переменная %s не число"
 
 #: rxconst.svariableisnotinteger
+#, object-pascal-format
 msgid "Variable %s is not integer"
 msgstr "Переменная %s не целое число"
 
 #: rxconst.svariableisnotstring
+#, object-pascal-format
 msgid "Variable %s is not string"
 msgstr "Переменная %s не строка"
 

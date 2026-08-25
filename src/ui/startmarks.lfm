@@ -1,0 +1,399 @@
+object StartMarksForm: TStartMarksForm
+  Left = 709
+  Height = 623
+  Top = 228
+  Width = 1100
+  Caption = 'Стартовые отметки'
+  ClientHeight = 623
+  ClientWidth = 1100
+  Constraints.MinHeight = 150
+  Constraints.MinWidth = 150
+  Position = poMainFormCenter
+  LCLVersion = '4.8.0.0'
+  OnClose = FormClose
+  OnCreate = FormCreate
+  object PanelJournalFilter: TPanel
+    Left = 0
+    Height = 42
+    Top = 0
+    Width = 1100
+    Align = alTop
+    BevelOuter = bvNone
+    ClientHeight = 42
+    ClientWidth = 1100
+    TabOrder = 0
+    object LabelJournalFilter: TLabel
+      Left = 8
+      Height = 18
+      Top = 12
+      Width = 52
+      Caption = ''
+      ParentColor = False
+    end
+    object ComboBoxJournalFilter: TComboBox
+      Left = 72
+      Height = 32
+      Top = 5
+      Width = 260
+      ItemHeight = 25
+      Style = csDropDownList
+      TabOrder = 0
+      OnChange = ComboBoxJournalFilterChange
+    end
+  end
+  object RxDBGridStartMarks: TRxDBGrid
+    Left = 0
+    Height = 581
+    Top = 42
+    Width = 1100
+    ColumnDefValues.BlobText = '(данные)'
+    TitleButtons = False
+    AutoSort = True
+    Columns = <    
+      item
+        Alignment = taCenter
+        Font.Style = [fsBold]
+        MinSize = 10
+        MaxSize = 200
+        Title.Alignment = taCenter
+        Title.Orientation = toHorizontal
+        Title.Caption = 'ID'
+        Width = 55
+        FieldName = 'id'
+        EditButtons = <>
+        Filter.DropDownRows = 0
+        Filter.EmptyValue = '(Пусто)'
+        Filter.NotEmptyValue = '(Не пусто)'
+        Filter.AllValue = '(Все значения)'
+        Filter.EmptyFont.Style = [fsItalic]
+        Filter.ItemIndex = -1
+        Footers = <>
+      end    
+      item
+        Alignment = taRightJustify
+        MinSize = 10
+        MaxSize = 200
+        Title.Alignment = taCenter
+        Title.Orientation = toHorizontal
+        Title.Caption = 'Этап приёма'
+        Width = 100
+        FieldName = 'stage_index'
+        EditButtons = <>
+        Filter.DropDownRows = 0
+        Filter.EmptyValue = '(Пусто)'
+        Filter.NotEmptyValue = '(Не пусто)'
+        Filter.AllValue = '(Все значения)'
+        Filter.EmptyFont.Style = [fsItalic]
+        Filter.ItemIndex = -1
+        Footers = <>
+      end    
+      item
+        Alignment = taRightJustify
+        MinSize = 10
+        MaxSize = 200
+        Title.Alignment = taCenter
+        Title.Orientation = toHorizontal
+        Title.Caption = 'Этап применения'
+        Width = 100
+        FieldName = 'applied_stage_index'
+        EditButtons = <>
+        Filter.DropDownRows = 0
+        Filter.EmptyValue = '(Пусто)'
+        Filter.NotEmptyValue = '(Не пусто)'
+        Filter.AllValue = '(Все значения)'
+        Filter.EmptyFont.Style = [fsItalic]
+        Filter.ItemIndex = -1
+        Footers = <>
+      end    
+      item
+        MinSize = 10
+        MaxSize = 200
+        Title.Alignment = taCenter
+        Title.Orientation = toHorizontal
+        Title.Caption = 'Время'
+        Width = 100
+        FieldName = 'event_time'
+        EditButtons = <>
+        Filter.DropDownRows = 0
+        Filter.EmptyValue = '(Пусто)'
+        Filter.NotEmptyValue = '(Не пусто)'
+        Filter.AllValue = '(Все значения)'
+        Filter.EmptyFont.Style = [fsItalic]
+        Filter.ItemIndex = -1
+        Footers = <>
+      end    
+      item
+        Alignment = taRightJustify
+        MinSize = 10
+        MaxSize = 200
+        Title.Alignment = taCenter
+        Title.Orientation = toHorizontal
+        Title.Caption = 'Поправка'
+        Width = 100
+        FieldName = 'correction_ms'
+        EditButtons = <>
+        Filter.DropDownRows = 0
+        Filter.EmptyValue = '(Пусто)'
+        Filter.NotEmptyValue = '(Не пусто)'
+        Filter.AllValue = '(Все значения)'
+        Filter.EmptyFont.Style = [fsItalic]
+        Filter.ItemIndex = -1
+        Footers = <>
+      end
+      item
+        Alignment = taRightJustify
+        MinSize = 10
+        MaxSize = 200
+        Title.Alignment = taCenter
+        Title.Orientation = toHorizontal
+        Title.Caption = 'Номер'
+        Width = 70
+        FieldName = 'participant_number'
+        EditButtons = <>
+        Filter.DropDownRows = 0
+        Filter.EmptyValue = '(Пусто)'
+        Filter.NotEmptyValue = '(Не пусто)'
+        Filter.AllValue = '(Все значения)'
+        Filter.EmptyFont.Style = [fsItalic]
+        Filter.ItemIndex = -1
+        Footers = <>
+      end
+      item
+        Alignment = taRightJustify
+        MinSize = 10
+        MaxSize = 200
+        Title.Alignment = taCenter
+        Title.Orientation = toHorizontal
+        Title.Caption = 'Дельта, мс'
+        Width = 90
+        FieldName = 'match_delta_ms'
+        EditButtons = <>
+        Filter.DropDownRows = 0
+        Filter.EmptyValue = '(Пусто)'
+        Filter.NotEmptyValue = '(Не пусто)'
+        Filter.AllValue = '(Все значения)'
+        Filter.EmptyFont.Style = [fsItalic]
+        Filter.ItemIndex = -1
+        Footers = <>
+      end
+      item
+        Alignment = taCenter
+        MinSize = 10
+        MaxSize = 200
+        Title.Alignment = taCenter
+        Title.Orientation = toHorizontal
+        Title.Caption = 'Транспорт'
+        Width = 80
+        FieldName = 'source_kind'
+        EditButtons = <>
+        Filter.DropDownRows = 0
+        Filter.EmptyValue = '(Пусто)'
+        Filter.NotEmptyValue = '(Не пусто)'
+        Filter.AllValue = '(Все значения)'
+        Filter.EmptyFont.Style = [fsItalic]
+        Filter.ItemIndex = -1
+        Footers = <>
+      end
+      item
+        MinSize = 10
+        MaxSize = 240
+        Title.Alignment = taCenter
+        Title.Orientation = toHorizontal
+        Title.Caption = 'Устройство'
+        Width = 130
+        FieldName = 'source_device_id'
+        EditButtons = <>
+        Filter.DropDownRows = 0
+        Filter.EmptyValue = '(Пусто)'
+        Filter.NotEmptyValue = '(Не пусто)'
+        Filter.AllValue = '(Все значения)'
+        Filter.EmptyFont.Style = [fsItalic]
+        Filter.ItemIndex = -1
+        Footers = <>
+      end
+      item
+        Alignment = taCenter
+        MinSize = 10
+        MaxSize = 200
+        Title.Alignment = taCenter
+        Title.Orientation = toHorizontal
+        Title.Caption = 'Режим назначения'
+        Width = 120
+        FieldName = 'assignment_mode'
+        EditButtons = <>
+        Filter.DropDownRows = 0
+        Filter.EmptyValue = '(Пусто)'
+        Filter.NotEmptyValue = '(Не пусто)'
+        Filter.AllValue = '(Все значения)'
+        Filter.EmptyFont.Style = [fsItalic]
+        Filter.ItemIndex = -1
+        Footers = <>
+      end
+      item
+        Alignment = taCenter
+        MinSize = 10
+        MaxSize = 200
+        Title.Alignment = taCenter
+        Title.Orientation = toHorizontal
+        Title.Caption = 'Статус'
+        Width = 90
+        FieldName = 'status'
+        EditButtons = <>
+        Filter.DropDownRows = 0
+        Filter.EmptyValue = '(Пусто)'
+        Filter.NotEmptyValue = '(Не пусто)'
+        Filter.AllValue = '(Все значения)'
+        Filter.EmptyFont.Style = [fsItalic]
+        Filter.ItemIndex = -1
+        Footers = <>
+      end
+      item
+        MinSize = 10
+        MaxSize = 240
+        Title.Alignment = taCenter
+        Title.Orientation = toHorizontal
+        Title.Caption = 'Получено'
+        Width = 165
+        FieldName = 'received_at'
+        EditButtons = <>
+        Filter.DropDownRows = 0
+        Filter.EmptyValue = '(Пусто)'
+        Filter.NotEmptyValue = '(Не пусто)'
+        Filter.AllValue = '(Все значения)'
+        Filter.EmptyFont.Style = [fsItalic]
+        Filter.ItemIndex = -1
+        Footers = <>
+      end
+      item
+        MinSize = 10
+        MaxSize = 240
+        Title.Alignment = taCenter
+        Title.Orientation = toHorizontal
+        Title.Caption = 'Применено'
+        Width = 165
+        FieldName = 'applied_at'
+        EditButtons = <>
+        Filter.DropDownRows = 0
+        Filter.EmptyValue = '(Пусто)'
+        Filter.NotEmptyValue = '(Не пусто)'
+        Filter.AllValue = '(Все значения)'
+        Filter.EmptyFont.Style = [fsItalic]
+        Filter.ItemIndex = -1
+        Footers = <>
+      end
+      item
+        MinSize = 10
+        MaxSize = 500
+        Title.Alignment = taCenter
+        Title.Orientation = toHorizontal
+        Title.Caption = 'Диагностика'
+        Width = 220
+        FieldName = 'diagnostic'
+        EditButtons = <>
+        Filter.DropDownRows = 0
+        Filter.EmptyValue = '(Пусто)'
+        Filter.NotEmptyValue = '(Не пусто)'
+        Filter.AllValue = '(Все значения)'
+        Filter.EmptyFont.Style = [fsItalic]
+        Filter.ItemIndex = -1
+        Footers = <>
+      end>
+    KeyStrokes = <    
+      item
+        Command = rxgcShowFindDlg
+        ShortCut = 16454
+        Enabled = True
+      end    
+      item
+        Command = rxgcShowColumnsDlg
+        ShortCut = 16471
+        Enabled = True
+      end    
+      item
+        Command = rxgcShowFilterDlg
+        ShortCut = 16468
+        Enabled = True
+      end    
+      item
+        Command = rxgcShowSortDlg
+        ShortCut = 16467
+        Enabled = True
+      end    
+      item
+        Command = rxgcShowQuickFilter
+        ShortCut = 16465
+        Enabled = True
+      end    
+      item
+        Command = rxgcHideQuickFilter
+        ShortCut = 16456
+        Enabled = True
+      end    
+      item
+        Command = rxgcSelectAll
+        ShortCut = 16449
+        Enabled = True
+      end    
+      item
+        Command = rxgcDeSelectAll
+        ShortCut = 16429
+        Enabled = True
+      end    
+      item
+        Command = rxgcInvertSelection
+        ShortCut = 16426
+        Enabled = True
+      end    
+      item
+        Command = rxgcOptimizeColumnsWidth
+        ShortCut = 16427
+        Enabled = True
+      end>
+    FooterOptions.DrawFullLine = False
+    SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+    SearchOptions.FromStart = False
+    OptionsRx = [rdgAllowColumnsForm, rdgAllowDialogFind, rdgAllowQuickFilter]
+    Align = alClient
+    Color = clWindow
+    DrawFullLine = False
+    SelectedColor = clHighlight
+    DataSource = DataSourceStartMarks
+    FixedCols = 0
+    Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgCancelOnExit]
+    ParentFont = False
+    PopupMenu = PopupMenu1
+    ReadOnly = True
+    Scrollbars = ssAutoBoth
+    TabOrder = 1
+    OnDblClick = RxDBGridStartMarksDblClick
+  end
+  object DataSourceStartMarks: TDataSource
+    DataSet = StartMarksDataset
+    Left = 104
+    Top = 245
+  end
+  object StartMarksDataset: TSQLQuery
+    ReadOnly = True
+    Left = 104
+    Top = 312
+  end
+  object PopupMenu1: TPopupMenu
+    Images = MainForm.ImageList1
+    Left = 208
+    Top = 48
+    object MenuItemCopy: TMenuItem
+      Action = AcCopy
+    end
+  end
+  object ActionList1: TActionList
+    Images = MainForm.ImageList1
+    Left = 280
+    Top = 48
+    object AcCopy: TAction
+      Caption = 'Копировать'
+      ImageIndex = 24
+      ShortCut = 16451
+      OnExecute = AcCopyExecute
+    end
+  end
+end

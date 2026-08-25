@@ -781,4 +781,3 @@ msgstr "Использовать сырой JPEG"
 #: rxdconst.susernamelabel
 msgid "&User name:"
 msgstr "&Имя пользователя"
-

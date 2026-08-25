@@ -7,7 +7,7 @@
       <Flags>
         <CompatibilityMode Value="True"/>
       </Flags>
-      <SessionStorage Value="InProjectDir"/>
+      <SessionStorage Value="InIDEConfig"/>
       <Title Value="Entime"/>
       <Scaled Value="True"/>
       <ResourceType Value="res"/>
@@ -17,7 +17,9 @@
         <TextName Value="Entime"/>
         <TextDesc Value="Time calculating program"/>
       </XPManifest>
-      <Icon Value="0"/>
+      <Resources Count="1">
+        <Resource_0 FileName="resources\sql\schema.sql" Type="RCDATA" ResourceName="ENTIME_SCHEMA"/>
+      </Resources>
     </General>
     <i18n>
       <EnableI18N Value="True"/>
@@ -26,26 +28,25 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
-      <MinorVersionNr Value="8"/>
-      <RevisionNr Value="3"/>
-      <BuildNr Value="152"/>
+      <MinorVersionNr Value="9"/>
+      <BuildNr Value="242"/>
       <Language Value="0419"/>
       <CharSet Value="04B0"/>
-      <Attributes pvaDebug="True"/>
       <StringTable CompanyName="Spot" FileDescription="Time tracking for sport events" InternalName="Entime" OriginalFilename="Entime" ProductName="Entime"/>
     </VersionInfo>
     <BuildModes Count="4">
-      <Item1 Name="Default" Default="True"/>
-      <Item2 Name="Debug">
+      <Item1 Name="default" Default="True"/>
+      <Item2 Name="debug">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="$NameOnly($(ProjFile))"/>
+            <Filename Value="entime"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+            <IncludeFiles Value="$(ProjOutDir);$(ProjPath)\src\include"/>
+            <OtherUnitFiles Value="$(ProjPath)\src\ui;$(ProjPath)\src\domain;$(ProjPath)\src\application;$(ProjPath)\src\data;$(ProjPath)\src\import;$(ProjPath)\src\infrastructure"/>
+            <UnitOutputDirectory Value="build\units\$(TargetCPU)-$(TargetOS)\debug"/>
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
@@ -79,16 +80,17 @@
           </Linking>
         </CompilerOptions>
       </Item2>
-      <Item3 Name="Release">
+      <Item3 Name="release">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="release\$NameOnly($(ProjFile))"/>
+            <Filename Value="build\bin\release\Entime"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+            <IncludeFiles Value="$(ProjOutDir);$(ProjPath)\src\include"/>
+            <OtherUnitFiles Value="$(ProjPath)\src\ui;$(ProjPath)\src\domain;$(ProjPath)\src\application;$(ProjPath)\src\data;$(ProjPath)\src\import;$(ProjPath)\src\infrastructure"/>
+            <UnitOutputDirectory Value="build\units\$(TargetCPU)-$(TargetOS)\release"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -119,11 +121,12 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="qt6\$NameOnly($(ProjFile))"/>
+            <Filename Value="build\bin\qt6\Entime"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+            <IncludeFiles Value="$(ProjOutDir);$(ProjPath)\src\include"/>
+            <OtherUnitFiles Value="$(ProjPath)\src\ui;$(ProjPath)\src\domain;$(ProjPath)\src\application;$(ProjPath)\src\data;$(ProjPath)\src\import;$(ProjPath)\src\infrastructure"/>
+            <UnitOutputDirectory Value="build\units\$(TargetCPU)-$(TargetOS)\qt6"/>
           </SearchPaths>
           <Linking>
             <Debugging>
@@ -159,34 +162,38 @@
     </RunParams>
     <RequiredPackages Count="17">
       <Item1>
-        <PackageName Value="LazControlDsgn"/>
+        <PackageName Value="FCL"/>
       </Item1>
       <Item2>
-        <PackageName Value="FCL"/>
+        <PackageName Value="LCL"/>
       </Item2>
       <Item3>
-        <PackageName Value="LCL"/>
+        <PackageName Value="LazControls"/>
       </Item3>
       <Item4>
-        <PackageName Value="LazControls"/>
+        <PackageName Value="SimpleBlePascal"/>
+        <MinVersion Major="1" Minor="1" Valid="True"/>
       </Item4>
       <Item5>
-        <PackageName Value="DateTimeCtrls"/>
+        <PackageName Value="LazBle"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item5>
       <Item6>
-        <PackageName Value="SQLDBLaz"/>
+        <PackageName Value="LazBleLCL"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item6>
       <Item7>
-        <PackageName Value="sqlite3laz"/>
+        <PackageName Value="DateTimeCtrls"/>
       </Item7>
       <Item8>
-        <PackageName Value="laz_synapse"/>
+        <PackageName Value="SQLDBLaz"/>
       </Item8>
       <Item9>
-        <PackageName Value="DataPortLasarus"/>
+        <PackageName Value="laz_synapse"/>
       </Item9>
       <Item10>
         <PackageName Value="LazSerialPort"/>
+        <MinVersion Minor="8" Valid="True"/>
       </Item10>
       <Item11>
         <PackageName Value="laz_fpspreadsheet"/>
@@ -210,13 +217,13 @@
         <PackageName Value="MyForks"/>
       </Item17>
     </RequiredPackages>
-    <Units Count="18">
+    <Units Count="71">
       <Unit0>
-        <Filename Value="Entime.lpr"/>
+        <Filename Value="entime.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
-        <Filename Value="main.pas"/>
+        <Filename Value="src\ui\main.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="MainForm"/>
         <HasResources Value="True"/>
@@ -224,7 +231,7 @@
         <UnitName Value="Main"/>
       </Unit1>
       <Unit2>
-        <Filename Value="result.pas"/>
+        <Filename Value="src\ui\result.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="ResultsForm"/>
         <HasResources Value="True"/>
@@ -232,11 +239,11 @@
         <UnitName Value="Result"/>
       </Unit2>
       <Unit3>
-        <Filename Value="i18n.pas"/>
+        <Filename Value="src\infrastructure\i18n.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit3>
       <Unit4>
-        <Filename Value="settings.pas"/>
+        <Filename Value="src\ui\settings.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SettingsForm"/>
         <HasResources Value="True"/>
@@ -244,81 +251,352 @@
         <UnitName Value="Settings"/>
       </Unit4>
       <Unit5>
-        <Filename Value="implement.pas"/>
+        <Filename Value="src\application\competitionbackupservice.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Implement"/>
+        <UnitName Value="CompetitionBackupService"/>
       </Unit5>
       <Unit6>
-        <Filename Value="include\my.inc"/>
+        <Filename Value="src\ui\inputdialogs.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="InputDialogs"/>
       </Unit6>
       <Unit7>
-        <Filename Value="startlist.pas"/>
+        <Filename Value="src\ui\startlist.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="StartlistForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="Startlist"/>
+        <UnitName Value="StartList"/>
       </Unit7>
       <Unit8>
-        <Filename Value="lora.pas"/>
+        <Filename Value="src\ui\startmarks.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="LoRaForm"/>
+        <ComponentName Value="StartMarksForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="LoRa"/>
+        <UnitName Value="StartMarks"/>
       </Unit8>
       <Unit9>
-        <Filename Value="startitemmodel.pas"/>
+        <Filename Value="src\domain\startitemmodel.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="StartItemModel"/>
       </Unit9>
       <Unit10>
-        <Filename Value="stagemodel.pas"/>
+        <Filename Value="src\domain\stagemodel.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit10>
       <Unit11>
-        <Filename Value="updater.pas"/>
+        <Filename Value="src\infrastructure\updater.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit11>
       <Unit12>
-        <Filename Value="db_sql.pas"/>
+        <Filename Value="src\data\dbsql.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit12>
       <Unit13>
-        <Filename Value="participantscsvparser.pas"/>
+        <Filename Value="src\import\participantscsvparser.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="ParticipantsCsvParser"/>
       </Unit13>
       <Unit14>
-        <Filename Value="validators.pas"/>
+        <Filename Value="src\import\validators.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Validators"/>
       </Unit14>
       <Unit15>
-        <Filename Value="csvparser.pas"/>
+        <Filename Value="src\import\csvparser.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="CsvParser"/>
       </Unit15>
       <Unit16>
-        <Filename Value="resultscsvparser.pas"/>
+        <Filename Value="src\import\resultscsvparser.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="ResultsCsvParser"/>
       </Unit16>
       <Unit17>
-        <Filename Value="app_logger.pas"/>
+        <Filename Value="src\infrastructure\applogger.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit17>
+      <Unit18>
+        <Filename Value="src\domain\stageconfig.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageConfig"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="src\data\competitiondbcontext.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="src\data\sqlquerysortengine.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="src\domain\participantstatus.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ParticipantStatus"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="src\domain\participantstagedata.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ParticipantStageData"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="src\data\configrepository.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ConfigRepository"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="src\data\competitionschemamigrator.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CompetitionSchemaMigrator"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="src\data\sqlvaluehelpers.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="SqlValueHelpers"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="src\data\competitionqueryprovider.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CompetitionQueryProvider"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="src\data\participantrepository.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ParticipantRepository"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="src\data\stageresultrepository.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageResultRepository"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="src\data\resultcalculationrepository.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ResultCalculationRepository"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="src\data\competitionimportrepository.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CompetitionImportRepository"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="src\ui\stagefieldfactory.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageFieldFactory"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="src\ui\stagegridcolumnfactory.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageGridColumnFactory"/>
+      </Unit32>
+      <Unit33>
+        <Filename Value="src\domain\stagefieldnames.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageFieldNames"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="src\ui\stageresulttabs.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageResultTabs"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="src\ui\stagesettingsframe.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="StageSettingsFrame"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="StageSettingsFrame"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="src\infrastructure\timingprotocol.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TimingProtocol"/>
+      </Unit36>
+      <Unit37>
+        <Filename Value="src\infrastructure\serialdeviceprovider.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="SerialDeviceProvider"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="src\infrastructure\transportstreamprocessor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TransportStreamProcessor"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="src\domain\timingmark.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TimingMark"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="src\infrastructure\bletimingtransport.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="BleTimingTransport"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="src\application\resultformatting.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ResultFormatting"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="src\application\competitionexportservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CompetitionExportService"/>
+      </Unit42>
+      <Unit43>
+        <Filename Value="src\application\competitionimportservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CompetitionImportService"/>
+      </Unit43>
+      <Unit44>
+        <Filename Value="src\application\competitionresultsservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CompetitionResultsService"/>
+      </Unit44>
+      <Unit45>
+        <Filename Value="src\application\competitionfinishservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CompetitionFinishService"/>
+      </Unit45>
+      <Unit46>
+        <Filename Value="src\application\competitionlifecycleservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CompetitionLifecycleService"/>
+      </Unit46>
+      <Unit47>
+        <Filename Value="src\ui\competitionrefreshcoordinator.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CompetitionRefreshCoordinator"/>
+      </Unit47>
+      <Unit48>
+        <Filename Value="src\domain\startmark.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StartMark"/>
+      </Unit48>
+      <Unit49>
+        <Filename Value="src\domain\finishmark.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="FinishMark"/>
+      </Unit49>
+      <Unit50>
+        <Filename Value="src\infrastructure\timingpacketmarkmapper.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TimingPacketMarkMapper"/>
+      </Unit50>
+      <Unit51>
+        <Filename Value="src\application\timingmarkrouter.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TimingMarkRouter"/>
+      </Unit51>
+      <Unit52>
+        <Filename Value="src\application\finishmarkservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="FinishMarkService"/>
+      </Unit52>
+      <Unit53>
+        <Filename Value="src\infrastructure\timingtransport.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TimingTransport"/>
+      </Unit53>
+      <Unit54>
+        <Filename Value="src\infrastructure\serialtimingtransport.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="SerialTimingTransport"/>
+      </Unit54>
+      <Unit55>
+        <Filename Value="src\infrastructure\lazserialtimingconnection.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="LazSerialTimingConnection"/>
+      </Unit55>
+      <Unit56>
+        <Filename Value="src\infrastructure\timingtransportcontroller.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TimingTransportController"/>
+      </Unit56>
+      <Unit57>
+        <Filename Value="src\infrastructure\transportstreamframer.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TransportStreamFramer"/>
+      </Unit57>
+      <Unit58>
+        <Filename Value="src\infrastructure\firmwareresponseprotocol.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="FirmwareResponseProtocol"/>
+      </Unit58>
+      <Unit59>
+        <Filename Value="src\application\startmarkmatcher.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StartMarkMatcher"/>
+      </Unit59>
+      <Unit60>
+        <Filename Value="src\application\startmarkservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StartMarkService"/>
+      </Unit60>
+      <Unit61>
+        <Filename Value="src\data\startmarkrepository.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StartMarkRepository"/>
+      </Unit61>
+      <Unit62>
+        <Filename Value="src\data\startmarksqliteadapters.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StartMarkSqliteAdapters"/>
+      </Unit62>
+      <Unit63>
+        <Filename Value="src\data\finishmarkrepository.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="FinishMarkRepository"/>
+      </Unit63>
+      <Unit64>
+        <Filename Value="src\application\httptransport.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="HttpTransport"/>
+      </Unit64>
+      <Unit65>
+        <Filename Value="src\infrastructure\fphttptransport.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="FpHttpTransport"/>
+      </Unit65>
+      <Unit66>
+        <Filename Value="src\application\telegramnotificationcoordinator.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TelegramNotificationCoordinator"/>
+      </Unit66>
+      <Unit67>
+        <Filename Value="src\application\ledpanelclient.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="LedPanelClient"/>
+      </Unit67>
+      <Unit68>
+        <Filename Value="src\application\ledpanelcoordinator.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="LedPanelCoordinator"/>
+      </Unit68>
+      <Unit69>
+        <Filename Value="src\ui\finishmarks.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FinishMarksForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="FinishMarks"/>
+      </Unit69>
+      <Unit70>
+        <Filename Value="src\ui\timingmarkjournalui.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="TimingMarkJournalUi"/>
+      </Unit70>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="$NameOnly($(ProjFile))"/>
+      <Filename Value="Entime"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir)"/>
+      <IncludeFiles Value="$(ProjOutDir);$(ProjPath)\src\include"/>
+      <OtherUnitFiles Value="$(ProjPath)\src\ui;$(ProjPath)\src\domain;$(ProjPath)\src\application;$(ProjPath)\src\data;$(ProjPath)\src\import;$(ProjPath)\src\infrastructure"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Linking>
@@ -338,14 +616,4 @@
       </Verbosity>
     </Other>
   </CompilerOptions>
-  <Debugging>
-    <Exceptions Count="2">
-      <Item1>
-        <Name Value="EGridException"/>
-      </Item1>
-      <Item2>
-        <Name Value="EDatabaseError"/>
-      </Item2>
-    </Exceptions>
-  </Debugging>
 </CONFIG>

@@ -11,12 +11,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.6\n"
 
-#: i18n.rsadddayresults
-#, object-pascal-format
-msgctxt "i18n.rsadddayresults"
-msgid "Добавить результаты дня %d?"
-msgstr "Добавить результаты дня %d?"
-
 #: i18n.rsaddunknownresultparticipant
 #, object-pascal-format
 msgctxt "i18n.rsaddunknownresultparticipant"
@@ -28,16 +22,39 @@ msgctxt "i18n.rsage"
 msgid "ГР"
 msgstr "ГР"
 
-#: i18n.rsallresultsexported
-#, object-pascal-format
-msgctxt "i18n.rsallresultsexported"
-msgid "Все результаты экспортированы: %s"
-msgstr "Все результаты экспортированы: %s"
-
 #: i18n.rsapplicationshutdown
 msgctxt "i18n.rsapplicationshutdown"
 msgid "Завершение работы программы"
 msgstr "Завершение работы программы"
+
+#: i18n.rsappliedat
+msgctxt "i18n.rsappliedat"
+msgid "Применено"
+msgstr "Применено"
+
+#: i18n.rsappliedstage
+msgctxt "i18n.rsappliedstage"
+msgid "Этап применения"
+msgstr "Этап применения"
+
+#: i18n.rsapplytocurrentstage
+#, object-pascal-format
+msgid "Применить к текущему этапу %d"
+msgstr "Применить к текущему этапу %d"
+
+#: i18n.rsapplytoreceivedstage
+#, object-pascal-format
+msgid "Применить к исходному этапу %d"
+msgstr "Применить к исходному этапу %d"
+
+#: i18n.rsassignmentmode
+msgctxt "i18n.rsassignmentmode"
+msgid "Режим назначения"
+msgstr "Режим назначения"
+
+#: i18n.rsatleastoneactivestagerequired
+msgid "Должен быть включён хотя бы один спецучасток"
+msgstr "Должен быть включён хотя бы один спецучасток"
 
 #: i18n.rsautomaticupdatecheckfailed
 #, object-pascal-format
@@ -49,6 +66,16 @@ msgstr "Автоматическая проверка обновлений не 
 msgctxt "i18n.rsautomaticupdatecheckstarted"
 msgid "Запущена автоматическая проверка обновлений"
 msgstr "Запущена автоматическая проверка обновлений"
+
+#: i18n.rsbackupcleanupcompleted
+#, object-pascal-format
+msgid "Удалено старых резервных копий: %d, освобождено: %d байт"
+msgstr "Удалено старых резервных копий: %d, освобождено: %d байт"
+
+#: i18n.rsbackupcleanupwarning
+#, object-pascal-format
+msgid "Очистка резервных копий завершена с предупреждением: %s"
+msgstr "Очистка резервных копий завершена с предупреждением: %s"
 
 #: i18n.rsbackupcreated
 #, object-pascal-format
@@ -73,6 +100,16 @@ msgstr "Не удалось создать каталог резервных к�
 msgctxt "i18n.rsbackupfileinvalid"
 msgid "Резервная копия не создана или пуста: %s; резервная копия пропущена"
 msgstr "Резервная копия не создана или пуста: %s; резервная копия пропущена"
+
+#: i18n.rsbackupmaxsizemblabel
+msgctxt "i18n.rsbackupmaxsizemblabel"
+msgid "Максимальный объём копий"
+msgstr "Максимальный объём копий"
+
+#: i18n.rsbackupretentionlabel
+msgctxt "i18n.rsbackupretentionlabel"
+msgid "Хранить автоматические копии"
+msgstr "Хранить автоматические копии"
 
 #: i18n.rsbynameasc
 msgctxt "i18n.rsbynameasc"
@@ -165,6 +202,11 @@ msgctxt "i18n.rscity"
 msgid "Город"
 msgstr "Город"
 
+#: i18n.rsclear
+msgctxt "i18n.rsclear"
+msgid "Очистить"
+msgstr "Очистить"
+
 #: i18n.rsclearallstatus
 #, object-pascal-format
 msgctxt "i18n.rsclearallstatus"
@@ -254,6 +296,11 @@ msgctxt "i18n.rscompetitionsettingsloaderror"
 msgid "Не удалось загрузить настройки соревнования: %s"
 msgstr "Не удалось загрузить настройки соревнования: %s"
 
+#: i18n.rscompetitionsettingssaveerror
+#, object-pascal-format
+msgid "Не удалось сохранить настройки соревнования: %s"
+msgstr "Не удалось сохранить настройки соревнования: %s"
+
 #: i18n.rsconfignotfound
 msgctxt "i18n.rsconfignotfound"
 msgid "Файл настроек не найден, создание файла настроек по умолчанию"
@@ -277,11 +324,21 @@ msgctxt "i18n.rsconfirmparticipantstatus"
 msgid "Уверены, что участник под номером %s %s?"
 msgstr "Уверены, что участник под номером %s %s?"
 
+#: i18n.rsconnecttoport
+#, object-pascal-format
+msgid "Подключиться к порту %s"
+msgstr "Подключиться к порту %s"
+
 #: i18n.rscontinueloadingresultswithoutbackup
 #, object-pascal-format
 msgctxt "i18n.rscontinueloadingresultswithoutbackup"
 msgid "Не удалось сделать резервную копию!%sПродолжить загрузку результатов?"
 msgstr "Не удалось сделать резервную копию!%sПродолжить загрузку результатов?"
+
+#: i18n.rscopy
+msgctxt "i18n.rscopy"
+msgid "Копировать"
+msgstr "Копировать"
 
 #: i18n.rscorrection
 msgctxt "i18n.rscorrection"
@@ -327,22 +384,10 @@ msgctxt "i18n.rsdatabaserefresherror"
 msgid "Не удалось обновить данные (%d ошибок). Первая ошибка: %s"
 msgstr "Не удалось обновить данные (%d ошибок). Первая ошибка: %s"
 
-#: i18n.rsdayresultsimported
-#, object-pascal-format
-msgctxt "i18n.rsdayresultsimported"
-msgid "Результаты дня импортированы: %d; файл: %s"
-msgstr "Результаты дня импортированы: %d; файл: %s"
-
-#: i18n.rsdayresultsimporterror
-#, object-pascal-format
-msgctxt "i18n.rsdayresultsimporterror"
-msgid "Не удалось импортировать результаты дня из файла \"%s\": %s"
-msgstr "Не удалось импортировать результаты дня из файла \"%s\": %s"
-
-#: i18n.rsdayresultsrowsnotfound
-msgctxt "i18n.rsdayresultsrowsnotfound"
-msgid "Файл не содержит результатов дня"
-msgstr "Файл не содержит результатов дня"
+#: i18n.rsdays
+msgctxt "i18n.rsdays"
+msgid "дней"
+msgstr "дней"
 
 #: i18n.rsdbfileclosed
 #, object-pascal-format
@@ -368,6 +413,16 @@ msgctxt "i18n.rsdetectedparticipantstages"
 msgid "Обнаруженные СУ: %s"
 msgstr "Обнаруженные СУ: %s"
 
+#: i18n.rsdevice
+msgctxt "i18n.rsdevice"
+msgid "Устройство"
+msgstr "Устройство"
+
+#: i18n.rsdiagnostic
+msgctxt "i18n.rsdiagnostic"
+msgid "Диагностика"
+msgstr "Диагностика"
+
 #: i18n.rsdidnotfinish
 msgctxt "i18n.rsdidnotfinish"
 msgid "не финишировал"
@@ -389,6 +444,11 @@ msgctxt "i18n.rsdiffleader"
 msgid "Отставание"
 msgstr "Отставание"
 
+#: i18n.rsdisconnectfromport
+#, object-pascal-format
+msgid "Отключиться от порта %s"
+msgstr "Отключиться от порта %s"
+
 #: i18n.rsduplicateparticipantcolumnname
 #, object-pascal-format
 msgctxt "i18n.rsduplicateparticipantcolumnname"
@@ -406,6 +466,11 @@ msgstr "Номер участника %d повторяется в строка�
 msgctxt "i18n.rsduplicateresultparticipantnumber"
 msgid "Номер участника %d повторяется в строках %d и %d"
 msgstr "Номер участника %d повторяется в строках %d и %d"
+
+#: i18n.rsemptylogvalue
+msgctxt "i18n.rsemptylogvalue"
+msgid "(пусто)"
+msgstr "(пусто)"
 
 #: i18n.rsemptyparticipantcolumnname
 #, object-pascal-format
@@ -465,6 +530,79 @@ msgstr "Финал"
 msgctxt "i18n.rsfinalfileexists"
 msgid "Файл финала уже существует. Перезаписать?"
 msgstr "Файл финала уже существует. Перезаписать?"
+
+#: i18n.rsfinishmarkjournalfilter
+msgctxt "i18n.rsfinishmarkjournalfilter"
+msgid "Фильтр"
+msgstr "Фильтр"
+
+#: i18n.rsfinishmarkjournalfilterall
+msgctxt "i18n.rsfinishmarkjournalfilterall"
+msgid "Все"
+msgstr "Все"
+
+#: i18n.rsfinishmarkjournalfilterapplied
+msgctxt "i18n.rsfinishmarkjournalfilterapplied"
+msgid "Применённые"
+msgstr "Применённые"
+
+#: i18n.rsfinishmarkjournalfiltercurrentstage
+msgctxt "i18n.rsfinishmarkjournalfiltercurrentstage"
+msgid "С начала текущего этапа"
+msgstr "С начала текущего этапа"
+
+#: i18n.rsfinishmarkjournalfiltererror
+msgid "Ошибочные"
+msgstr "Ошибочные"
+
+#: i18n.rsfinishmarkjournalfilterhidden
+msgctxt "i18n.rsfinishmarkjournalfilterhidden"
+msgid "Скрытые"
+msgstr "Скрытые"
+
+#: i18n.rsfinishmarkjournalfilterignoreddebounce
+msgid "Отброшенные debounce"
+msgstr "Отброшенные debounce"
+
+#: i18n.rsfinishmarkjournalfilterlast15minutes
+msgctxt "i18n.rsfinishmarkjournalfilterlast15minutes"
+msgid "Последние 15 минут"
+msgstr "Последние 15 минут"
+
+#: i18n.rsfinishmarkjournalfilterpending
+msgctxt "i18n.rsfinishmarkjournalfilterpending"
+msgid "Ожидающие"
+msgstr "Ожидающие"
+
+#: i18n.rsfinishmarkjournalrefreshwarning
+#, object-pascal-format
+msgid "Не удалось обновить журнал финишных отметок: %s"
+msgstr "Не удалось обновить журнал финишных отметок: %s"
+
+#: i18n.rsfinishmarknumbersaveerror
+#, object-pascal-format
+msgid "Не удалось сохранить номер финишной отметки: %s"
+msgstr "Не удалось сохранить номер финишной отметки: %s"
+
+#: i18n.rsfinishmarks
+msgctxt "i18n.rsfinishmarks"
+msgid "Финишные отметки"
+msgstr "Финишные отметки"
+
+#: i18n.rsfinishmarkshidden
+#, object-pascal-format
+msgid "Финишные отметки скрыты: %d"
+msgstr "Финишные отметки скрыты: %d"
+
+#: i18n.rsfinishmarkshideerror
+#, object-pascal-format
+msgid "Не удалось скрыть финишные отметки: %s"
+msgstr "Не удалось скрыть финишные отметки: %s"
+
+#: i18n.rsfinishmarkshiderefreshwarning
+#, object-pascal-format
+msgid "Финишные отметки скрыты, но не удалось обновить список: %s"
+msgstr "Финишные отметки скрыты, но не удалось обновить список: %s"
 
 #: i18n.rsfinishprotocol
 msgctxt "i18n.rsfinishprotocol"
@@ -544,6 +682,11 @@ msgstr "HTTP-ответ: %d %s; заголовков: %d; байт: %d"
 msgctxt "i18n.rshttpresponsereceived"
 msgid "Получен HTTP-ответ: %d байт"
 msgstr "Получен HTTP-ответ: %d байт"
+
+#: i18n.rsid
+msgctxt "i18n.rsid"
+msgid "ID"
+msgstr "ID"
 
 #: i18n.rsimportfinish
 msgctxt "i18n.rsimportfinish"
@@ -631,6 +774,10 @@ msgctxt "i18n.rsledpanelerror"
 msgid "Ошибка LED-панели: %s"
 msgstr "Ошибка LED-панели: %s"
 
+#: i18n.rsledpanelinvalidaddress
+msgid "Некорректный адрес LED-панели: укажите host[:port]"
+msgstr "Некорректный адрес LED-панели: укажите host[:port]"
+
 #: i18n.rsledpaneltestsucceeded
 msgctxt "i18n.rsledpaneltestsucceeded"
 msgid "Проверка LED-панели выполнена успешно"
@@ -668,39 +815,20 @@ msgctxt "i18n.rslogfileopenerror"
 msgid "Не удалось открыть файл журнала: %s"
 msgstr "Не удалось открыть файл журнала: %s"
 
-#: i18n.rsloracorrectionskippedparticipantmissing
-#, object-pascal-format
-msgctxt "i18n.rsloracorrectionskippedparticipantmissing"
-msgid "Поправка LoRa пропущена: участник с номером %s отсутствует"
-msgstr "Поправка LoRa пропущена: участник с номером %s отсутствует"
-
-#: i18n.rslorarecordhidden
-#, object-pascal-format
-msgctxt "i18n.rslorarecordhidden"
-msgid "Запись LoRa скрыта: %s"
-msgstr "Запись LoRa скрыта: %s"
-
-#: i18n.rslorarecordsloaderror
-#, object-pascal-format
-msgctxt "i18n.rslorarecordsloaderror"
-msgid "Не удалось загрузить записи LoRa: %s"
-msgstr "Не удалось загрузить записи LoRa: %s"
-
-#: i18n.rslorarecordsrefreshwarning
-#, object-pascal-format
-msgctxt "i18n.rslorarecordsrefreshwarning"
-msgid "Изменение сохранено, но список LoRa не обновлён: %s"
-msgstr "Изменение сохранено, но список LoRa не обновлён: %s"
-
-#: i18n.rslorarecordsreset
-msgctxt "i18n.rslorarecordsreset"
-msgid "Состояние записей LoRa сброшено"
-msgstr "Состояние записей LoRa сброшено"
-
 #: i18n.rsmanualupdatecheckstarted
 msgctxt "i18n.rsmanualupdatecheckstarted"
 msgid "Запущена ручная проверка обновлений"
 msgstr "Запущена ручная проверка обновлений"
+
+#: i18n.rsmatchdeltams
+msgctxt "i18n.rsmatchdeltams"
+msgid "Дельта, мс"
+msgstr "Дельта, мс"
+
+#: i18n.rsmegabytes
+msgctxt "i18n.rsmegabytes"
+msgid "МБ"
+msgstr "МБ"
 
 #: i18n.rsmodulesynchronizationerror
 #, object-pascal-format
@@ -758,6 +886,10 @@ msgctxt "i18n.rsnickname"
 msgid "Ник"
 msgstr "Ник"
 
+#: i18n.rsnoavailableserialports
+msgid "Доступные порты не найдены"
+msgstr "Доступные порты не найдены"
+
 #: i18n.rsnumber
 msgctxt "i18n.rsnumber"
 msgid "Номер"
@@ -768,11 +900,37 @@ msgctxt "i18n.rsnumbercolumnnotfound"
 msgid "Не найдена колонка с номерами участников"
 msgstr "Не найдена колонка с номерами участников"
 
+#: i18n.rsopenfinishmarkswindow
+msgctxt "i18n.rsopenfinishmarkswindow"
+msgid "В новом окне"
+msgstr "В новом окне"
+
+#: i18n.rsopenfinishmarkswindowhint
+msgctxt "i18n.rsopenfinishmarkswindowhint"
+msgid "Открыть журнал финишных отметок"
+msgstr "Открыть журнал финишных отметок"
+
+#: i18n.rsopenresultsfile
+#, object-pascal-format
+msgctxt "i18n.rsopenresultsfile"
+msgid "Открытие файла результатов: %s"
+msgstr "Открытие файла результатов: %s"
+
 #: i18n.rsopenstartlistfile
 #, object-pascal-format
 msgctxt "i18n.rsopenstartlistfile"
 msgid "Открытие файла стартового протокола: %s"
 msgstr "Открытие файла стартового протокола: %s"
+
+#: i18n.rsopenstartmarkswindow
+msgctxt "i18n.rsopenstartmarkswindow"
+msgid "В новом окне"
+msgstr "В новом окне"
+
+#: i18n.rsopenstartmarkswindowhint
+msgctxt "i18n.rsopenstartmarkswindowhint"
+msgid "Открыть журнал стартовых отметок"
+msgstr "Открыть журнал стартовых отметок"
 
 #: i18n.rsparticipantcorrectionset
 #, object-pascal-format
@@ -798,11 +956,33 @@ msgctxt "i18n.rsparticipantdoesnotexist"
 msgid "Номер %s не существует"
 msgstr "Номер %s не существует"
 
+#: i18n.rsparticipantfieldupdated
+#, object-pascal-format
+msgctxt "i18n.rsparticipantfieldupdated"
+msgid "Номеру %s изменено поле «%s»"
+msgstr "Номеру %s изменено поле «%s»"
+
+#: i18n.rsparticipantfieldvaluechanged
+#, object-pascal-format
+msgctxt "i18n.rsparticipantfieldvaluechanged"
+msgid "Номеру %s изменено поле «%s»: %s → %s"
+msgstr "Номеру %s изменено поле «%s»: %s → %s"
+
 #: i18n.rsparticipantnamedstagestatusset
 #, object-pascal-format
 msgctxt "i18n.rsparticipantnamedstagestatusset"
 msgid "Участник с номером %s %s на СУ %d: %s"
 msgstr "Участник с номером %s %s на СУ %d: %s"
+
+#: i18n.rsparticipantnumberchanged
+#, object-pascal-format
+msgctxt "i18n.rsparticipantnumberchanged"
+msgid "Номер участника изменён с %s на %s"
+msgstr "Номер участника изменён с %s на %s"
+
+#: i18n.rsparticipantnumbermustbepositive
+msgid "Номер участника должен быть больше нуля"
+msgstr "Номер участника должен быть больше нуля"
 
 #: i18n.rsparticipantrowfieldcountmismatch
 #, object-pascal-format
@@ -838,11 +1018,15 @@ msgctxt "i18n.rsparticipantsimporterror"
 msgid "Не удалось импортировать участников из файла \"%s\": %s"
 msgstr "Не удалось импортировать участников из файла \"%s\": %s"
 
-#: i18n.rsparticipantsimportpartial
+#: i18n.rsparticipantstagecountexpanded
 #, object-pascal-format
-msgctxt "i18n.rsparticipantsimportpartial"
-msgid "Участники импортированы с пропусками: %d; использовано СУ: %d из %d; файл: %s"
-msgstr "Участники импортированы с пропусками: %d; использовано СУ: %d из %d; файл: %s"
+msgid "Количество СУ расширено по списку участников: %d → %d"
+msgstr "Количество СУ расширено по списку участников: %d → %d"
+
+#: i18n.rsparticipantstagesapplied
+#, object-pascal-format
+msgid "Активные СУ из списка участников: %s; выключено ранее активных СУ: %d"
+msgstr "Активные СУ из списка участников: %s; выключено ранее активных СУ: %d"
 
 #: i18n.rsparticipantstagesaveerror
 #, object-pascal-format
@@ -862,11 +1046,11 @@ msgctxt "i18n.rsparticipantstagestatusset"
 msgid "Участник с номером %s %s на СУ %d"
 msgstr "Участник с номером %s %s на СУ %d"
 
-#: i18n.rsparticipantstagevalueupdated
+#: i18n.rsparticipantstagevaluechanged
 #, object-pascal-format
-msgctxt "i18n.rsparticipantstagevalueupdated"
-msgid "Номеру %s изменено поле «%s» на СУ %d: %s"
-msgstr "Номеру %s изменено поле «%s» на СУ %d: %s"
+msgctxt "i18n.rsparticipantstagevaluechanged"
+msgid "Номеру %s изменено поле «%s» на СУ %d: %s → %s"
+msgstr "Номеру %s изменено поле «%s» на СУ %d: %s → %s"
 
 #: i18n.rsparticipantstarttimeset
 #, object-pascal-format
@@ -897,6 +1081,11 @@ msgstr "Не удалось пересчитать статус номера %s:
 msgctxt "i18n.rsparticipantstatusset"
 msgid "Участник с номером %s %s"
 msgstr "Участник с номером %s %s"
+
+#: i18n.rsparticipantstatusvalueformat
+msgctxt "i18n.rsparticipantstatusvalueformat"
+msgid "Некорректный статус. Допустимы DNF, DNS, DSQ, коды 1, 2, 3 или пустое значение"
+msgstr "Некорректный статус. Допустимы DNF, DNS, DSQ, коды 1, 2, 3 или пустое значение"
 
 #: i18n.rsparticipantupdated
 #, object-pascal-format
@@ -943,6 +1132,11 @@ msgctxt "i18n.rsportconnectionrestored"
 msgid "Связь с портом %s восстановлена"
 msgstr "Связь с портом %s восстановлена"
 
+#: i18n.rsportunavailable
+#, object-pascal-format
+msgid "Порт %s недоступен"
+msgstr "Порт %s недоступен"
+
 #: i18n.rsqualificationresults
 msgctxt "i18n.rsqualificationresults"
 msgid "По результатам квалификации"
@@ -953,6 +1147,16 @@ msgstr "По результатам квалификации"
 msgctxt "i18n.rsreallydisqualifynumber"
 msgid "Действительно дисквалифицировать участника под номером %s?"
 msgstr "Действительно дисквалифицировать участника под номером %s?"
+
+#: i18n.rsreceivedat
+msgctxt "i18n.rsreceivedat"
+msgid "Получено"
+msgstr "Получено"
+
+#: i18n.rsreceivedstage
+msgctxt "i18n.rsreceivedstage"
+msgid "Этап приёма"
+msgstr "Этап приёма"
 
 #: i18n.rsresult
 msgctxt "i18n.rsresult"
@@ -1026,10 +1230,35 @@ msgctxt "i18n.rsresultsthruexportedtofile"
 msgid "Сквозной протокол экспортирован в файл"
 msgstr "Сквозной протокол экспортирован в файл"
 
-#: i18n.rssaveresults
-msgctxt "i18n.rssaveresults"
-msgid "Сохранить результаты?"
-msgstr "Сохранить результаты?"
+#: i18n.rsschemamigrationbackuperror
+#, object-pascal-format
+msgctxt "i18n.rsschemamigrationbackuperror"
+msgid "Миграция отменена: не удалось создать резервную копию файла \"%s\""
+msgstr "Миграция отменена: не удалось создать резервную копию файла \"%s\""
+
+#: i18n.rsschemamigrationcompleted
+#, object-pascal-format
+msgctxt "i18n.rsschemamigrationcompleted"
+msgid "Миграция схемы файла \"%s\" завершена: версия %d, СУ: %d, ёмкость: %d"
+msgstr "Миграция схемы файла \"%s\" завершена: версия %d, СУ: %d, ёмкость: %d"
+
+#: i18n.rsschemamigrationerror
+#, object-pascal-format
+msgctxt "i18n.rsschemamigrationerror"
+msgid "Не удалось мигрировать схему файла \"%s\": %s"
+msgstr "Не удалось мигрировать схему файла \"%s\": %s"
+
+#: i18n.rsschemamigrationstarted
+#, object-pascal-format
+msgctxt "i18n.rsschemamigrationstarted"
+msgid "Начата миграция схемы файла \"%s\": версия %d → %d"
+msgstr "Начата миграция схемы файла \"%s\": версия %d → %d"
+
+#: i18n.rsschemaversiontoonew
+#, object-pascal-format
+msgctxt "i18n.rsschemaversiontoonew"
+msgid "Версия схемы %d новее поддерживаемой версии %d"
+msgstr "Версия схемы %d новее поддерживаемой версии %d"
 
 #: i18n.rsserialcanread
 #, object-pascal-format
@@ -1043,11 +1272,10 @@ msgctxt "i18n.rsserialcanwrite"
 msgid "Запись доступна: %s"
 msgstr "Запись доступна: %s"
 
-#: i18n.rsserialfinish
+#: i18n.rsserialpacketrejected
 #, object-pascal-format
-msgctxt "i18n.rsserialfinish"
-msgid "Финиш -> %s"
-msgstr "Финиш -> %s"
+msgid "Serial-пакет отклонён: причина=%s; данные=%s"
+msgstr "Serial-пакет отклонён: причина=%s; данные=%s"
 
 #: i18n.rsserialraw
 #, object-pascal-format
@@ -1060,12 +1288,6 @@ msgstr "Исходные данные -> %s"
 msgctxt "i18n.rsserialreadcount"
 msgid "Прочитано: %s"
 msgstr "Прочитано: %s"
-
-#: i18n.rsserialstart
-#, object-pascal-format
-msgctxt "i18n.rsserialstart"
-msgid "Старт -> %s, %s"
-msgstr "Старт -> %s, %s"
 
 #: i18n.rsserialwait
 #, object-pascal-format
@@ -1099,11 +1321,6 @@ msgctxt "i18n.rssettingscompetition"
 msgid "Соревнование"
 msgstr "Соревнование"
 
-#: i18n.rssettingscomport
-msgctxt "i18n.rssettingscomport"
-msgid "COM порт"
-msgstr "COM порт"
-
 #: i18n.rssettingsgeneral
 msgctxt "i18n.rssettingsgeneral"
 msgid "Общие"
@@ -1130,6 +1347,10 @@ msgctxt "i18n.rssettingstelegrambot"
 msgid "Телеграм бот"
 msgstr "Телеграм бот"
 
+#: i18n.rssettingstiminginput
+msgid "Источник отсечек"
+msgstr "Источник отсечек"
+
 #: i18n.rssettingsview
 msgctxt "i18n.rssettingsview"
 msgid "Вид"
@@ -1140,6 +1361,26 @@ msgstr "Вид"
 msgctxt "i18n.rsshowncategories"
 msgid "Категории для показа в окне результатов: %s"
 msgstr "Категории для показа в окне результатов: %s"
+
+#: i18n.rsstagecapacityexpansionbackuperror
+#, object-pascal-format
+msgid "Расширение количества СУ отменено: не удалось создать резервную копию файла \"%s\""
+msgstr "Расширение количества СУ отменено: не удалось создать резервную копию файла \"%s\""
+
+#: i18n.rsstagecount
+msgctxt "i18n.rsstagecount"
+msgid "Количество спецучастков"
+msgstr "Количество спецучастков"
+
+#: i18n.rsstagecountrangeerror
+#, object-pascal-format
+msgid "Недопустимое количество СУ: %s. Допустимый диапазон: %d..%d"
+msgstr "Недопустимое количество СУ: %s. Допустимый диапазон: %d..%d"
+
+#: i18n.rsstagecountreductionwarning
+#, object-pascal-format
+msgid "При уменьшении количества СУ с %d до %d результаты скрываемых СУ останутся в файле, но не будут учитываться и отображаться. Продолжить?"
+msgstr "При уменьшении количества СУ с %d до %d результаты скрываемых СУ останутся в файле, но не будут учитываться и отображаться. Продолжить?"
 
 #: i18n.rsstageresultscalculationerror
 #, object-pascal-format
@@ -1174,6 +1415,137 @@ msgctxt "i18n.rsstartlistfileexists"
 msgid "Файл стартового протокола уже существует. Перезаписать?"
 msgstr "Файл стартового протокола уже существует. Перезаписать?"
 
+#: i18n.rsstartmarkapplied
+#, object-pascal-format
+msgid "Стартовая отметка номера %d применена: этап приёма %d, этап применения %d, поправка %d"
+msgstr "Стартовая отметка номера %d применена: этап приёма %d, этап применения %d, поправка %d"
+
+#: i18n.rsstartmarkapplyerror
+#, object-pascal-format
+msgid "Не удалось применить стартовую отметку номера %d: %s"
+msgstr "Не удалось применить стартовую отметку номера %d: %s"
+
+#: i18n.rsstartmarkautomaticapply
+msgctxt "i18n.rsstartmarkautomaticapply"
+msgid "Применять автоматически"
+msgstr "Применять автоматически"
+
+#: i18n.rsstartmarkautomaticapplyhint
+msgctxt "i18n.rsstartmarkautomaticapplyhint"
+msgid ""
+"При однозначном совпадении автоматически применить поправку к участнику.\n"
+"Существующая поправка не перезаписывается."
+msgstr ""
+"При однозначном совпадении автоматически применить поправку к участнику.\n"
+"Существующая поправка не перезаписывается."
+
+#: i18n.rsstartmarkcorrectionmissing
+#, object-pascal-format
+msgid "В стартовой отметке номера %d отсутствует поправка"
+msgstr "В стартовой отметке номера %d отсутствует поправка"
+
+#: i18n.rsstartmarkjournalfilter
+msgctxt "i18n.rsstartmarkjournalfilter"
+msgid "Фильтр"
+msgstr "Фильтр"
+
+#: i18n.rsstartmarkjournalfilterall
+msgctxt "i18n.rsstartmarkjournalfilterall"
+msgid "Все"
+msgstr "Все"
+
+#: i18n.rsstartmarkjournalfilterapplied
+msgctxt "i18n.rsstartmarkjournalfilterapplied"
+msgid "Применённые"
+msgstr "Применённые"
+
+#: i18n.rsstartmarkjournalfilterconflictorerror
+msgid "Конфликтные и ошибочные"
+msgstr "Конфликтные и ошибочные"
+
+#: i18n.rsstartmarkjournalfiltercurrentstage
+msgctxt "i18n.rsstartmarkjournalfiltercurrentstage"
+msgid "С начала текущего этапа"
+msgstr "С начала текущего этапа"
+
+#: i18n.rsstartmarkjournalfilterhidden
+msgctxt "i18n.rsstartmarkjournalfilterhidden"
+msgid "Скрытые"
+msgstr "Скрытые"
+
+#: i18n.rsstartmarkjournalfilterlast15minutes
+msgctxt "i18n.rsstartmarkjournalfilterlast15minutes"
+msgid "Последние 15 минут"
+msgstr "Последние 15 минут"
+
+#: i18n.rsstartmarkjournalfilterpending
+msgctxt "i18n.rsstartmarkjournalfilterpending"
+msgid "Ожидающие"
+msgstr "Ожидающие"
+
+#: i18n.rsstartmarkjournalrefreshwarning
+#, object-pascal-format
+msgid "Не удалось обновить журнал стартовых отметок: %s"
+msgstr "Не удалось обновить журнал стартовых отметок: %s"
+
+#: i18n.rsstartmarkmatchdeltahint
+msgctxt "i18n.rsstartmarkmatchdeltahint"
+msgid ""
+"Максимальная разница между временем отметки и стартовым временем\n"
+"участника для автоматической подстановки номера."
+msgstr ""
+"Максимальная разница между временем отметки и стартовым временем\n"
+"участника для автоматической подстановки номера."
+
+#: i18n.rsstartmarkmatchdeltaseconds
+msgctxt "i18n.rsstartmarkmatchdeltaseconds"
+msgid "Допуск, секунд (±)"
+msgstr "Допуск, секунд (±)"
+
+#: i18n.rsstartmarknumbersaveerror
+#, object-pascal-format
+msgid "Не удалось сохранить номер стартовой отметки: %s"
+msgstr "Не удалось сохранить номер стартовой отметки: %s"
+
+#: i18n.rsstartmarkrefreshwarning
+#, object-pascal-format
+msgid "Отметка применена, но не удалось обновить списки: %s"
+msgstr "Отметка применена, но не удалось обновить списки: %s"
+
+#: i18n.rsstartmarks
+msgctxt "i18n.rsstartmarks"
+msgid "Стартовые отметки"
+msgstr "Стартовые отметки"
+
+#: i18n.rsstartmarksettings
+msgctxt "i18n.rsstartmarksettings"
+msgid "Стартовые отметки"
+msgstr "Стартовые отметки"
+
+#: i18n.rsstartmarkshidden
+#, object-pascal-format
+msgid "Стартовые отметки скрыты: %d"
+msgstr "Стартовые отметки скрыты: %d"
+
+#: i18n.rsstartmarkshideerror
+#, object-pascal-format
+msgid "Не удалось скрыть стартовые отметки: %s"
+msgstr "Не удалось скрыть стартовые отметки: %s"
+
+#: i18n.rsstartmarkshiderefreshwarning
+#, object-pascal-format
+msgid "Отметки скрыты, но не удалось обновить список: %s"
+msgstr "Отметки скрыты, но не удалось обновить список: %s"
+
+#: i18n.rsstartmarkstagechoicemessage
+#, object-pascal-format
+msgid "Стартовая отметка номера %d принята на этапе %d — %s, а сейчас выбран этап %d — %s. К какому этапу применить поправку?"
+msgstr "Стартовая отметка номера %d принята на этапе %d — %s, а сейчас выбран этап %d — %s. К какому этапу применить поправку?"
+
+#: i18n.rsstartmarkstagechoicetitle
+msgid "Выбор этапа"
+msgstr "Выбор этапа"
+
 #: i18n.rsstartprogram
 #, object-pascal-format
 msgctxt "i18n.rsstartprogram"
@@ -1190,56 +1562,26 @@ msgctxt "i18n.rsstarttime"
 msgid "Старт"
 msgstr "Старт"
 
+#: i18n.rsstatus
+msgctxt "i18n.rsstatus"
+msgid "Статус"
+msgstr "Статус"
+
 #: i18n.rssu
 msgctxt "i18n.rssu"
 msgid "СУ"
 msgstr "СУ"
 
-#: i18n.rssu1
-msgctxt "i18n.rssu1"
-msgid "СУ 1"
-msgstr "СУ 1"
-
-#: i18n.rssu2
-msgctxt "i18n.rssu2"
-msgid "СУ 2"
-msgstr "СУ 2"
-
-#: i18n.rssu3
-msgctxt "i18n.rssu3"
-msgid "СУ 3"
-msgstr "СУ 3"
-
-#: i18n.rssu4
-msgctxt "i18n.rssu4"
-msgid "СУ 4"
-msgstr "СУ 4"
-
-#: i18n.rssu5
-msgctxt "i18n.rssu5"
-msgid "СУ 5"
-msgstr "СУ 5"
-
-#: i18n.rssu6
-msgctxt "i18n.rssu6"
-msgid "СУ 6"
-msgstr "СУ 6"
-
-#: i18n.rssu7
-msgctxt "i18n.rssu7"
-msgid "СУ 7"
-msgstr "СУ 7"
-
-#: i18n.rssu8
-msgctxt "i18n.rssu8"
-msgid "СУ 8"
-msgstr "СУ 8"
-
-#: i18n.rssumdaysexported
+#: i18n.rssuformat
 #, object-pascal-format
-msgctxt "i18n.rssumdaysexported"
-msgid "Сводные результаты по дням экспортированы: %s"
-msgstr "Сводные результаты по дням экспортированы: %s"
+msgctxt "i18n.rssuformat"
+msgid "СУ %d"
+msgstr "СУ %d"
+
+#: i18n.rssumdurationlimitexceeded
+#, object-pascal-format
+msgid "Суммарное время участника %s достигло или превысило 24 часа; текущий формат результата не отображает полные сутки"
+msgstr "Суммарное время участника %s достигло или превысило 24 часа; текущий формат результата не отображает полные сутки"
 
 #: i18n.rssumresult
 msgctxt "i18n.rssumresult"
@@ -1294,27 +1636,118 @@ msgctxt "i18n.rstelegrambottestsucceeded"
 msgid "Проверка Telegram-бота выполнена успешно"
 msgstr "Проверка Telegram-бота выполнена успешно"
 
+#: i18n.rstelegramqueuecleared
+#, object-pascal-format
+msgid "При закрытии удалено ожидающих уведомлений Telegram: %d"
+msgstr "При закрытии удалено ожидающих уведомлений Telegram: %d"
+
+#: i18n.rstelegramqueueitemdropped
+#, object-pascal-format
+msgid "Очередь Telegram переполнена: удалено ожидающее уведомление участника %d, поставленное %s"
+msgstr "Очередь Telegram переполнена: удалено ожидающее уведомление участника %d, поставленное %s"
+
+#: i18n.rstelegramretrycount
+msgctxt "i18n.rstelegramretrycount"
+msgid "Количество повторов"
+msgstr "Количество повторов"
+
+#: i18n.rstelegramretrydelayseconds
+msgctxt "i18n.rstelegramretrydelayseconds"
+msgid "Интервал, секунд"
+msgstr "Интервал, секунд"
+
+#: i18n.rstelegramretryenabled
+msgctxt "i18n.rstelegramretryenabled"
+msgid "Повторять при ошибке"
+msgstr "Повторять при ошибке"
+
 #: i18n.rsthruresultscalculationerror
 #, object-pascal-format
 msgctxt "i18n.rsthruresultscalculationerror"
 msgid "Не удалось пересчитать сквозные результаты: %s"
 msgstr "Не удалось пересчитать сквозные результаты: %s"
 
+#: i18n.rstime
+msgctxt "i18n.rstime"
+msgid "Время"
+msgstr "Время"
+
 #: i18n.rstimetostart
 msgctxt "i18n.rstimetostart"
 msgid "Время старта"
 msgstr "Время старта"
 
+#: i18n.rstimingfinish
+#, object-pascal-format
+msgctxt "i18n.rstimingfinish"
+msgid "Финиш -> %s"
+msgstr "Финиш -> %s"
+
+#: i18n.rstiminginputble
+msgctxt "i18n.rstiminginputble"
+msgid "BLE"
+msgstr "BLE"
+
+#: i18n.rstiminginputbledevice
+msgctxt "i18n.rstiminginputbledevice"
+msgid "Устройство"
+msgstr "Устройство"
+
+#: i18n.rstiminginputbledeviceid
+msgctxt "i18n.rstiminginputbledeviceid"
+msgid "Идентификатор"
+msgstr "Идентификатор"
+
+#: i18n.rstiminginputblesettings
+msgctxt "i18n.rstiminginputblesettings"
+msgid "Настройки BLE"
+msgstr "Настройки BLE"
+
+#: i18n.rstiminginputdevicenotselected
+msgid "Не выбрано"
+msgstr "Не выбрано"
+
+#: i18n.rstiminginputmode
+msgctxt "i18n.rstiminginputmode"
+msgid "Тип подключения"
+msgstr "Тип подключения"
+
+#: i18n.rstiminginputselectdevice
+msgctxt "i18n.rstiminginputselectdevice"
+msgid "Выбрать…"
+msgstr "Выбрать…"
+
+#: i18n.rstiminginputserial
+msgctxt "i18n.rstiminginputserial"
+msgid "Serial (COM-порт)"
+msgstr "Serial (COM-порт)"
+
+#: i18n.rstiminginputserialsettings
+msgctxt "i18n.rstiminginputserialsettings"
+msgid "Настройки Serial"
+msgstr "Настройки Serial"
+
+#: i18n.rstimingstart
+#, object-pascal-format
+msgctxt "i18n.rstimingstart"
+msgid "Старт -> %s, %s"
+msgstr "Старт -> %s, %s"
+
 #: i18n.rstoomanyparticipantstages
 #, object-pascal-format
 msgctxt "i18n.rstoomanyparticipantstages"
-msgid "В файле найдено %d СУ, но поддерживается не более %d. Лишние СУ будут пропущены. Продолжить?"
-msgstr "В файле найдено %d СУ, но поддерживается не более %d. Лишние СУ будут пропущены. Продолжить?"
+msgid "В файле найдено %d СУ, но поддерживается не более %d"
+msgstr "В файле найдено %d СУ, но поддерживается не более %d"
 
 #: i18n.rstotal
 msgctxt "i18n.rstotal"
 msgid "Общий"
 msgstr "Общий"
+
+#: i18n.rstransport
+msgctxt "i18n.rstransport"
+msgid "Транспорт"
+msgstr "Транспорт"
 
 #: i18n.rsunknownfileencoding
 msgctxt "i18n.rsunknownfileencoding"
@@ -1395,6 +1828,11 @@ msgctxt "i18n.rsupdateweekly"
 msgid "Один раз в неделю"
 msgstr "Один раз в неделю"
 
+#: i18n.rswrite
+msgctxt "i18n.rswrite"
+msgid "Записать"
+msgstr "Записать"
+
 #: i18n.rswriteparticipantsdatabaseerror
 msgctxt "i18n.rswriteparticipantsdatabaseerror"
 msgid "Ошибка записи списка участников в базу: "
@@ -1405,43 +1843,15 @@ msgctxt "i18n.rswriteresultsdatabaseerror"
 msgid "Ошибка записи результатов в базу: "
 msgstr "Ошибка записи результатов в базу: "
 
-#: tloraform.accopy.caption
-msgctxt "tloraform.accopy.caption"
-msgid "Копировать"
-msgstr "Копировать"
+#: tmainform.acapplyfinishmarks.caption
+msgctxt "tmainform.acapplyfinishmarks.caption"
+msgid "Записать"
+msgstr "Записать"
 
-#: tloraform.caption
-msgid "LoRaForm"
-msgstr "LoRa"
-
-#: tloraform.rxdbgridlora.columns[0].title.caption
-msgctxt "tloraform.rxdbgridlora.columns[0].title.caption"
-msgid "Номер"
-msgstr "Номер"
-
-#: tloraform.rxdbgridlora.columns[1].title.caption
-msgctxt "tloraform.rxdbgridlora.columns[1].title.caption"
-msgid "Старт"
-msgstr "Старт"
-
-#: tloraform.rxdbgridlora.columns[2].title.caption
-msgctxt "tloraform.rxdbgridlora.columns[2].title.caption"
-msgid "Поправка"
-msgstr "Поправка"
-
-#: tloraform.rxdbgridlora.columns[3].title.caption
-msgid "Установлено"
-msgstr "Установлено"
-
-#: tloraform.rxdbgridlora.columns[4].title.caption
-msgctxt "tloraform.rxdbgridlora.columns[4].title.caption"
-msgid "Время"
-msgstr "Время"
-
-#: tloraform.rxdbgridlora.hint
-msgctxt "tloraform.rxdbgridlora.hint"
-msgid "Двойной клик на строке с нужной поправкой заносит её в основную таблицу"
-msgstr "Двойной клик на строке с нужной поправкой заносит её в основную таблицу"
+#: tmainform.acapplystartmarks.caption
+msgctxt "tmainform.acapplystartmarks.caption"
+msgid "Записать"
+msgstr "Записать"
 
 #: tmainform.accheckupdate.caption
 msgctxt "tmainform.accheckupdate.caption"
@@ -1455,6 +1865,11 @@ msgstr "Очистить результаты"
 #: tmainform.acclearresults.hint
 msgid "Очистить результаты соревнований и оставить остальную информацию об участниках"
 msgstr "Очистить результаты соревнований и оставить остальную информацию об участниках"
+
+#: tmainform.acclearstartmarks.caption
+msgctxt "tmainform.acclearstartmarks.caption"
+msgid "Очистить"
+msgstr "Очистить"
 
 #: tmainform.accomclose.caption
 msgctxt "tmainform.accomclose.caption"
@@ -1495,14 +1910,15 @@ msgstr "LED панель"
 msgid "Использовать LED панель для показа финишных результатов"
 msgstr "Использовать LED панель для показа финишных результатов"
 
-#: tmainform.acloraclear.caption
-msgctxt "tmainform.acloraclear.caption"
-msgid "Очистить"
-msgstr "Очистить"
+#: tmainform.acopenfinishmarkjournal.caption
+msgctxt "tmainform.acopenfinishmarkjournal.caption"
+msgid "В новом окне"
+msgstr "В новом окне"
 
-#: tmainform.acloraclear.hint
-msgid "Убирает ненужные значение поправки"
-msgstr "Убирает ненужные значение поправки"
+#: tmainform.acopenfinishmarkjournal.hint
+msgctxt "tmainform.acopenfinishmarkjournal.hint"
+msgid "Открыть журнал финишных отметок"
+msgstr "Открыть журнал финишных отметок"
 
 #: tmainform.acopenlogdirectory.caption
 msgid "Открыть каталог"
@@ -1519,6 +1935,16 @@ msgstr "Открыть текущий файл"
 #: tmainform.acopenlogfile.hint
 msgid "Открыть текущий файл журнала"
 msgstr "Открыть текущий файл журнала"
+
+#: tmainform.acopenstartmarkjournal.caption
+msgctxt "tmainform.acopenstartmarkjournal.caption"
+msgid "В новом окне"
+msgstr "В новом окне"
+
+#: tmainform.acopenstartmarkjournal.hint
+msgctxt "tmainform.acopenstartmarkjournal.hint"
+msgid "Открыть журнал стартовых отметок"
+msgstr "Открыть журнал стартовых отметок"
 
 #: tmainform.acrunracesettings.caption
 msgid "Параметры соревнования"
@@ -1555,10 +1981,6 @@ msgstr "Не стартовал"
 msgctxt "tmainform.acsetdsq.caption"
 msgid "DSQ"
 msgstr "DSQ"
-
-#: tmainform.acsetfinish.caption
-msgid "Записать"
-msgstr "Записать"
 
 #: tmainform.acsetstarttime.caption
 msgid "Изменить время старта"
@@ -1619,7 +2041,12 @@ msgstr ""
 "При изменении поправки, стартового времени, финишного времени\n"
 "или штрафа автоматически пересчитывать результаты"
 
-#: tmainform.currentsu.caption
+#: tmainform.clock.caption
+msgid "00:00:00"
+msgstr ""
+
+#: tmainform.currentstagegroup.caption
+msgctxt "tmainform.currentstagegroup.caption"
 msgid "Текущий СУ"
 msgstr "Текущий СУ"
 
@@ -1630,16 +2057,6 @@ msgstr "Копиров&ать"
 
 #: tmainform.editcopy1.hint
 msgctxt "tmainform.editcopy1.hint"
-msgid "Копировать"
-msgstr "Копировать"
-
-#: tmainform.editcopy2.caption
-msgctxt "tmainform.editcopy2.caption"
-msgid "Копиров&ать"
-msgstr "Копиров&ать"
-
-#: tmainform.editcopy2.hint
-msgctxt "tmainform.editcopy2.hint"
 msgid "Копировать"
 msgstr "Копировать"
 
@@ -1668,23 +2085,6 @@ msgstr "В&ыход"
 #: tmainform.fileexit.hint
 msgid "Выход"
 msgstr "Выход"
-
-#: tmainform.fileexportallresults.caption
-msgid "Экспорт результатов дня ..."
-msgstr "Экспорт результатов дня ..."
-
-#: tmainform.fileexportallresults.dialog.title
-msgctxt "tmainform.fileexportallresults.dialog.title"
-msgid "Экспорт результатов"
-msgstr "Экспорт результатов"
-
-#: tmainform.fileexportallresults.hint
-msgid ""
-"Экспорт результатов этапа для суммирования\n"
-"с другим соревнованием/днём соревнования"
-msgstr ""
-"Экспорт результатов этапа для суммирования\n"
-"с другим соревнованием/днём соревнования"
 
 #: tmainform.fileexportcsvresults.caption
 msgid "Экспорт результатов ..."
@@ -1725,20 +2125,6 @@ msgstr "Сохранить &как ..."
 
 #: tmainform.fileexportstageresultssaveas.hint
 msgctxt "tmainform.fileexportstageresultssaveas.hint"
-msgid "Сохранить как..."
-msgstr "Сохранить как..."
-
-#: tmainform.fileexportsumdays.caption
-msgctxt "tmainform.fileexportsumdays.caption"
-msgid "Сохранить &как ..."
-msgstr "Сохранить &как ..."
-
-#: tmainform.fileexportsumdays.dialog.title
-msgid "Сохранить сумму результатов как"
-msgstr "Сохранить сумму результатов как"
-
-#: tmainform.fileexportsumdays.hint
-msgctxt "tmainform.fileexportsumdays.hint"
 msgid "Сохранить как..."
 msgstr "Сохранить как..."
 
@@ -1790,18 +2176,6 @@ msgstr "Загрузить результаты ..."
 msgid "Загрузить результаты в файл соревнований"
 msgstr "Загрузить результаты в файл соревнований"
 
-#: tmainform.fileopencsvsum.caption
-msgid "Открыть сумму результатов ..."
-msgstr "Открыть сумму результатов ..."
-
-#: tmainform.fileopencsvsum.dialog.title
-msgid "Открыть существующий файл с суммой результатов"
-msgstr "Открыть существующий файл с суммой результатов"
-
-#: tmainform.fileopencsvsum.hint
-msgid "Открыть сумму результатов дня/предыдущего соревнования"
-msgstr "Открыть сумму результатов дня/предыдущего соревнования"
-
 #: tmainform.fileopendb.caption
 msgid "О&ткрыть ..."
 msgstr "О&ткрыть ..."
@@ -1816,314 +2190,10 @@ msgctxt "tmainform.fileopendb.hint"
 msgid "Открыть существующий файл соревнований"
 msgstr "Открыть существующий файл соревнований"
 
-#: tmainform.generatesumdays.caption
-msgid "Суммировать результаты нескольких дней ..."
-msgstr "Суммировать результаты нескольких дней ..."
-
-#: tmainform.gridresult1.columns[0].title.caption
-msgctxt "tmainform.gridresult1.columns[0].title.caption"
-msgid "Категория"
-msgstr "Категория"
-
-#: tmainform.gridresult1.columns[1].title.caption
-msgctxt "tmainform.gridresult1.columns[1].title.caption"
-msgid "Место"
-msgstr "Место"
-
-#: tmainform.gridresult1.columns[2].title.caption
-msgctxt "tmainform.gridresult1.columns[2].title.caption"
-msgid "Номер"
-msgstr "Номер"
-
-#: tmainform.gridresult1.columns[3].title.caption
-msgctxt "tmainform.gridresult1.columns[3].title.caption"
-msgid "Имя"
-msgstr "Имя"
-
-#: tmainform.gridresult1.columns[4].title.caption
-msgctxt "tmainform.gridresult1.columns[4].title.caption"
-msgid "Штраф"
-msgstr "Штраф"
-
-#: tmainform.gridresult1.columns[5].title.caption
-msgctxt "tmainform.gridresult1.columns[5].title.caption"
-msgid "Результат"
-msgstr "Результат"
-
-#: tmainform.gridresult1.columns[6].title.caption
-msgctxt "tmainform.gridresult1.columns[6].title.caption"
-msgid "Отставание"
-msgstr "Отставание"
-
-#: tmainform.gridresult2.columns[0].title.caption
-msgctxt "tmainform.gridresult2.columns[0].title.caption"
-msgid "Категория"
-msgstr "Категория"
-
-#: tmainform.gridresult2.columns[1].title.caption
-msgctxt "tmainform.gridresult2.columns[1].title.caption"
-msgid "Место"
-msgstr "Место"
-
-#: tmainform.gridresult2.columns[2].title.caption
-msgctxt "tmainform.gridresult2.columns[2].title.caption"
-msgid "Номер"
-msgstr "Номер"
-
-#: tmainform.gridresult2.columns[3].title.caption
-msgctxt "tmainform.gridresult2.columns[3].title.caption"
-msgid "Имя"
-msgstr "Имя"
-
-#: tmainform.gridresult2.columns[4].title.caption
-msgctxt "tmainform.gridresult2.columns[4].title.caption"
-msgid "Штраф"
-msgstr "Штраф"
-
-#: tmainform.gridresult2.columns[5].title.caption
-msgctxt "tmainform.gridresult2.columns[5].title.caption"
-msgid "Результат"
-msgstr "Результат"
-
-#: tmainform.gridresult2.columns[6].title.caption
-msgctxt "tmainform.gridresult2.columns[6].title.caption"
-msgid "Отставание"
-msgstr "Отставание"
-
-#: tmainform.gridresult3.columns[0].title.caption
-msgctxt "tmainform.gridresult3.columns[0].title.caption"
-msgid "Категория"
-msgstr "Категория"
-
-#: tmainform.gridresult3.columns[1].title.caption
-msgctxt "tmainform.gridresult3.columns[1].title.caption"
-msgid "Место"
-msgstr "Место"
-
-#: tmainform.gridresult3.columns[2].title.caption
-msgctxt "tmainform.gridresult3.columns[2].title.caption"
-msgid "Номер"
-msgstr "Номер"
-
-#: tmainform.gridresult3.columns[3].title.caption
-msgctxt "tmainform.gridresult3.columns[3].title.caption"
-msgid "Имя"
-msgstr "Имя"
-
-#: tmainform.gridresult3.columns[4].title.caption
-msgctxt "tmainform.gridresult3.columns[4].title.caption"
-msgid "Штраф"
-msgstr "Штраф"
-
-#: tmainform.gridresult3.columns[5].title.caption
-msgctxt "tmainform.gridresult3.columns[5].title.caption"
-msgid "Результат"
-msgstr "Результат"
-
-#: tmainform.gridresult3.columns[6].title.caption
-msgctxt "tmainform.gridresult3.columns[6].title.caption"
-msgid "Отставание"
-msgstr "Отставание"
-
-#: tmainform.gridresult4.columns[0].title.caption
-msgctxt "tmainform.gridresult4.columns[0].title.caption"
-msgid "Категория"
-msgstr "Категория"
-
-#: tmainform.gridresult4.columns[1].title.caption
-msgctxt "tmainform.gridresult4.columns[1].title.caption"
-msgid "Место"
-msgstr "Место"
-
-#: tmainform.gridresult4.columns[2].title.caption
-msgctxt "tmainform.gridresult4.columns[2].title.caption"
-msgid "Номер"
-msgstr "Номер"
-
-#: tmainform.gridresult4.columns[3].title.caption
-msgctxt "tmainform.gridresult4.columns[3].title.caption"
-msgid "Имя"
-msgstr "Имя"
-
-#: tmainform.gridresult4.columns[4].title.caption
-msgctxt "tmainform.gridresult4.columns[4].title.caption"
-msgid "Штраф"
-msgstr "Штраф"
-
-#: tmainform.gridresult4.columns[5].title.caption
-msgctxt "tmainform.gridresult4.columns[5].title.caption"
-msgid "Результат"
-msgstr "Результат"
-
-#: tmainform.gridresult4.columns[6].title.caption
-msgctxt "tmainform.gridresult4.columns[6].title.caption"
-msgid "Отставание"
-msgstr "Отставание"
-
-#: tmainform.gridresult5.columns[0].title.caption
-msgctxt "tmainform.gridresult5.columns[0].title.caption"
-msgid "Категория"
-msgstr "Категория"
-
-#: tmainform.gridresult5.columns[1].title.caption
-msgctxt "tmainform.gridresult5.columns[1].title.caption"
-msgid "Место"
-msgstr "Место"
-
-#: tmainform.gridresult5.columns[2].title.caption
-msgctxt "tmainform.gridresult5.columns[2].title.caption"
-msgid "Номер"
-msgstr "Номер"
-
-#: tmainform.gridresult5.columns[3].title.caption
-msgctxt "tmainform.gridresult5.columns[3].title.caption"
-msgid "Имя"
-msgstr "Имя"
-
-#: tmainform.gridresult5.columns[4].title.caption
-msgctxt "tmainform.gridresult5.columns[4].title.caption"
-msgid "Штраф"
-msgstr "Штраф"
-
-#: tmainform.gridresult5.columns[5].title.caption
-msgctxt "tmainform.gridresult5.columns[5].title.caption"
-msgid "Результат"
-msgstr "Результат"
-
-#: tmainform.gridresult5.columns[6].title.caption
-msgctxt "tmainform.gridresult5.columns[6].title.caption"
-msgid "Отставание"
-msgstr "Отставание"
-
-#: tmainform.gridresult6.columns[0].title.caption
-msgctxt "tmainform.gridresult6.columns[0].title.caption"
-msgid "Категория"
-msgstr "Категория"
-
-#: tmainform.gridresult6.columns[1].title.caption
-msgctxt "tmainform.gridresult6.columns[1].title.caption"
-msgid "Место"
-msgstr "Место"
-
-#: tmainform.gridresult6.columns[2].title.caption
-msgctxt "tmainform.gridresult6.columns[2].title.caption"
-msgid "Номер"
-msgstr "Номер"
-
-#: tmainform.gridresult6.columns[3].title.caption
-msgctxt "tmainform.gridresult6.columns[3].title.caption"
-msgid "Имя"
-msgstr "Имя"
-
-#: tmainform.gridresult6.columns[4].title.caption
-msgctxt "tmainform.gridresult6.columns[4].title.caption"
-msgid "Штраф"
-msgstr "Штраф"
-
-#: tmainform.gridresult6.columns[5].title.caption
-msgctxt "tmainform.gridresult6.columns[5].title.caption"
-msgid "Результат"
-msgstr "Результат"
-
-#: tmainform.gridresult6.columns[6].title.caption
-msgctxt "tmainform.gridresult6.columns[6].title.caption"
-msgid "Отставание"
-msgstr "Отставание"
-
-#: tmainform.gridresult7.columns[0].title.caption
-msgctxt "tmainform.gridresult7.columns[0].title.caption"
-msgid "Категория"
-msgstr "Категория"
-
-#: tmainform.gridresult7.columns[1].title.caption
-msgctxt "tmainform.gridresult7.columns[1].title.caption"
-msgid "Место"
-msgstr "Место"
-
-#: tmainform.gridresult7.columns[2].title.caption
-msgctxt "tmainform.gridresult7.columns[2].title.caption"
-msgid "Номер"
-msgstr "Номер"
-
-#: tmainform.gridresult7.columns[3].title.caption
-msgctxt "tmainform.gridresult7.columns[3].title.caption"
-msgid "Имя"
-msgstr "Имя"
-
-#: tmainform.gridresult7.columns[4].title.caption
-msgctxt "tmainform.gridresult7.columns[4].title.caption"
-msgid "Штраф"
-msgstr "Штраф"
-
-#: tmainform.gridresult7.columns[5].title.caption
-msgctxt "tmainform.gridresult7.columns[5].title.caption"
-msgid "Результат"
-msgstr "Результат"
-
-#: tmainform.gridresult7.columns[6].title.caption
-msgctxt "tmainform.gridresult7.columns[6].title.caption"
-msgid "Отставание"
-msgstr "Отставание"
-
-#: tmainform.gridresult8.columns[0].title.caption
-msgctxt "tmainform.gridresult8.columns[0].title.caption"
-msgid "Категория"
-msgstr "Категория"
-
-#: tmainform.gridresult8.columns[1].title.caption
-msgctxt "tmainform.gridresult8.columns[1].title.caption"
-msgid "Место"
-msgstr "Место"
-
-#: tmainform.gridresult8.columns[2].title.caption
-msgctxt "tmainform.gridresult8.columns[2].title.caption"
-msgid "Номер"
-msgstr "Номер"
-
-#: tmainform.gridresult8.columns[3].title.caption
-msgctxt "tmainform.gridresult8.columns[3].title.caption"
-msgid "Имя"
-msgstr "Имя"
-
-#: tmainform.gridresult8.columns[4].title.caption
-msgctxt "tmainform.gridresult8.columns[4].title.caption"
-msgid "Штраф"
-msgstr "Штраф"
-
-#: tmainform.gridresult8.columns[5].title.caption
-msgctxt "tmainform.gridresult8.columns[5].title.caption"
-msgid "Результат"
-msgstr "Результат"
-
-#: tmainform.gridresult8.columns[6].title.caption
-msgctxt "tmainform.gridresult8.columns[6].title.caption"
-msgid "Отставание"
-msgstr "Отставание"
-
 #: tmainform.gridresultstagesum.columns[0].title.caption
 msgctxt "tmainform.gridresultstagesum.columns[0].title.caption"
 msgid "Категория"
 msgstr "Категория"
-
-#: tmainform.gridresultstagesum.columns[10].title.caption
-msgctxt "tmainform.gridresultstagesum.columns[10].title.caption"
-msgid "СУ 7"
-msgstr "СУ 7"
-
-#: tmainform.gridresultstagesum.columns[11].title.caption
-msgctxt "tmainform.gridresultstagesum.columns[11].title.caption"
-msgid "СУ 8"
-msgstr "СУ 8"
-
-#: tmainform.gridresultstagesum.columns[12].title.caption
-msgctxt "tmainform.gridresultstagesum.columns[12].title.caption"
-msgid "Результат"
-msgstr "Результат"
-
-#: tmainform.gridresultstagesum.columns[13].title.caption
-msgctxt "tmainform.gridresultstagesum.columns[13].title.caption"
-msgid "Отставание"
-msgstr "Отставание"
 
 #: tmainform.gridresultstagesum.columns[1].title.caption
 msgctxt "tmainform.gridresultstagesum.columns[1].title.caption"
@@ -2142,33 +2212,13 @@ msgstr "Имя"
 
 #: tmainform.gridresultstagesum.columns[4].title.caption
 msgctxt "tmainform.gridresultstagesum.columns[4].title.caption"
-msgid "СУ 1"
-msgstr "СУ 1"
+msgid "Результат"
+msgstr "Результат"
 
 #: tmainform.gridresultstagesum.columns[5].title.caption
 msgctxt "tmainform.gridresultstagesum.columns[5].title.caption"
-msgid "СУ 2"
-msgstr "СУ 2"
-
-#: tmainform.gridresultstagesum.columns[6].title.caption
-msgctxt "tmainform.gridresultstagesum.columns[6].title.caption"
-msgid "СУ 3"
-msgstr "СУ 3"
-
-#: tmainform.gridresultstagesum.columns[7].title.caption
-msgctxt "tmainform.gridresultstagesum.columns[7].title.caption"
-msgid "СУ 4"
-msgstr "СУ 4"
-
-#: tmainform.gridresultstagesum.columns[8].title.caption
-msgctxt "tmainform.gridresultstagesum.columns[8].title.caption"
-msgid "СУ 5"
-msgstr "СУ 5"
-
-#: tmainform.gridresultstagesum.columns[9].title.caption
-msgctxt "tmainform.gridresultstagesum.columns[9].title.caption"
-msgid "СУ 6"
-msgstr "СУ 6"
+msgid "Отставание"
+msgstr "Отставание"
 
 #: tmainform.gridresultstagetotal.columns[0].title.caption
 msgctxt "tmainform.gridresultstagetotal.columns[0].title.caption"
@@ -2212,58 +2262,6 @@ msgstr "Количество участников"
 #: tmainform.groupbox2.caption
 msgid "Сейчас на трассе"
 msgstr "Сейчас на трассе"
-
-#: tmainform.lorapopupdefault.caption
-msgid "По умолчанию"
-msgstr "По умолчанию"
-
-#: tmainform.lorapopupdefault.hint
-msgid "Показать только необработанные результаты"
-msgstr "Показать только необработанные результаты"
-
-#: tmainform.lorapopuphideselected.caption
-msgid "Скрыть выбранное"
-msgstr "Скрыть выбранное"
-
-#: tmainform.lorapopuphideselected.hint
-msgid "Скрыть выбранное значение из списка"
-msgstr "Скрыть выбранное значение из списка"
-
-#: tmainform.lorapopupopen.caption
-msgid "В новом окне"
-msgstr "В новом окне"
-
-#: tmainform.lorapopupopen.hint
-msgid ""
-"Показать все результаты в новом окне,\n"
-"включая дополнительную информацию"
-msgstr ""
-"Показать все результаты в новом окне,\n"
-"включая дополнительную информацию"
-
-#: tmainform.lorapopupshow15min.caption
-msgid "Всё за 15 минут"
-msgstr "Всё за 15 минут"
-
-#: tmainform.lorapopupshow15min.hint
-msgid "Показать все результаты за последние 15 минут"
-msgstr "Показать все результаты за последние 15 минут"
-
-#: tmainform.lorapopupshowall.caption
-msgid "Показать всё"
-msgstr "Показать всё"
-
-#: tmainform.lorapopupshowall.hint
-msgid "Показать все результаты"
-msgstr "Показать все результаты"
-
-#: tmainform.lorapopupshowfromstart.caption
-msgid "Всё за соревнование"
-msgstr "Всё за соревнование"
-
-#: tmainform.lorapopupshowfromstart.hint
-msgid "Показать все результаты от начала соревнования"
-msgstr "Показать все результаты от начала соревнования"
 
 #: tmainform.menuitem3.caption
 msgctxt "tmainform.menuitem3.caption"
@@ -2326,9 +2324,15 @@ msgstr "Открыть недавнее"
 msgid "Инструменты"
 msgstr "Инструменты"
 
-#: tmainform.panellora.caption
-msgid "Время от стартовой отсечки"
-msgstr "Время от стартовой отсечки"
+#: tmainform.panelresult.caption
+msgctxt "tmainform.panelresult.caption"
+msgid "Финишные отметки"
+msgstr "Финишные отметки"
+
+#: tmainform.panelstartmarks.caption
+msgctxt "tmainform.panelstartmarks.caption"
+msgid "Стартовые отметки"
+msgstr "Стартовые отметки"
 
 #: tmainform.pmdeletenumber.caption
 msgid "Удалить участника"
@@ -2376,314 +2380,46 @@ msgstr "Комментарий"
 
 #: tmainform.rxdbgrid1.columns[13].title.caption
 msgctxt "tmainform.rxdbgrid1.columns[13].title.caption"
-msgid "СУ 1|Поправка"
-msgstr "СУ 1|Поправка"
+msgid "Итог"
+msgstr "Итог"
 
 #: tmainform.rxdbgrid1.columns[14].title.caption
 msgctxt "tmainform.rxdbgrid1.columns[14].title.caption"
-msgid "СУ 1|Старт"
-msgstr "СУ 1|Старт"
+msgid "Отставание"
+msgstr "Отставание"
 
 #: tmainform.rxdbgrid1.columns[15].title.caption
 msgctxt "tmainform.rxdbgrid1.columns[15].title.caption"
-msgid "СУ 1|Финиш"
-msgstr "СУ 1|Финиш"
-
-#: tmainform.rxdbgrid1.columns[16].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[16].title.caption"
-msgid "СУ 1|Штраф"
-msgstr "СУ 1|Штраф"
-
-#: tmainform.rxdbgrid1.columns[17].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[17].title.caption"
-msgid "СУ 1|Результат"
-msgstr "СУ 1|Результат"
-
-#: tmainform.rxdbgrid1.columns[18].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[18].title.caption"
-msgid "СУ 1|Отставание"
-msgstr "СУ 1|Отставание"
-
-#: tmainform.rxdbgrid1.columns[19].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[19].title.caption"
-msgid "СУ 1|Место"
-msgstr "СУ 1|Место"
+msgid "Статус"
+msgstr "Статус"
 
 #: tmainform.rxdbgrid1.columns[1].title.caption
 msgctxt "tmainform.rxdbgrid1.columns[1].title.caption"
 msgid "Категория"
 msgstr "Категория"
 
-#: tmainform.rxdbgrid1.columns[20].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[20].title.caption"
-msgid "СУ 2|Поправка"
-msgstr "СУ 2|Поправка"
-
-#: tmainform.rxdbgrid1.columns[21].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[21].title.caption"
-msgid "СУ 2|Старт"
-msgstr "СУ 2|Старт"
-
-#: tmainform.rxdbgrid1.columns[22].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[22].title.caption"
-msgid "СУ 2|Финиш"
-msgstr "СУ 2|Финиш"
-
-#: tmainform.rxdbgrid1.columns[23].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[23].title.caption"
-msgid "СУ 2|Штраф"
-msgstr "СУ 2|Штраф"
-
-#: tmainform.rxdbgrid1.columns[24].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[24].title.caption"
-msgid "СУ 2|Результат"
-msgstr "СУ 2|Результат"
-
-#: tmainform.rxdbgrid1.columns[25].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[25].title.caption"
-msgid "СУ 2|Отставание"
-msgstr "СУ 2|Отставание"
-
-#: tmainform.rxdbgrid1.columns[26].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[26].title.caption"
-msgid "СУ 2|Место"
-msgstr "СУ 2|Место"
-
-#: tmainform.rxdbgrid1.columns[27].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[27].title.caption"
-msgid "СУ 3|Поправка"
-msgstr "СУ 3|Поправка"
-
-#: tmainform.rxdbgrid1.columns[28].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[28].title.caption"
-msgid "СУ 3|Старт"
-msgstr "СУ 3|Старт"
-
-#: tmainform.rxdbgrid1.columns[29].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[29].title.caption"
-msgid "СУ 3|Финиш"
-msgstr "СУ 3|Финиш"
-
 #: tmainform.rxdbgrid1.columns[2].title.caption
 msgctxt "tmainform.rxdbgrid1.columns[2].title.caption"
 msgid "Место"
 msgstr "Место"
-
-#: tmainform.rxdbgrid1.columns[30].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[30].title.caption"
-msgid "СУ 3|Штраф"
-msgstr "СУ 3|Штраф"
-
-#: tmainform.rxdbgrid1.columns[31].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[31].title.caption"
-msgid "СУ 3|Результат"
-msgstr "СУ 3|Результат"
-
-#: tmainform.rxdbgrid1.columns[32].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[32].title.caption"
-msgid "СУ 3|Отставание"
-msgstr "СУ 3|Отставание"
-
-#: tmainform.rxdbgrid1.columns[33].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[33].title.caption"
-msgid "СУ 3|Место"
-msgstr "СУ 3|Место"
-
-#: tmainform.rxdbgrid1.columns[34].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[34].title.caption"
-msgid "СУ 4|Поправка"
-msgstr "СУ 4|Поправка"
-
-#: tmainform.rxdbgrid1.columns[35].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[35].title.caption"
-msgid "СУ 4|Старт"
-msgstr "СУ 4|Старт"
-
-#: tmainform.rxdbgrid1.columns[36].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[36].title.caption"
-msgid "СУ 4|Финиш"
-msgstr "СУ 4|Финиш"
-
-#: tmainform.rxdbgrid1.columns[37].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[37].title.caption"
-msgid "СУ 4|Штраф"
-msgstr "СУ 4|Штраф"
-
-#: tmainform.rxdbgrid1.columns[38].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[38].title.caption"
-msgid "СУ 4|Результат"
-msgstr "СУ 4|Результат"
-
-#: tmainform.rxdbgrid1.columns[39].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[39].title.caption"
-msgid "СУ 4|Отставание"
-msgstr "СУ 4|Отставание"
 
 #: tmainform.rxdbgrid1.columns[3].title.caption
 msgctxt "tmainform.rxdbgrid1.columns[3].title.caption"
 msgid "Номер"
 msgstr "Номер"
 
-#: tmainform.rxdbgrid1.columns[40].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[40].title.caption"
-msgid "СУ 4|Место"
-msgstr "СУ 4|Место"
-
-#: tmainform.rxdbgrid1.columns[41].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[41].title.caption"
-msgid "СУ 5|Поправка"
-msgstr "СУ 5|Поправка"
-
-#: tmainform.rxdbgrid1.columns[42].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[42].title.caption"
-msgid "СУ 5|Старт"
-msgstr "СУ 5|Старт"
-
-#: tmainform.rxdbgrid1.columns[43].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[43].title.caption"
-msgid "СУ 5|Финиш"
-msgstr "СУ 5|Финиш"
-
-#: tmainform.rxdbgrid1.columns[44].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[44].title.caption"
-msgid "СУ 5|Штраф"
-msgstr "СУ 5|Штраф"
-
-#: tmainform.rxdbgrid1.columns[45].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[45].title.caption"
-msgid "СУ 5|Результат"
-msgstr "СУ 5|Результат"
-
-#: tmainform.rxdbgrid1.columns[46].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[46].title.caption"
-msgid "СУ 5|Отставание"
-msgstr "СУ 5|Отставание"
-
-#: tmainform.rxdbgrid1.columns[47].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[47].title.caption"
-msgid "СУ 5|Место"
-msgstr "СУ 5|Место"
-
-#: tmainform.rxdbgrid1.columns[48].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[48].title.caption"
-msgid "СУ 6|Поправка"
-msgstr "СУ 6|Поправка"
-
-#: tmainform.rxdbgrid1.columns[49].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[49].title.caption"
-msgid "СУ 6|Старт"
-msgstr "СУ 6|Старт"
-
 #: tmainform.rxdbgrid1.columns[4].title.caption
 msgid "rfid"
 msgstr "Rfid"
-
-#: tmainform.rxdbgrid1.columns[50].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[50].title.caption"
-msgid "СУ 6|Финиш"
-msgstr "СУ 6|Финиш"
-
-#: tmainform.rxdbgrid1.columns[51].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[51].title.caption"
-msgid "СУ 6|Штраф"
-msgstr "СУ 6|Штраф"
-
-#: tmainform.rxdbgrid1.columns[52].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[52].title.caption"
-msgid "СУ 6|Результат"
-msgstr "СУ 6|Результат"
-
-#: tmainform.rxdbgrid1.columns[53].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[53].title.caption"
-msgid "СУ 6|Отставание"
-msgstr "СУ 6|Отставание"
-
-#: tmainform.rxdbgrid1.columns[54].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[54].title.caption"
-msgid "СУ 6|Место"
-msgstr "СУ 6|Место"
-
-#: tmainform.rxdbgrid1.columns[55].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[55].title.caption"
-msgid "СУ 7|Поправка"
-msgstr "СУ 7|Поправка"
-
-#: tmainform.rxdbgrid1.columns[56].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[56].title.caption"
-msgid "СУ 7|Старт"
-msgstr "СУ 7|Старт"
-
-#: tmainform.rxdbgrid1.columns[57].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[57].title.caption"
-msgid "СУ 7|Финиш"
-msgstr "СУ 7|Финиш"
-
-#: tmainform.rxdbgrid1.columns[58].title.caption
-msgid "СУ 7|Штраф"
-msgstr "СУ 7|Штраф"
-
-#: tmainform.rxdbgrid1.columns[59].title.caption
-msgid "СУ 7|Результат"
-msgstr "СУ 7|Результат"
 
 #: tmainform.rxdbgrid1.columns[5].title.caption
 msgctxt "tmainform.rxdbgrid1.columns[5].title.caption"
 msgid "Имя"
 msgstr "Имя"
 
-#: tmainform.rxdbgrid1.columns[60].title.caption
-msgid "СУ 7|Отставание"
-msgstr "СУ 7|Отставание"
-
-#: tmainform.rxdbgrid1.columns[61].title.caption
-msgid "СУ 7|Место"
-msgstr "СУ 7|Место"
-
-#: tmainform.rxdbgrid1.columns[62].title.caption
-msgid "СУ 8|Поправка"
-msgstr "СУ 8|Поправка"
-
-#: tmainform.rxdbgrid1.columns[63].title.caption
-msgid "СУ 8|Старт"
-msgstr "СУ 8|Старт"
-
-#: tmainform.rxdbgrid1.columns[64].title.caption
-msgid "СУ 8|Финиш"
-msgstr "СУ 8|Финиш"
-
-#: tmainform.rxdbgrid1.columns[65].title.caption
-msgid "СУ 8|Штраф"
-msgstr "СУ 8|Штраф"
-
-#: tmainform.rxdbgrid1.columns[66].title.caption
-msgid "СУ 8|Результат"
-msgstr "СУ 8|Результат"
-
-#: tmainform.rxdbgrid1.columns[67].title.caption
-msgid "СУ 8|Отставание"
-msgstr "СУ 8|Отставание"
-
-#: tmainform.rxdbgrid1.columns[68].title.caption
-msgid "СУ 8|Место"
-msgstr "СУ 8|Место"
-
-#: tmainform.rxdbgrid1.columns[69].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[69].title.caption"
-msgid "Итог"
-msgstr "Итог"
-
 #: tmainform.rxdbgrid1.columns[6].title.caption
 msgid "Никнейм"
 msgstr "Никнейм"
-
-#: tmainform.rxdbgrid1.columns[70].title.caption
-msgctxt "tmainform.rxdbgrid1.columns[70].title.caption"
-msgid "Отставание"
-msgstr "Отставание"
-
-#: tmainform.rxdbgrid1.columns[71].title.caption
-msgid "Статус"
-msgstr "Статус"
 
 #: tmainform.rxdbgrid1.columns[7].title.caption
 msgid "Возраст"
@@ -2709,79 +2445,30 @@ msgctxt "tmainform.rxdbgridcorrection.columns[1].title.caption"
 msgid "Поправка"
 msgstr "Поправка"
 
-#: tmainform.rxdbgridlora.columns[0].title.caption
-msgctxt "tmainform.rxdbgridlora.columns[0].title.caption"
-msgid "Номер"
-msgstr "Номер"
-
-#: tmainform.rxdbgridlora.columns[1].title.caption
-msgctxt "tmainform.rxdbgridlora.columns[1].title.caption"
-msgid "Старт"
-msgstr "Старт"
-
-#: tmainform.rxdbgridlora.columns[2].title.caption
-msgctxt "tmainform.rxdbgridlora.columns[2].title.caption"
-msgid "Поправка"
-msgstr "Поправка"
-
-#: tmainform.rxdbgridlora.hint
-msgctxt "tmainform.rxdbgridlora.hint"
-msgid "Двойной клик на строке с нужной поправкой заносит её в основную таблицу"
-msgstr "Двойной клик на строке с нужной поправкой заносит её в основную таблицу"
-
-#: tmainform.sgridresult.columns[0].title.caption
-msgctxt "tmainform.sgridresult.columns[0].title.caption"
+#: tmainform.rxdbgridfinishmarks.columns[0].title.caption
+msgctxt "tmainform.rxdbgridfinishmarks.columns[0].title.caption"
 msgid "Время"
 msgstr "Время"
 
-#: tmainform.sgridresult.columns[1].title.caption
-msgctxt "tmainform.sgridresult.columns[1].title.caption"
+#: tmainform.rxdbgridfinishmarks.columns[1].title.caption
+msgctxt "tmainform.rxdbgridfinishmarks.columns[1].title.caption"
 msgid "Номер"
 msgstr "Номер"
 
-#: tmainform.sgridresult.columns[2].title.caption
-msgid "Ввод"
-msgstr "Ввод"
+#: tmainform.rxdbgridstartmarks.columns[0].title.caption
+msgctxt "tmainform.rxdbgridstartmarks.columns[0].title.caption"
+msgid "Время"
+msgstr "Время"
 
-#: tmainform.sheetstage1.caption
-msgctxt "tmainform.sheetstage1.caption"
-msgid "СУ 1"
-msgstr "СУ 1"
+#: tmainform.rxdbgridstartmarks.columns[1].title.caption
+msgctxt "tmainform.rxdbgridstartmarks.columns[1].title.caption"
+msgid "Поправка"
+msgstr "Поправка"
 
-#: tmainform.sheetstage2.caption
-msgctxt "tmainform.sheetstage2.caption"
-msgid "СУ 2"
-msgstr "СУ 2"
-
-#: tmainform.sheetstage3.caption
-msgctxt "tmainform.sheetstage3.caption"
-msgid "СУ 3"
-msgstr "СУ 3"
-
-#: tmainform.sheetstage4.caption
-msgctxt "tmainform.sheetstage4.caption"
-msgid "СУ 4"
-msgstr "СУ 4"
-
-#: tmainform.sheetstage5.caption
-msgctxt "tmainform.sheetstage5.caption"
-msgid "СУ 5"
-msgstr "СУ 5"
-
-#: tmainform.sheetstage6.caption
-msgctxt "tmainform.sheetstage6.caption"
-msgid "СУ 6"
-msgstr "СУ 6"
-
-#: tmainform.sheetstage7.caption
-msgctxt "tmainform.sheetstage7.caption"
-msgid "СУ 7"
-msgstr "СУ 7"
-
-#: tmainform.sheetstage8.caption
-msgctxt "tmainform.sheetstage8.caption"
-msgid "СУ 8"
-msgstr "СУ 8"
+#: tmainform.rxdbgridstartmarks.columns[2].title.caption
+msgctxt "tmainform.rxdbgridstartmarks.columns[2].title.caption"
+msgid "Номер"
+msgstr "Номер"
 
 #: tmainform.sheetstagesum.caption
 msgctxt "tmainform.sheetstagesum.caption"
@@ -2821,14 +2508,6 @@ msgctxt "tmainform.statrxdbgrid2.columns[3].title.caption"
 msgid "Время"
 msgstr "Время"
 
-#: tmainform.statusbarleft.panels[0].text
-msgid "часы"
-msgstr "часы"
-
-#: tmainform.statusbarleft.panels[1].text
-msgid "Serial"
-msgstr "Порт"
-
 #: tmainform.tabsheet1.caption
 msgid "Стартовый"
 msgstr "Стартовый"
@@ -2841,6 +2520,11 @@ msgstr "Статистика"
 msgctxt "tmainform.tabsheet3.caption"
 msgid "Результаты"
 msgstr "Результаты"
+
+#: tmainform.timinginputdevicelabel.caption
+msgctxt "tmainform.timinginputdevicelabel.caption"
+msgid "COM1"
+msgstr ""
 
 #: tresultsform.caption
 msgctxt "tresultsform.caption"
@@ -3036,6 +2720,11 @@ msgctxt "tsettingsform.buttonledtest.caption"
 msgid "Применить"
 msgstr "Применить"
 
+#: tsettingsform.buttonselectbledevice.caption
+msgctxt "tsettingsform.buttonselectbledevice.caption"
+msgid "Выбрать…"
+msgstr "Выбрать…"
+
 #: tsettingsform.buttontelegramtest.caption
 msgctxt "tsettingsform.buttontelegramtest.caption"
 msgid "Применить"
@@ -3058,13 +2747,28 @@ msgstr "Скрывать нулевой час в результатах"
 msgid "Показывать название спецучастка когда когда он один активный"
 msgstr "Показывать название спецучастка когда когда он один активный"
 
+#: tsettingsform.checkboxstartmarkautomaticapply.caption
+msgctxt "tsettingsform.checkboxstartmarkautomaticapply.caption"
+msgid "Применять автоматически"
+msgstr "Применять автоматически"
+
+#: tsettingsform.checkboxstartmarkautomaticapply.hint
+msgctxt "tsettingsform.checkboxstartmarkautomaticapply.hint"
+msgid ""
+"При однозначном совпадении автоматически применить поправку к участнику.\n"
+"Существующая поправка не перезаписывается."
+msgstr ""
+"При однозначном совпадении автоматически применить поправку к участнику.\n"
+"Существующая поправка не перезаписывается."
+
+#: tsettingsform.checkboxtelegramretry.caption
+msgctxt "tsettingsform.checkboxtelegramretry.caption"
+msgid "Повторять при ошибке"
+msgstr "Повторять при ошибке"
+
 #: tsettingsform.checkboxupdateatstartup.caption
 msgid "Проверять наличие обновлений при старте программы"
 msgstr "Проверять наличие обновлений при старте программы"
-
-#: tsettingsform.checkgroup1.caption
-msgid "Активные спецучастки:"
-msgstr "Активные спецучастки:"
 
 #: tsettingsform.delayedit.hint
 msgid ""
@@ -3082,14 +2786,15 @@ msgstr ""
 msgid "Резервное копирование"
 msgstr "Резервное копирование"
 
+#: tsettingsform.dividerbevelblesettings.caption
+msgctxt "tsettingsform.dividerbevelblesettings.caption"
+msgid "Настройки BLE"
+msgstr "Настройки BLE"
+
 #: tsettingsform.dividerbevelcomsettings1.caption
 msgctxt "tsettingsform.dividerbevelcomsettings1.caption"
-msgid "COM порт"
-msgstr "COM порт"
-
-#: tsettingsform.dividerbevelcomsettings2.caption
-msgid "Режим работы с финишем"
-msgstr "Режим работы с финишем"
+msgid "Настройки Serial"
+msgstr "Настройки Serial"
 
 #: tsettingsform.dividerbeveldelay1.caption
 msgid "Задержка в миллисекундах"
@@ -3109,6 +2814,11 @@ msgctxt "tsettingsform.dividerbevelledtest.caption"
 msgid "Тест"
 msgstr "Тест"
 
+#: tsettingsform.dividerbevelstartmarksettings.caption
+msgctxt "tsettingsform.dividerbevelstartmarksettings.caption"
+msgid "Стартовые отметки"
+msgstr "Стартовые отметки"
+
 #: tsettingsform.dividerbeveltelegrambotadress.caption
 msgctxt "tsettingsform.dividerbeveltelegrambotadress.caption"
 msgid "Адрес"
@@ -3119,6 +2829,11 @@ msgctxt "tsettingsform.dividerbeveltelegramtest.caption"
 msgid "Тест"
 msgstr "Тест"
 
+#: tsettingsform.dividerbeveltiminginputmode.caption
+msgctxt "tsettingsform.dividerbeveltiminginputmode.caption"
+msgid "Тип подключения"
+msgstr "Тип подключения"
+
 #: tsettingsform.dividerbevelupdate.caption
 msgctxt "tsettingsform.dividerbevelupdate.caption"
 msgid "Обновление"
@@ -3127,24 +2842,6 @@ msgstr "Обновление"
 #: tsettingsform.dividerbevelviewother.caption
 msgid "Разное"
 msgstr "Разное"
-
-#: tsettingsform.editcomsetstr.hint
-msgid ""
-"Строка, после получения которой,\n"
-"будет взята текущая метка времени,\n"
-"по умолчанию F"
-msgstr ""
-"Строка, после получения которой,\n"
-"будет взята текущая метка времени,\n"
-"по умолчанию F"
-
-#: tsettingsform.editcomsettime.hint
-msgid ""
-"Формат метки времени\n"
-"По умолчанию чч:мм:cc,000"
-msgstr ""
-"Формат метки времени\n"
-"По умолчанию чч:мм:cc,000"
 
 #: tsettingsform.groupboxcategory.caption
 msgid "Категории"
@@ -3190,10 +2887,40 @@ msgstr "Parity"
 msgid "Flow control"
 msgstr "Flow control"
 
+#: tsettingsform.labelbackupmaxsizemb.caption
+msgctxt "tsettingsform.labelbackupmaxsizemb.caption"
+msgid "Максимальный объём копий"
+msgstr "Максимальный объём копий"
+
+#: tsettingsform.labelbackupmegabytes.caption
+msgctxt "tsettingsform.labelbackupmegabytes.caption"
+msgid "МБ"
+msgstr "МБ"
+
 #: tsettingsform.labelbackupminutes.caption
 msgctxt "tsettingsform.labelbackupminutes.caption"
 msgid "минут"
 msgstr "минут"
+
+#: tsettingsform.labelbackupretentiondays.caption
+msgctxt "tsettingsform.labelbackupretentiondays.caption"
+msgid "Хранить автоматические копии"
+msgstr "Хранить автоматические копии"
+
+#: tsettingsform.labelbackupretentiondaysunit.caption
+msgctxt "tsettingsform.labelbackupretentiondaysunit.caption"
+msgid "дней"
+msgstr "дней"
+
+#: tsettingsform.labelbledevice.caption
+msgctxt "tsettingsform.labelbledevice.caption"
+msgid "Устройство"
+msgstr "Устройство"
+
+#: tsettingsform.labelbledeviceid.caption
+msgctxt "tsettingsform.labelbledeviceid.caption"
+msgid "Идентификатор"
+msgstr "Идентификатор"
 
 #: tsettingsform.labelbottomline.caption
 msgid "Нижняя строка"
@@ -3233,6 +2960,16 @@ msgstr "Результат"
 msgid "Одна строка"
 msgstr "Одна строка"
 
+#: tsettingsform.labeltelegramretrycount.caption
+msgctxt "tsettingsform.labeltelegramretrycount.caption"
+msgid "Количество повторов"
+msgstr "Количество повторов"
+
+#: tsettingsform.labeltelegramretrydelay.caption
+msgctxt "tsettingsform.labeltelegramretrydelay.caption"
+msgid "Интервал, секунд"
+msgstr "Интервал, секунд"
+
 #: tsettingsform.labelupperline.caption
 msgid "Верхняя строка"
 msgstr "Верхняя строка"
@@ -3246,29 +2983,29 @@ msgctxt "tsettingsform.panelbackup.hint"
 msgid "Автоматически создавать резервные копии открытого соревнования через заданные промежутки времени"
 msgstr "Автоматически создавать резервные копии открытого соревнования через заданные промежутки времени"
 
-#: tsettingsform.radiobuttoncomsetstr.caption
-msgid "Спец. команда"
-msgstr "Спец. команда"
+#: tsettingsform.radiobuttontiminginputble.caption
+msgctxt "tsettingsform.radiobuttontiminginputble.caption"
+msgid "BLE"
+msgstr "BLE"
 
-#: tsettingsform.radiobuttoncomsetstr.hint
+#: tsettingsform.radiobuttontiminginputserial.caption
+msgctxt "tsettingsform.radiobuttontiminginputserial.caption"
+msgid "Serial (COM-порт)"
+msgstr "Serial (COM-порт)"
+
+#: tsettingsform.startmarkmatchdeltalabel.caption
+msgctxt "tsettingsform.startmarkmatchdeltalabel.caption"
+msgid "Допуск, секунд (±)"
+msgstr "Допуск, секунд (±)"
+
+#: tsettingsform.startmarkmatchdeltalabel.hint
+msgctxt "tsettingsform.startmarkmatchdeltalabel.hint"
 msgid ""
-"Программа будет ожидать из COM порта заданную строку,\n"
-"после получения которой, будет взята текущая метка времени"
+"Максимальная разница между временем отметки и стартовым временем\n"
+"участника для автоматической подстановки номера."
 msgstr ""
-"Программа будет ожидать из COM порта заданную строку,\n"
-"после получения которой, будет взята текущая метка времени"
-
-#: tsettingsform.radiobuttoncomsettime.caption
-msgid "Отметка времени"
-msgstr "Отметка времени"
-
-#: tsettingsform.radiobuttoncomsettime.hint
-msgid ""
-"Программа будет ожидать из COM порта метку времени,\n"
-"которая и будет установлена"
-msgstr ""
-"Программа будет ожидать из COM порта метку времени,\n"
-"которая и будет установлена"
+"Максимальная разница между временем отметки и стартовым временем\n"
+"участника для автоматической подстановки номера."
 
 #: tsettingsform.telegrambotadressedit.texthint
 msgctxt "tsettingsform.telegrambotadressedit.texthint"
@@ -3363,4 +3100,84 @@ msgstr "Спецучасток"
 #: tstartlistform.timeedit1.text
 msgid "0"
 msgstr "0"
+
+#: tstartmarksform.accopy.caption
+msgctxt "tstartmarksform.accopy.caption"
+msgid "Копировать"
+msgstr "Копировать"
+
+#: tstartmarksform.caption
+msgctxt "tstartmarksform.caption"
+msgid "Стартовые отметки"
+msgstr "Стартовые отметки"
+
+#: tstartmarksform.rxdbgridstartmarks.columns[0].title.caption
+msgctxt "tstartmarksform.rxdbgridstartmarks.columns[0].title.caption"
+msgid "ID"
+msgstr "ID"
+
+#: tstartmarksform.rxdbgridstartmarks.columns[10].title.caption
+msgctxt "tstartmarksform.rxdbgridstartmarks.columns[10].title.caption"
+msgid "Статус"
+msgstr "Статус"
+
+#: tstartmarksform.rxdbgridstartmarks.columns[11].title.caption
+msgctxt "tstartmarksform.rxdbgridstartmarks.columns[11].title.caption"
+msgid "Получено"
+msgstr "Получено"
+
+#: tstartmarksform.rxdbgridstartmarks.columns[12].title.caption
+msgctxt "tstartmarksform.rxdbgridstartmarks.columns[12].title.caption"
+msgid "Применено"
+msgstr "Применено"
+
+#: tstartmarksform.rxdbgridstartmarks.columns[13].title.caption
+msgctxt "tstartmarksform.rxdbgridstartmarks.columns[13].title.caption"
+msgid "Диагностика"
+msgstr "Диагностика"
+
+#: tstartmarksform.rxdbgridstartmarks.columns[1].title.caption
+msgctxt "tstartmarksform.rxdbgridstartmarks.columns[1].title.caption"
+msgid "Этап приёма"
+msgstr "Этап приёма"
+
+#: tstartmarksform.rxdbgridstartmarks.columns[2].title.caption
+msgctxt "tstartmarksform.rxdbgridstartmarks.columns[2].title.caption"
+msgid "Этап применения"
+msgstr "Этап применения"
+
+#: tstartmarksform.rxdbgridstartmarks.columns[3].title.caption
+msgctxt "tstartmarksform.rxdbgridstartmarks.columns[3].title.caption"
+msgid "Время"
+msgstr "Время"
+
+#: tstartmarksform.rxdbgridstartmarks.columns[4].title.caption
+msgctxt "tstartmarksform.rxdbgridstartmarks.columns[4].title.caption"
+msgid "Поправка"
+msgstr "Поправка"
+
+#: tstartmarksform.rxdbgridstartmarks.columns[5].title.caption
+msgctxt "tstartmarksform.rxdbgridstartmarks.columns[5].title.caption"
+msgid "Номер"
+msgstr "Номер"
+
+#: tstartmarksform.rxdbgridstartmarks.columns[6].title.caption
+msgctxt "tstartmarksform.rxdbgridstartmarks.columns[6].title.caption"
+msgid "Дельта, мс"
+msgstr "Дельта, мс"
+
+#: tstartmarksform.rxdbgridstartmarks.columns[7].title.caption
+msgctxt "tstartmarksform.rxdbgridstartmarks.columns[7].title.caption"
+msgid "Транспорт"
+msgstr "Транспорт"
+
+#: tstartmarksform.rxdbgridstartmarks.columns[8].title.caption
+msgctxt "tstartmarksform.rxdbgridstartmarks.columns[8].title.caption"
+msgid "Устройство"
+msgstr "Устройство"
+
+#: tstartmarksform.rxdbgridstartmarks.columns[9].title.caption
+msgctxt "tstartmarksform.rxdbgridstartmarks.columns[9].title.caption"
+msgid "Режим назначения"
+msgstr "Режим назначения"
 

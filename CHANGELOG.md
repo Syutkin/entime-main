@@ -1,5 +1,31 @@
 # Changelog
 
+## [Unreleased]
+
+## [0.9.0-beta.1] - 2026-08-25
+
+### Added
+
+- Добавлена поддержка от 1 до 32 СУ.
+- Добавлен приём отсечек от модуля хронометража по Bluetooth Low Energy (BLE):
+  выбор устройства, подключение и обмен данными через Nordic UART Service.
+- Добавлены рабочие очереди и журналы стартовых и финишных отметок с
+  восстановлением после перезапуска.
+- Добавлена ротация автоматических и страховочных резервных копий
+  по сроку хранения и занятому объёму.
+
+### Changed
+
+- Улучшена обработка отсечек времени по serial-порту.
+
+### Fixed
+
+- Исправлено попадание участников из других категорий в стартовый список при
+  сортировке по результату.
+- Исправлено отображение отставания в сквозном протоколе, если не все СУ завершены.
+- Исправлено смещение основной таблицы при обновлении результатов через
+  контекстное меню.
+
 ## [0.8.3] - 2026-08-21
 
 ### Fixed
@@ -190,18 +216,19 @@
 - Изменения не сохранялись при открытии базы данных.
 - Исправлена компоновка интерфейса при изменении размера окна.
 
-[0.8.3]: https://codeberg.org/Syutkin/entime/src/tag/0.8.3
-[0.8.2]: https://codeberg.org/Syutkin/entime/src/tag/0.8.2
-[0.8.1]: https://codeberg.org/Syutkin/entime/src/tag/0.8.1
-[0.8.0]: https://codeberg.org/Syutkin/entime/src/tag/0.8.0
-[0.7.24]: https://codeberg.org/Syutkin/entime/src/tag/0.7.24
-[0.7.23]: https://codeberg.org/Syutkin/entime/src/tag/0.7.23
-[0.7.22]: https://codeberg.org/Syutkin/entime/src/tag/0.7.22
-[0.7.21]: https://codeberg.org/Syutkin/entime/src/tag/0.7.21
-[0.7.20]: https://codeberg.org/Syutkin/entime/src/tag/0.7.20
-[0.7.19]: https://codeberg.org/Syutkin/entime/src/tag/0.7.19
-[0.7.18]: https://codeberg.org/Syutkin/entime/src/tag/0.7.18
-[0.7.17]: https://codeberg.org/Syutkin/entime/src/tag/0.7.17
-[0.7.16]: https://codeberg.org/Syutkin/entime/src/tag/0.7.16
-[0.7.14]: https://codeberg.org/Syutkin/entime/src/tag/0.7.14
-[0.7.13]: https://codeberg.org/Syutkin/entime/src/tag/0.7.13
+[0.9.0-beta.1]: https://codeberg.org/Syutkin/entime/releases/tag/0.9.0-beta.1
+[0.8.3]: https://codeberg.org/Syutkin/entime/releases/tag/0.8.3
+[0.8.2]: https://codeberg.org/Syutkin/entime/releases/tag/0.8.2
+[0.8.1]: https://codeberg.org/Syutkin/entime/releases/tag/0.8.1
+[0.8.0]: https://codeberg.org/Syutkin/entime/releases/tag/0.8.0
+[0.7.24]: https://codeberg.org/Syutkin/entime/releases/tag/0.7.24
+[0.7.23]: https://codeberg.org/Syutkin/entime/releases/tag/0.7.23
+[0.7.22]: https://codeberg.org/Syutkin/entime/releases/tag/0.7.22
+[0.7.21]: https://codeberg.org/Syutkin/entime/releases/tag/0.7.21
+[0.7.20]: https://codeberg.org/Syutkin/entime/releases/tag/0.7.20
+[0.7.19]: https://codeberg.org/Syutkin/entime/releases/tag/0.7.19
+[0.7.18]: https://codeberg.org/Syutkin/entime/releases/tag/0.7.18
+[0.7.17]: https://codeberg.org/Syutkin/entime/releases/tag/0.7.17
+[0.7.16]: https://codeberg.org/Syutkin/entime/releases/tag/0.7.16
+[0.7.14]: https://codeberg.org/Syutkin/entime/releases/tag/0.7.14
+[0.7.13]: https://codeberg.org/Syutkin/entime/releases/tag/0.7.13

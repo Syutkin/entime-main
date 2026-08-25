@@ -1,0 +1,3854 @@
+object MainForm: TMainForm
+  Left = 244
+  Height = 655
+  Top = 30
+  Width = 1096
+  ClientHeight = 625
+  ClientWidth = 1096
+  Constraints.MinHeight = 400
+  Constraints.MinWidth = 900
+  KeyPreview = True
+  Menu = MainMenu
+  SessionProperties = 'AcLEDPanel.Checked;AcTelegramBot.Checked;AcViewResults.Checked;CheckBoxAutomaticUpdateResutls.Checked;Height;Left;RaceMode.Checked;CorrectionPanel.Height;PanelStartMarks.Height;Serial.BaudRate;Serial.DataBits;Serial.Device;Serial.FlowControl;Serial.Parity;Serial.StopBits;Top;Width;WindowState;AcViewMemo.Checked'
+  ShowHint = True
+  LCLVersion = '4.8.0.0'
+  WindowState = wsMaximized
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnKeyDown = FormKeyDown
+  object DebugSplitter: TSplitter
+    Left = 842
+    Height = 559
+    Top = 32
+    Width = 5
+    Align = alRight
+    ResizeAnchor = akRight
+    Visible = False
+  end
+  object DebugPanel: TPanel
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 847
+    Height = 559
+    Top = 32
+    Width = 249
+    Align = alRight
+    BevelOuter = bvNone
+    ClientHeight = 559
+    ClientWidth = 249
+    Constraints.MinWidth = 249
+    ParentFont = False
+    TabOrder = 1
+    Visible = False
+    object Memo: TMemo
+      AnchorSideLeft.Control = DebugPanel
+      AnchorSideTop.Control = DebugPanel
+      AnchorSideRight.Control = DebugPanel
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = ButtonSaveMemo
+      Left = 0
+      Height = 524
+      Top = 0
+      Width = 249
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      ParentFont = False
+      ParentShowHint = False
+      ReadOnly = True
+      ScrollBars = ssVertical
+      TabOrder = 0
+    end
+    object ButtonSaveMemo: TButton
+      AnchorSideLeft.Control = ButtonClearMemo
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = DebugPanel
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = DebugPanel
+      AnchorSideBottom.Side = asrBottom
+      Left = 85
+      Height = 25
+      Top = 529
+      Width = 75
+      Anchors = [akLeft, akBottom]
+      BorderSpacing.Around = 5
+      Caption = 'Сохранить'
+      ParentFont = False
+      TabOrder = 1
+      OnClick = ButtonSaveMemoClick
+    end
+    object ButtonClearMemo: TButton
+      AnchorSideLeft.Control = DebugPanel
+      AnchorSideTop.Side = asrBottom
+      AnchorSideBottom.Control = DebugPanel
+      AnchorSideBottom.Side = asrBottom
+      Left = 5
+      Height = 25
+      Top = 529
+      Width = 75
+      Anchors = [akLeft, akBottom]
+      BorderSpacing.Around = 5
+      Caption = 'Очистить'
+      ParentFont = False
+      TabOrder = 2
+      OnClick = ButtonClearMemoClick
+    end
+  end
+  object ToolPanel1: TToolPanel
+    Left = 0
+    Height = 32
+    Top = 0
+    Width = 1096
+    Items = <>
+    Options = []
+    CustomizeShortCut = False
+    Align = alTop
+    BorderWidth = 4
+    ClientHeight = 32
+    ClientWidth = 1096
+    ParentFont = False
+    TabOrder = 2
+    object RaceMode: TCheckBox
+      AnchorSideLeft.Control = ToolPanel1
+      AnchorSideTop.Control = ToolPanel1
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = RaceModeLabel
+      Left = 986
+      Height = 20
+      Top = 6
+      Width = 20
+      Anchors = [akTop, akRight]
+      BorderSpacing.Right = 1
+      Color = clDefault
+      ParentColor = False
+      ParentFont = False
+      TabOrder = 0
+      TabStop = False
+      OnClick = RaceModeClick
+    end
+    object RaceModeLabel: TLabel
+      AnchorSideLeft.Control = ToolPanel1
+      AnchorSideLeft.Side = asrCenter
+      AnchorSideTop.Control = ToolPanel1
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = ToolPanel1
+      AnchorSideRight.Side = asrBottom
+      Left = 1007
+      Height = 18
+      Hint = 'В режиме гонки редактирование таблицы запрещено'#13#10'При нажатии на пробел фиксируется время'
+      Top = 7
+      Width = 83
+      Anchors = [akTop, akRight]
+      BorderSpacing.Right = 1
+      Caption = 'Режим гонки'
+      ParentColor = False
+      ParentFont = False
+      WordWrap = True
+    end
+    object CheckBoxAutomaticUpdateResutls: TCheckBox
+      AnchorSideLeft.Control = ToolPanel1
+      AnchorSideTop.Control = ToolPanel1
+      Left = 6
+      Height = 22
+      Hint = 'При изменении поправки, стартового времени, финишного времени'#13#10'или штрафа автоматически пересчитывать результаты'
+      Top = 5
+      Width = 167
+      BorderSpacing.Left = 1
+      Caption = 'Обновлять результаты'
+      Checked = True
+      State = cbChecked
+      TabOrder = 1
+    end
+  end
+  object StatusBarPanel: TPanel
+    Left = 0
+    Height = 34
+    Top = 591
+    Width = 1096
+    Align = alBottom
+    AutoSize = True
+    BevelOuter = bvNone
+    ClientHeight = 34
+    ClientWidth = 1096
+    ParentFont = False
+    TabOrder = 3
+    object TimingInputControl: TPanel
+      Left = 0
+      Height = 34
+      Top = 0
+      Width = 170
+      Align = alLeft
+      BevelOuter = bvNone
+      ClientHeight = 34
+      ClientWidth = 170
+      ParentFont = False
+      TabOrder = 0
+      object TimingInputStateButton: TSpeedButton
+        Left = 0
+        Height = 34
+        Top = 0
+        Width = 34
+        Align = alLeft
+        Flat = True
+        Images = ImageList1
+        ImageIndex = 10
+        ShowCaption = False
+        ShowHint = True
+        ParentShowHint = False
+        OnClick = TimingInputStateButtonClick
+      end
+      object TimingInputDeviceLabel: TLabel
+        Cursor = crHandPoint
+        Left = 40
+        Height = 34
+        Top = 0
+        Width = 130
+        Align = alClient
+        AutoSize = False
+        BorderSpacing.Left = 6
+        Caption = 'COM1'
+        Layout = tlCenter
+        ParentShowHint = False
+        ShowHint = True
+        OnClick = TimingInputDeviceLabelClick
+      end
+    end
+    object TimingInputStatusText: TStaticText
+      Left = 170
+      Height = 34
+      Top = 0
+      Width = 210
+      Align = alLeft
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 1
+    end
+    object ComboBoxLog: TComboBox
+      Left = 380
+      Height = 32
+      Top = 1
+      Width = 568
+      Align = alClient
+      BorderSpacing.Top = 1
+      BorderSpacing.Bottom = 1
+      ItemHeight = 25
+      ParentFont = False
+      Style = csDropDownList
+      TabOrder = 2
+      TabStop = False
+    end
+    object Clock: TStaticText
+      Left = 954
+      Height = 22
+      Top = 6
+      Width = 136
+      Align = alRight
+      Alignment = taRightJustify
+      BorderSpacing.Around = 6
+      Caption = '00:00:00'
+      ParentFont = False
+      TabOrder = 3
+    end
+  end
+  object MainPanel: TPanel
+    Left = 0
+    Height = 559
+    Top = 32
+    Width = 842
+    Align = alClient
+    ClientHeight = 559
+    ClientWidth = 842
+    TabOrder = 4
+    object EditPanel: TPanel
+      Left = 489
+      Height = 557
+      Top = 1
+      Width = 352
+      Align = alRight
+      BevelOuter = bvNone
+      ClientHeight = 557
+      ClientWidth = 352
+      Constraints.MinWidth = 235
+      ParentFont = False
+      TabOrder = 0
+      object CorrectionPanel: TPanel
+        Left = 0
+        Height = 259
+        Top = 0
+        Width = 352
+        Align = alTop
+        BevelOuter = bvNone
+        ClientHeight = 259
+        ClientWidth = 352
+        Constraints.MinHeight = 152
+        ParentFont = False
+        TabOrder = 0
+        object CurrentStageGroup: TGroupBox
+          Left = 0
+          Height = 90
+          Top = 0
+          Width = 352
+          Align = alTop
+          AutoSize = True
+          Caption = 'Текущий СУ'
+          ChildSizing.LeftRightSpacing = 6
+          ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+          ChildSizing.ShrinkHorizontal = crsScaleChilds
+          ChildSizing.ShrinkVertical = crsScaleChilds
+          ChildSizing.Layout = cclLeftToRightThenTopToBottom
+          ChildSizing.ControlsPerLine = 1
+          ClientHeight = 61
+          ClientWidth = 348
+          ParentFont = False
+          TabOrder = 0
+          object CurrentStageComboBox: TComboBox
+            Left = 6
+            Height = 32
+            Top = 0
+            Width = 336
+            ItemHeight = 25
+            ParentFont = False
+            Style = csDropDownList
+            TabOrder = 0
+            OnChange = CurrentStageComboBoxChange
+          end
+        end
+        object RxDBGridCorrection: TRxDBGrid
+          Left = 0
+          Height = 169
+          Top = 90
+          Width = 352
+          ColumnDefValues.BlobText = '(данные)'
+          TitleButtons = False
+          AutoSort = False
+          Columns = <          
+            item
+              Alignment = taCenter
+              Title.Alignment = taCenter
+              Title.Orientation = toHorizontal
+              Title.Caption = 'Номер'
+              Width = 75
+              FieldName = 'number'
+              EditButtons = <>
+              Filter.DropDownRows = 0
+              Filter.EmptyValue = '(Пусто)'
+              Filter.NotEmptyValue = '(Не пусто)'
+              Filter.AllValue = '(Все значения)'
+              Filter.EmptyFont.Style = [fsItalic]
+              Filter.ItemIndex = -1
+              Footers = <>
+            end          
+            item
+              Title.Alignment = taCenter
+              Title.Orientation = toHorizontal
+              Title.Caption = 'Поправка'
+              Width = 125
+              FieldName = 'correction'
+              EditButtons = <>
+              Filter.DropDownRows = 0
+              Filter.EmptyValue = '(Пусто)'
+              Filter.NotEmptyValue = '(Не пусто)'
+              Filter.AllValue = '(Все значения)'
+              Filter.EmptyFont.Style = [fsItalic]
+              Filter.ItemIndex = -1
+              Footers = <>
+              SortFields = 'number'
+            end>
+          KeyStrokes = <          
+            item
+              Command = rxgcShowFindDlg
+              ShortCut = 16454
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowColumnsDlg
+              ShortCut = 16471
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowFilterDlg
+              ShortCut = 16468
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowSortDlg
+              ShortCut = 16467
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowQuickFilter
+              ShortCut = 16465
+              Enabled = True
+            end          
+            item
+              Command = rxgcHideQuickFilter
+              ShortCut = 16456
+              Enabled = True
+            end          
+            item
+              Command = rxgcSelectAll
+              ShortCut = 16449
+              Enabled = True
+            end          
+            item
+              Command = rxgcDeSelectAll
+              ShortCut = 16429
+              Enabled = True
+            end          
+            item
+              Command = rxgcInvertSelection
+              ShortCut = 16426
+              Enabled = True
+            end          
+            item
+              Command = rxgcOptimizeColumnsWidth
+              ShortCut = 16427
+              Enabled = True
+            end          
+            item
+              Command = rxgcCopyCellValue
+              ShortCut = 16451
+              Enabled = True
+            end>
+          FooterOptions.DrawFullLine = False
+          SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+          SearchOptions.FromStart = False
+          OptionsRx = []
+          Align = alClient
+          AutoAdvance = aaNone
+          Color = clWindow
+          DrawFullLine = False
+          SelectedColor = clHighlight
+          Constraints.MinHeight = 100
+          DataSource = CorrectionDataSource
+          FixedCols = 0
+          Options = [dgEditing, dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
+          ParentFont = False
+          PopupMenu = CorrectionPopupMenu
+          Scrollbars = ssAutoBoth
+          TabOrder = 1
+          OnEditingDone = RxDBGridCorrectionEditingDone
+        end
+      end
+      object Splitter1: TSplitter
+        Cursor = crVSplit
+        Left = 0
+        Height = 5
+        Top = 259
+        Width = 352
+        Align = alTop
+        AutoSnap = False
+        ResizeAnchor = akTop
+      end
+      object Splitter2: TSplitter
+        Cursor = crVSplit
+        Left = 0
+        Height = 5
+        Top = 335
+        Width = 352
+        Align = alBottom
+        ResizeAnchor = akBottom
+      end
+      object PanelResult: TGroupBox
+        Left = 0
+        Height = 200
+        Top = 264
+        Width = 352
+        Align = alClient
+        Caption = 'Финишные отметки'
+        ClientHeight = 171
+        ClientWidth = 348
+        Constraints.MinHeight = 200
+        ParentFont = False
+        TabOrder = 1
+        object RxDBGridFinishMarks: TRxDBGrid
+          AnchorSideLeft.Control = PanelResult
+          AnchorSideTop.Control = PanelResult
+          AnchorSideRight.Control = PanelResult
+          AnchorSideRight.Side = asrBottom
+          AnchorSideBottom.Control = ButtonSetFinish
+          Left = 0
+          Height = 133
+          Top = 0
+          Width = 348
+          ColumnDefValues.BlobText = '(данные)'
+          TitleButtons = False
+          AutoSort = True
+          Columns = <          
+            item
+              Alignment = taRightJustify
+              ReadOnly = True
+              Title.Alignment = taCenter
+              Title.Orientation = toHorizontal
+              Title.Caption = 'Время'
+              Width = 125
+              FieldName = 'event_time'
+              EditButtons = <>
+              Filter.DropDownRows = 0
+              Filter.EmptyValue = '(Empty)'
+              Filter.NotEmptyValue = '(Not empty)'
+              Filter.AllValue = '(All values)'
+              Filter.EmptyFont.Style = [fsItalic]
+              Filter.ItemIndex = -1
+              Footers = <>
+            end          
+            item
+              Alignment = taCenter
+              Font.Style = [fsBold]
+              Title.Alignment = taCenter
+              Title.Orientation = toHorizontal
+              Title.Caption = 'Номер'
+              Width = 75
+              FieldName = 'participant_number'
+              EditButtons = <>
+              Filter.DropDownRows = 0
+              Filter.EmptyValue = '(Empty)'
+              Filter.NotEmptyValue = '(Not empty)'
+              Filter.AllValue = '(All values)'
+              Filter.EmptyFont.Style = [fsItalic]
+              Filter.ItemIndex = -1
+              Footers = <>
+            end>
+          KeyStrokes = <          
+            item
+              Command = rxgcShowFindDlg
+              ShortCut = 16454
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowColumnsDlg
+              ShortCut = 16471
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowFilterDlg
+              ShortCut = 16468
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowSortDlg
+              ShortCut = 16467
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowQuickFilter
+              ShortCut = 16465
+              Enabled = True
+            end          
+            item
+              Command = rxgcHideQuickFilter
+              ShortCut = 16456
+              Enabled = True
+            end          
+            item
+              Command = rxgcSelectAll
+              ShortCut = 16449
+              Enabled = True
+            end          
+            item
+              Command = rxgcDeSelectAll
+              ShortCut = 16429
+              Enabled = True
+            end          
+            item
+              Command = rxgcInvertSelection
+              ShortCut = 16426
+              Enabled = True
+            end          
+            item
+              Command = rxgcOptimizeColumnsWidth
+              ShortCut = 16427
+              Enabled = True
+            end          
+            item
+              Command = rxgcCopyCellValue
+              ShortCut = 16451
+              Enabled = True
+            end>
+          FooterOptions.DrawFullLine = False
+          SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+          SearchOptions.FromStart = False
+          OptionsRx = [rdgAllowColumnsForm, rdgAllowDialogFind, rdgAllowQuickFilter]
+          Anchors = [akTop, akLeft, akRight, akBottom]
+          BorderSpacing.Bottom = 5
+          Color = clWindow
+          DrawFullLine = False
+          SelectedColor = clHighlight
+          Constraints.MinHeight = 100
+          DataSource = DataSourceFinishMarks
+          FixedCols = 0
+          Options = [dgEditing, dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDisableInsert]
+          ParentFont = False
+          PopupMenu = PopupMenuFinishMarks
+          Scrollbars = ssAutoBoth
+          TabOrder = 0
+          OnDblClick = RxDBGridFinishMarksDblClick
+          OnEditingDone = RxDBGridFinishMarksEditingDone
+        end
+        object ResultClear: TButton
+          AnchorSideLeft.Control = PanelResult
+          AnchorSideTop.Control = RxDBGridFinishMarks
+          AnchorSideBottom.Control = PanelResult
+          AnchorSideBottom.Side = asrBottom
+          Left = 5
+          Height = 28
+          Top = 138
+          Width = 73
+          Anchors = [akLeft, akBottom]
+          AutoSize = True
+          BorderSpacing.Left = 5
+          BorderSpacing.Bottom = 5
+          Caption = 'Очистить'
+          ParentFont = False
+          TabOrder = 1
+          OnClick = ResultClearClick
+        end
+        object ButtonSetFinish: TButton
+          AnchorSideLeft.Control = ResultClear
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideBottom.Control = PanelResult
+          AnchorSideBottom.Side = asrBottom
+          Left = 83
+          Height = 28
+          Top = 138
+          Width = 71
+          Action = AcApplyFinishMarks
+          Anchors = [akLeft, akBottom]
+          AutoSize = True
+          BorderSpacing.Left = 5
+          BorderSpacing.Bottom = 5
+          ParentFont = False
+          TabOrder = 2
+        end
+      end
+      object PanelStartMarks: TGroupBox
+        Left = 0
+        Height = 217
+        Top = 340
+        Width = 352
+        Align = alBottom
+        Caption = 'Стартовые отметки'
+        ClientHeight = 188
+        ClientWidth = 348
+        ParentFont = False
+        TabOrder = 2
+        object ButtonStartMarksClear: TButton
+          AnchorSideLeft.Control = PanelStartMarks
+          AnchorSideBottom.Control = PanelStartMarks
+          AnchorSideBottom.Side = asrBottom
+          Left = 5
+          Height = 25
+          Top = 158
+          Width = 75
+          Action = AcClearStartMarks
+          Anchors = [akLeft, akBottom]
+          BorderSpacing.Around = 5
+          ParentFont = False
+          TabOrder = 0
+        end
+        object ButtonApplyStartMarks: TButton
+          AnchorSideLeft.Control = ButtonStartMarksClear
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideBottom.Control = PanelStartMarks
+          AnchorSideBottom.Side = asrBottom
+          Left = 85
+          Height = 25
+          Top = 158
+          Width = 75
+          Action = AcApplyStartMarks
+          Anchors = [akLeft, akBottom]
+          BorderSpacing.Left = 5
+          BorderSpacing.Bottom = 5
+          ParentFont = False
+          TabOrder = 1
+        end
+        object RxDBGridStartMarks: TRxDBGrid
+          AnchorSideLeft.Control = PanelStartMarks
+          AnchorSideTop.Control = PanelStartMarks
+          AnchorSideRight.Control = PanelStartMarks
+          AnchorSideRight.Side = asrBottom
+          AnchorSideBottom.Control = ButtonStartMarksClear
+          Left = 0
+          Height = 153
+          Top = 0
+          Width = 348
+          ColumnDefValues.BlobText = '(данные)'
+          TitleButtons = False
+          AutoSort = True
+          Columns = <          
+            item
+              Alignment = taRightJustify
+              ReadOnly = True
+              Title.Alignment = taCenter
+              Title.Orientation = toHorizontal
+              Title.Caption = 'Время'
+              Width = 125
+              FieldName = 'event_time'
+              EditButtons = <>
+              Filter.DropDownRows = 0
+              Filter.EmptyValue = '(Пусто)'
+              Filter.NotEmptyValue = '(Не пусто)'
+              Filter.AllValue = '(Все значения)'
+              Filter.EmptyFont.Style = [fsItalic]
+              Filter.ItemIndex = -1
+              Footers = <>
+            end          
+            item
+              Alignment = taRightJustify
+              ReadOnly = True
+              Title.Alignment = taCenter
+              Title.Orientation = toHorizontal
+              Title.Caption = 'Поправка'
+              Width = 75
+              FieldName = 'correction_ms'
+              EditButtons = <>
+              Filter.DropDownRows = 0
+              Filter.EmptyValue = '(Пусто)'
+              Filter.NotEmptyValue = '(Не пусто)'
+              Filter.AllValue = '(Все значения)'
+              Filter.EmptyFont.Style = [fsItalic]
+              Filter.ItemIndex = -1
+              Footers = <>
+            end          
+            item
+              Alignment = taCenter
+              Font.Style = [fsBold]
+              Title.Alignment = taCenter
+              Title.Orientation = toHorizontal
+              Title.Caption = 'Номер'
+              Width = 49
+              FieldName = 'participant_number'
+              EditButtons = <>
+              Filter.DropDownRows = 0
+              Filter.EmptyValue = '(Пусто)'
+              Filter.NotEmptyValue = '(Не пусто)'
+              Filter.AllValue = '(Все значения)'
+              Filter.EmptyFont.Style = [fsItalic]
+              Filter.ItemIndex = -1
+              Footers = <>
+            end>
+          KeyStrokes = <          
+            item
+              Command = rxgcShowFindDlg
+              ShortCut = 16454
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowColumnsDlg
+              ShortCut = 16471
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowFilterDlg
+              ShortCut = 16468
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowSortDlg
+              ShortCut = 16467
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowQuickFilter
+              ShortCut = 16465
+              Enabled = True
+            end          
+            item
+              Command = rxgcHideQuickFilter
+              ShortCut = 16456
+              Enabled = True
+            end          
+            item
+              Command = rxgcSelectAll
+              ShortCut = 16449
+              Enabled = True
+            end          
+            item
+              Command = rxgcDeSelectAll
+              ShortCut = 16429
+              Enabled = True
+            end          
+            item
+              Command = rxgcInvertSelection
+              ShortCut = 16426
+              Enabled = True
+            end          
+            item
+              Command = rxgcOptimizeColumnsWidth
+              ShortCut = 16427
+              Enabled = True
+            end          
+            item
+              Command = rxgcCopyCellValue
+              ShortCut = 16451
+              Enabled = True
+            end>
+          FooterOptions.DrawFullLine = False
+          SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+          SearchOptions.FromStart = False
+          OptionsRx = [rdgAllowColumnsForm, rdgAllowDialogFind, rdgAllowQuickFilter]
+          Anchors = [akTop, akLeft, akRight, akBottom]
+          Color = clWindow
+          DrawFullLine = False
+          SelectedColor = clHighlight
+          DataSource = DataSourceStartMarks
+          FixedCols = 0
+          Options = [dgEditing, dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDisableInsert]
+          ParentFont = False
+          PopupMenu = PopupMenuStartMarks
+          Scrollbars = ssAutoBoth
+          TabOrder = 2
+          OnDblClick = RxDBGridStartMarksDblClick
+          OnEditingDone = RxDBGridStartMarksEditingDone
+        end
+      end
+    end
+    object PageControl1: TPageControl
+      Left = 1
+      Height = 557
+      Top = 1
+      Width = 488
+      ActivePage = TabSheet1
+      Align = alClient
+      ParentFont = False
+      TabIndex = 0
+      TabOrder = 1
+      object TabSheet1: TTabSheet
+        Caption = 'Стартовый'
+        ClientHeight = 522
+        ClientWidth = 482
+        ParentFont = False
+        object TabSheetMainPanel: TPanel
+          AnchorSideRight.Control = DebugSplitter
+          AnchorSideRight.Side = asrBottom
+          Left = 0
+          Height = 522
+          Top = 0
+          Width = 482
+          Align = alClient
+          BevelOuter = bvNone
+          ClientHeight = 522
+          ClientWidth = 482
+          Constraints.MinWidth = 480
+          ParentFont = False
+          TabOrder = 0
+          object ComboBox1Category: TComboBox
+            Left = 48
+            Height = 32
+            Top = 536
+            Width = 100
+            ItemHeight = 31
+            ParentFont = False
+            TabOrder = 0
+            Visible = False
+            OnEditingDone = ComboBox1CategoryEditingDone
+          end
+          object RxDBGrid1: TMyRxDBGrid
+            Left = 0
+            Height = 522
+            Top = 0
+            Width = 482
+            ColumnDefValues.BlobText = '(данные)'
+            TitleButtons = True
+            AutoSort = True
+            Columns = <            
+              item
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'id'
+                Width = 0
+                Visible = False
+                FieldName = 'id'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Категория'
+                Width = 100
+                FieldName = 'category'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taCenter
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Место'
+                Width = 45
+                FieldName = 'sumplace'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taCenter
+                Font.Style = [fsBold]
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Номер'
+                Width = 45
+                FieldName = 'number'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'rfid'
+                Width = 0
+                Visible = False
+                FieldName = 'rfid'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Имя'
+                Width = 151
+                FieldName = 'name'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Никнейм'
+                Width = 0
+                Visible = False
+                FieldName = 'nickname'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Возраст'
+                Width = 0
+                Visible = False
+                FieldName = 'age'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Команда'
+                Width = 0
+                Visible = False
+                FieldName = 'team'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Город'
+                Width = 0
+                Visible = False
+                FieldName = 'city'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Телефон'
+                Width = 0
+                Visible = False
+                FieldName = 'phone'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Емейл'
+                Width = 0
+                Visible = False
+                FieldName = 'email'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Комментарий'
+                Width = 0
+                Visible = False
+                FieldName = 'comment'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taCenter
+                Color = 9568145
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Итог'
+                Width = 67
+                FieldName = 'sumresult'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taCenter
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Отставание'
+                Width = 67
+                FieldName = 'sumdiffleader'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Статус'
+                Width = 0
+                Visible = False
+                FieldName = 'status'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end>
+            KeyStrokes = <            
+              item
+                Command = rxgcShowFindDlg
+                ShortCut = 16454
+                Enabled = True
+              end            
+              item
+                Command = rxgcShowColumnsDlg
+                ShortCut = 16471
+                Enabled = True
+              end            
+              item
+                Command = rxgcShowFilterDlg
+                ShortCut = 16468
+                Enabled = True
+              end            
+              item
+                Command = rxgcShowSortDlg
+                ShortCut = 16467
+                Enabled = True
+              end            
+              item
+                Command = rxgcShowQuickFilter
+                ShortCut = 16465
+                Enabled = True
+              end            
+              item
+                Command = rxgcHideQuickFilter
+                ShortCut = 16456
+                Enabled = True
+              end            
+              item
+                Command = rxgcSelectAll
+                ShortCut = 16449
+                Enabled = True
+              end            
+              item
+                Command = rxgcDeSelectAll
+                ShortCut = 16429
+                Enabled = True
+              end            
+              item
+                Command = rxgcInvertSelection
+                ShortCut = 16426
+                Enabled = True
+              end            
+              item
+                Command = rxgcOptimizeColumnsWidth
+                ShortCut = 16427
+                Enabled = True
+              end            
+              item
+                Command = rxgcCopyCellValue
+                ShortCut = 16451
+                Enabled = True
+              end>
+            FooterOptions.DrawFullLine = False
+            SearchOptions.QuickSearchOptions = [loPartialKey]
+            SearchOptions.FromStart = True
+            OptionsRx = [rdgAllowColumnsForm, rdgAllowDialogFind]
+            Align = alClient
+            AutoAdvance = aaDown
+            Color = clWindow
+            DrawFullLine = False
+            SelectedColor = clHighlight
+            DataSource = MainDataSource1
+            Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColumnMove, dgColLines, dgRowLines, dgTabs, dgAlwaysShowSelection, dgCancelOnExit, dgHeaderHotTracking, dgHeaderPushedLook, dgRowHighlight, dgDblClickAutoSize]
+            ParentFont = False
+            PopupMenu = PopupMenu1
+            Scrollbars = ssAutoBoth
+            TabOrder = 1
+            OnEditingDone = RxDBGrid1EditingDone
+            OnKeyDown = RxDBGrid1KeyDown
+            OnKeyPress = RxDBGrid1KeyPress
+            OnSelectEditor = RxDBGrid1SelectEditor
+          end
+        end
+      end
+      object TabSheet2: TTabSheet
+        Caption = 'Статистика'
+        ClientHeight = 522
+        ClientWidth = 482
+        ParentFont = False
+        OnShow = TabSheet2Show
+        object GroupBox1: TGroupBox
+          AnchorSideLeft.Control = TabSheet2
+          AnchorSideTop.Control = TabSheet2
+          Left = 0
+          Height = 329
+          Top = 0
+          Width = 172
+          AutoSize = True
+          Caption = 'Количество участников'
+          ClientHeight = 300
+          ClientWidth = 168
+          Constraints.MaxHeight = 329
+          Constraints.MinHeight = 329
+          Constraints.MinWidth = 167
+          ParentFont = False
+          TabOrder = 0
+          object StatRxDBGrid1: TRxDBGrid
+            Left = 0
+            Height = 300
+            Top = 0
+            Width = 168
+            ColumnDefValues.BlobText = '(данные)'
+            TitleButtons = False
+            AutoSort = False
+            Columns = <            
+              item
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Категория'
+                Width = 113
+                FieldName = 'category'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <                
+                  item
+                    FieldName = 'category'
+                    Value = 'Итого:'
+                    ValueType = fvtStaticText
+                  end>
+              end            
+              item
+                Alignment = taCenter
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Кол-во'
+                Width = 49
+                FieldName = 'catcount'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <                
+                  item
+                    Alignment = taCenter
+                    FieldName = 'catcount'
+                    ValueType = fvtSum
+                  end>
+              end>
+            KeyStrokes = <            
+              item
+                Command = rxgcShowFindDlg
+                ShortCut = 16454
+                Enabled = True
+              end            
+              item
+                Command = rxgcShowColumnsDlg
+                ShortCut = 16471
+                Enabled = True
+              end            
+              item
+                Command = rxgcShowFilterDlg
+                ShortCut = 16468
+                Enabled = True
+              end            
+              item
+                Command = rxgcShowSortDlg
+                ShortCut = 16467
+                Enabled = True
+              end            
+              item
+                Command = rxgcShowQuickFilter
+                ShortCut = 16465
+                Enabled = True
+              end            
+              item
+                Command = rxgcHideQuickFilter
+                ShortCut = 16456
+                Enabled = True
+              end            
+              item
+                Command = rxgcSelectAll
+                ShortCut = 16449
+                Enabled = True
+              end            
+              item
+                Command = rxgcDeSelectAll
+                ShortCut = 16429
+                Enabled = True
+              end            
+              item
+                Command = rxgcInvertSelection
+                ShortCut = 16426
+                Enabled = True
+              end            
+              item
+                Command = rxgcOptimizeColumnsWidth
+                ShortCut = 16427
+                Enabled = True
+              end            
+              item
+                Command = rxgcCopyCellValue
+                ShortCut = 16451
+                Enabled = True
+              end>
+            FooterOptions.Active = True
+            FooterOptions.RowCount = 1
+            FooterOptions.DrawFullLine = False
+            SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+            SearchOptions.FromStart = False
+            OptionsRx = [rdgAllowColumnsForm, rdgFooterRows]
+            FooterRowCount = 1
+            Align = alClient
+            AutoEdit = False
+            BorderStyle = bsNone
+            Color = clWindow
+            DrawFullLine = False
+            SelectedColor = clHighlight
+            DataSource = StatDataSource1
+            FixedCols = 0
+            Options = [dgTitles, dgColumnResize, dgRowLines, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
+            ParentFont = False
+            Scrollbars = ssNone
+            TabOrder = 0
+          end
+        end
+        object GroupBox2: TGroupBox
+          AnchorSideLeft.Control = GroupBox1
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideTop.Control = TabSheet2
+          Left = 177
+          Height = 329
+          Top = 0
+          Width = 349
+          AutoSize = True
+          BorderSpacing.Left = 5
+          Caption = 'Сейчас на трассе'
+          ClientHeight = 300
+          ClientWidth = 345
+          Constraints.MaxHeight = 329
+          Constraints.MinHeight = 329
+          Constraints.MinWidth = 349
+          ParentFont = False
+          TabOrder = 1
+          object StatRxDBGrid2: TRxDBGrid
+            Left = 0
+            Height = 300
+            Top = 0
+            Width = 345
+            ColumnDefValues.BlobText = '(данные)'
+            TitleButtons = False
+            AutoSort = False
+            Columns = <            
+              item
+                Alignment = taCenter
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Номер'
+                Width = 45
+                FieldName = 'number'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <                
+                  item
+                    FieldName = 'category'
+                    Value = 'Итого:'
+                    ValueType = fvtStaticText
+                  end>
+              end            
+              item
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Имя'
+                Width = 151
+                FieldName = 'name'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <                
+                  item
+                    Alignment = taCenter
+                    FieldName = 'catcount'
+                    ValueType = fvtSum
+                  end>
+              end            
+              item
+                Alignment = taCenter
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Старт'
+                Width = 75
+                FieldName = 'starttime'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end            
+              item
+                Alignment = taCenter
+                Title.Alignment = taCenter
+                Title.Orientation = toHorizontal
+                Title.Caption = 'Время'
+                Width = 75
+                FieldName = 'timeontrack'
+                EditButtons = <>
+                Filter.DropDownRows = 0
+                Filter.EmptyValue = '(Пусто)'
+                Filter.NotEmptyValue = '(Не пусто)'
+                Filter.AllValue = '(Все значения)'
+                Filter.EmptyFont.Style = [fsItalic]
+                Filter.ItemIndex = -1
+                Footers = <>
+              end>
+            KeyStrokes = <            
+              item
+                Command = rxgcShowFindDlg
+                ShortCut = 16454
+                Enabled = True
+              end            
+              item
+                Command = rxgcShowColumnsDlg
+                ShortCut = 16471
+                Enabled = True
+              end            
+              item
+                Command = rxgcShowFilterDlg
+                ShortCut = 16468
+                Enabled = True
+              end            
+              item
+                Command = rxgcShowSortDlg
+                ShortCut = 16467
+                Enabled = True
+              end            
+              item
+                Command = rxgcShowQuickFilter
+                ShortCut = 16465
+                Enabled = True
+              end            
+              item
+                Command = rxgcHideQuickFilter
+                ShortCut = 16456
+                Enabled = True
+              end            
+              item
+                Command = rxgcSelectAll
+                ShortCut = 16449
+                Enabled = True
+              end            
+              item
+                Command = rxgcDeSelectAll
+                ShortCut = 16429
+                Enabled = True
+              end            
+              item
+                Command = rxgcInvertSelection
+                ShortCut = 16426
+                Enabled = True
+              end            
+              item
+                Command = rxgcOptimizeColumnsWidth
+                ShortCut = 16427
+                Enabled = True
+              end            
+              item
+                Command = rxgcCopyCellValue
+                ShortCut = 16451
+                Enabled = True
+              end>
+            FooterOptions.Active = True
+            FooterOptions.DrawFullLine = False
+            SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+            SearchOptions.FromStart = False
+            OptionsRx = [rdgAllowColumnsForm, rdgFooterRows]
+            Align = alClient
+            AutoEdit = False
+            BorderStyle = bsNone
+            Color = clWindow
+            DrawFullLine = False
+            SelectedColor = clHighlight
+            DataSource = StatDataSource2
+            FixedCols = 0
+            Options = [dgTitles, dgColumnResize, dgRowLines, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
+            ParentFont = False
+            PopupMenu = OnTracePopupMenu
+            Scrollbars = ssAutoHorizontal
+            TabOrder = 0
+          end
+        end
+      end
+      object TabSheet3: TTabSheet
+        Caption = 'Результаты'
+        ClientHeight = 522
+        ClientWidth = 482
+        ParentFont = False
+        object SheetStage: TPageControl
+          Left = 0
+          Height = 522
+          Top = 0
+          Width = 482
+          ActivePage = SheetStageSum
+          Align = alClient
+          ParentFont = False
+          TabIndex = 0
+          TabOrder = 0
+          object SheetStageSum: TTabSheet
+            Caption = 'Общий'
+            ClientHeight = 487
+            ClientWidth = 476
+            ParentFont = False
+            object GridResultStageSum: TRxDBGrid
+              Left = 0
+              Height = 487
+              Top = 0
+              Width = 476
+              ColumnDefValues.BlobText = '(данные)'
+              TitleButtons = False
+              AutoSort = True
+              Columns = <              
+                item
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Категория'
+                  Width = 100
+                  FieldName = 'category'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Место'
+                  Width = 45
+                  FieldName = 'sumplace'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
+                  Font.Style = [fsBold]
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Номер'
+                  Width = 45
+                  FieldName = 'number'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Имя'
+                  Width = 151
+                  FieldName = 'name'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
+                  Font.Style = [fsBold]
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Результат'
+                  Width = 100
+                  FieldName = 'sumresult'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Отставание'
+                  Width = 75
+                  FieldName = 'sumdiffleader'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end>
+              KeyStrokes = <              
+                item
+                  Command = rxgcShowFindDlg
+                  ShortCut = 16454
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcShowColumnsDlg
+                  ShortCut = 16471
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcShowFilterDlg
+                  ShortCut = 16468
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcShowSortDlg
+                  ShortCut = 16467
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcShowQuickFilter
+                  ShortCut = 16465
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcHideQuickFilter
+                  ShortCut = 16456
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcSelectAll
+                  ShortCut = 16449
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcDeSelectAll
+                  ShortCut = 16429
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcInvertSelection
+                  ShortCut = 16426
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcOptimizeColumnsWidth
+                  ShortCut = 16427
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcCopyCellValue
+                  ShortCut = 16451
+                  Enabled = True
+                end>
+              FooterOptions.DrawFullLine = False
+              SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+              SearchOptions.FromStart = False
+              OptionsRx = []
+              Align = alClient
+              Color = clWindow
+              DrawFullLine = False
+              SelectedColor = clHighlight
+              DataSource = ResultDataSourceStageSum
+              FixedCols = 0
+              Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
+              ParentFont = False
+              ReadOnly = True
+              Scrollbars = ssAutoBoth
+              TabOrder = 0
+            end
+          end
+          object SheetStageTotal: TTabSheet
+            Caption = 'Сквозной'
+            ClientHeight = 487
+            ClientWidth = 476
+            ParentFont = False
+            object GridResultStageTotal: TRxDBGrid
+              Left = 0
+              Height = 487
+              Top = 0
+              Width = 476
+              ColumnDefValues.BlobText = '(данные)'
+              TitleButtons = False
+              AutoSort = True
+              Columns = <              
+                item
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Категория'
+                  Width = 100
+                  FieldName = 'category'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Место'
+                  Width = 45
+                  FieldName = 'sumplace'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
+                  Font.Style = [fsBold]
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Номер'
+                  Width = 45
+                  FieldName = 'number'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Имя'
+                  Width = 151
+                  FieldName = 'name'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
+                  Font.Style = [fsBold]
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Результат'
+                  Width = 100
+                  FieldName = 'sumresult'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Отставание'
+                  Width = 75
+                  FieldName = 'thrudiff'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Пусто)'
+                  Filter.NotEmptyValue = '(Не пусто)'
+                  Filter.AllValue = '(Все значения)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end              
+                item
+                  Alignment = taCenter
+                  Title.Alignment = taCenter
+                  Title.Orientation = toHorizontal
+                  Title.Caption = 'Кол-во СУ'
+                  Width = 45
+                  FieldName = 'sumstages'
+                  EditButtons = <>
+                  Filter.DropDownRows = 0
+                  Filter.EmptyValue = '(Empty)'
+                  Filter.NotEmptyValue = '(Not empty)'
+                  Filter.AllValue = '(All values)'
+                  Filter.EmptyFont.Style = [fsItalic]
+                  Filter.ItemIndex = -1
+                  Footers = <>
+                end>
+              KeyStrokes = <              
+                item
+                  Command = rxgcShowFindDlg
+                  ShortCut = 16454
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcShowColumnsDlg
+                  ShortCut = 16471
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcShowFilterDlg
+                  ShortCut = 16468
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcShowSortDlg
+                  ShortCut = 16467
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcShowQuickFilter
+                  ShortCut = 16465
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcHideQuickFilter
+                  ShortCut = 16456
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcSelectAll
+                  ShortCut = 16449
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcDeSelectAll
+                  ShortCut = 16429
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcInvertSelection
+                  ShortCut = 16426
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcOptimizeColumnsWidth
+                  ShortCut = 16427
+                  Enabled = True
+                end              
+                item
+                  Command = rxgcCopyCellValue
+                  ShortCut = 16451
+                  Enabled = True
+                end>
+              FooterOptions.DrawFullLine = False
+              SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+              SearchOptions.FromStart = False
+              OptionsRx = []
+              Align = alClient
+              Color = clWindow
+              DrawFullLine = False
+              SelectedColor = clHighlight
+              DataSource = ResultDataSourceStageTotal
+              FixedCols = 0
+              Options = [dgTitles, dgColumnResize, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
+              ParentFont = False
+              ReadOnly = True
+              Scrollbars = ssAutoBoth
+              TabOrder = 0
+            end
+          end
+        end
+      end
+    end
+  end
+  object Serial: TLazSerial
+    Active = False
+    BaudRate = br115200
+    CustomBaudRate = -1
+    DataBits = db8bits
+    Parity = pNone
+    FlowControl = fcNone
+    StopBits = sbOne
+    SynSer.Tag = 0
+    SynSer.Handle = -1
+    SynSer.RaiseExcept = False
+    SynSer.TestDSR = False
+    SynSer.TestCTS = False
+    SynSer.MaxLineLength = 0
+    SynSer.DeadlockTimeout = 30000
+    SynSer.LinuxLock = False
+    SynSer.ConvertLineEnd = False
+    SynSer.AtTimeout = 1000
+    SynSer.InterPacketTimeout = True
+    Device = 'COM1'
+    RcvLineCRLF = False
+    OnStatus = SerialStatus
+    Left = 72
+    Top = 216
+  end
+  object SerialPortPopupMenu: TPopupMenu
+    OnPopup = SerialPortPopupMenuPopup
+    Left = 296
+    Top = 216
+  end
+  object MainMenu: TMainMenu
+    Images = ImageList1
+    Left = 72
+    Top = 112
+    object MenuItemFile: TMenuItem
+      Caption = 'Файл'
+      object MenuItemNewDB: TMenuItem
+        Action = FileNewDB
+        ShortCut = 24654
+      end
+      object N3: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemOpen: TMenuItem
+        Action = FileOpenDB
+        ShortCut = 24655
+      end
+      object MenuItemOpenRecent: TMenuItem
+        Caption = 'Открыть недавнее'
+      end
+      object N6: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemOpenCSV: TMenuItem
+        Action = FileOpenCSV
+        Caption = 'Загрузить список участников ...'
+        ShortCut = 24652
+      end
+      object MenuItemImportResults: TMenuItem
+        Action = FileOpenCSVResult
+        ShortCut = 24649
+      end
+      object MenuItemExportCSVStartList: TMenuItem
+        Action = FileExportCSVStartlist
+        ShortCut = 24659
+      end
+      object MenuItemExportCSVResults: TMenuItem
+        Action = FileExportCSVResults
+      end
+      object MenuItemExportStageResults: TMenuItem
+        Action = ExportStageResults
+      end
+      object MenuItemGenerateFinal: TMenuItem
+        Action = FileGenerateFinal
+        Visible = False
+      end
+      object N12: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemExport: TMenuItem
+        Action = FileExportFull
+        ShortCut = 24646
+      end
+      object N2: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemClose: TMenuItem
+        Action = FileClose
+      end
+      object N15: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemExit: TMenuItem
+        Action = FileExit
+      end
+    end
+    object MenuItem3: TMenuItem
+      Caption = 'Вид'
+      object ViewResults: TMenuItem
+        Action = AcViewResults
+        AutoCheck = True
+      end
+      object ViewMemo: TMenuItem
+        Action = AcViewMemo
+        AutoCheck = True
+        ShortCut = 24656
+      end
+      object MenuItem4: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemMonitorMode: TMenuItem
+        AutoCheck = True
+        Caption = 'Режим монитора'
+        ImageIndex = 25
+        ShowAlwaysCheckable = True
+        OnClick = MenuItemMonitorModeClick
+      end
+    end
+    object MenuItemCompetition: TMenuItem
+      Caption = 'Соревнование'
+      object MenuItemGenerateStartTime: TMenuItem
+        Action = AcGenerateStartTime
+      end
+      object Separator1: TMenuItem
+        Caption = '-'
+      end
+      object MenuItem2: TMenuItem
+        Action = AcRunRaceSettings
+      end
+    end
+    object MenuItemTools: TMenuItem
+      Caption = 'Инструменты'
+      object MenuItemSettings: TMenuItem
+        Action = AcRunSettings
+      end
+      object N4: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemCOMOpen: TMenuItem
+        Action = AcCOMOpen
+      end
+      object MenuItemCOMClose: TMenuItem
+        Action = AcCOMClose
+      end
+      object N5: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemCOMSync: TMenuItem
+        Action = AcSyncModule
+      end
+      object Separator3: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemLED: TMenuItem
+        Action = AcLEDPanel
+        AutoCheck = True
+      end
+      object MenuItemTelegramBot: TMenuItem
+        Action = AcTelegramBot
+        AutoCheck = True
+      end
+      object Separator4: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemLog: TMenuItem
+        Caption = 'Журнал'
+        object MenuItemOpenLogFile: TMenuItem
+          Action = AcOpenLogFile
+        end
+        object MenuItemOpenLogDirectory: TMenuItem
+          Action = AcOpenLogDirectory
+        end
+      end
+    end
+    object MenuItemHelp: TMenuItem
+      Caption = 'Помощь'
+      object MenuItemAbout: TMenuItem
+        Caption = 'О программе'
+        ImageIndex = 14
+        OnClick = MenuItemAboutClick
+      end
+      object Separator2: TMenuItem
+        Caption = '-'
+      end
+      object MenuItemCheckUpdate: TMenuItem
+        Action = AcCheckUpdate
+      end
+    end
+    object MenuItemDebug: TMenuItem
+      Caption = 'Отладка'
+      Visible = False
+      object MenuItem5: TMenuItem
+        Caption = 'http запрос'
+        OnClick = MenuItem5Click
+      end
+      object MenuItem6: TMenuItem
+        Caption = 'Экспорт результатов СУ...'
+        Hint = 'Экспорт результатов СУ для переноса в другую БД'
+        ImageIndex = 27
+      end
+    end
+  end
+  object ActionList1: TActionList
+    Images = ImageList1
+    Left = 229
+    Top = 112
+    object AcCOMSetup: TAction
+      Category = 'COM'
+      Caption = 'Настройка'
+      Hint = 'Настройка COM порта для работы с подключаемым устройством'
+      ImageIndex = 12
+      OnExecute = AcCOMSetupExecute
+    end
+    object AcCOMOpen: TAction
+      Category = 'COM'
+      Caption = 'Открыть COM порт'
+      Hint = 'Открыть COM порт для работы'
+      ImageIndex = 9
+      OnExecute = AcCOMOpenExecute
+      OnUpdate = COMStatus
+    end
+    object AcCOMClose: TAction
+      Category = 'COM'
+      Caption = 'Закрыть COM порт'
+      Hint = 'Закрыть COM порт'
+      ImageIndex = 10
+      OnExecute = AcCOMCloseExecute
+      OnUpdate = COMStatus
+    end
+    object AcViewResults: TAction
+      Category = 'Vision'
+      AutoCheck = True
+      Caption = 'Результаты'
+      Checked = True
+      Hint = 'Показать или скрыть окно с результатами'
+      OnExecute = AcViewResultsExecute
+    end
+    object AcViewMemo: TAction
+      Category = 'Vision'
+      AutoCheck = True
+      Caption = 'Отладка'
+      Hint = 'Показать или скрыть отладочную панель'
+      OnExecute = AcViewMemoExecute
+    end
+    object AcApplyFinishMarks: TAction
+      Caption = 'Записать'
+      Enabled = False
+      OnExecute = AcApplyFinishMarksExecute
+      OnUpdate = CheckDBOpen
+    end
+    object AcRunSettings: TAction
+      Caption = 'Настройки'
+      ImageIndex = 13
+      OnExecute = AcRunSettingsExecute
+    end
+    object AcOpenLogFile: TAction
+      Category = 'Logging'
+      Caption = 'Открыть текущий файл'
+      Hint = 'Открыть текущий файл журнала'
+      OnExecute = AcOpenLogFileExecute
+      OnUpdate = AcOpenLogFileUpdate
+    end
+    object AcOpenLogDirectory: TAction
+      Category = 'Logging'
+      Caption = 'Открыть каталог'
+      Hint = 'Открыть каталог файлов журнала'
+      OnExecute = AcOpenLogDirectoryExecute
+      OnUpdate = AcOpenLogDirectoryUpdate
+    end
+    object AcUpdateResults: TAction
+      Category = 'EditMainDB'
+      Caption = 'Обновить результаты'
+      Enabled = False
+      ImageIndex = 19
+      OnExecute = AcUpdateResultsExecute
+      OnUpdate = CheckDBOpen
+    end
+    object AcClearResults: TAction
+      Category = 'EditMainDB'
+      Caption = 'Очистить результаты'
+      Enabled = False
+      Hint = 'Очистить результаты соревнований и оставить остальную информацию об участниках'
+      ImageIndex = 22
+      OnExecute = AcClearResultsExecute
+      OnUpdate = CheckDBOpenAndRaceMode
+    end
+    object AcDeleteNumber: TAction
+      Category = 'EditMainDB'
+      Enabled = False
+      ImageIndex = 23
+      OnExecute = AcDeleteNumberExecute
+      OnUpdate = CheckDBOpenAndRaceMode
+    end
+    object AcSetDNS: TAction
+      Category = 'EditMainDB'
+      Caption = 'DNS'
+      OnExecute = AcSetDNSExecute
+      OnUpdate = CheckDBOpen
+    end
+    object AcSetDNF: TAction
+      Category = 'EditMainDB'
+      Caption = 'DNF'
+      OnExecute = AcSetDNFExecute
+      OnUpdate = CheckDBOpen
+    end
+    object AcSetDSQ: TAction
+      Category = 'EditMainDB'
+      Caption = 'DSQ'
+      OnExecute = AcSetDSQExecute
+      OnUpdate = CheckDBOpen
+    end
+    object AcSetClear: TAction
+      Category = 'EditMainDB'
+      Caption = 'Очистить статус'
+      OnExecute = AcSetClearExecute
+      OnUpdate = CheckDBOpen
+    end
+    object AcSetDNSCor: TAction
+      Category = 'EditMainDB'
+      Caption = 'Не стартовал'
+      OnExecute = AcSetDNSCorExecute
+      OnUpdate = CheckDBOpen
+    end
+    object AcSetDNFOnTrace: TAction
+      Category = 'EditMainDB'
+      Caption = 'Не финишировал'
+      OnExecute = AcSetDNFOnTraceExecute
+      OnUpdate = CheckDBOpen
+    end
+    object FileNewDB: TFileSaveAs
+      Category = 'File'
+      Caption = 'Н&овое соревнование ...'
+      Dialog.Title = 'Создать новый файл соревнований'
+      Dialog.DefaultExt = '.sqlite'
+      Dialog.Filter = 'SQLite database|*.sqlite;*.db|All files|*'
+      Hint = 'Создать новый файл соревнований'
+      ImageIndex = 1
+      ShortCut = 16462
+      OnAccept = FileNewDBAccept
+    end
+    object AcSyncModule: TAction
+      Category = 'COM'
+      Caption = 'Синхронизировать модуль'
+      ImageIndex = 17
+      OnExecute = AcSyncModuleExecute
+      OnUpdate = COMStatus
+    end
+    object AcGenerateStartTime: TAction
+      Category = 'EditMainDB'
+      Caption = 'Сформировать стартовый протокол'
+      ImageIndex = 26
+      OnExecute = AcGenerateStartTimeExecute
+      OnUpdate = CheckDBOpen
+    end
+    object AcOpenStartMarkJournal: TAction
+      Category = 'EditMainDB'
+      Caption = 'В новом окне'
+      Hint = 'Открыть журнал стартовых отметок'
+      ImageIndex = 18
+      OnExecute = AcOpenStartMarkJournalExecute
+      OnUpdate = CheckDBOpen
+    end
+    object AcOpenFinishMarkJournal: TAction
+      Category = 'EditMainDB'
+      Caption = 'В новом окне'
+      Hint = 'Открыть журнал финишных отметок'
+      ImageIndex = 18
+      OnExecute = AcOpenFinishMarkJournalExecute
+      OnUpdate = CheckDBOpen
+    end
+    object AcApplyStartMarks: TAction
+      Category = 'EditMainDB'
+      Caption = 'Записать'
+      Enabled = False
+      OnExecute = AcApplyStartMarksExecute
+      OnUpdate = AcApplyStartMarksUpdate
+    end
+    object AcClearStartMarks: TAction
+      Category = 'EditMainDB'
+      Caption = 'Очистить'
+      Enabled = False
+      OnExecute = AcClearStartMarksExecute
+      OnUpdate = AcClearStartMarksUpdate
+    end
+    object EditCopy1: TEditCopy
+      Category = 'Edit'
+      Caption = 'Копиров&ать'
+      Hint = 'Копировать'
+      ImageIndex = 24
+      ShortCut = 16451
+      OnExecute = EditCopy1Execute
+      OnUpdate = CheckDBOpen
+    end
+    object AcSetStarttime: TAction
+      Category = 'EditMainDB'
+      Caption = 'Изменить время старта'
+      OnExecute = AcSetStarttimeExecute
+      OnUpdate = CheckDBOpenAndRaceMode
+    end
+    object FileOpenDB: TFileOpen
+      Category = 'File'
+      Caption = 'О&ткрыть ...'
+      Dialog.Title = 'Открыть существующий файл соревнований'
+      Dialog.Filter = 'SQLite database|*.sqlite;*.db|All files|*'
+      Hint = 'Открыть существующий файл соревнований'
+      ImageIndex = 0
+      ShortCut = 16463
+      OnAccept = FileOpenDBAccept
+    end
+    object FileOpenCSV: TFileOpen
+      Category = 'File'
+      OnUpdate = CheckDBOpen
+      Caption = 'О&ткрыть список участников ...'
+      Dialog.Title = 'Открыть существующий файл со списком участников'
+      Dialog.DefaultExt = '.csv'
+      Dialog.Filter = 'CSV (Comma delimited)|*.csv'
+      Hint = 'Открыть список участников в CSV формате'
+      ImageIndex = 2
+      OnAccept = FileOpenCSVAccept
+    end
+    object FileOpenCSVResult: TFileOpen
+      Category = 'File'
+      OnUpdate = CheckDBOpen
+      Caption = 'Загрузить результаты ...'
+      Dialog.DefaultExt = '.csv'
+      Dialog.Filter = 'CSV (Comma delimited)|*.csv'
+      Hint = 'Загрузить результаты в файл соревнований'
+      ImageIndex = 8
+      OnAccept = FileOpenCSVResultAccept
+    end
+    object FileExportFull: TFileSaveAs
+      Category = 'File'
+      OnUpdate = CheckDBOpen
+      Caption = 'Экспорт финишного протокола ...'
+      Dialog.Title = 'Экспорт финишного протокола'
+      Dialog.DefaultExt = '.xlsx'
+      Dialog.Filter = 'Microsoft Office Open XML (*.xlsx)|*.xlsx|LibreOffice/OpenOffice spreadsheet (*.ods)|*.ods'
+      Hint = 'Формирование финишного протокола в виде электронной таблицы'
+      ImageIndex = 4
+      ShortCut = 16454
+      BeforeExecute = FileExportFullBeforeExecute
+      OnAccept = FileExportFullAccept
+    end
+    object FileExportCSVStartlist: TFileSaveAs
+      Category = 'File'
+      OnUpdate = CheckDBOpen
+      Caption = 'Экспорт стартового протокола...'
+      Dialog.Title = 'Экспорт стартового протокола'
+      Dialog.DefaultExt = '.csv'
+      Dialog.Filter = 'Text CSV (Comma delimited)|*.csv|All files|*'
+      Hint = 'Экспорт стартового протокола в CSV файл'
+      ImageIndex = 27
+      ShortCut = 16467
+      BeforeExecute = FileExportCSVStartlistBeforeExecute
+      OnAccept = FileExportCSVStartlistAccept
+    end
+    object AcRunRaceSettings: TAction
+      Caption = 'Параметры соревнования'
+      ImageIndex = 13
+      OnExecute = AcRunRaceSettingsExecute
+      OnUpdate = CheckDBOpen
+    end
+    object Empty: TAction
+      Caption = 'Empty'
+      DisableIfNoHandler = False
+      OnExecute = EmptyExecute
+      OnUpdate = CheckDBOpenAndRaceMode
+    end
+    object AcLEDPanel: TAction
+      AutoCheck = True
+      Caption = 'LED панель'
+      Hint = 'Использовать LED панель для показа финишных результатов'
+      OnExecute = AcLEDPanelExecute
+    end
+    object AcTelegramBot: TAction
+      AutoCheck = True
+      Caption = 'Telegram bot'
+      Hint = 'Отправлять данные в бота'
+      OnExecute = AcTelegramBotExecute
+    end
+    object FileExportCSVResults: TFileSaveAs
+      Category = 'File'
+      OnUpdate = CheckDBOpen
+      Caption = 'Экспорт результатов ...'
+      Dialog.DefaultExt = '.csv'
+      Dialog.Filter = 'Text CSV (Comma delimited)|*.csv'
+      Hint = 'Экспорт результатов в CSV файл для подсчёта общего рейтинга'
+      ImageIndex = 27
+      BeforeExecute = FileExportCSVResultsBeforeExecute
+      OnAccept = FileExportCSVResultsAccept
+    end
+    object ExportStageResults: TAction
+      Category = 'File'
+      Caption = 'Экспорт результатов СУ...'
+      Hint = 'Экспорт результатов СУ для переноса в другую БД'
+      OnExecute = ExportStageResultsExecute
+      OnUpdate = CheckDBOpen
+    end
+    object FileExportStageResultsSaveAs: TFileSaveAs
+      Category = 'File'
+      Caption = 'Сохранить &как ...'
+      Dialog.DefaultExt = '.csv'
+      Dialog.Filter = 'Text CSV (Comma delimited)|*.csv'
+      Hint = 'Сохранить как...'
+      BeforeExecute = FileExportStageResultsSaveAsBeforeExecute
+      OnAccept = FileExportStageResultsSaveAsAccept
+    end
+    object FileGenerateFinal: TFileSaveAs
+      Category = 'File'
+      OnUpdate = CheckDBOpen
+      Caption = 'Создать финальный заезд...'
+      Dialog.Title = 'Создать финальный заезд по результатам квалификации'
+      Dialog.DefaultExt = '.sqlite'
+      Dialog.Filter = 'SQLite database|*.sqlite;*.db|All files|*'
+      Hint = 'Создать финальный заезд по результатам квалификации'
+      ImageIndex = 6
+      BeforeExecute = FileGenerateFinalBeforeExecute
+      OnAccept = FileGenerateFinalAccept
+    end
+    object FileClose: TAction
+      Category = 'File'
+      Caption = 'Закрыть'
+      DisableIfNoHandler = False
+      ImageIndex = 15
+      OnExecute = FileCloseExecute
+      OnUpdate = CheckDBOpen
+    end
+    object FileExit: TFileExit
+      Category = 'File'
+      Caption = 'В&ыход'
+      Hint = 'Выход'
+    end
+    object AcCheckUpdate: TAction
+      Caption = 'Проверить обновления ...'
+      OnExecute = AcCheckUpdateExecute
+      OnUpdate = AcCheckUpdateUpdate
+    end
+  end
+  object Timer1: TTimer
+    OnTimer = Timer1Timer
+    Left = 352
+    Top = 112
+  end
+  object MainDataSource1: TDataSource
+    DataSet = MainDataset1
+    Left = 72
+    Top = 304
+  end
+  object MainDataset1: TSQLQuery
+    FieldDefs = <>
+    AfterInsert = MainDataset1AfterInsert
+    Params = <>
+    Macros = <>
+    Left = 152
+    Top = 304
+    object MainDataset1id: TAutoIncField
+      FieldKind = fkData
+      FieldName = 'id'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object MainDataset1category: TStringField
+      FieldKind = fkData
+      FieldName = 'category'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object MainDataset1sumplace: TLongintField
+      FieldKind = fkData
+      FieldName = 'sumplace'
+      Index = 2
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object MainDataset1number: TLongintField
+      FieldKind = fkData
+      FieldName = 'number'
+      Index = 3
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object MainDataset1rfid: TStringField
+      FieldKind = fkData
+      FieldName = 'rfid'
+      Index = 4
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object MainDataset1name: TStringField
+      FieldKind = fkData
+      FieldName = 'name'
+      Index = 5
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object MainDataset1nickname: TStringField
+      FieldKind = fkData
+      FieldName = 'nickname'
+      Index = 6
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object MainDataset1age: TStringField
+      FieldKind = fkData
+      FieldName = 'age'
+      Index = 7
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object MainDataset1team: TStringField
+      FieldKind = fkData
+      FieldName = 'team'
+      Index = 8
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object MainDataset1city: TStringField
+      FieldKind = fkData
+      FieldName = 'city'
+      Index = 9
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object MainDataset1phone: TStringField
+      FieldKind = fkData
+      FieldName = 'phone'
+      Index = 10
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object MainDataset1email: TStringField
+      FieldKind = fkData
+      FieldName = 'email'
+      Index = 11
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object MainDataset1comment: TStringField
+      FieldKind = fkData
+      FieldName = 'comment'
+      Index = 12
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object MainDataset1sumresult: TStringField
+      FieldKind = fkData
+      FieldName = 'sumresult'
+      Index = 13
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+      Size = 255
+    end
+    object MainDataset1sumdiffleader: TStringField
+      FieldKind = fkData
+      FieldName = 'sumdiffleader'
+      Index = 14
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = HideZeroHour
+      Size = 255
+    end
+    object MainDataset1status: TStringField
+      FieldKind = fkData
+      FieldName = 'status'
+      Index = 15
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnGetText = MainDataset1statusGetText
+      OnSetText = CheckStatusSetText
+    end
+    object MainDataset1sumstages: TLongintField
+      FieldKind = fkData
+      FieldName = 'sumstages'
+      Index = 16
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object MainDataset1thrudiff: TStringField
+      FieldKind = fkData
+      FieldName = 'thrudiff'
+      Index = 17
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object MainDataset1thruplace: TLongintField
+      FieldKind = fkData
+      FieldName = 'thruplace'
+      Index = 18
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+  end
+  object SQLQuery1: TSQLQuery
+    FieldDefs = <>
+    Params = <>
+    Macros = <>
+    Left = 456
+    Top = 528
+  end
+  object PopupMenu1: TPopupMenu
+    Images = ImageList1
+    Left = 152
+    Top = 112
+    object pmUpdateResults: TMenuItem
+      Action = AcUpdateResults
+    end
+    object N1: TMenuItem
+      Caption = '-'
+    end
+    object pmSetStartTime: TMenuItem
+      Action = AcSetStarttime
+    end
+    object pmSetStatus: TMenuItem
+      Action = Empty
+      Caption = 'Установить ...'
+      object pmSetDNS: TMenuItem
+        Action = AcSetDNS
+      end
+      object pmSetDNF: TMenuItem
+        Action = AcSetDNF
+      end
+      object pmSetDSQ: TMenuItem
+        Action = AcSetDSQ
+      end
+      object pmSetClear: TMenuItem
+        Action = AcSetClear
+      end
+    end
+    object pmDeleteNumber: TMenuItem
+      Action = AcDeleteNumber
+      Caption = 'Удалить участника'
+    end
+    object N9: TMenuItem
+      Caption = '-'
+    end
+    object pmCopy: TMenuItem
+      Action = EditCopy1
+    end
+    object N10: TMenuItem
+      Caption = '-'
+    end
+    object pmClearResults: TMenuItem
+      Action = AcClearResults
+    end
+  end
+  object CorrectionDataSource: TDataSource
+    DataSet = CorrectionDataset
+    Left = 1000
+    Top = 96
+  end
+  object CorrectionDataset: TSQLQuery
+    FieldDefs = <>
+    Params = <>
+    Macros = <>
+    Left = 1000
+    Top = 160
+    object CorrectionDatasetnumber: TLongintField
+      FieldKind = fkData
+      FieldName = 'number'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object CorrectionDatasetcorrection: TLongintField
+      FieldKind = fkData
+      FieldName = 'correction'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      OnSetText = CheckCorrectionSetText
+    end
+    object CorrectionDatasetid: TAutoIncField
+      FieldKind = fkData
+      FieldName = 'id'
+      Index = 2
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+  end
+  object StatDataSource1: TDataSource
+    DataSet = StatDataset1
+    Left = 657
+    Top = 684
+  end
+  object StatDataset1: TSQLQuery
+    FieldDefs = <>
+    ReadOnly = True
+    Params = <>
+    Macros = <>
+    Left = 737
+    Top = 684
+    object StatDataset1id: TLongintField
+      DisplayLabel = 'id'
+      FieldKind = fkData
+      FieldName = 'id_stat'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object StatDataset1category: TStringField
+      DisplayWidth = 1
+      FieldKind = fkData
+      FieldName = 'category'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object StatDataset1catcount: TLargeintField
+      FieldKind = fkData
+      FieldName = 'catcount'
+      Index = 2
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+  end
+  object CorrectionPopupMenu: TPopupMenu
+    Images = ImageList1
+    Left = 1000
+    Top = 216
+    object pmSetDNSCor: TMenuItem
+      Action = AcSetDNSCor
+    end
+  end
+  object StatDataSource2: TDataSource
+    DataSet = StatDataset2
+    Left = 657
+    Top = 637
+  end
+  object StatDataset2: TSQLQuery
+    FieldDefs = <>
+    ReadOnly = True
+    Params = <>
+    Macros = <>
+    Left = 737
+    Top = 637
+    object StatDataset2number: TLongintField
+      DisplayWidth = 20
+      FieldKind = fkData
+      FieldName = 'number'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object StatDataset2name: TStringField
+      DisplayWidth = 20
+      FieldKind = fkData
+      FieldName = 'name'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object StatDataset2starttime: TStringField
+      FieldKind = fkData
+      FieldName = 'starttime'
+      Index = 2
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object StatDataset2timeontrack: TStringField
+      DisplayWidth = 255
+      FieldKind = fkData
+      FieldName = 'timeontrack'
+      Index = 3
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+  end
+  object OnTracePopupMenu: TPopupMenu
+    Left = 816
+    Top = 637
+    object MenuItem1: TMenuItem
+      Action = AcSetDNFOnTrace
+    end
+  end
+  object ResultDatasetStageTotal: TSQLQuery
+    FieldDefs = <>
+    ReadOnly = True
+    Params = <>
+    Macros = <>
+    Left = 901
+    Top = 400
+  end
+  object ResultDataSourceStageTotal: TDataSource
+    DataSet = ResultDatasetStageTotal
+    Left = 853
+    Top = 400
+  end
+  object ResultDatasetStageSum: TSQLQuery
+    FieldDefs = <>
+    ReadOnly = True
+    Params = <>
+    Macros = <>
+    Left = 901
+    Top = 464
+  end
+  object ResultDataSourceStageSum: TDataSource
+    DataSet = ResultDatasetStageSum
+    Left = 853
+    Top = 464
+  end
+  object SQLQuery2: TSQLQuery
+    FieldDefs = <>
+    Params = <>
+    Macros = <>
+    Left = 456
+    Top = 592
+  end
+  object HistoryFiles1: THistoryFiles
+    IniKey = 'History Files'
+    IniFile = 'History.ini'
+    ParentMenu = MenuItemOpenRecent
+    FileMustExist = True
+    OnClickHistoryItem = HistoryFiles1ClickHistoryItem
+    Left = 456
+    Top = 684
+  end
+  object RxIniPropStorage1: TRxIniPropStorage
+    StoredValues = <    
+      item
+        Name = 'openlast'
+        OnSave = RxIniPropStorage1StoredValues0Save
+        OnRestore = RxIniPropStorage1StoredValues0Restore
+      end    
+      item
+        Name = 'lang'
+        OnSave = RxIniPropStorage1StoredValues1Save
+        OnRestore = RxIniPropStorage1StoredValues1Restore
+      end    
+      item
+        Name = 'checkinterval'
+        OnSave = RxIniPropStorage1StoredValues2Save
+        OnRestore = RxIniPropStorage1StoredValues2Restore
+      end    
+      item
+        Name = 'zerohour'
+        OnSave = RxIniPropStorage1StoredValues3Save
+        OnRestore = RxIniPropStorage1StoredValues3Restore
+      end    
+      item
+        Name = 'ledpaneladress'
+        Value = '192.168.1.100'
+        OnSave = RxIniPropStorage1StoredValues4Save
+        OnRestore = RxIniPropStorage1StoredValues4Restore
+      end    
+      item
+        Name = 'telegrambotadress'
+        OnSave = RxIniPropStorage1StoredValues5Save
+        OnRestore = RxIniPropStorage1StoredValues5Restore
+      end    
+      item
+        Name = 'showStageNameForSingleStage'
+        OnSave = RxIniPropStorage1StoredValues6Save
+        OnRestore = RxIniPropStorage1StoredValues6Restore
+      end    
+      item
+        Name = 'checkUpdateAtStartup'
+        OnSave = RxIniPropStorage1StoredValues7Save
+        OnRestore = RxIniPropStorage1StoredValues7Restore
+      end    
+      item
+        Name = 'lastUpdateCheckoutTime'
+        OnSave = RxIniPropStorage1StoredValues8Save
+        OnRestore = RxIniPropStorage1StoredValues8Restore
+      end    
+      item
+        Name = 'checkUpdateIntervalInDays'
+        OnSave = RxIniPropStorage1StoredValues9Save
+        OnRestore = RxIniPropStorage1StoredValues9Restore
+      end    
+      item
+        Name = 'doAutomaticBackup'
+        OnSave = RxIniPropStorage1StoredValues10Save
+        OnRestore = RxIniPropStorage1StoredValues10Restore
+      end    
+      item
+        Name = 'backupPeriodms'
+        OnSave = RxIniPropStorage1StoredValues11Save
+        OnRestore = RxIniPropStorage1StoredValues11Restore
+      end    
+      item
+        Name = 'timingInputTransport'
+        OnSave = RxIniPropStorage1StoredValues12Save
+        OnRestore = RxIniPropStorage1StoredValues12Restore
+      end    
+      item
+        Name = 'bleDeviceId'
+        OnSave = RxIniPropStorage1StoredValues13Save
+        OnRestore = RxIniPropStorage1StoredValues13Restore
+      end    
+      item
+        Name = 'bleDeviceName'
+        OnSave = RxIniPropStorage1StoredValues14Save
+        OnRestore = RxIniPropStorage1StoredValues14Restore
+      end    
+      item
+        Name = 'startMarkMatchDeltaSeconds'
+        Value = '15'
+        OnSave = RxIniPropStorage1StoredValues15Save
+        OnRestore = RxIniPropStorage1StoredValues15Restore
+      end    
+      item
+        Name = 'startMarkAutomaticApply'
+        Value = 'False'
+        OnSave = RxIniPropStorage1StoredValues16Save
+        OnRestore = RxIniPropStorage1StoredValues16Restore
+      end    
+      item
+        Name = 'automatic_backup_retention_days'
+        Value = '30'
+        OnSave = RxIniPropStorage1StoredValues17Save
+        OnRestore = RxIniPropStorage1StoredValues17Restore
+      end    
+      item
+        Name = 'automatic_backup_max_size_mb'
+        Value = '2048'
+        OnSave = RxIniPropStorage1StoredValues18Save
+        OnRestore = RxIniPropStorage1StoredValues18Restore
+      end    
+      item
+        Name = 'telegram_retry_enabled'
+        Value = 'False'
+        OnSave = RxIniPropStorage1StoredValues19Save
+        OnRestore = RxIniPropStorage1StoredValues19Restore
+      end    
+      item
+        Name = 'telegram_retry_count'
+        Value = '2'
+        OnSave = RxIniPropStorage1StoredValues20Save
+        OnRestore = RxIniPropStorage1StoredValues20Restore
+      end    
+      item
+        Name = 'telegram_retry_delay_seconds'
+        Value = '5'
+        OnSave = RxIniPropStorage1StoredValues21Save
+        OnRestore = RxIniPropStorage1StoredValues21Restore
+      end>
+    OnRestoreProperties = RxIniPropStorage1RestoreProperties
+    SeparateFiles = False
+    Left = 352
+    Top = 684
+  end
+  object RxAboutDialog1: TRxAboutDialog
+    Options = [radShowImageLogo]
+    ApplicationTitle = 'Entime'
+    Caption = 'О программе'
+    Picture.Data = {
+      1754506F727461626C654E6574776F726B47726170686963FA26000089504E47
+      0D0A1A0A0000000D4948445200000060000000600806000000E2987738000020
+      0049444154789CED5D77785455DE3E82A06003CBAA8865FDDC75C58ED88024D3
+      5B0A510476153462C3455D56A484F4327D26091DA4B82AF6752D1FE0EEBA8A05
+      3BBD08A124A4F732997AEF9D3BEFF7C7B993A97726015DDDFD3CCFF37B7C0C99
+      DC7BDFF7777EFD9E21E497F5CBFA65FD67ACD3C26488889C1625BFAC935C4190
+      870A723A2164182164B820678848F0DF87099F097E3E9C9C5F569C150EF8E984
+      90E163C7DE3D62A6FDC0CD739FEF9AFEF44667FE9C0DDE4D8FACE7BE9EBD9E3B
+      F8F03ABE2E675DA027671D182A819E9C757CDDC3EBF803B3D7735F3FB6CEBB69
+      EE7A67FE9CE7BBA6CF341DB879ECD8BB47104A4C90945F082191A00F23E4AA33
+      67571C9EF0D4C6BE854F6C64B63CBC9E6F79600D306D2590BD0CC8AA1297CC28
+      C9A8A4FF9DBA1CF8FD6AE0C1B57CCBECF5CCD6C7D7F52E79B8AAF64E42AE3A93
+      5E33828CFF37EB3412D2F4331EB67C3FFEC90D4EFD23EBB9C30FACA1A0652F05
+      A644C9600908977441329702D357020FADE58E3CF2BCCB74BF71DF6D849AAEE0
+      CEF8AF262208FCB0BBA7159F3F6775DB038F6E60BF9CF93C02F70AA087CB8F41
+      407A25905E4125B31298B10A819CE7D9AF66AF6C7BE0EE69C5E793D0AEF8AF22
+      22686A86A9E6ACFED5E3ABDB9F9ABD813B347D15352DFD92808044E02723205D
+      8480A0E82AE8F567ADE10ECD5ED53937E5E18D1791FF122282C09F7EBD64DAD9
+      7356B7E4CC5ECF374C5F09DCB32C31F8A7424042ED172120285396020FACE11B
+      7296B5E45C2F997636A144FC47FA88A0B93923C7BCF7AEC7D6FBB6CD5845818F
+      013F1901550164550590554925B3928F918C080920A322248321406BA792BD14
+      98B5C6B76D46F9DEBB08F511FF51BB6108216458CA34C3454FACEBB3CC5A1B70
+      DEBB3C047E5202AA0298224856158FAC2A1E9995FE30E190690F4946B8547048
+      B7FBC38487AE82477A45204C9213A0B5033A3B70DF8A8033674D9F2565DAB2A0
+      59FA59EF86A0C919FE8782EDD73FB2DEF7F9B4954052F09751D0A9F09852C523
+      ABD28FAC4A0EF754B198B182C5332FB3B06EE1F0F2760E7FDFE7C7E787FDF8F6
+      B81FFBEB79ECABE7F1CD31FAB30FF6FAB1E90B0E962D1C9E7A89C5B4E52C322B
+      59E8EC1C74763F74761E3A3B8F747B00E9F64004F8D10468ED80C64E77CD03AB
+      D9EDD30A3EBD91FC8C77C369848672673EBEAAF9FE9C757CEBD4E5B1E0C7DAFE
+      80A0F13CA654FA915DC962E66A16F96F32F8EB371C0E34F270FB0238D9E5E302
+      38D8C8E39D1D1CF2DE64F087552CD26D2C74B61019BA3022A2C10F8AD60E4C5F
+      C9B73DB0B4F12142C899C2B3FE6C4808823FE2F1B5DD4BEE5F43C3CA7B1311B0
+      3480ECA53CB2ABFC9852C9E19E2A06B96FB0F8600F87A66EFF49039E6CB5F4F0
+      F8FB5E0EB96FB29852C1426BE3A0B5F9A1B5F3D0DA03A20468EC80C606642F45
+      60D68A9EB28B2FBEF82CF23321610821E4F4AB24D9A31E7BDE5135635508F8B8
+      E02F0D085ACF23BB8AC3BD4B199836B3F8BED10F1F7BF29A3ED8C572011C6AF2
+      C3B6954556052310C14363E3A1B5054409D0D868FE3073A573E58DE94F8E2621
+      BFF093813FEC9A6BB4E73EBEDEF5DAF49503019F6A7D761583DC37181C6DE5C1
+      FFFB708F597C00A8EDE091F71603AD9581C6CAF593204680C6469DF7CC959EBF
+      5D71E3FD3F1909430821C3A8E6F7BD78DF8A48F02308581AC03D4B0314F84A16
+      8FAC63F0F1410E3CFFD3011F6F7DF23D879CB53E682C2C34563F34B6009528F0
+      3536406DA3A4DCBFC2F5DAEFEE78F00281847F9B390ADAFCB31E5BE3A89AB632
+      31F854EBA9B9B16EF1A1ADF767867CD8EAECE351B19541BA8D81DACA416DE305
+      22620950DBA8E3BE7F79EFEA0B2FBCF61CF26FF20941F0473EBABAA328DAEC88
+      813F63B90FEFEE60C17227676F9C1E16BB8F74E26F9FD4E2852D4751F9E6F758
+      B26E1F9E5DB11BCFAED88D25EBF6C1F2EA416CDC7C046F7F528B5DD51DE87531
+      27752DD61FC096DD0CB22B7D2112AC81B804A8057374FFB26E3D2164E48F4D42
+      30BB3D7396AD7AD68CD56092825FC9E2FE953E1C6CF4233048EC5BBBDC7861CB
+      113C55B50BDADC6FA1CCDD0379DE61C8F3AB21CF3F0A79C171280491171C872C
+      FF286479D5902E3904F9E23D502DFA168FD976E0F9F70EA3B9C3356822AA9B79
+      CC58EE85DAC2426DF14790104E80CA0AA457809B66AE7984103282FC8879C210
+      42C81959CFBD77D3CCB57C6B42F0057BFFE4461F4E740C3CAC747B397CB6A705
+      F357EE8664C17750161C85AAE80454C5755095344055DA0475593354A52D54CA
+      5AA12A6B85B2B4459066284A9AA0286A80A2B00EF2825AC8F28E62F2B3DFE1E9
+      65BBF0CF6F1BD1E766077C3F0D5D3C9ED8E083DA1C22411D870095159852C577
+      A4CFDF1C2C6FFFE04E79082164D86DEA79973EB4C6B35D34DA09037FEE0B3ED4
+      B471037A5096E3F1AF1D4D78DCBE1B8A2507A02A3A017549033465CDD094B742
+      A3EF80C6D005ADB11B5A630FB4C65E684D0E684D0E684C0E688C0E680CBD501B
+      7AA0D67743A5EF82AABC03AAD256284B9A212F6A80ACA016698B0E609669273E
+      F8AA013E66608AD1D0C9E18F1BBD509B19A82D7EA8A3480812A0B20253977ABF
+      BD3923EF3242BB6F3F1809FD4E376765575578C42306FE9C8DDE01837FA4C181
+      E756EF833AFF2054C527A02E6984A6BC155A430774C66EE84C0EE8CC4EA45B5C
+      48B77AA01324DDE645BACD0B9D958AD6E211C40D8DD905B5C909B5D101B5BE1B
+      CAF24E284B5BA1286E84ACE004248B0EE0A9A57B70A0A67BC0243CB1DE0B9599
+      812A8A847002D436E0BE8AEE9584901F34511B4A0839F3DEDC7F4E9AB18A8F29
+      ACC5D8FC155E9C684FAE5D7E3E80B7B69D4056D15EA88A6BA1296D82B6BC0D3A
+      431774268700B81B19362F326C0C32EC6C44D12DA3C28FF48AF0C21B87743B07
+      9D8D83D6C6426B65A0B578A131BBA1313AA136F44255DE0545491BE4458D90E6
+      D742BD640F5EFCFB7170FEE4915943A71FD39779A032B3FD248483AFB2024A2B
+      905E1170672CDE2621B46471CABBE03442C8B051A3AE1A356BA5EBE318E0A3C0
+      9FBECC8B838DC9C1777958985F3D04657E35D4A50DD0E85B29F06607D2AD2E64
+      D8BDC8B033C8B4B3C8ACF05311CACD9995817E092F3B6708D54E5D05AD80D2E2
+      9B1F3A6B1819261754060794655D5094B4425AD880B4C58751B8F1C080A2A6EA
+      663FB22B0412AC3C5496400C014A2B704FA567FB65BF9307F383532261282164
+      E403D6EAC7EE5B9100FC2A0EF756F9F0EE77BEA4D14E5BB707CF2CDF0755510D
+      34E5CDD01ADAA133F58680AF6068C959003DD40708246CBC44345F82A5677B80
+      16DC6C7EE86C1C3456061A8B176A93132A7D2FE4A51D9015374192771C39963D
+      68684F1E2D6DDDED83D6EA85CAC241690991A00C138D1D986AAC798AD0D074E8
+      C9823F841032FCDA49B3C7DCBF9239124FFB695D87C3940A1F2CFFEB491AE737
+      B6BBF0A87D1FD42575D094B74067EC82CEDC87749B2704BCD064C9AA0C88B61C
+      07D5F9B28788D0DA78680522D4260F94863E28CABA202B698134FF046694EF41
+      6D735FC26760B900EC9B3D509A7C509A432428A348C8AA606A6F48FDE3E5E424
+      1D72BFE39D613EF654B8DD8F2C25FB31A592C1ECB51EB4F526363D6DDD1E3C5A
+      7100EA927A68F56DD099BA9121687D66052B345B22818F21A0DFF4F0488F1041
+      E39375BEEC015AF9B4F9A1B1B0509BBD50199D509477435EDC0A69411D66E8F7
+      A1A12DF14EE8ECF363D62A171426064AB31FCA3804A8AC4076F9F179E4241DF2
+      1042C8F0EB6EBBF7D23FACF01D8A5BC717EC7E7685071FED4F6C3F5D1E167F5A
+      F93DD4A541F07B04F07DFD5A1F0FF868F0332A794CA9F263EA322E4AFC519DAF
+      24AD475B001A1B0F8D9583DAEC83CAE882A2BC07F29236480BEAF1B0753F7A9D
+      899F69FB61064AA3074A130BA5858F24C14225C3EEABBEFCD6AC3183DD05C18C
+      77E41F4CC79EB87779BC16A2A0FD153EE4BEE6069FA0A4E9E703B0BC7E14EAE2
+      13D0EADB906EEA4586D52D981C71AD8F077E46851FA6F719B439F82809406763
+      A1B3FB93B61DFB1B2FFD24F8A1B230509ADCFD24480AEA90BFF150D2E828EF0D
+      3714462F14662E2E016A2B90557A648EB00B069C219F2630366AFA52E757F1C1
+      E731A592C13D951E1C6D491CEFFFF5D306A88A6AA0D5B722DDD4830C5B08FCA0
+      834D3A6A5219A061A78D41C5E6F8E6416BF50A24082DC744E087375E6C01A8A3
+      489015B7226DC971ACDF5A9BF0D94EB473D05A5C909B1828C24D912524E916D7
+      D784905102A603226008216484F6C94D77DDB722C0C612C0634A2587AC0A2F4C
+      EFB9C127087B8E36F4E19EF223D4E19ABA695C3F00F063474D78A4DB59E82C1E
+      D8FF37BE93D4989DD05A7DD0D9FC8323209A04830BF2B26E488B5BA02EACC6DE
+      E33DA2CFC70702B0BCE782DCE081C2CC4161E123C0575A008D2DC049E7BC3189
+      84EA4449B5FF7442C839336C0DC698A985AA00A654FA9155C920BBC28D83F5E2
+      7692E5782C5C7F149AB266E88C5D4298E91B34F841EDD7D91868CD2ED8DFEF8D
+      7B3DB5C1018DD9039D95EBDF0503023F9A04930F4A8313F2D24E480B9BF0C4D2
+      C3F026285B1C6962A03185ED02732082008505C8D437DB0821E7920138E32184
+      1693CE9FBEDC7734665EA72AD0AFFD8B5E71C2C78ADBC88F76B541577A82C6F9
+      E63E1AED2471B87143CECA00D2ED7EE8AC3E684C7DB0BD17BF7CA0D277436372
+      416B654F81001E6A0B0795C90B45B903B2927648F26AF1DE17CDA2CFC9F90358
+      FC6A1FDD05260E0A331F01BEC202A4DB9813849C73011940A16E282164A4FAC9
+      9753EE893BAFC323AB924196DD8D2D3BDDA237E5F6727872C53168CA5B699265
+      F308A1E620C1AF02CD70ED7EE8AC5E688C7DB0BDDB15F79ACAF2CE0802745104
+      24043F28568104330B95D10379590FA4452D78C072246115F51F7BDC50185C90
+      1B19284C7CFF2E0812A0B400D227DE9293248959BFF9B9575F3D3FBEF6FB9155
+      E1C3FDCBFBD0D8296E7E3EDFD7094D493D7406C1F484DBFDC1805F194D8003B6
+      773BE31350D601B5D109AD9549386E9268EA41631348B0F8A1323350189C9095
+      7642925F8FAD5FB78A3E6F7B2F8B69950EC80D5E284CFE180214164053783437
+      99191A42A8A71E3DD5D6F5F79851C12A1E59152C326C1EE4BE1ADF0E07D7A28D
+      B5B4B0667620C316667A060B7E1C02AC0320409B8480B8DA6F8B244165E1A034
+      79212F77405ADC8AC7971F47A23C3FFFB55EC8F46E288C2C14663E027C850550
+      1BBAFE4908194D124443430821675E78F9AD63EE5BC6B54C8999CFE49159C120
+      C3EAC29B5F3A456FA4B5DB0B55D18928ED4F92E1262A33080468AD5EA8074080
+      268A8041697FB0E3650D4065E5A1343350185C9095762235BF0EC79BC49FFBDD
+      6F5C90953BFBCD90C21C8820406BE35A2F187BF365244195742821E42CC9EC95
+      93B39745CDE757059055E947A6DD872C5B1FF69FF08ADEC8CB1FB50AB65FD0FE
+      8AF8DA3F20F00502742749C0C980DFDF720CDB05B2B25E488A5AB06AB3B833AE
+      6EF2D1029FC107B9C91F4380D202DCF9E0CAC9249494C5B7FFBAC59FE544BF1C
+      4109E09061F3E0BE8A5EB8BCE261D9B3EBEBA1357420DDE242868D416645ACED
+      1F30F8426573A004A8921090D4F484B71BAD01A82C7E284D0CE47A2724251D98
+      5551838048DEE3F707906DE9864CEF81DCC8411EC70CC99EFD2C8710129CA088
+      21601821645466594D79CC6C7E258FCC0A16E93637E66E104F4C9C1E16D9C606
+      688D34E9CAB4B311DA2F067CC2F2F20009504411109C703B29EDEFEF76F1509A
+      58C80D1E484BBBA12E6D4447AF4FF4F99FDED00D59B90B32231B970045614D39
+      A15971CC1CD1694488FF330D6DEF44980B61263FA38241BAD505D33BE20E78EF
+      7107D20D2D61E627A4FD83013EBAB61F41C03B0320C0164BC0A0B43F48802500
+      A5D90F85D10759592FA445CDF8745FFC301800AAB6F44152E684CCC8401EC70F
+      284A5BDF21849C4FE214E78608CEE1C26C6BF78E5802FCC8B0FBA0B3F4E1A54F
+      C54BB5EF7FDD058DBE033AB3B3DFFC44375206057E340186DEE40458988819CF
+      93053F44000F858981ACDC0949713B5EFF34FEF501E0B5ED6E48CA1C9089F801
+      95BE7B0721E4C2788E7808A1B58A5F4DB1F5558B12607660EB2EF104ECE58F3B
+      A1357451FB6F67432DC401021FBFB1221060191801EA280206027E5CED0FB619
+      2D3C14261672BD0B92924EACDAD226FAFC1FEE714152DA0B99C11BDF111BFAAA
+      0921BF12B08E206028A159DA25532ADC0D310454F89161F54267ECC5A707C477
+      C08ACD6DD01ABAA1B37A68F3BC923F35F08304D8064680D230000206007E2C01
+      1C640637A4255D2878B949F4F9BFA9764152D203A9C10BB9898BDD0126770321
+      E4121227231E2A8447974EA964BA2322964A1E99151CD2AD5E688DBDF8EAB078
+      2C5CF46A3334C69E7E02C2B57FD0C007BB5AF68111202F8D25E0A44D8F358A00
+      330799C10369690FE6AD172760CF71272425DD908A44422A0BDB4508B9345E28
+      1A24604C5695DF1743809D43BAD503ADB1077B6BC477C0E2179BA135F652022A
+      38A191720AE09F0C01664A8026C9887932D31322200085D90FB9D10B69592F72
+      96891350DBEA81A4B80B52BD3B2E014A8BDF4708192346C0D98490CB322B38AF
+      3801DDD8735C7C07E4BED402ADC94187A62AFC745C64B0C047F773C308502524
+      A01D4A83036AB30FEAE078F929989EF8043890B3BC45F4F96B5A3C484B4080DC
+      C4790921970958C72720C3E6E98E6E8664D839E8AC1E680CDDF8EA90F8D440F1
+      EB6DD0981CD059BD48B78B133060F0C308D058BC5019C4C3D0FD750C1E5BDB07
+      95C943076AC377C1C9821F41800FD23207E66D1077C2BB8FF521ADB81352BD3B
+      7E2E60F4742727C0EA6C4C44C027FB1DA23750F97E273446710206057CB0A365
+      0F08530C4102C4E3F00080BF7DC762DA321F25C1EA87DA9A78BC3C21F8D10494
+      3A90B7499C80AF0F39121220D73B1B0502C47D4086B9B73A11019BBF1327E0E5
+      6D3D710948087C22F02308F04165EC43FEA636B8BC89FBD06DBD3C96FE9D45A6
+      9D81DAC285C6CBE34C37C7033F2E01062FA4A50EACFE407C9EF49FBB7AFB4D50
+      DC1D50DE5B9DC8079C4508B934DDD0BE33B61F1B24A0072F6E13CF84DFFFB60F
+      1A432FB4160F74762E76566780C047F472FB0960A0323A212B6EC643D603D875
+      443C2102E8FB5FBB4F7078EE15266CB299A783B522C3B531E0C710D08BD73F17
+      7FFED73EEB4DE8846525ED3B8528286E183A92107289BAB8FEBDC8621825406B
+      F1406DE881E1AF1DA237B0B7D68B74530F34C9081808F011DD2C1E1A2B0B95C9
+      0D45793764C52D902F3988B2170FA2CB215E9B01001F1BC087FB394C5DEAEB1F
+      AC55058948647A045104F300BD07F2D21E7C76503C0AAC7CBF2B220C8DCE03D2
+      F2EBDF13CB03FA33E1B4F93BCDF1EAF13A8B171A432F9E58251E8639DC1CB2AD
+      DDD058DCD0D9383A2C3540E0C5C0D7552072882A384E58DC0C495E2D948B7762
+      F3970D60B9C4333C3E3600FB56163AAB0F2A0B075570AE336CC0361A7CA515B4
+      B962A40468F45D68EB156F4DFE714D63C244ECAE793BCD442413EEAF054D7CF4
+      EDC7E31260F541637420DBD40C1F2B5E8E7E66630F346617B436366C5AEDE480
+      EF2FA60587A88471C2FE99CEE256480B1A90BAE8101EB7EFC68EC39D0987C400
+      E040831FF35F61A0323391B39D71C60B95164A80DCC84256EEC2ACE55DA2C3C7
+      7E3E804C7D43C252C4EDB3DF7E9CD05A504C733E388C35FAC6F47C4578F4122A
+      86F9A036F541AB6FC3BE1A7147FCE2A76EA84DC1DE6CE48CCE40818FDBC91248
+      505B58A8CC5E288D4E6192AD1DB2A26648F24F4091BB0FA657BF47478F78C308
+      A003B6FFD8C762D61A868E160687AAA2A7DBCC01284C3CE44606B23227966F15
+      0FC18F3438212B6E112FC69903B84EB5444944DA92C17EC079E75E74F56FD446
+      477B64318C87D6C6D0374FCA3BF1D7CFC5FD406B0F07B5C101ADC51B33243528
+      AD8FD7CDB205A0B6F1505BB9D0249BA10F726137480A1A91BAE418B28B76E1CD
+      8F6A928ECA773979ACFB9845BA9D0D4DB6854FB799035098FC901B68087AAC45
+      DCFCBCFB5527D28ADA44CBD1923247FBB9175DFD1B42C87944E4BDE2D309EDD6
+      8C5516D76F0BB7DDBA0A1E3A1B0B8DD90DB5BE0B0B36D6276C502F7AA50F1AB3
+      1BBAE08CCE00343E29F8E1F33B369EC6F816162A93174A830B8A723AEF2F2D6E
+      81A4A01E298BAAF1986D176A9AFA12121100F0F961166A4BD878A125647E1446
+      1632BD0773D625FE3BB97FA9A739804843262DAF7E1B21642C11E98845444293
+      9EFAA434B624CC41234442534D0D68EAF088DECC2707BDD00447446CB1333A27
+      057C4C5D27384845474854460F94FA3E61ACB01D92C226A4E59D8064E16E2C7F
+      BB1ADD7DF1A3259E0FC0F0562BE4466F68B0CA1C0869BF9181B4DC89FFDD21FE
+      BC1DBD3EDC63A84B5888BB7DCE27A56221688C23BE25DB901DE13CFBEB313EA8
+      0D0EA8CA5AB1F9EB76D11B727AFD98B3BE0F1A8B971E8461E7070D7C62F043E3
+      23FDC354160E4A930F0AA31BF2720764A55D9016B54292DF80C98B8F625AD92E
+      6C89132DEDA8EE85A6BC0D32831B0A131B45000799C18B0796F7A1C7299EFC7D
+      B8B30392826671076C0EE0BACCB26C42C84524C15444FF543439E38CFF519577
+      36461060E7E98116262794E59D98BFFE049804A1DFBFF679A035BBFA5B84C906
+      A50604BC485D274882CAE287CACC4269F2D249B5B25E484B3A20296C466A5E1D
+      D2161FC4BC157B71B88E26535EC68FA756D7425ADA0D99DE0DB93144008D7E18
+      48CB5D78F75BB7A8C9E5FC012CDA7802A945ED908AD9FFE2CE4642CEBC5ACC01
+      8713D0EF0726FDE9ABD59135191E3A2BF5032A7D0F34A5F5D85F239E15FA581E
+      0B5F7146EC8253025E0CFCB02986E03C8FCAC209333D1EC8CBFB202DED86A4B8
+      0D69058D48C9AD8574D13E2C7BFB08FEF6790B2485CD9096F640A6F74061A426
+      4861E62117B4FFC90D4E787CE28A76A4A10F8AC2DAB00C58B0FF6104DCF1D457
+      ABA3ECBFE880EE50222464BF532DC8D05A192E5E55526D704051DA06FDEB7509
+      C7D30F35B2B8A7C245FBB4567FDC498553013E6E61CD1A80CA4A9BE94A130B85
+      D107B9C10D599903D2922E488ADA20296C465A7E235297D44052DC0559991372
+      83AFDF07C84D7EC88C34EADB5D2B3E82190800D6B7EA905AD01A667E22133099
+      91E17EA358944E08B93891FD0FF703C385AD72B5A2A87167444DC6CE0B2FB8B9
+      A02CEB82BAB836E1B41800BCF185172A93871E03339066F9C9021F5DDBB104E8
+      AB43663FEDE91ABD90E95D909639202DED16A407B2B23E3AD36964A9D335F969
+      E2A5F760EDBFC41D2F0034B6BBA1283886B4A260F4136B7E52F31A771242929A
+      9F7866E8B2F1B3DE5818EE40E9BC0D2794867BA12869C5FCE78F25BC49CE1F80
+      F13D0FD4662F34564EBC55F843821FDD5011DA8A72134389307820D3BB697D27
+      0C7C4A000799C187DCD73D6092BCF5B964E351A414B44052424D98DCC445981F
+      B999C78DB3DE5848423D8001BDAC178C862E1A3DF6869BE4A5ADC7C42A938AB2
+      2EC80BEBF0E10EF11A3900383C3CE6BEE011EF569D22F0032929D3AA26254261
+      E2A8C335B2D4EC44819FB3C68D6E67E2DAD217FB3B90BAA40669451DD4F9C6C9
+      7ED30A5A8F9DF5AB1B6E2234FA89A9FF24DA05C3081DA5BE62C2EC778AC21D68
+      7F61CCE48152DF0B79491B66988E244DFF9BBBFD7878AD072A0B33E096E10F02
+      7E4C69998F2B41BB3F73A50775494E78E9EEF3E1F7A6C3482D68A1B65F44FB6F
+      C979A7881072054990FD8AAD6052F6ABF3AEBC6DBCBCB4BD3EA22663E5A1B630
+      C2EB9D5D901535C2F0DAB1A415C9BA8E3824C43991EA548017053FFCE53921CE
+      EF0F3783E0AFF2E0786BE2660FE7E76179E31852F2C2335F2656FB0BDBEBCFBB
+      F2B6F184563F07FDC67C282720E4CAF10FBD9EA7B172B1BBC0EC8552EF80BCB4
+      1D8AC21ABCB3BD29618902009ABAFDF8E30BF4E491609324BA65980CF853023F
+      8C048539D00F7ECE5A6F52CD07800FBE6E8124EF18520BDB202975C48D7CE426
+      0E37CF7A235FD0FEE01B92837E5BBE7F170C3FFBFCEB25B9D55F8717C58295C9
+      FEF76B8B5BA129388C83B5895FDE00A84FD0BFEB83CAE4A32DC330127E74E005
+      F0E5C158DFC820F70D1FBA5DC94F4C39D2D00775FE41A41434D3BABF48DC3F69
+      D1911DC3CFBEE4FA28ED1FF4D135C15D701E21E4F2DF28164C551A9CEEC85A8C
+      F06AA7E0906545CDC82A3A80BA96C4A12940A3A34D9F0B67B3851D01137D2052
+      32E007ABF54A41EBE5260E5AAB0F6B3F6292463B00D0D2E9C694E27D48C96B14
+      4C8F33AEE99196BB3DD728964C27845C2E60774A87370513B30B0921D7DC39F7
+      B38D6AAB3FAA20C6D1FABCA10F8AD24EC80A1BF1A0E5004E0C80040038D8C0E1
+      4F2FF9A0B230B45335C0BE6D42E0A3C18FB0F754EBE7BEE0C3EEDA811D2AD5D4
+      E1468E753F52F21A84A8A7AFDFF48417DDE4663F6E9FBB7D1321E41A01B3533E
+      432E18119D43081973DEA5B74E485D7478674C69D8C24165F2845EED2CA8478E
+      6DE02478D900B6EE61F1C87A064AB34084C51FB76D385847AB30F3429849819F
+      B9DA87F776B2F030033B45B0A9C38DD9B6FD989C5B27D8FDF8518FC2024C5C78
+      74FFB96327DC41E8E4C339E4073A4F34F8EEF06842C89563EFCCD1C94A3ABAA2
+      0B61C1573B15E5BD9095B441925F8F59E6FDA86B1D180900E0F4F2F8703F87A7
+      5F62E84924C16E9599170EC4084A20AE448496260178230BB991C1932F30D8BC
+      9B43CF006C7D70B574BAF190651F26E79EE8075FCCEEA71577755F3EF1892984
+      90AB04AC7EB0C3FB8287778C2034A1B8E6C63FAC5FA8347AB9E8573BD566164A
+      A33B4442413DD20BF6E0606D4FD2E8287A9DE8E0B17E1B87C7D633C8B4335059
+      84A4C9CC4161F6C78AA0E50A2307959945BA8DC1C36B19ACFC90C3F1367ED0D7
+      3F52DF8BCCC2DD98BC44D07CC1E9C6B3FB32838FBFF1F77FC927D4F45C447E84
+      334483A6E86C42C72AAEBDED91CDAB546606D124A8CC0C944637E4E5BD9016B7
+      212DBF01AA25FBF0CEE7F549F384782B10003A9D3CBE38E2C75BDF7058B78D45
+      E9DF182C788DC1631B183CBA81C182571914BDCDE0F98F59BCF50D87EDD57E74
+      F4F1833EAB14A071FED6AF1AA1CADD8BC94BEA93836F6471EB231FAC2384FC8E
+      D0864BF0AB4F7EF0B3438385BA7309219791E1C36FB863CEC7AFA8CC6CEC8B6D
+      667A960E25A11D92820648167F0FFDCBC91BE63FE5EAEEF3C1FCEA21A42D3A88
+      94BC8608B3130F7CB989C384399FBC35FCACD137115A6E3EE5A827D91A4A689D
+      683421E4F291E75D39FECEA7BED8ACB2F23124A8CCAC408203B2920E480A9B90
+      9A7B0C534B7661DB2EF1D73D7FAAB57D6F2BA697EDC4A485479092DF88B4A28E
+      C4E09B79DCF1F4D7FF1879C16F6F2734E11A4D7EA0931213AD707F703E21E4CA
+      61E78D197FD7D35F7DA88CBB1358288C5EDA1429E982A4A805A9F97598BCF000
+      FEBC620F6A56DECAE8000006B5494441549AFA12F6137EEC1508000D6D2E2C5A
+      B30713E7EFC3E4DC3AA41434D338BFAC4F78E5948D05DFC8E2F6A7BFDD36ECBC
+      31E30921570A58FCA8C716479370BA70C10B0821578D3CEFF209131EFFE76B4A
+      932F4E3D9EA34D11BD0BB2D21EDA992A6C44CA921A4816EC42C95FF6E3705DCF
+      49F987935D9C9FC791FA5E985E3988B4E77660D2E21AA4E43586EC7DB93332CE
+      8F6CB0E0B6273E7A6BC405BFBD83D088E702018B7FEB376AC49040860FBFE9D6
+      9C7757CBF5AEF8249898B0CE54272485AD48CD6B40CAE2E3487D6E17FEB47C37
+      B67C598FB6EEC44D9053591D3D5EFCE39B46CC5FB90769CFEDC4C44547317949
+      03520B5A9056DC0949A923CCE4C4822F2D77E39687DE5F37ECAC51B78481FFA3
+      9F9A9E8C8491846EC12B0821D75F3775755E5A4153777FF22490A088E94CF542
+      5ADC0949610B2522B70693171C802EEF3BCC5FB51B6F7E548343277AE0F79FBC
+      89F2F30154D7F5E0ED6D35786ED56EA4E77D8789CFEDC7A4C5C731794903520A
+      5A42B6BEDC45B55E303911E09B03482D68EE1977EFDA2242C80D849A9D9F14FC
+      E00ADF09A3098D04AEBBF48E07EF99F8DCFEFD0A131BD91009EF4C193C90953B
+      434414B522B5A009297975989C7B1C93161EC2E4677742B9F02B3C6AFD0EA64D
+      FBF0C2966A6CFDB21E5FEC6BC5CEC31D38DEE4C0F12607761EEEC017FB5AB1F5
+      CB7ABCB8B51AE64DFBF188E53B28177E85497FDE8189CF7D2F805E8794FC46A4
+      16B422ADA8939A9B3227647A8FA8D6CB8D2CEE9E7FF0C0A5131E9A4A08B98ED0
+      1ACF68F213981DB1D5FF155684965E2F2584FCE69C31374F1EFFE8D64D92920E
+      8FD21A8824C2ECA7441819C8F51EC8CA5D90963A2029E986A4B80369850219F9
+      0D0221B598B4F838262E3C82BBE71FC45D7FDE8B3BE7EDC21DCF7C873B9EF90E
+      77CEDB85BBFEBC1777CF3F88890B8F60D2A2E398945B8BC9B9273039AF0129F9
+      4D482D68456A513B24C55D218DD77B844E161772B4FDE0079056DCE119FFE8D6
+      4DE78CB9793221E4B784961846919FE957590D2534FD3E87D032ECAF0921375C
+      91F2A79977CDDBB55366F0C476A684EC556E64203778699FB6CC19464627528B
+      DA915AD88A948216A4E4372125AF1193F31AA82CA9A722FC7F4A5E23FD9D8296
+      7EC0D38A3BE9DF2AED85B4CC496DBCC11BD2F868736301647A0FEE9CB76BE715
+      139F9945A8C9F935A1530DE7929FF997B90D21340B3C8B50BF30961072EDB091
+      17DC7E5DF6F282498B6B5AE5066F545324B66E2333F820D57B202D774152E684
+      A4CC0149692F24253D02315D482BEE425A71A7205D54B34BBAE9EF94F6D2CF94
+      39212D7741AAF7844037B202F07C0878017C99C18B898B6B5AAFCD5A5E306CE4
+      05B71342AE159EE102E1997EF65F674848A4493A9750CDB98A1032EE9C8BC6A5
+      8CBBEF79C3A405876B647A4F6C77CACC53604C7EC88D1C64461632811099C10B
+      A9C14B89D1BB45C403A9C14BC136F8E8678D2C9DD534F96341178097EA3DB87B
+      C1E19A71F73D6F38E7A27129849071C23D07B53E68727EB2EF0C1BEC0A9AA4E1
+      84460AA309F50D571342AE1F31FA8A49BF9DB2ACF0CE79BBF6A4157771721317
+      3147D94F4638214213456E0C0925880D816CE442662528E6F8A0CB4D7EA41577
+      7177CEDBB5E7DAECE50523465F31891072BD708F970AF73C92844A0B3F6BAD17
+      5BE1BEE16C42CDD218421F721C21E4D63113727E7FD3ACBFAEBF7BC1E15A4949
+      0F644626F2CDC270E0C2891191E8DF8F784DD4C84252DA83890B0ED5DDF8E0DB
+      1BC74C78E4F78490F1C2BD5C2DDCDBF9C2BD066DFD7F8CD68BADFE2F76269144
+      5C42E836FF2D21E4C661232EB8F3B28973678DBB6FBD75C2DC2FB74F5C74ACB3
+      FFADF378871F2511B9998754EF465A7117262E3AD63961EE97DBC74DDB60BFEC
+      AEB90F0D1B71FE5D84901B856B5F25DC4B38F04173F31FA9F5622B9A88B308AD
+      1E5E44E8E4D8AF09757A3710426E25C386DD71C9F899D3AFD19A175D3FE3A555
+      E31FFBD7D6BBE6EDD97FF7FC03C7272DA86E99945BDB9792D7C0A6E435B09372
+      6BFB262DA86EB97BFE81E377CDDBB37FFC63FFDA7AFD8C97565DA3352FBA64FC
+      CCE964D8B03B0821B70A7FFB5AE15A9709D73E4FB897FF5AE0A3579088A18446
+      156712AA79A308EDA35E4A68567D35A11A3A8E506DBD855073711B21E47642C8
+      1D51723B216482F03BB7089F1927FC8DAB85BF79A9708D51C235CF24A1EF8FFF
+      AF073EDE0ADF15C30905E42C427389D184867F17130ADC584241BC8A500DBE9A
+      10F23F825C2DFCEC2AE177C60A9FB99850C0470B7FF32CE11AC349A4B6FFBF03
+      3EDE8ADE19414246901029E7126A3246110A6AB88C12FEED5C12027B0409011E
+      ADE9BF809E6005010A123294508D3D9D50208304854BF0E7C1DF0B7EEE670DF8
+      FF0188AEA594E3E6BD670000000049454E44AE426082
+    }
+    AdditionalInfo.Strings = (
+      'Icon set:'
+      'Fugue Icons'
+      'https://p.yusukekamiyamane.com/'
+    )
+    Left = 1296
+    Top = 704
+  end
+  object TimerMonitor: TTimer
+    Enabled = False
+    Interval = 5000
+    OnTimer = TimerMonitorTimer
+    Left = 456
+    Top = 112
+  end
+  object DataSourceStartMarks: TDataSource
+    DataSet = DatasetStartMarks
+    Left = 912
+    Top = 684
+  end
+  object DatasetStartMarks: TSQLQuery
+    FieldDefs = <>
+    BeforeInsert = TimingMarkWorkQueueBeforeInsert
+    Params = <>
+    Macros = <>
+    Left = 1000
+    Top = 684
+  end
+  object PopupMenuStartMarks: TPopupMenu
+    Images = ImageList1
+    Left = 1072
+    Top = 684
+    object MenuItemOpenStartMarkJournal: TMenuItem
+      Action = AcOpenStartMarkJournal
+    end
+  end
+  object PopupMenuFinishMarks: TPopupMenu
+    Images = ImageList1
+    Left = 1144
+    Top = 684
+    object MenuItemOpenFinishMarkJournal: TMenuItem
+      Action = AcOpenFinishMarkJournal
+    end
+  end
+  object ImageList1: TImageList
+    Left = 152
+    Top = 216
+    Bitmap = {
+      4C7A1D00000010000000100000002C2700000000000078DAED9D075814C9D6F7
+      6B5CB36B5CD7AB6C72CD11C58891202A4A30A2A89815139845C404184057CC09
+      138A0A289851145082208843122488886430802859F07CE734D3E3300CC3E0DE
+      E7FDDE7BDF9DE7F93F5D5D757E55D53D7D2A74D7F400000314B315CE475929A8
+      F9CCE6192301CFDB84ECB04DC887797ED930D7E72D5846E5C399D47270CC804A
+      727A8BC6688B22E61BBF2B78975B1E806BEE57389A520C2B833FC0A8130F60BF
+      8767251DF1F6825F76DE3C3ED2CA8E8DD8BEEF1BBF33D0E64A4E395CCA2EE374
+      15C3A63742A1B838070A0BB3E0F3E754F8F42919FCFD6FC198EDBBEE6FD932B9
+      F3A64D13BFF1D6FE7B9DDE95C1858C2F9C28BCC0E529E4E7BF878F1F33E0DDBB
+      44C8CC8C817BF72E037D905D86EA2CE6B7FBD85DCCFA0267534B3851D8D0C11F
+      0A0A722BE571E9D211B1C68DEBBC45CC6FF53A782EBD044E261572A2F0B4333E
+      50549457250FAA071DCB9A35DA26627EF3FDA3A7938BE0287E07240A4FB6F7C6
+      E3CF9799477E7E2A989868AD14F3E6EE274EBC2E8483719F385178C2F1FB505A
+      5A28330F3AA74B96A8AF16F366374F1F7E990F7F457FE44461DDC3F7E0CB9762
+      99799494E4C28205C3D78AF9756EE7F6C77C029B880F9C28AC7DE03694957D91
+      994769E927983D7BF07A31BFCAF9D2DEA88F601DFA8E1385C7FC7503CACBCB64
+      E6515A9A0F8686FDCCC4BCB1FD6D9BC85CD81E92CDC9262217B4F6B8C1D7AF5F
+      65E6F1E54B214C9AD4DB5CCCCFB1DB3FF0D0C3BCA5F7134BAD9EBD879D6139A0
+      B1DB052A3E5F319F725419E6558A799560B804D4D47EDB2EE667EF636CB1FD44
+      B6E884FDAF16577C275F0E7DD360EAC694DEBD9BDA54A78E1D9B2CAFC42F3AC1
+      D882235897FD7D99D1BE2DCC70E731C698921CB5E4F9EDDB0DF450C635A8D3D6
+      AD539885C52446BE23E93F18BFA4ACAC80FB5E0B0BDFE2779C8E3E97C25DA7BC
+      DF910DAAB32C1EE39696967EE6AE8DBCBC4C78FF3E09B2B2E22123E305A4A747
+      8BFD8EEC509DA5F98D1BF597D1775A509023330F69BF433112CFAF5FAFBB82BE
+      D3C2C28FD5E641F5A063215B1431629E7CB1ACAC08AFAD4F72F3E0FD16458C98
+      37351D6D5A56562CBA3EABCF83CE29D9A28811F3CB9669AEA26BEBDB352E3B0F
+      FA5EC816458C985FBC78E49AF272693FA99A4751D15B205B1431627EFEFCA16B
+      E9FAA66BBBBA3C5606CD81510FFA82F2E1D6416AD67FB2A196BF8B7923A3C1EB
+      C947A80ED5E5A1E1DE1736E42C825FCED64FFDD9A10E6B7596897943C3FE66E4
+      67E4ABD279ACF45F00EA37FA821ACAF89D01B43B5E2F0D5961AB33CC9EE7A74E
+      EDB391F3D4AF55F350BBAA02933335AAA8C53126E4F971E3BA6C06DEDBA5F230
+      7DB0104638AA5428A517B4DE5537BDD93E266C66F7AD7C55D57F5943A58F649B
+      F1856B37869FEE073D9394A0A5C50F19CD760B18E6213EFE5EBD7E5CDCA34713
+      1B796A695037A2D1FC3A998D17D7B9DE64591D8E5F7CD5866DDB36B5D6FE2FBE
+      6E903771D85C6BFF97E07D51509D763D3825D3FF797E9EB3D46993FA50BA2CFF
+      175F37172DA00CCF316D49CF3312C0CAF31448C6CBF27F9E9FE8B0168ACB8B81
+      B6C2B417DC966471EF88385E96FFF3FCD853CB20BF2C1F9EBC09030A074A6C29
+      9EC2B2FC9FE7471C9F0BB9A5B9B0F49A355098E49318047C3C6D65F93FCF0F38
+      340DDE95BC033BFF7362511C1F4F5B59FE2FBEEEECF4E17DD97BC82ACEAA228A
+      A774C93684AE0F6A2B78BEEBDE71BE5DF66A43759AE5B48EF37F0B0B0B4ED4EF
+      535BC1F368C354B66AC8F57F6A430E1D3A082B57AE04EA632A6C2BF8E12B8791
+      EFCBF57F3E8F850B17E27E01886C79BFE755ADFF531ED6D656101919C68D1B44
+      B6BCDFF3AAD1FFA97FA07183C896E3711CC04911FFE745B63CCFCBC0C0400F65
+      ACA0C8961831AFAFAF6FFCF6ED5B484A4A82989818887AFE1C821E3E84407777
+      08F3F68684A74F213B36168A3232006D974F9A34899124F90C4C8B88888087C8
+      793E7800D72E5E04D733A7E1BEB313843CB80F89C267F029255971FE12F1A7E0
+      9ECB6508F6F4800461087C4C79A330EF86FC95B3F670D7E5123CF1BC0771C2A7
+      F02125A93ABEBF8989C99DD3A74F83BDBD3D1C387000B66CD902E6E6E6606969
+      09FBF6ED034ADBB0618307DA0E9255BEF4F90B7CE40D3EF76E41E0430F880879
+      0CAFE39EC3FB0CC5EBEF7AD9112E3B9C80EB57CFC323AFDBE074F92257B7E1C3
+      872FEBDEBD3B23C9E3AF3A39C24587E3E07AD501BCBC6FC2B163C72031271104
+      02C10A940A4A2EEF74E93C9C3E7514EC4F1D8363C78FC2C1830721242684CF63
+      0DAABFBCF3B777DF5E387DE13478067842547214C749AA4E9D3A623FD4D5D5AD
+      72FEBC3CDCC1C9C9014E62F9FBECFE829D3B7742507410C7FEF0C30F5B51AA3C
+      AFAEAEBE58B2FE0FB0FE2E2E8E70D6F1085C743B05B71E5E856DDBB6F1EC0ED4
+      3014FBE687BD97C9E2CF207FE19A3DDC787405F6EEDF83F3C64DD0B163C7B56D
+      DAB461249E5752525A275D7F7F5F6F70BFEF06777DAEC3A3670FE0695C10C466
+      C400D9A28811F33FFEF8E3BC860D1B5AD5AB57CFAA6EDDBA246BD40EDCDF51BF
+      7EFD1D98B6A351A346D68D1B37B66EDAB4E9BC66CD9A31D23FFDFF3FFDFF7F42
+      FFCFE7F1BDFD3F9FC7DFE9FF298FEFEDFF25EF1BFC6FEAFF870E1BC6447D79AD
+      FA7F497EDCB871B5EEFF797EE0A0C1BE9807D4A4D9336656EAFF79BEF18FCDC1
+      D5B5E23E8D6498B6B4CFC79324FB7F9E6F50AF0ED6351234D44702850B0B0B65
+      6E4992FDBFF8FAFBA505CC9C3C0EC2B06E147EFFFEBDCC2D49B2FFE7F90943BB
+      404A4A0ADCBE7A11284C5BC97D0A93282CD9FF8BEF3B4C55F5DD307D28482B31
+      31B1D2FEEED58610111A08E9290995784C63EB666955EABF6FB99C870B07B7C3
+      85637B2AF5FFA1A10158979795F8C5D3B4B9EB47E6F8C1D9112E9C3F06575CCF
+      C17DEF1B1012EA0F49297195787E1C59DBF113CF4F99328593ACFEFF31F69FF7
+      3DAE81E7A35BF038C41B22E242E075463CA0ADB8FC3163C67052A4FFF70F7B04
+      B129D1A0A1A1B184E75554543829D2FFFB863D84172951A0ACAC2C2EFF975F7E
+      E154DBFE9FE7F97EBCB6FDFF3FE3FFFF7BE37F49FF5784971EFF4BFABF42BC94
+      FF1B79E8C188BB3DA19B9DD2E3419B7AB37E1BBBD7EAFCF571FC83BBFFF7AFF3
+      75637FBAC02ADDFF93E7FF33AFEBC040E72EA07AA53B77FFAFEDF186C9D2F7FF
+      E4F9BFF2A93F6ABCFF27CFFFB5ED4780F2F10ED0EF5417EEFE5FCB9DF552A4EF
+      FF29E2FFFD8E76E3EEFF3535FF21B5E9AECAF7FF14F1FFFAE37F08AB3F4790D1
+      60411DB786C6752AF1DFDBFF7FAFFFCBE26BE3FF0AF172FC5F115E9EFFCBE0BF
+      ABFFFA5EFF57A4FEF2FC5F115E9EFF2BC42BD0FFFFBBCEDFF7F6FFB599FFCBEA
+      FF6B33FF97D5FF7FEFFC5F9AFFDEFE9FE6FEB598FF4B4B8FEE0788B4046AF921
+      86EE0588B494E63C20D482AFCF4641D9530DF812AC0E254F4642E1E36190EF37
+      043EF90C86BC478320D77B00373F2266E3467D26D2729A2B110F39B615FCDB9D
+      5092650D85E9DB393EEF8D05E4BE36E778B22566DD3A1D26D28AF2F21271F9F9
+      610BE16DE44EC80AB78674E176480DD90AC9C19BE14D9005BC0E3407B22566D5
+      AAB14C24537AFEC797FFEEF92E9CAF958AF5FCB99F381C1AEA0D644BCCECD9AA
+      6CC50A2DD2CA2F5FF221E4E101F0F6BC043121E7213E3E1862639F4074F46348
+      4808C56BCB07C2C31F713CD912A3AFDF834D9FDE8FD1B3F892923CB879D3813B
+      B78F1E9C83ECEC649C6F1770A2F2F930F1644B8C9E5EF75998C726928BCB0920
+      6567A771F5F4F3BB099191BE5CF92F5F3EAB543EADAB58B870F8DA51A3DA6FAB
+      FACD7EE5E6BCA492928AE7ED543E6D49C41715BD83397354D70D1DDA76C19021
+      FFB2269D3C6903A48C8C649C2F1781A7E715AE4C2A3F3EFE69A5F20B0BB361E6
+      CC011B90632347FE82FD57DF8D05051970E8902537E77376DC0DAF5F4773F70C
+      48543E1F269E6C89D1D0F89DE1392059E4E7A7C19533A67070BF393CF13A58E9
+      FC132F593ED91283F567225995946473F7671411D912A3ACDC8C91700EBFB867
+      CF2636B51131D2ED406DF5373EDAA8D0EF64C7A1C24479286A1F2EDA4A8615F9
+      8C4745AE58B1820E3652A4710A3051BC962C590238C70423232310C58DAF81ED
+      817D192C58B000A64D9B86D7891E8C1E3D1AB4B4B400C7CC9447B41C3E76F9F2
+      E564D393D8DEBD7A41BB76EDE0E7D6AD01FB188A8F45E9CAE1E3F57475A98F25
+      DBE9EA6A6AD0B14307E8DAB933EDC7D7C0EAA112D4870F87FECACAA08D75C67D
+      C311438640FF3E7D289C2087D54725CE9A3E1D34860E05D5BE7D61E4A041A0AD
+      A9495C2F75CC83D2E5F06FE6E3F9D5C3733416CB27E98E1AC5EDEBE116D37BA3
+      26C8E1292D65E1CC9960A0AD0DB3F1FBA27D094DA8E13B9F844A2719631EA2F0
+      4405AFB129A8B7A8C922F161453ED3509F5106DFE94B5FE83B62FF331FDEE7B5
+      BFC3FF39BF5DB56A1588FC375C413F7CCECBD4D494F3417A0E2B8A1B5F03FF62
+      DDBA75B06CD93298376F1E4CC76B73C2840934FEE3FC99D26BE0C957E289277B
+      1D1D1DD0C66B6BE2C4898AF892A44F25CEC46B6ADCB8719C447EA02787E985DA
+      2C756D2753DDA97C0ACB692317A1B688F290BEBEB3C68E1D4B7C960C3ED2D8D8
+      986F2317CBB9568B445BE94FF444ACDF340303BE7DD311C593DF5A2A709E6347
+      615B3500DB997163C6F0EDDC529495280FB96DD6BCD9B34173D830AEDD1981ED
+      CE68CC4BD45E2DAFA1ECA4C5D84EEB635BC7B73B3A1A1A301E35AE228FA41A78
+      6A235217CE9AC5B53B4615ED7BAA84262AD0766493161B1A82283CA9167E552C
+      FA3EA6498415FED01A2E1A7FE07882FDFE7B7DD6B8719D4AE9BFFDF61BC3EB9D
+      617FD61DE7636B6C6C6CBADADADA325E357D88C7BEA8E7DCB9733726BF7C09B8
+      DD307FFE7C6665655513CFB52FBFFEFAEB224D4DCDAD71A1A1D0B76FDF5D4386
+      0CE985FE8FF395EDF2F82534BE20DFA76D84BF3FFCFEFBEF47BB75EBD60F7DB8
+      D2B1C8607BB76DDB369ADA9AC58B1703F5E3181781F32BD32E5DBA54391619FC
+      56ECEB73A88D9A3A752AD75ED13880C60D782CC6D2C72283779B31634611F93A
+      8D1BA8CD193F7E3C8CA9F0891792C7A2AAAA2AEBD89F625B534EED0CCE53A157
+      8F1EF0FBAFBF42F7AE5DA177CF9E94471C1ECBAAD6AD5B33AC8F4C5FA27A0FC3
+      FEBA17323D3A75124B05C7227D30BF6AC601D4FFBFA67696C60F435454385FE4
+      356CC0004E6423B295FE24133B06C70B63478C10F7FFDAEAEA5FD5060F2EEDDD
+      B56B7EB31F7F247F5A5DCD777E88FAEC0595FB7FEAC36350F7513628956AD899
+      289C0F706D578EA8FFCF11F9664D1F49967402554A632F055D50929DF91D7DF2
+      4C45D8C183078B7D465202C1137581E0F58D9E3DCF0EA1FBF9828B5E4CA0A5AF
+      B0FF0B04B7FC2C2D015455576DC1EBA6932C5EBEFF3B8C51521AB3BFA8A888AE
+      731381A3A79A8857D0FFCFB056AD5A2977E8D061EBA68C22109CB87957A0336D
+      9FE2FE7F86356FDE9C35D4D4D3106C3BF688F268B071EFE7C9E6DB14F47F11AF
+      8EDDDDDA3D5A0253CBD794C76FB6F6A06E6CAA80FFEBB3860D1BB2BAEDBB30A6
+      AAC558E75E5EFFDAB0FB2BE5F12FEB23A03ED9B0D6FEAF3E6F71F94FABAD203E
+      1FA08DCEECEFF2FFDE6AA3A1B926E743FFF8FF7F81FF57F7E19FE3490ABF7F36
+      79F264B170BF15C66BA3E69144BF1DE09EBBAAA9A9E9E1D618A5C73F8B2586DA
+      0C12CE775BA1BF2FF1F2F67E989E9E9EF7F3CF3F53DFAC84D73E678B1FE30F1F
+      3EC0A2458BCC707ECC287ED0A0410CFB3E5EE3EFB8BB3F8A477F1BACAA6A47EC
+      C0810319FAF12FC8533DF43A77EE6C161C1C1C69686868466CCF9E3DE97E2EB7
+      2E01B5382C22E2D3B2E5CBEFA06D7F2A107DE9178C37C1BC17F2E7A153A74E66
+      BEBEBE9198AF59D7AE5D19FA17435F6558A79521CF9E0169C0C081547EFFE52B
+      561C4E4B4BFB84C7BE4CF25C76ECD8D1CCC3C32372C4881166386767E89F8291
+      2347AE097CF204EE7B7A7279E05CE20E1D8BABAB6B20CEE7A74A7F1FD88E99DD
+      B8712312DB0733D4E4E1C3876FF0F4F202CA234428A43CF2CF9C39138CEC166C
+      5BDBC8FA4EFFFCF34FB3356B1C629B3409885AB53A0AF0D8ACD0E76D44DA8A9A
+      8D6DD6BF68FD5983060DD84F3FFDC4A8BE7FFCF107C373C9F0F80D1A34B89961
+      6B0B50AFDE8DF4B66D37ADAC576F0D6BD4A89158D4E6114FCF9E25792C6B121E
+      FF9E79737DA17EFDBD99FAFA59850241DC2D812076BD4010C1EAD55B5A2D8FED
+      DA140D75F5C3CFF05855070FDED7B2A5C11AC6EE0A8D8DF30159778120DC4C20
+      08C23EE721AB5B77176BD2648E98C731DB542D4DCD53D1788E870F1B76544949
+      696AF3E674A9DDDCC5D80DE1EAD5D83708823CB0BF33279EB1ABA8CB3C3F6DCC
+      A85117129F3F07F59123CF62DB388DEA53C1DF205BCCE38AD0C2A214F378E82D
+      10786F96E0A78FD6D0B8941117079A6A6A17F1B8A6F3C7F38DBF82BA8879380A
+      ADADCBD157AF3E66CCC592F8C68D1BDBBE7BF50A34478E746AD2A4C90CC9F351
+      9977449DC33CCE0AE97B61ECD433147D7F23EBD7AFBF07B733312FEE78949595
+      19CEE598A5A5259B376F1F6BDFDE41C49F45D9631E27858C1D3342B1BF7BFF90
+      14305F8D459AEAB0E42D33D9DB9D0BDABFDFBDC80615812A1089C23694463664
+      4B8C349F6461382F75E7A277B91E97A0342D11BE961471A230C5511AD9C8E2C3
+      578C9B17BB7D7E4961EA2B282B2B832F5FBE5412C5511AD990AD24EF6334B47D
+      E092B1EF3E25C543717131D05884E4377B18277E9FD2C8866C89E1F93B137ADB
+      449FDD0B050505F0F9F367B1309E93641CD9449FD943F1363CEF3AA653C4DB17
+      A1F0F1E347B1DEBD7B07D9D9D990999101CF2323212C2C8C13855F05F902313C
+      7F4DAB43417EEE07C8C9C9017A86F42A2101A2D00EE3393D8F88A8A4A4B8588A
+      2FE0790FED2E05F9391F20333D1D5EC6C4405C7434278CE7C4EFF34A8E8BA178
+      311F385139E26D4430D098E84D7CBC5818CF49328E941CF090E2C5F58F9931D8
+      261DCFDFDB9414C84C4A120BE33949C665BD7903C9277652BCF8FCA5CE1BD93E
+      63F9F8779FA3F01CE231E4A6A5714A9FAFC689DFE7141A04644B0CCF672DD4C0
+      4E5F6B5EAED98C92A2E83028C2F35E94950565F9F99C284C71859121906B6658
+      42B6C448F11579AC9AF0AEC0F10094A26D59663A9465A44349E453C8BFB01F72
+      57EABF231BB2AD8627B547D9A0225005224588E2DAF37692FC7F831873A67616
+      C7FC5785155BDABF2852D534193CC50B376EA41D6761C5BE98E7D256AF2E16A7
+      55E52F0ACDCCBE82AE6E34AC5D5B0AB48FD21649B860C15B2ECDC8288D4BABCA
+      5F40BBF3C2254B7261D0A04730674E06D03E69C284582E6EF4E85051DC0519E5
+      9FA7B90CE6715A38654A02282B7BC088114F4045C5137EFED901C7FC2E406915
+      36E7996CFE34EA24A69F1076EEEC0E2D5B3A726ADDFA32505C45DA69269BA7E1
+      310D6F0EA1CD61E1CF3FDF40D64D2C8AAB48B3E36C65F3FB285DD8B2E57D9025
+      4AABB091C9533CB201C08BF6AB899371FEACD12E0278D13E633BB42B5435AD2A
+      BF01EDD6A25D1CD0B662DF9A55A86A5A557E2D6A3EDACD15566CD7B26F7CD5B4
+      FF26DFC5393137D6A7F13CCE159AE21C61306A0A6A8148141E4C696443B6C4C8
+      E0BB2D58306F9983C3F1ABB1B1C2A4F7EFD38B4914A6384A239B6AF86E4B972E
+      360F0BF349CDCC4C80BCBC77E0E7F788DB92288ED2962D3336275B491EE701CD
+      66CF9E65121AEA93FAE64D04F6BFD91C436B4E789EE2282D3CDC3F75CE1C239A
+      3B34E3799C9F0F3D75EAA05B62A21032325E8A19FABD091F26515A5252189C3D
+      7BDC8D188935A8339F3D7B984CBCA4E8DE81741CE9F9F3A06462781EE7292B12
+      1284C57C3A5F1EDD43942C3F3737934B4F4989292686E7718E629A9818562CC9
+      E21C0B3662634ACF1B687E4AF730E8F77357AE9C87F4F4F86262C46BC0870E9D
+      1316E69F22C92725BD029CFF70DB6F4A80F87821C4C686A710235E033E70A0DA
+      D1A3FBEFD0F9A53A4AE6215DFF949428387DDAFE0E313CDFAF5FBF165A5AA336
+      464787647CF890568991D4870F38BE79F92263F4E8D11B89E1799C67B15EBD7A
+      F5D1D119BF87D23F7FCEA9C252DCEBD70919BABABA7BC8961849BE478F1E743F
+      A55F9F3E7DACECECF679C5C7C7623EB9259F3F7F2C79F9322E63FFFEFD5E6867
+      4536642B8BA7DFF3E0FCA115CECFC6A3D6A2768B44E1F1944636D2FC7FAAFFF3
+      3EF8BDFE2FC5D7DAFF79FE7BFD1FAF85BFE5FFA8BFE5FFB46EFDEFF83FDDDFF8
+      3BFE8FAAB5FF27DDDE08098F8E671183AAB5FFBFB9341DE24E6A7FB4371DB47D
+      E7DC7E35FAFFEB5B9B20EECC544EB1A7A740F409BD52483F0111BB95C32376F5
+      36AAC9FF85877400520F03BC580E1039FB9BE2D6C1E34D1D8535F97F84E3EA72
+      EFEDC34B6FADEDFDC979D12F19D78DDBC640A02ADC5DDE56E861D2CEA8B6FEEF
+      6CD45448BA32A79911E621ABFDA8749F4652D3549AB03393EADBA38C300F46FC
+      77AEFB935CFF57EB757F52EBFF2AADFB2B0FD1E4D6EE9506A94171E008287C3C
+      1C0AFC87C2675F556EEDDFC78703A5D7FF555AF7C7F1EF76716BFF389ED6FEA5
+      6EADE065AFFFABB4EEAF206C11B7762F3B620764865941BAD012D29E6D8394A7
+      5BB8B57F494F3649AFFFABB4EEEFFDF3DDE2757E313181E230ADA393B5FE8F5F
+      F7C7974FFCCB974F212E2E08FB9B086EED5954943FC609B9B56761610F2BADFF
+      E3D7FD4996CFAFF3A3F2F930952F6BFD1FADE1A3B57CB2CAC736415C7E7C7C48
+      A5F2F9F57FB4868FD6F24996CFAFF3A3F2F930952F6BFD1FADE1A3B57CB2CA7F
+      F54A282E3F2E2EB852F9FCFA3F7EDD9F64F9FC3A3F2A9F0F53F9B2D6FFF1EBFE
+      64954F3C5F3EF192E54BACFFABD5BA3FE9F57FDFB3EEEFDFB9FEEFDFA1578706
+      B2E4E34358FAA9112CEBAC5A8BEC73EA7AA87D283F9410E58432C134A58CD323
+      18868D50F632F80E990EA3CCF31E2C722A0DB70CFFFA727F1E0A4AC3AD0AF2BC
+      16A7669ED3F4419B5D282149927F736C48BBB473A3E696C5D91D2C0DDFE5FE25
+      62774C59F49E3C146018F3C036216A0F6039C2AF8987B92DCFBF3C30A07EE2D1
+      A1A38A9FEF31CD0FDC7A303FC8E276BACB64CF848303FC50420CBF2A0ADD059F
+      FC2DA018F3A030C5F37CF49EBEED529C0DF43F789B99E63C5A7F08F76D5FEC55
+      191FBFBF3F8BB2ED43E94751C2FCD09DF0D6632DE43DD906B4CFF3A1D63D3A67
+      DC329E9A7577B549DC492DF3B01D3DFB85EFECC59E59766342ABEE46982EFC8C
+      ECFB871B397D0CDC0614C7F34F3677699F757F955A86BB897AA045E7FEFEE61D
+      98CF86F6CCCFEC4F4AB3C738A1B4289EE71FAEFDDDFED1BA3F84D2A2785FCCE7
+      B17947B26118D73FFDE67CF54C776335DC17DF3FBBB7A29DF0DDFDF99079733A
+      A71C9FE540711E264A5C1F7563516BEC6BDAF50BDAA9629EEAA26FF2CA51772A
+      A68B7FC38DE9C2F7B7C641C6C50190E33119681F75F4DA8256ECEADCE6ECFAC2
+      9FC6E3BE6D9AB3D6A12C9761A621B62AFAB8DF8EE75D6637137EBA33043EDFD7
+      821C974E40E1C7DB3ABEA278949FFFB60E9E995706DFCE75ED71F0F3FD51A6D7
+      16B61A75654EF3FA3CEF38BDB1B0C4471D685B74B70714DEFC158A6EFD0EC577
+      BB92F2301C8371EEC59E030EBA2E6831F7A26193764EB39A8AAFFF3393EA0945
+      DA75D1B0BE4FF04EA5D4B7CE7F14943D680FA8BCB74E7F840759B773BA38A391
+      F9D9C9F53B60394C92B7D7FFC11E65747A625D0A2B9DD4AB6382724209517EA8
+      7D283D4C6B81653069FEFFB7C897457E2E2D8A6F8FEA8C6A87FE5F9FDA08F275
+      F2599EC736C188F3E7747BF89A709013BC390614F7F5D521B5E2D0AD53F31E2C
+      D4C7B64113E3DA49F3B48FDA493E5DFEFA089408ADA12C7E3FE7E3185647AD40
+      FF37C534D33407ADB9D8567490E4D1FF955E1D19E25312BD97F3F1726C1F284C
+      3E8EEA9FE230CE3CC773D5A1CF015B0E96251C3A98787C9839322D24FCDF24F3
+      D6DCD49C47E650186153E1DB782CB48DB3EBC7B02DE8476D42E6CDA5B7D1C63D
+      E3C66C27DCD793F07FE7F73EEB0AD0FF21E1ECF857B87F94FC5B24CA9F619B30
+      3EFAA09A57DAB56531681B8EF1FBC4F7DFD19F3FF89A418AEB42A0F0D36D5DC9
+      EF8DC8C783B674614FB77563C15BBB929D5FD2E53979689B47619E275FCF7EB0
+      025E3B4E010A7BADFE8DF96EF893ECB9AD87A912A3384A231BB2A5B084FF3B27
+      5F995A9072491B827628BF425F9F493E7FCBB835E7BF22FF9F49696443B6C448
+      F8BF49E8BEFEA9E8DB90E1A65344FE8F3E3F935891FF537E424A231BB22586E7
+      D19795AE2D6A159E7747153EBAF584B7B7C71605ECE8CDFBBF90C21447696443
+      B6C4F03CF912FAB4DEB585CD9E17DDFE130AAFB785A2BB5DA0C47B10270A7371
+      984636642BE97F14269F44DFD643FF0F0FDED62435FBFC8F0565B71B0389C214
+      47696423EDBF3C4FBE2DC3FF85A2B009A5FD6FF37FC1C263A8A34CB0E00813CC
+      3F5CB125611C7D04FD759960F109265874BC226EE83EC6461ED666C30F08D9E0
+      BDDA0AF043048B8F9F112C3A7606E346B2217F69B341B6C2C9BB9E0253DE26AC
+      81EF446B016D858960F32C1104F30EDD607D2D856A6BEF01EBBA5EC83AADAEAE
+      FC162853649725BE7A05478F1E85D5EE31601990000223BBDB4C69A190FD64A8
+      CD3AACA4E3AF877C6BB4EF86BC066A630B9353AE3AA73D13363D785176E8D021
+      888F8E063B3B3B58EA1606EBEF4783C0D0C65D306DB7BAC0602795B5A395E9E9
+      FBEDCD1D1FF7DFE51A61E8E89BB9FE41E497956E42303E1B0C3B825E82ADAD2D
+      448584C08E1D3B60DEA527B0D0F92908A6585F164CB662784C2305730EDC5A7E
+      FD2918BB04C2B4C3F741C7F206CC3EE1031B1F3CE7F2D8ECF9827B774D98AF2F
+      F7FE19035B2F104CD8E624D0DFCA04730F32D6D3401B25ECBFF4244CDC770796
+      B906C312E727A0677907D6DC0A83955742C1E46218D09AC8ABF6F6F4EE9ECB02
+      5D0B4D818E05CF33C1741B3581C1AE7B732FF882DAA68BA069EE0CC64E8130FF
+      AC3FCC39E607EBDD2361F1C967C4BAA2860B7436B14AFCB4DDE27A4CB0BB83E7
+      2A18B42DDD60A2CD1D587E3598AB33D358E9C7462ED7A2F70E55C33381DE160D
+      4CF31ABAC60154579D85B90EBE30DADC15D8E0854FD8C07963D8F0A54C2EAFBB
+      595C8FA9473D60C0925338C19E19C27AE3F7DD7F0E5390674CC5682CEB3D5DC8
+      7A4D1372F9F59ACE64F1FFE9F7FEFFF1FFFF0CFF9F78E40C8CBE1F0CBA074ED6
+      DAFF575C0D859ED742E1746A36685EF50441A3C62EB5F17FB5937E300BBF03D7
+      823250BFEE9D2330DDB25AB0F53C136CBD50A3FFEBA3FFF7BC1604B629B9DC7D
+      C8ED29B99FEA5C7B7256E01A501755A3FFEB383F8621B79EC196B43C6E8DDDD2
+      B84CE8785F182C70F11D2570F6A9D1FFDBFC751D6684C67F1913150B1BDCEF82
+      7AC473181612F95E70C9FBA4C0D15320CFFF05E356C5B63A71235F33FE0DF47F
+      91C8954FDB01A8A66E7E418273F7860A363B3036DF9A09369EAAD8AE3DC66DD9
+      22BC36EC6F9DE9F8F46576F7846CE8F6321B367D28E0B6A45F83E2B3299DD95D
+      62D5EA2FC7A36CCFF927D50AD3FF3DCFEE1DB9B5508CB9D05A2525C6AE9AA09C
+      5001223955C4519A8BC8D65116AFD7A8D1759FC18323528D8CDE162C5FFEB97C
+      D9B24FE5B36665170C1A149E4A6964530DAFD7A2C5ADD059B3B20AE7CECD8459
+      B3522B89E20C0DD30A9B37BF194AB695F90B4A0D1BBAF84C9B96523869523C77
+      6F929ED94B8A3E1327C661F85561830678E120F38D3F67D2AFDF93D471E3222B
+      DDDFD4D40CE124F9193B361C7AF478984ACC37FE94F3D8B151058307FB40C78E
+      AE9C1DAD37CACACA82D7AF5F43424202F73E9F962D4F439B36E7A16B57F70262
+      BEF1C703B0ECF2FEFDBD4059F93EFCF49303B75628323292FB2DF92B6CC35AB6
+      3C87BAC0E9B7DFDCCA89F9C61F0ED0D20A2DEFD2E52EB46EED8A36572BB1F4FE
+      218AE3D5B6ED8D7262BEF176CECACABE05AD5AD19A03F72A2CFD2E9ED625511A
+      A955AB1B05C47CE3F798B4697335A54D1B3FA93A5FE3442CAD6D22B56CF9081A
+      35BA904ACC377E97D20F3FECF569DBD6AFB055ABDB22F6362A58A4DB22F63634
+      6FEE5D58A7CE1E1F62BEF13B50DBF5EAD6B50D6DD52A00F3B887B69152BA87AC
+      7FE10F3FD886922D3195F9ADA8557A75EAACF769D8F06C6AB36601052D5B4697
+      93284C7194463615B6B278EA72E6A18FCC465F998D3E333B4024A78A384A3365
+      D2FCDFD5F6ED069C147C1740A72D5B26577AF736CF93280DB594DE0528EBDDFB
+      9426FDEE7D499ECAA777EBD3BBBC157DF7BE747D376F9EECF4F4E95D78F2E416
+      A4A6C6D6F8EE7D79F50D08B841CFCBE4BE7BBFA6FAFAFB5FC73C5E54FBEEFD0D
+      1B7497D37BE5E4FD57C0850B76D5BE7BFFDBBBC7ABFFAF001F9FABD5BE7B9FEA
+      42EFA993F75F01DEDE57AA7DF73ED5A5F2BBC7ABFE5780A7A773B5EFDEA7BAD0
+      F31879FF15E0E171B9DA77EF535DE85D79F2FE2BE0EEDD8BD5BE7BBFA22E5FE5
+      FE57C0D8B19D1E49BE7BBF4F9FE6E27BEFA2BAD4F85F01FDFBB762DDBB37E244
+      EFECE379515D6AFCAF001453566E5A85A7BAC8FB9F00BEBE7DFBB6602449BE96
+      EFFDA9F21EA02953A62CA1F6393D3DBD562286D84993262D4D4B4B0337F381E0
+      B5BD3F276FCB01F0C87A10F8EE5485C736C3E0C9DE91F0D44E038407B520E2A8
+      36084F1A0031C4D2BB64929393E1C15615C8BE365F21C59F9D04C410ABA3A3B3
+      82FA5877F35EF0DA719A42229E1862C78E1D6BFAF2E54BB8B5A13B449DD0112B
+      FCC858AECE01B6C3F1188642E09E6110B25F0D228F6921AF0FC4104BBF2F888D
+      8D85DB663D20F4D068B4D1E48ED96F97AA881989C7AC0931A7C6C2ABF3BA90E2
+      340932AE1A0231C4AAABABAF8E8A8A827B16CA589E3A9EABE13299EC6B069073
+      7B067CF6980D7977E70331C40E1F3E7C2DBDB3C66BBB8A5CA6D87B3E94F92E82
+      AFFEC650E465CCBDE786585555D575A1A1A1E0B74F1B8F7914F2DAC8EB233F15
+      F919F0E1D61CF8746F01143C58CC71A49C076B811862070C18B0412814C2B367
+      CF2AD6373F7F0E2F5EBC80B8B838888F8FE7CE136DB977E2609DA95C6249C4AA
+      A8A8CCE8DBB7EF466939383880A464D98858F49F3E62F5EEDD9BDE8B6CE1E6E6
+      0692A2384A93B4255692A7F729B76DDB9664151414C48D65E858E8F8288ED2C8
+      46164FBF2D6BD2A4092F1BFC6E9D2445717C3AD9F2FCBFA1EFFFE7F9FFFFB1E7
+      FF8E8E8F712E9386EDC79AA3B57DFEFFF0E175B0B23A07F49BCFA64D2F26D6E6
+      F9BF574A1A5CBFEECACD6D2C2C8E63FB31D75ED1E7FF97854F60848B3BD0EF22
+      376D5A83750950F8F9BFE79B641879E52EC7AA9D718553EED7147EFE7F21D84F
+      CC0E3AE200273D6E2AFCFC3FEC4D1C68DF7E242AD705EE4687D5EAF97F8B690B
+      1FD36F381BACD99EFCABD6206759CFFFE977FBDDBA35AC22FA2D3FDD6F104C58
+      EA2A98BB71444795B6556C88FDC7FFFF59FFF33FB9FE27C76F37C478EDFFEEF5
+      3FAFCE4FE6941BEDAA90FF27DDDE8CE32D03787E5C97DB9268FD5FFCD92970D0
+      A48F4B4DFE1FF4D7A86AD7FF79ACEF945ED3FA9FC84B26389653AF245AFFF7D8
+      4613D64D6A7BA3B6EB7F4E4E6B9A495AA4F9E31D79FE5F9DF8F57FA30734E2FC
+      5FEA1DC03245BFA5A5DFE9D2EF6AE58D25D0B6036A86ACB902F1942E8FC7F9C0
+      4C1CFF45D1FD22C9B902ED533CA5CBE3693E40F6D7CC0771F307BF5D43B8B9C3
+      E303BA5C3E945EC33AE6E574BFCA63731F48BC6020168DE5295ED67B2B2545F3
+      017A7F23CD25A85CFFDD43383D3BA0C9BDD791D2E5F1341FA07B570FAD06E0F5
+      4AF384F1F0E6D2041C4B1B70F7B4285D1E4FF3011A2B879E9C024917274196DB
+      0C1CBFCF85771EABB93134A5CBE3693E40E3ECE8E8686EBCCD8BDFA774793CCD
+      07688C4EEFEF0C0909A9B4A5784A97C7D37C80C6F7E1E1E140E367C92DC553BA
+      3C9EE603342F387CF83004040454DAF2F305793CCD09A8BE4F9F3E053F3FBF4A
+      5B8AA774793CCD11C876EFDEBDE0E3E353694BF1942E8FC7F9C11A171797049A
+      0705060682E496E2295D1EDFB469D35E383F3013CD15A46546E9D2CCFF035809
+      80A8
+    }
+  end
+  object CSVStartListExporter: TCSVExporter
+    FileName = 'startlist.csv'
+    Dataset = MainDataset1
+    ExportFields = <    
+      item
+        FieldName = 'category'
+        ExportedName = 'Категория'
+      end    
+      item
+        FieldName = 'number'
+        ExportedName = 'Номер'
+      end    
+      item
+        FieldName = 'name'
+        ExportedName = 'Имя'
+      end    
+      item
+        FieldName = 'nickname'
+        ExportedName = 'Никнейм'
+      end    
+      item
+        FieldName = 'age'
+        ExportedName = 'ГР'
+      end    
+      item
+        FieldName = 'team'
+        ExportedName = 'Команда'
+      end    
+      item
+        FieldName = 'city'
+        ExportedName = 'Город'
+      end    
+      item
+        FieldName = 'phone'
+        ExportedName = 'Телефон'
+      end    
+      item
+        FieldName = 'email'
+        ExportedName = 'емейл'
+      end    
+      item
+        FieldName = 'comment'
+        ExportedName = 'Комментарий'
+      end>
+    FromCurrent = False
+    RestorePosition = True
+    FormatSettings.DecimalSeparator = #0
+    FormatSettings.CurrencyDigits = 0
+    FormatSettings.FieldDelimiter = ';'
+    FormatSettings.IgnoreOuterWhitespace = False
+    FormatSettings.RowDelimiter = #13#10
+    FormatSettings.QuoteChar = '"'
+    Left = 229
+    Top = 395
+  end
+  object CSVResultsExporter: TCSVExporter
+    Dataset = MainDataset1
+    ExportFields = <    
+      item
+        FieldName = 'category'
+        ExportedName = 'Категория'
+      end    
+      item
+        FieldName = 'sumplace'
+        ExportedName = 'Место'
+      end    
+      item
+        FieldName = 'number'
+        ExportedName = 'Номер'
+      end    
+      item
+        FieldName = 'name'
+        ExportedName = 'Имя'
+      end    
+      item
+        FieldName = 'nickname'
+        ExportedName = 'Никнейм'
+      end    
+      item
+        FieldName = 'age'
+        ExportedName = 'ГР'
+      end    
+      item
+        FieldName = 'team'
+        ExportedName = 'Команда'
+      end    
+      item
+        FieldName = 'city'
+        ExportedName = 'Город'
+      end>
+    FromCurrent = False
+    RestorePosition = False
+    FormatSettings.DecimalSeparator = #0
+    FormatSettings.CurrencyDigits = 0
+    FormatSettings.FieldDelimiter = ';'
+    FormatSettings.IgnoreOuterWhitespace = False
+    FormatSettings.RowDelimiter = #13#10
+    FormatSettings.QuoteChar = '"'
+    Left = 352
+    Top = 395
+  end
+  object BackupTimer: TTimer
+    Interval = 600000
+    OnTimer = BackupTimerTimer
+    Left = 352
+    Top = 176
+  end
+  object LazBleComponent1: TLazBleComponent
+    OnScanStateChanged = LazBleComponent1ScanStateChanged
+    OnAvailabilityChanged = LazBleComponent1AvailabilityChanged
+    OnError = LazBleComponent1Error
+    Left = 72
+    Top = 528
+  end
+  object LazBleLclClient1: TLazBleLclClient
+    LazBle = LazBleComponent1
+    AutoReconnect = True
+    OnConfigureClient = LazBleLclClient1ConfigureClient
+    OnDeviceChanged = LazBleLclClient1DeviceChanged
+    OnStateChanged = LazBleLclClient1StateChanged
+    OnError = LazBleLclClient1Error
+    Left = 152
+    Top = 528
+  end
+  object DataSourceFinishMarks: TDataSource
+    DataSet = DatasetFinishMarks
+    Left = 600
+    Top = 336
+  end
+  object DatasetFinishMarks: TSQLQuery
+    FieldDefs = <>
+    BeforeInsert = TimingMarkWorkQueueBeforeInsert
+    Params = <>
+    Macros = <>
+    Left = 520
+    Top = 336
+  end
+end

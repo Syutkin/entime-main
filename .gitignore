@@ -6,6 +6,7 @@
 *.exe
 *.dll
 *.so
+*.so.*
 *.dylib
 *.lrs
 *.res
@@ -25,12 +26,10 @@
 # Lazarus local files (user-specific info)
 *.lps
 
-# Lazarus backups and unit output folders.
-# These can be changed by user in Lazarus/project options.
+# Lazarus backup folders created next to edited sources and forms.
 backup/
-include/backup/*
 *.bak
-lib/
+/lib/
 
 # Application bundle for Mac OS
 *.app/
@@ -39,27 +38,34 @@ lib/
 
 #build results
 [Ee]ntime
-qt5/*
-gtk2/*
-bin/*
-release/*
-debug/*
-win32/*
-tests/integration/.test_build/*
+/qt5/
+/gtk2/
+/bin/
+/release/
+/debug/
+/win32/
+/build/
+/var/
+**/simpleble_pascal/
+**/lazble/
+**/TLazSerial/
+/tests/.test_build/
+/tests/integration/.test_build/
 
 #compress languages files
-languages/*.mo
+/languages/*.mo
 
 #user resourses
 icon/*
 ico/*
 doc/*
+docs/
 changelog-gen/*
 installer/*
-md/*
-logs/*
+/logs/
 
 #user files
+/AGENTS.md
 *.sqlite
 *.sqlite-journal
 *.bat

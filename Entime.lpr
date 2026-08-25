@@ -13,15 +13,14 @@ uses
   Main,
   LazSerialPort,
   rxnew,
-  sqlite3laz,
+  SqlQuerySortEngine,
   lazcontrols,
   datetimectrls,
   lazdbexport,
   Result,
   HistoryLazarus,
-  db_sql,
   rxapputils,
-  app_logger,
+  AppLogger,
   i18n;
 
   {$R *.res}
@@ -47,13 +46,17 @@ end;
 begin
   RequireDerivedFormResource := True;
   {$IFDEF DEBUG}
-  if FileExists('heaptrace.trc') then
+  if FileExists(IncludeTrailingPathDelimiter(
+    ExtractFilePath(ExpandFileName(ParamStr(0)))) + 'heaptrace.trc') then
   begin
-    DeleteFile('heaptrace.trc');
+    DeleteFile(IncludeTrailingPathDelimiter(
+      ExtractFilePath(ExpandFileName(ParamStr(0)))) + 'heaptrace.trc');
   end;
-  SetHeapTraceOutput('heaptrace.trc');
+  SetHeapTraceOutput(IncludeTrailingPathDelimiter(
+    ExtractFilePath(ExpandFileName(ParamStr(0)))) + 'heaptrace.trc');
   globalSkipIfNoLeaks := true;
   {$ENDIF DEBUG}
+  Application.Title:='Entime';
   Application.Scaled:=True;
   Application.Initialize;
 
@@ -70,8 +73,8 @@ begin
   try
     try
       Application.CreateForm(TMainForm, MainForm);
+      MainForm.LazBleComponent1.RefreshAvailability;
       Application.CreateForm(TResultsForm, ResultsForm);
-      //Application.CreateForm(TLoRaForm, LoRaForm);
       Application.Run;
     except
       on E: Exception do

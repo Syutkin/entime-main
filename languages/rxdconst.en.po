@@ -759,4 +759,3 @@ msgstr ""
 #: rxdconst.susernamelabel
 msgid "&User name:"
 msgstr ""
-

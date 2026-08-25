@@ -26,6 +26,7 @@ msgid "Button align"
 msgstr ""
 
 #: rxconst.sbuttonalign1
+msgctxt "rxconst.sbuttonalign1"
 msgid "None"
 msgstr ""
 
@@ -47,6 +48,10 @@ msgstr ""
 
 #: rxconst.scloseallexceptthis
 msgid "Close all except this"
+msgstr ""
+
+#: rxconst.scloseallquestion
+msgid "Close all window?"
 msgstr ""
 
 #: rxconst.scloseallwindows
@@ -129,6 +134,10 @@ msgstr ""
 msgid "General"
 msgstr ""
 
+#: rxconst.sgrabkey
+msgid "Grab key"
+msgstr ""
+
 #: rxconst.shistorydesc
 msgid "History - \"%s\""
 msgstr ""
@@ -165,6 +174,10 @@ msgstr ""
 msgid "Out of range %d %d %d %d"
 msgstr ""
 
+#: rxconst.spressthekey
+msgid "Press the key"
+msgstr ""
+
 #: rxconst.sprevmonth
 msgid "Previous Month|"
 msgstr ""
@@ -173,16 +186,77 @@ msgstr ""
 msgid "Previous Year|"
 msgstr ""
 
+#: rxconst.squestion
+msgid "Question"
+msgstr ""
+
 #: rxconst.sreqvalue
 msgid "Error. Expected value for field %s."
+msgstr ""
+
+#: rxconst.srxbyte
+msgid "B"
+msgstr ""
+
+#: rxconst.srxcloseformvalidatoreditor
+msgid "Rx close form validator editor"
+msgstr ""
+
+#: rxconst.srxgigabyte
+msgid "GB"
+msgstr ""
+
+#: rxconst.srxkilobyte
+msgid "KB"
+msgstr ""
+
+#: rxconst.srxlogindlgbtnmore
+msgid "More >>"
+msgstr ""
+
+#: rxconst.srxlogindlgdatabase
+msgid "Database"
+msgstr ""
+
+#: rxconst.srxmegabyte
+msgid "MB"
+msgstr ""
+
+#: rxconst.srxnotdefinedfilename
+msgid "Not defined file name"
 msgstr ""
 
 #: rxconst.srxstrholdertexteditor
 msgid "Rx string holder editor"
 msgstr ""
 
+#: rxconst.srxterrabyte
+msgid "TB"
+msgstr ""
+
 #: rxconst.srxtextfolderitem
 msgid "Item "
+msgstr ""
+
+#: rxconst.srxtextfoldersynhighlighter
+msgid "Highlighter"
+msgstr ""
+
+#: rxconst.srxtextfoldersynhtml
+msgid "HTML"
+msgstr ""
+
+#: rxconst.srxtextfoldersynnone
+msgctxt "rxconst.srxtextfoldersynnone"
+msgid "None"
+msgstr ""
+
+#: rxconst.srxtextfoldersynsql
+msgid "SQL"
+msgstr ""
+
+#: rxconst.srxtextfoldersynxml
+msgid "XML"
 msgstr ""
 
 #: rxconst.srxtextholderadd
@@ -191,6 +265,14 @@ msgstr ""
 
 #: rxconst.srxtextholdereditor
 msgid "RxTextHolder editor"
+msgstr ""
+
+#: rxconst.srxtextholdermovedown
+msgid "Down"
+msgstr ""
+
+#: rxconst.srxtextholdermoveup
+msgid "Up"
 msgstr ""
 
 #: rxconst.srxtextholderremove
@@ -205,12 +287,28 @@ msgstr ""
 msgid "Rx text holder editor"
 msgstr ""
 
+#: rxconst.srxtoolpaneleditor
+msgid "Rx toolpanel editor"
+msgstr ""
+
+#: rxconst.srxviewspaneleditor
+msgid "Rx views panel editor"
+msgstr ""
+
 #: rxconst.ssecondhalfofyear
 msgid "Second half of year"
 msgstr ""
 
 #: rxconst.ssecondquarter
 msgid "Second quarter"
+msgstr ""
+
+#: rxconst.sseparator
+msgid "Separator"
+msgstr ""
+
+#: rxconst.sshortcut
+msgid "ShortCut"
 msgstr ""
 
 #: rxconst.sshowcaption
@@ -292,4 +390,3 @@ msgstr ""
 #: rxconst.swindowsicofiles
 msgid "Windows Ico files (*.ico)|*.ico|All files (*.*)|*.*"
 msgstr ""
-
