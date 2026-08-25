@@ -535,14 +535,15 @@ class WorkflowTests(unittest.TestCase):
     def test_windows_release_runs_current_entime_test_projects(self):
         self.assertIn("- name: Run Windows test suites", self.workflow)
         self.assertIn(
-            "lazbuild --no-write-project --ws=win32 --build-mode=windows $unitProject",
+            "lazbuild --no-write-project --ws=win32 $unitProject",
             self.workflow,
         )
         self.assertIn("& $unitBinary --all --format=plain", self.workflow)
         self.assertIn(
-            "lazbuild --no-write-project --ws=win32 --build-mode=windows $integrationProject",
+            "lazbuild --no-write-project --ws=win32 $integrationProject",
             self.workflow,
         )
+        self.assertNotIn("--build-mode=windows", self.workflow)
         self.assertIn("& $integrationBinary --all --format=plain", self.workflow)
         self.assertNotIn("./scripts/run-tests.sh", self.workflow)
         self.assertNotIn("./scripts/run-integration-tests.sh", self.workflow)

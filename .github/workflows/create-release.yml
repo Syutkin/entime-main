@@ -497,7 +497,7 @@ jobs:
 
           $unitProject = 'tests/entimetests.lpi'
           if (Test-Path $unitProject) {
-            lazbuild --no-write-project --ws=win32 --build-mode=windows $unitProject
+            lazbuild --no-write-project --ws=win32 $unitProject
             if ($LASTEXITCODE -ne 0) { throw 'Could not build the unit tests.' }
             $unitBinary = 'tests/.test_build/entimetests.exe'
             if (-not (Test-Path $unitBinary)) {
@@ -511,7 +511,7 @@ jobs:
 
           $integrationProject = 'tests/integration/entimeintegrationtests.lpi'
           if (Test-Path $integrationProject) {
-            lazbuild --no-write-project --ws=win32 --build-mode=windows $integrationProject
+            lazbuild --no-write-project --ws=win32 $integrationProject
             if ($LASTEXITCODE -ne 0) { throw 'Could not build the integration tests.' }
             $integrationBinary = 'tests/integration/.test_build/entimeintegrationtests.exe'
             if (-not (Test-Path $integrationBinary)) {
