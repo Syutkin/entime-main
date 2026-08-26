@@ -5,8 +5,12 @@
     {
       "name": "chsdet",
       "entime_version_range": "*",
-      "source": "opm",
-      "archive": "ChsDet.zip",
+      "source": "git",
+      "repository": "https://github.com/Syutkin/chsdet.git",
+      "selector": "branch",
+      "branch": "master",
+      "archive": "ChsDet-git.zip",
+      "directory": "packages/ChsDet",
       "lpk": ["chsdet.lpk"]
     },
     {

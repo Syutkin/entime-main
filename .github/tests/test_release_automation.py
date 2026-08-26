@@ -294,6 +294,27 @@ class PackageVersionTests(unittest.TestCase):
         self.assertEqual(current_lazserial["selector"], "branch")
         self.assertEqual(current_lazserial["branch"], "master")
 
+    def test_chsdet_always_comes_from_git_master(self):
+        for tag in ("0.8.3", "0.9.0", "1.0.0"):
+            with self.subTest(tag=tag):
+                selected = package_versions.select_package_configuration(
+                    self.configuration, tag
+                )
+                chsdet = next(
+                    package
+                    for package in selected["packages"]
+                    if package["name"] == "chsdet"
+                )
+
+                self.assertEqual(chsdet["source"], "git")
+                self.assertEqual(
+                    chsdet["repository"],
+                    "https://github.com/Syutkin/chsdet.git",
+                )
+                self.assertEqual(chsdet["selector"], "branch")
+                self.assertEqual(chsdet["branch"], "master")
+                self.assertEqual(chsdet["directory"], "packages/ChsDet")
+
     def test_comparator_ranges_support_and_or(self):
         self.assertTrue(
             package_versions.version_matches((0, 8, 3), ">=0.8.0 <0.9.0")
