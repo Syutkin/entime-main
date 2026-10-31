@@ -440,6 +440,13 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn('Write-Host "  - $($sampleFile.Name)"', self.packager)
         self.assertNotIn("'finish_results.csv'", self.packager)
 
+    def test_release_contains_external_html_report_templates(self):
+        self.assertIn("Test-Path -LiteralPath 'templates/reports' -PathType Container", self.packager)
+        self.assertIn('$expectedTemplateEntries', self.packager)
+        self.assertIn('Archive report templates do not match the source templates', self.packager)
+        self.assertIn('Packaged report template differs from source', self.packager)
+        self.assertIn("'templates',", self.packager)
+
     def test_release_notes_are_exact_changelog_section(self):
         self.assertNotIn("- name: Create release notes", self.workflow)
         publish_step = self.workflow.split("- name: Publish GitHub Release", 1)[1]

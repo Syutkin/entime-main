@@ -125,6 +125,18 @@ if (Test-Path -LiteralPath 'resources/fonts' -PathType Container) {
 }
 $expectedFontEntries = @($reportFonts | ForEach-Object { "fonts/$_" })
 
+# Templates are external files beside the executable; older source tags have none.
+$reportTemplates = @()
+if (Test-Path -LiteralPath 'templates/reports' -PathType Container) {
+    $reportTemplates = @(Get-ChildItem -LiteralPath 'templates/reports' -File |
+        Where-Object { $_.Extension.ToLowerInvariant() -in @('.html', '.htm') } |
+        Sort-Object Name)
+    if ($reportTemplates.Count -eq 0) {
+        throw 'The report templates directory contains no HTML templates.'
+    }
+}
+$expectedTemplateEntries = @($reportTemplates | ForEach-Object { "templates/reports/$($_.Name)" })
+
 $archiveBaseName = "Entime-$Tag-win-x64"
 $stageDirectory = Join-Path $OutputDirectory "$archiveBaseName-stage"
 $archivePath = Join-Path $OutputDirectory "$archiveBaseName.zip"
@@ -162,6 +174,14 @@ if ($reportFonts.Count -gt 0) {
     }
 }
 
+if ($reportTemplates.Count -gt 0) {
+    $templateStageDirectory = Join-Path $stageDirectory 'templates/reports'
+    New-Item -ItemType Directory -Force $templateStageDirectory | Out-Null
+    foreach ($template in $reportTemplates) {
+        Copy-Item -LiteralPath $template.FullName -Destination (Join-Path $templateStageDirectory $template.Name)
+    }
+}
+
 $samplesDirectory = Join-Path $stageDirectory 'samples'
 New-Item -ItemType Directory -Force $samplesDirectory | Out-Null
 foreach ($sampleFile in $sampleFiles) {
@@ -182,7 +202,7 @@ $requiredArchivePaths = @(
     'libcrypto-3-x64.dll',
     'libssl-3-x64.dll',
     'sqlite3.dll'
-) + $requiredBleDependencies + $expectedFontEntries
+) + $requiredBleDependencies + $expectedFontEntries + $expectedTemplateEntries
 foreach ($requiredPath in $requiredArchivePaths) {
     if ($archiveEntries -notcontains $requiredPath) {
         throw "Archive is missing $requiredPath."
@@ -209,6 +229,14 @@ if ($languageDifference.Count -ne 0) {
     $languageDifference | Format-Table | Out-String | Write-Host
     throw 'Archive PO files do not match the current project translations.'
 }
+$actualTemplateEntries = @($normalizedArchiveEntries |
+    Where-Object { $_ -like 'templates/*' -and -not $_.EndsWith('/') } |
+    Sort-Object)
+if (($expectedTemplateEntries.Count -ne $actualTemplateEntries.Count) -or
+    (($expectedTemplateEntries.Count -gt 0) -and
+        (@(Compare-Object $expectedTemplateEntries $actualTemplateEntries).Count -ne 0))) {
+    throw 'Archive report templates do not match the source templates.'
+}
 if ($actualLanguageEntries | Where-Object { $_ -match '\.(?:mo|pot)$' }) {
     throw 'Runtime archive must not contain MO catalogs or POT templates.'
 }
@@ -222,6 +250,7 @@ $allowedRoots = @(
     'sqlite3.dll',
     'languages',
     'fonts',
+    'templates',
     'samples'
 ) + $requiredBleDependencies
 foreach ($entry in $archiveEntries) {
@@ -240,6 +269,13 @@ foreach ($name in $reportFonts) {
     if ((Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash -ne
         (Get-FileHash -LiteralPath $extracted -Algorithm SHA256).Hash) {
         throw "Packaged report font resource differs from source: $name"
+    }
+}
+foreach ($template in $reportTemplates) {
+    $extracted = Join-Path $verificationDirectory "templates/reports/$($template.Name)"
+    if ((Get-FileHash -LiteralPath $template.FullName -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $extracted -Algorithm SHA256).Hash) {
+        throw "Packaged report template differs from source: $($template.Name)"
     }
 }
 $extractedExecutable = Join-Path $verificationDirectory 'Entime.exe'
