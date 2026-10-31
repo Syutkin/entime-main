@@ -113,6 +113,19 @@ foreach ($fileName in $requiredBleDependencies) {
     Assert-PeX64 $sourcePath
 }
 
+# Current report-enabled sources deploy their licensed fonts beside the executable.
+# Older tags without the report package keep their historical archive contents.
+$reportFonts = @()
+if (Select-String -Path 'entime.lpi' -Pattern 'PackageName Value="lclfpreport"' -Quiet) {
+    $reportFonts = @('LiberationSans-Regular.ttf', 'LiberationSans-Bold.ttf', 'LICENSE.txt')
+    foreach ($name in $reportFonts) {
+        if (-not (Test-Path -LiteralPath (Join-Path 'resources/fonts' $name) -PathType Leaf)) {
+            throw "Required report font resource is missing: $name"
+        }
+    }
+}
+$expectedFontEntries = @($reportFonts | ForEach-Object { "fonts/$_" })
+
 $archiveBaseName = "Entime-$Tag-win-x64"
 $stageDirectory = Join-Path $OutputDirectory "$archiveBaseName-stage"
 $archivePath = Join-Path $OutputDirectory "$archiveBaseName.zip"
@@ -142,6 +155,14 @@ foreach ($languageFile in $languageFiles) {
     Copy-Item $languageFile.FullName $destination
 }
 
+if ($reportFonts.Count -gt 0) {
+    $fontStageDirectory = Join-Path $stageDirectory 'fonts'
+    New-Item -ItemType Directory -Force $fontStageDirectory | Out-Null
+    foreach ($name in $reportFonts) {
+        Copy-Item -LiteralPath (Join-Path 'resources/fonts' $name) -Destination (Join-Path $fontStageDirectory $name)
+    }
+}
+
 $samplesDirectory = Join-Path $stageDirectory 'samples'
 New-Item -ItemType Directory -Force $samplesDirectory | Out-Null
 foreach ($sampleFile in $sampleFiles) {
@@ -162,7 +183,7 @@ $requiredArchivePaths = @(
     'libcrypto-3-x64.dll',
     'libssl-3-x64.dll',
     'sqlite3.dll'
-) + $requiredBleDependencies
+) + $requiredBleDependencies + $expectedFontEntries
 foreach ($requiredPath in $requiredArchivePaths) {
     if ($archiveEntries -notcontains $requiredPath) {
         throw "Archive is missing $requiredPath."
@@ -201,6 +222,7 @@ $allowedRoots = @(
     'libssl-3-x64.dll',
     'sqlite3.dll',
     'languages',
+    'fonts',
     'samples'
 ) + $requiredBleDependencies
 foreach ($entry in $archiveEntries) {
@@ -213,6 +235,14 @@ foreach ($entry in $archiveEntries) {
 $verificationDirectory = Join-Path $OutputDirectory "$archiveBaseName-verify"
 Remove-Item -Recurse -Force $verificationDirectory -ErrorAction SilentlyContinue
 Expand-Archive $archivePath -DestinationPath $verificationDirectory -Force
+foreach ($name in $reportFonts) {
+    $source = Join-Path 'resources/fonts' $name
+    $extracted = Join-Path (Join-Path $verificationDirectory 'fonts') $name
+    if ((Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $extracted -Algorithm SHA256).Hash) {
+        throw "Packaged report font resource differs from source: $name"
+    }
+}
 $extractedExecutable = Join-Path $verificationDirectory 'Entime.exe'
 Assert-PeX64 $extractedExecutable
 foreach ($runtimeName in @('libcrypto-3-x64.dll', 'libssl-3-x64.dll', 'sqlite3.dll') + $requiredBleDependencies) {
