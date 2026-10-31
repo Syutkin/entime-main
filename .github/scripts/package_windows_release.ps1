@@ -113,10 +113,9 @@ foreach ($fileName in $requiredBleDependencies) {
     Assert-PeX64 $sourcePath
 }
 
-# Current report-enabled sources deploy their licensed fonts beside the executable.
-# Older tags without the report package keep their historical archive contents.
+# Older report tags need their bundled fonts; current sources use system fonts.
 $reportFonts = @()
-if (Select-String -Path 'entime.lpi' -Pattern 'PackageName Value="lclfpreport"' -Quiet) {
+if (Test-Path -LiteralPath 'resources/fonts' -PathType Container) {
     $reportFonts = @('LiberationSans-Regular.ttf', 'LiberationSans-Bold.ttf', 'LICENSE.txt')
     foreach ($name in $reportFonts) {
         if (-not (Test-Path -LiteralPath (Join-Path 'resources/fonts' $name) -PathType Leaf)) {
