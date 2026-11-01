@@ -24,7 +24,7 @@ if ($LockFile) {
     Write-Host 'Lazarus toolchain: resolving latest official release'
     $page = (Invoke-WebRequest -Uri $checksumUrl -UseBasicParsing).Content
     $plainText = [System.Net.WebUtility]::HtmlDecode([regex]::Replace($page, '(?s)<[^>]+>', ' '))
-    $releaseMatch = [regex]::Match($plainText, 'Lazarus\s+(\d+(?:\.\d+)+)')
+    $releaseMatch = [regex]::Match($plainText, 'Lazarus\s+(\d+(?:\.\d+)+)(?![0-9A-Za-z.])')
     if (-not $releaseMatch.Success) { throw 'Could not determine the latest official Lazarus release.' }
     $version = $releaseMatch.Groups[1].Value
     $fileMatch = [regex]::Match($plainText, '([a-fA-F0-9]{64})\s+([^\s<]*lazarus-' + [regex]::Escape($version) + '-fpc-[^\s<]*-win64\.exe)')

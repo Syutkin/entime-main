@@ -90,6 +90,25 @@ function global:fpc { $global:LASTEXITCODE = 0; '3.2.2' }
         self.assertNotEqual(0, result.returncode)
         self.assertIn("full commit SHA", result.stdout + result.stderr)
 
+    def test_lazarus_uses_stable_installer_when_rc_appears_first(self):
+        html = self.root / "checksums.html"
+        html.write_text("<h2>Lazarus 5.0RC1</h2><pre>" + "a" * 64 +
+                        " lazarus-5.0RC1-fpc-3.2.2-win64.exe</pre>" +
+                        "<h2>Lazarus 4.8</h2><pre>" + "b" * 64 +
+                        " lazarus-4.8-fpc-3.2.2-win64.exe</pre>")
+        setup = """
+function global:Invoke-WebRequest {
+    param($Uri, [switch]$UseBasicParsing)
+    [PSCustomObject]@{ Content = (Get-Content -Raw $env:CHECKSUMS_HTML) }
+}
+"""
+        result = self.run_ps("install_official_lazarus.ps1",
+                             ["-OutputDirectory", self.root / "installer", "-ResolveOnly"],
+                             setup, {"CHECKSUMS_HTML": str(html)})
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn("lazarus-4.8-fpc-3.2.2-win64.exe", result.stdout)
+        self.assertEqual("b" * 64, result.stdout.strip().splitlines()[-1])
+
     def test_runtime_uses_pinned_distribution_and_rejects_wrong_hash(self):
         fixture = self.root / "runtime.zip"
         dll = b"matching native runtime"
