@@ -538,11 +538,18 @@ jobs:
             $env:HOME = $testHome
             $env:APPDATA = $testHome
             $env:LOCALAPPDATA = $testHome
-            & $integrationBinary --all --format=plain
-            if ($LASTEXITCODE -ne 0) { throw 'Integration tests failed.' }
+            & (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/run_windows_gui_tests.ps1') -Executable $integrationBinary -OutputDirectory (Join-Path $env:RUNNER_TEMP 'entime-gui-diagnostics')
           } else {
             Write-Host 'Skipping integration tests: this historical tag has no tests/integration/entimeintegrationtests.lpi.'
           }
+
+      - name: Upload GUI test diagnostics
+        if: failure() || cancelled()
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-gui-diagnostics
+          path: ${{ runner.temp }}/entime-gui-diagnostics
+          if-no-files-found: ignore
 
       - name: Build Windows x64 executable
         if: env.CONTINUE_PIPELINE == 'true'

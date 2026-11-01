@@ -603,7 +603,7 @@ class WorkflowTests(unittest.TestCase):
             self.workflow,
         )
         self.assertNotIn("--build-mode=windows", self.workflow)
-        self.assertIn("& $integrationBinary --all --format=plain", self.workflow)
+        self.assertIn("scripts/run_windows_gui_tests.ps1", self.workflow)
         self.assertNotIn("./scripts/run-tests.sh", self.workflow)
         self.assertNotIn("./scripts/run-integration-tests.sh", self.workflow)
         self.assertLess(
