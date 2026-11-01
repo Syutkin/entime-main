@@ -135,7 +135,17 @@ if (Test-Path -LiteralPath 'templates/reports' -PathType Container) {
         throw 'The report templates directory contains no HTML templates.'
     }
 }
-$expectedTemplateEntries = @($reportTemplates | ForEach-Object { "templates/reports/$($_.Name)" })
+$labelTemplates = @()
+if (Test-Path -LiteralPath 'templates/labels' -PathType Container) {
+    $labelTemplates = @(Get-ChildItem -LiteralPath 'templates/labels' -File |
+        Where-Object { $_.Extension.ToLowerInvariant() -eq '.ini' } |
+        Sort-Object Name)
+    if ($labelTemplates.Count -eq 0) {
+        throw 'The label templates directory contains no INI templates.'
+    }
+}
+$expectedTemplateEntries = @($reportTemplates | ForEach-Object { "templates/reports/$($_.Name)" }) +
+    @($labelTemplates | ForEach-Object { "templates/labels/$($_.Name)" })
 
 $archiveBaseName = "Entime-$Tag-win-x64"
 $stageDirectory = Join-Path $OutputDirectory "$archiveBaseName-stage"
@@ -179,6 +189,14 @@ if ($reportTemplates.Count -gt 0) {
     New-Item -ItemType Directory -Force $templateStageDirectory | Out-Null
     foreach ($template in $reportTemplates) {
         Copy-Item -LiteralPath $template.FullName -Destination (Join-Path $templateStageDirectory $template.Name)
+    }
+}
+
+if ($labelTemplates.Count -gt 0) {
+    $labelStageDirectory = Join-Path $stageDirectory 'templates/labels'
+    New-Item -ItemType Directory -Force $labelStageDirectory | Out-Null
+    foreach ($template in $labelTemplates) {
+        Copy-Item -LiteralPath $template.FullName -Destination (Join-Path $labelStageDirectory $template.Name)
     }
 }
 
@@ -276,6 +294,13 @@ foreach ($template in $reportTemplates) {
     if ((Get-FileHash -LiteralPath $template.FullName -Algorithm SHA256).Hash -ne
         (Get-FileHash -LiteralPath $extracted -Algorithm SHA256).Hash) {
         throw "Packaged report template differs from source: $($template.Name)"
+    }
+}
+foreach ($template in $labelTemplates) {
+    $extracted = Join-Path $verificationDirectory "templates/labels/$($template.Name)"
+    if ((Get-FileHash -LiteralPath $template.FullName -Algorithm SHA256).Hash -ne
+        (Get-FileHash -LiteralPath $extracted -Algorithm SHA256).Hash) {
+        throw "Packaged label template differs from source: $($template.Name)"
     }
 }
 $extractedExecutable = Join-Path $verificationDirectory 'Entime.exe'
