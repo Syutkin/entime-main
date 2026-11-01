@@ -589,6 +589,10 @@ class WorkflowTests(unittest.TestCase):
 
     def test_windows_release_runs_current_entime_test_projects(self):
         self.assertIn("- name: Run Windows test suites", self.workflow)
+        self.assertLess(
+            self.workflow.index("$env:ENTIME_ROOT = $env:GITHUB_WORKSPACE"),
+            self.workflow.index("& $unitBinary --all --format=plain"),
+        )
         self.assertIn(
             "lazbuild --no-write-project --ws=win32 $unitProject",
             self.workflow,

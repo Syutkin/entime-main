@@ -505,6 +505,7 @@ jobs:
             (Split-Path -Parent $env:SQLITE3_PATH)
           ) | Where-Object { $_ }
           $env:PATH = (@($runtimeDirectories) + @($env:PATH)) -join ';'
+          $env:ENTIME_ROOT = $env:GITHUB_WORKSPACE
 
           $unitProject = 'tests/entimetests.lpi'
           if (Test-Path $unitProject) {
@@ -530,7 +531,6 @@ jobs:
             }
             $testHome = Join-Path $env:RUNNER_TEMP 'entime-test-home'
             New-Item -ItemType Directory -Force $testHome | Out-Null
-            $env:ENTIME_ROOT = $env:GITHUB_WORKSPACE
             $env:HOME = $testHome
             $env:APPDATA = $testHome
             $env:LOCALAPPDATA = $testHome
