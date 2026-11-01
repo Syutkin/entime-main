@@ -313,5 +313,14 @@ foreach ($runtimeName in @('libcrypto-3-x64.dll', 'libssl-3-x64.dll', 'sqlite3.d
 foreach ($runtimeName in $requiredBleDependencies) {
     Assert-PeX64 (Join-Path $verificationDirectory $runtimeName)
 }
+$verifiedFiles = @(Get-ChildItem -LiteralPath $verificationDirectory -Recurse -File |
+    Sort-Object FullName)
+Write-Host "Verified archive contents ($($verifiedFiles.Count) files):"
+foreach ($file in $verifiedFiles) {
+    $relative = [IO.Path]::GetRelativePath($verificationDirectory, $file.FullName).Replace('\', '/')
+    Write-Host "  - $relative ($($file.Length) bytes)"
+}
 Remove-Item -Recurse -Force $verificationDirectory
-Write-Host "Created $archivePath"
+Write-Host "Created $archivePath ($((Get-Item -LiteralPath $archivePath).Length) bytes)"
+Write-Host "SHA-256: $archiveHash"
+Write-Host "Checksum file: $checksumPath"
