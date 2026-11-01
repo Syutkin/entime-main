@@ -14,7 +14,7 @@ SEMVER = r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)"
 SEMVER_PATTERN = re.compile(
     rf"^{SEMVER}(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$"
 )
-COMPARATOR_PATTERN = re.compile(rf"^(<=|>=|<|>|=)?{SEMVER}$")
+COMPARATOR_PATTERN = re.compile(r"^(<=|>=|<|>|=)?(.+)$")
 
 
 def parse_version(value: str) -> tuple[int, int, int]:
@@ -30,27 +30,40 @@ def parse_version(value: str) -> tuple[int, int, int]:
                 and identifier[0] == "0"
             ):
                 raise ValueError(f"Invalid release SemVer: {value!r}.")
-    # Dependency ranges follow the numeric application version. A prerelease
-    # uses exactly the same project dependencies as its future stable release.
+    # Numeric-only bounds retain their historical core-version semantics.
     return tuple(int(part) for part in match.groups()[:3])
 
 
-def comparator_matches(version: tuple[int, int, int], expression: str) -> bool:
+def version_key(value: str) -> tuple:
+    core = parse_version(value)
+    prerelease = value.partition("-")[2]
+    if not prerelease:
+        return (*core, 1, ())
+    identifiers = tuple((0, int(p)) if p.isdigit() else (1, p) for p in prerelease.split("."))
+    return (*core, 0, identifiers)
+
+
+def comparator_matches(version: str | tuple[int, int, int], expression: str) -> bool:
     match = COMPARATOR_PATTERN.fullmatch(expression)
     if match is None:
         raise ValueError(f"Invalid version comparator: {expression!r}.")
     operator = match.group(1) or "="
-    expected = tuple(int(part) for part in match.groups()[1:])
+    expected_tag = match.group(2)
+    actual_tag = version if isinstance(version, str) else ".".join(map(str, version))
+    if "-" in expected_tag:
+        actual, expected = version_key(actual_tag), version_key(expected_tag)
+    else:
+        actual, expected = parse_version(actual_tag), parse_version(expected_tag)
     return {
-        "=": version == expected,
-        ">": version > expected,
-        ">=": version >= expected,
-        "<": version < expected,
-        "<=": version <= expected,
+        "=": actual == expected,
+        ">": actual > expected,
+        ">=": actual >= expected,
+        "<": actual < expected,
+        "<=": actual <= expected,
     }[operator]
 
 
-def version_matches(version: tuple[int, int, int], expression: str) -> bool:
+def version_matches(version: str | tuple[int, int, int], expression: str) -> bool:
     expression = expression.strip()
     if expression == "*":
         return True
@@ -80,7 +93,8 @@ def select_package_configuration(
     if not isinstance(packages, list):
         raise ValueError("Package list is missing.")
 
-    version = parse_version(tag)
+    parse_version(tag)
+    version = tag
     selected: list[dict[str, object]] = []
     selected_names: set[str] = set()
     for source_package in packages:

@@ -77,7 +77,8 @@ foreach ($package in $manifest.packages) {
         $selector = if ($package.selector) { [string]$package.selector } elseif ($package.branch) { 'branch' } else { '' }
         $selectorMetadataIsValid =
             (($selector -eq 'branch') -and $package.branch) -or
-            (($selector -eq 'latest_tag') -and $package.tag)
+            (($selector -eq 'latest_tag') -and $package.tag) -or
+            ($selector -eq 'commit')
         if (-not $package.repository -or -not $selectorMetadataIsValid -or $package.commit -notmatch '^[0-9a-f]{40}$') {
             throw "Locked Git metadata for package $($package.name) is incomplete."
         }
@@ -104,12 +105,13 @@ $lockedBleRuntimeNames = @(
         ForEach-Object { $_.name } |
         Sort-Object -Unique
 )
-if ($lockedBleRuntimeNames.Count -notin @(0, 2)) {
+if (($lockedBleRuntimeNames.Count -notin @(0, 2)) -and -not
+    ($manifest.runtime.simpleble.provider -eq 'SimpleDelphiBLE' -and
+     $lockedBleRuntimeNames.Count -eq 1 -and $lockedBleRuntimeNames[0] -eq 'simplecble.dll')) {
     throw 'The locked manifest must contain both SimpleBLE runtime DLLs or neither of them.'
 }
-if ($lockedBleRuntimeNames.Count -eq 2) {
-    $runtimePaths['simplecble.dll'] = Join-Path $DependenciesDirectory 'simpleble/dll/simplecble.dll'
-    $runtimePaths['simpleble.dll'] = Join-Path $DependenciesDirectory 'simpleble/dll/simpleble.dll'
+foreach ($name in $lockedBleRuntimeNames) {
+    $runtimePaths[$name] = Join-Path $DependenciesDirectory "simpleble/dll/$name"
 }
 foreach ($runtimeFile in $manifest.runtime_files) {
     if (-not $runtimePaths.ContainsKey($runtimeFile.name)) {

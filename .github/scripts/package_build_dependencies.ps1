@@ -39,10 +39,13 @@ if ($SimpleBleDirectory) {
         throw "SimpleBLE dependency metadata is missing: $simpleBleMetadataPath"
     }
     $runtimeMetadata['simpleble'] = Get-Content -Raw $simpleBleMetadataPath | ConvertFrom-Json
-    $runtimeInputs += @(
-        @{ name = 'simplecble.dll'; path = (Join-Path $SimpleBleDirectory 'simplecble.dll'); source = 'simpleble' },
-        @{ name = 'simpleble.dll'; path = (Join-Path $SimpleBleDirectory 'simpleble.dll'); source = 'simpleble' }
-    )
+    $dllNames = @('simplecble.dll', 'simpleble.dll')
+    if ($runtimeMetadata['simpleble'].provider -eq 'SimpleDelphiBLE') {
+        $dllNames = @('simplecble.dll')
+    }
+    foreach ($name in $dllNames) {
+        $runtimeInputs += @{ name = $name; path = (Join-Path $SimpleBleDirectory $name); source = 'simpleble' }
+    }
 }
 $manifest | Add-Member -NotePropertyName runtime -NotePropertyValue $runtimeMetadata -Force
 $runtimeFiles = @(
@@ -81,7 +84,7 @@ Copy-Item -Force (Join-Path $SqliteDirectory 'sqlite3.dll') (Join-Path $sqliteSt
 if ($SimpleBleDirectory) {
     $simpleBleStaging = Join-Path $staging 'simpleble/dll'
     New-Item -ItemType Directory -Force $simpleBleStaging | Out-Null
-    foreach ($dll in @('simplecble.dll', 'simpleble.dll')) {
+    foreach ($dll in $dllNames) {
         Copy-Item -Force (Join-Path $SimpleBleDirectory $dll) (Join-Path $simpleBleStaging $dll)
     }
 }

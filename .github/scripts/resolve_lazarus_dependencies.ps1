@@ -28,6 +28,18 @@ function Find-PackageFile([string]$Root, [string]$Name) {
 
 function Resolve-GitTarget($Package) {
     $selector = if ($Package.selector) { [string]$Package.selector } elseif ($Package.branch) { 'branch' } else { '' }
+    if ($selector -eq 'commit') {
+        if ($Package.commit -notmatch '^[0-9a-fA-F]{40}$') {
+            throw "Git package $($Package.name) requires a full commit SHA."
+        }
+        return [PSCustomObject]@{
+            selector = 'commit'
+            ref = $Package.commit.ToLowerInvariant()
+            description = "commit $($Package.commit)"
+            branch = $null
+            tag = $null
+        }
+    }
     if ($selector -eq 'branch') {
         if (-not $Package.branch) {
             throw "Git package $($Package.name) with selector 'branch' has no branch."
@@ -91,8 +103,16 @@ if ($Mode -eq 'latest') {
             ) ($package.archive -replace '\.zip$', '')
             New-Item -ItemType Directory -Force (Split-Path $checkoutDirectory -Parent) |
                 Out-Null
-            & git clone --depth 1 --single-branch --branch $target.ref `
-                $package.repository $checkoutDirectory
+            if ($target.selector -eq 'commit') {
+                & git init --quiet $checkoutDirectory
+                if ($LASTEXITCODE -ne 0) { throw 'Could not initialize pinned package checkout.' }
+                & git -C $checkoutDirectory fetch --quiet --depth 1 $package.repository $target.ref
+                if ($LASTEXITCODE -ne 0) { throw "Could not fetch pinned commit $($target.ref)." }
+                & git -C $checkoutDirectory checkout --quiet --detach FETCH_HEAD
+            } else {
+                & git clone --depth 1 --single-branch --branch $target.ref `
+                    $package.repository $checkoutDirectory
+            }
             if ($LASTEXITCODE -ne 0) {
                 throw "Could not clone $($package.repository) at $($target.description)."
             }
@@ -100,6 +120,9 @@ if ($Mode -eq 'latest') {
                 Select-Object -Last 1).Trim().ToLowerInvariant()
             if ($LASTEXITCODE -ne 0 -or $commit -notmatch '^[0-9a-f]{40}$') {
                 throw "Could not resolve the commit for Git package $($package.name)."
+            }
+            if ($target.selector -eq 'commit' -and $commit -ne $target.ref) {
+                throw "Resolved commit does not match pinned SHA for $($package.name)."
             }
             & git -C $checkoutDirectory archive --format=zip `
                 "--output=$archivePath" $commit
@@ -157,7 +180,8 @@ if ($Mode -eq 'latest') {
             $selector = if ($package.selector) { [string]$package.selector } elseif ($package.branch) { 'branch' } else { '' }
             $selectorMetadataIsValid =
                 (($selector -eq 'branch') -and $package.branch) -or
-                (($selector -eq 'latest_tag') -and $package.tag)
+                (($selector -eq 'latest_tag') -and $package.tag) -or
+                ($selector -eq 'commit')
             if (-not $package.repository -or -not $selectorMetadataIsValid -or $package.commit -notmatch '^[0-9a-f]{40}$') {
                 throw "Locked Git metadata for package $($package.name) is incomplete."
             }

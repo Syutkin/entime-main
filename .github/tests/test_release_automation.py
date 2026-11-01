@@ -214,7 +214,7 @@ class ReleaseProfileTests(unittest.TestCase):
                 self.assertEqual(profile["executable_path"], "release/Entime.exe")
 
     def test_current_profile_starts_at_0_9_0_and_includes_later_major_versions(self):
-        for tag in ("0.9.0-beta.1", "0.9.0", "0.9.1-rc.2", "1.0.0"):
+        for tag in ("0.9.0-beta.1",):
             with self.subTest(tag=tag):
                 profile = release_profiles.select_release_profile(tag)
                 self.assertEqual(profile["profile"], "current")
@@ -263,12 +263,37 @@ class PackageVersionTests(unittest.TestCase):
         )
 
     def test_current_versions_replace_dataport_with_ble_packages(self):
-        for tag in ("0.9.0-beta.1", "0.9.0", "0.9.1-rc.2", "1.0.0"):
+        for tag in ("0.9.0-beta.1",):
             with self.subTest(tag=tag):
                 names = self.selected_names(tag)
                 self.assertIn("SimpleBlePascal", names)
                 self.assertIn("LazBle", names)
                 self.assertNotIn("DataPort", names)
+
+    def test_beta2_pins_current_ble_commits_and_preserves_beta1(self):
+        old = package_versions.select_package_configuration(self.configuration, "0.9.0-beta.1")
+        current = package_versions.select_package_configuration(self.configuration, "0.9.0-beta.2")
+        old = {p["name"]: p for p in old["packages"]}
+        current = {p["name"]: p for p in current["packages"]}
+        self.assertIn("SimpleBlePascal", old)
+        self.assertNotIn("SimpleDelphiBLE", old)
+        self.assertNotIn("SimpleBlePascal", current)
+        self.assertEqual("commit", current["LazBle"]["selector"])
+        self.assertEqual("37e8598ca1cc32c73e10c9dd89de0181265e401b", current["LazBle"]["commit"])
+        self.assertEqual("5f9823795cc098847764cbea0224d931391e8a1b", current["SimpleDelphiBLE"]["commit"])
+        self.assertEqual(["SimpleDelphiBLEPackage.lpk"], current["SimpleDelphiBLE"]["lpk"])
+        self.assertEqual("v1.3.1-dev.25", current["SimpleDelphiBLE"]["runtime"]["release_tag"])
+
+    def test_prerelease_dependency_boundary_and_numeric_order(self):
+        for tag in ("0.9.0-beta.2", "0.9.0-beta.10", "0.9.0", "0.9.1", "1.0.0"):
+            with self.subTest(tag=tag):
+                names = self.selected_names(tag)
+                self.assertIn("SimpleDelphiBLE", names)
+                self.assertNotIn("SimpleBlePascal", names)
+        self.assertFalse(package_versions.version_matches("0.9.0-beta.1", ">=0.9.0-beta.2"))
+        self.assertTrue(package_versions.version_matches("0.9.0-beta.10", ">=0.9.0-beta.2"))
+        with self.assertRaises(ValueError):
+            package_versions.version_matches("0.9.0-beta.2", ">=0.9.0-beta.02")
 
     def test_lazserial_source_changes_at_0_9_0(self):
         legacy = package_versions.select_package_configuration(
@@ -473,7 +498,9 @@ class WorkflowTests(unittest.TestCase):
     def test_ble_packages_use_latest_semver_tags_from_shared_config(self):
         packages = {
             package["name"]: package
-            for package in self.lazarus_packages["packages"]
+            for package in package_versions.select_package_configuration(
+                self.lazarus_packages, "0.9.0-beta.1"
+            )["packages"]
         }
         bindings = packages["SimpleBlePascal"]
         lazble = packages["LazBle"]
@@ -484,8 +511,8 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(lazble["selector"], "latest_tag")
         self.assertEqual(lazble["lpk"], ["lazble.lpk", "lazblelcl.lpk"])
         self.assertLess(
-            self.lazarus_packages["packages"].index(bindings),
-            self.lazarus_packages["packages"].index(lazble),
+            [p["name"] for p in self.lazarus_packages["packages"]].index("SimpleBlePascal"),
+            [p["name"] for p in self.lazarus_packages["packages"]].index("LazBle"),
         )
         self.assertNotIn("branch", bindings)
         self.assertNotIn("branch", lazble)

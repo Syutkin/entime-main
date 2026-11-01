@@ -39,7 +39,9 @@ $requiredBleDependencies = @(
         ForEach-Object { $_.name } |
         Sort-Object -Unique
 )
-if ($requiredBleDependencies.Count -notin @(0, 2)) {
+if (($requiredBleDependencies.Count -notin @(0, 2)) -and -not
+    ($manifest.runtime.simpleble.provider -eq 'SimpleDelphiBLE' -and
+     $requiredBleDependencies.Count -eq 1 -and $requiredBleDependencies[0] -eq 'simplecble.dll')) {
     throw 'The dependency manifest must contain both SimpleBLE runtime DLLs or neither of them.'
 }
 

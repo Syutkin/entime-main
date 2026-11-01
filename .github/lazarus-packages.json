@@ -11,7 +11,9 @@
       "branch": "master",
       "archive": "ChsDet-git.zip",
       "directory": "packages/ChsDet",
-      "lpk": ["chsdet.lpk"]
+      "lpk": [
+        "chsdet.lpk"
+      ]
     },
     {
       "name": "Synapse",
@@ -22,41 +24,84 @@
       "branch": "master",
       "archive": "Synapse-git.zip",
       "directory": "packages/Synapse",
-      "lpk": ["laz_synapse.lpk"]
+      "lpk": [
+        "laz_synapse.lpk"
+      ]
     },
     {
       "name": "SimpleBlePascal",
-      "entime_version_range": ">=0.9.0",
+      "entime_version_range": ">=0.9.0 <0.9.0-beta.2",
       "source": "git",
       "repository": "https://github.com/Syutkin/Pascal-Bindings-For-SimpleBLE-Library.git",
       "selector": "latest_tag",
       "archive": "SimpleBlePascal-git.zip",
       "directory": "packages/SimpleBlePascal",
-      "lpk": ["simpleblepascal.lpk"]
+      "lpk": [
+        "simpleblepascal.lpk"
+      ]
     },
     {
       "name": "LazBle",
-      "entime_version_range": ">=0.9.0",
+      "entime_version_range": ">=0.9.0 <0.9.0-beta.2",
       "source": "git",
       "repository": "https://github.com/Syutkin/LazBle.git",
       "selector": "latest_tag",
       "archive": "LazBle-git.zip",
       "directory": "packages/LazBle",
-      "lpk": ["lazble.lpk", "lazblelcl.lpk"]
+      "lpk": [
+        "lazble.lpk",
+        "lazblelcl.lpk"
+      ]
+    },
+    {
+      "name": "SimpleDelphiBLE",
+      "entime_version_range": ">=0.9.0-beta.2",
+      "source": "git",
+      "repository": "https://github.com/simpleble/simpledelphible.git",
+      "selector": "commit",
+      "commit": "5f9823795cc098847764cbea0224d931391e8a1b",
+      "archive": "SimpleDelphiBLE-git.zip",
+      "directory": "packages/simpledelphible",
+      "lpk": [
+        "SimpleDelphiBLEPackage.lpk"
+      ],
+      "runtime": {
+        "release_tag": "v1.3.1-dev.25",
+        "asset": "simpledelphible-1.3.1-dev.25.zip",
+        "sha256": "be6c6ad8c6ba52696f8cc743b7245d53d2b2bdf03e43a763e9f71ba49bbfa0c1"
+      }
+    },
+    {
+      "name": "LazBle",
+      "entime_version_range": ">=0.9.0-beta.2",
+      "source": "git",
+      "repository": "https://github.com/Syutkin/LazBle.git",
+      "selector": "commit",
+      "commit": "37e8598ca1cc32c73e10c9dd89de0181265e401b",
+      "archive": "LazBle-git.zip",
+      "directory": "packages/LazBle",
+      "lpk": [
+        "lazble.lpk",
+        "lazblelcl.lpk"
+      ]
     },
     {
       "name": "DataPort",
       "entime_version_range": "<0.9.0",
       "source": "opm",
       "archive": "DataPort.zip",
-      "lpk": ["dataportlasarus.lpk"]
+      "lpk": [
+        "dataportlasarus.lpk"
+      ]
     },
     {
       "name": "LazSerial",
       "entime_version_range": "<0.9.0",
       "source": "opm",
       "archive": "LazSerial.zip",
-      "lpk": ["LazSerialPort.lpk"]
+      "lpk": [
+        "LazSerialPort.lpk"
+      ]
     },
     {
       "name": "LazSerial",
@@ -67,28 +112,37 @@
       "branch": "master",
       "archive": "LazSerial-git.zip",
       "directory": "packages/LazSerial",
-      "lpk": ["LazSerialPort.lpk"]
+      "lpk": [
+        "LazSerialPort.lpk"
+      ]
     },
     {
       "name": "FPSpreadsheet",
       "entime_version_range": "*",
       "source": "opm",
       "archive": "FPSpreadsheet.zip",
-      "lpk": ["laz_fpspreadsheet.lpk"]
+      "lpk": [
+        "laz_fpspreadsheet.lpk"
+      ]
     },
     {
       "name": "Rx",
       "entime_version_range": "*",
       "source": "opm",
       "archive": "Rx.zip",
-      "lpk": ["rxnew.lpk", "rxdbgrid_export_spreadsheet.lpk"]
+      "lpk": [
+        "rxnew.lpk",
+        "rxdbgrid_export_spreadsheet.lpk"
+      ]
     },
     {
       "name": "HistoryFiles",
       "entime_version_range": "*",
       "source": "opm",
       "archive": "HistoryFiles.zip",
-      "lpk": ["HistoryLazarus.lpk"]
+      "lpk": [
+        "HistoryLazarus.lpk"
+      ]
     }
   ]
 }

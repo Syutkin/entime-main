@@ -16,7 +16,7 @@ PACKAGER = Path(__file__).parents[1] / "scripts" / "package_windows_release.ps1"
 
 @unittest.skipUnless(PWSH, "PowerShell is required for the archive integration test")
 class LabelTemplatePackagingTests(unittest.TestCase):
-    def package(self, labels: bool, empty: bool = False):
+    def package(self, labels: bool, empty: bool = False, ble: str = ""):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / "languages").mkdir()
@@ -45,15 +45,28 @@ class LabelTemplatePackagingTests(unittest.TestCase):
                 content = name.encode("ascii")
                 (dependencies / name).write_bytes(content)
                 manifest.append({"name": name, "sha256": hashlib.sha256(content).hexdigest()})
-            (root / "manifest.json").write_text(json.dumps({"runtime_files": manifest}), encoding="utf-8")
+            metadata = {"runtime_files": manifest}
+            if ble:
+                names = ["simplecble.dll"] if ble != "legacy" else ["simplecble.dll", "simpleble.dll"]
+                for name in names:
+                    (dependencies / name).write_bytes(pe)
+                    manifest.append({"name": name, "sha256": hashlib.sha256(pe).hexdigest()})
+                if ble == "modern":
+                    metadata["runtime"] = {"simpleble": {"provider": "SimpleDelphiBLE"}}
+            (root / "manifest.json").write_text(json.dumps(metadata), encoding="utf-8")
             result = subprocess.run([
                 PWSH, "-NoProfile", "-NonInteractive", "-File", str(PACKAGER),
                 "-Tag", "test", "-ExecutablePath", str(root / "Entime.exe"),
                 "-OpenSslDependenciesDirectory", str(dependencies),
                 "-SqlitePath", str(dependencies / "sqlite3.dll"),
+                "-SimpleBleDependenciesDirectory", str(dependencies),
                 "-DependencyManifestPath", str(root / "manifest.json"),
                 "-OutputDirectory", str(root / "output"),
             ], cwd=root, capture_output=True, text=True, timeout=60)
+            if ble == "incomplete":
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("both SimpleBLE", result.stdout + result.stderr)
+                return
             if empty:
                 self.assertNotEqual(0, result.returncode)
                 self.assertIn("label", (result.stdout + result.stderr).lower())
@@ -67,6 +80,9 @@ class LabelTemplatePackagingTests(unittest.TestCase):
                     expected.add("templates/labels/70x37.ini")
                     self.assertEqual(ini, archive.read("templates/labels/70x37.ini"))
                 self.assertEqual(expected, actual)
+                if ble:
+                    self.assertEqual(bytes(pe), archive.read("simplecble.dll"))
+                    self.assertEqual(ble == "legacy", "simpleble.dll" in archive.namelist())
 
     def test_archive_contains_ini_and_html_unchanged(self):
         self.package(labels=True)
@@ -76,3 +92,12 @@ class LabelTemplatePackagingTests(unittest.TestCase):
 
     def test_present_but_empty_label_directory_is_rejected(self):
         self.package(labels=True, empty=True)
+
+    def test_modern_runtime_packages_one_dll(self):
+        self.package(labels=True, ble="modern")
+
+    def test_legacy_runtime_still_requires_two_dlls(self):
+        self.package(labels=True, ble="legacy")
+
+    def test_incomplete_legacy_runtime_is_rejected(self):
+        self.package(labels=True, ble="incomplete")

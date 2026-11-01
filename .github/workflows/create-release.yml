@@ -173,7 +173,7 @@ jobs:
           $resolvedPackages = Get-Content -Raw $packageConfig | ConvertFrom-Json
           $blePackages = @(
             $resolvedPackages.packages |
-              Where-Object { $_.name -in @('SimpleBlePascal', 'LazBle') } |
+              Where-Object { $_.name -in @('SimpleBlePascal', 'SimpleDelphiBLE', 'LazBle') } |
               ForEach-Object { $_.name } |
               Sort-Object -Unique
           )
@@ -181,6 +181,8 @@ jobs:
             throw 'The selected package set must contain both BLE packages or neither of them.'
           }
           "USES_SIMPLEBLE=$(($blePackages.Count -eq 2).ToString().ToLowerInvariant())" |
+            Out-File $env:GITHUB_ENV -Append -Encoding utf8
+          "USES_SIMPLEDELPHIBLE=$((@($resolvedPackages.packages | Where-Object { $_.name -eq 'SimpleDelphiBLE' }).Count -eq 1).ToString().ToLowerInvariant())" |
             Out-File $env:GITHUB_ENV -Append -Encoding utf8
           "LAZARUS_PACKAGES_CONFIG=$packageConfig" |
             Out-File $env:GITHUB_ENV -Append -Encoding utf8
@@ -443,13 +445,22 @@ jobs:
           "LAZARUS_DEPENDENCIES=$directory" | Out-File $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Download latest SimpleCBLE Windows x64 DLLs
-        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode != 'rebuild_existing' && env.USES_SIMPLEBLE == 'true'
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode != 'rebuild_existing' && env.USES_SIMPLEBLE == 'true' && env.USES_SIMPLEDELPHIBLE != 'true'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           $simpleBleDirectory = Join-Path $env:RUNNER_TEMP 'simpleble'
           & (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/download_latest_simpleble.ps1') `
             -OutputDirectory $simpleBleDirectory
+          "SIMPLEBLE_DEPENDENCIES=$simpleBleDirectory" |
+            Out-File $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Download pinned SimpleDelphiBLE runtime
+        if: env.CONTINUE_PIPELINE == 'true' && inputs.mode != 'rebuild_existing' && env.USES_SIMPLEDELPHIBLE == 'true'
+        run: |
+          $simpleBleDirectory = Join-Path $env:RUNNER_TEMP 'simpleble'
+          & (Join-Path $env:AUTOMATION_DIRECTORY 'scripts/download_simpledelphible_runtime.ps1') `
+            -ConfigFile $env:LAZARUS_PACKAGES_CONFIG -OutputDirectory $simpleBleDirectory
           "SIMPLEBLE_DEPENDENCIES=$simpleBleDirectory" |
             Out-File $env:GITHUB_ENV -Append -Encoding utf8
 
