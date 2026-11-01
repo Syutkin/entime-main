@@ -16,8 +16,7 @@ implementation
 
 function IsValidStageCount(const Value: integer): boolean;
 begin
-  Result := (Value >= MIN_STAGE_COUNT) and
-    (Value <= MAX_SUPPORTED_STAGE_COUNT);
+  Result := (Value >= MIN_STAGE_COUNT) and (Value <= MAX_SUPPORTED_STAGE_COUNT);
 end;
 
 function NormalizeStageCount(const Value, DefaultValue: integer): integer;

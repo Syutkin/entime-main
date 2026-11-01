@@ -13,26 +13,27 @@ type
   TMessageDlgHandler = function(const Msg: string; DlgType: TMsgDlgType;
     Buttons: TMsgDlgButtons; HelpCtx: longint): integer;
   TStageSelectionHandler = function(const ACaption, APrompt: string): integer;
-  TStartMarkStageChoiceHandler = function(const ACaption, AMessage,
-    AReceivedStageButton, ACurrentStageButton: string): TStartMarkStageChoice;
+  TStartMarkStageChoiceHandler = function(
+    const ACaption, AMessage, AReceivedStageButton, ACurrentStageButton: string):
+    TStartMarkStageChoice;
 
 procedure SetMessageDlgHandler(AHandler: TMessageDlgHandler);
 procedure ResetMessageDlgHandler;
 function AskMessageDlg(const Msg: string; DlgType: TMsgDlgType;
   Buttons: TMsgDlgButtons; HelpCtx: longint): integer;
-procedure SetStartMarkStageChoiceHandler(
-  AHandler: TStartMarkStageChoiceHandler);
+procedure SetStartMarkStageChoiceHandler(AHandler: TStartMarkStageChoiceHandler);
 procedure ResetStartMarkStageChoiceHandler;
-function AskStartMarkStageChoice(const ACaption, AMessage,
-  AReceivedStageButton, ACurrentStageButton: string): TStartMarkStageChoice;
+function AskStartMarkStageChoice(
+  const ACaption, AMessage, AReceivedStageButton, ACurrentStageButton: string):
+  TStartMarkStageChoice;
 procedure SetStageSelectionHandler(AHandler: TStageSelectionHandler);
 procedure ResetStageSelectionHandler;
 function TryHandleStageSelection(const ACaption, APrompt: string;
   out AStageIndex: integer): boolean;
 
-function MyDoInputCombo(const ACaption, APrompt: string;
-  const AList: TStrings; AIndex: integer; AllowInput: boolean;
-  out ASelected: integer; out ASelectedText: string): integer;
+function MyDoInputCombo(const ACaption, APrompt: string; const AList: TStrings;
+  AIndex: integer; AllowInput: boolean; out ASelected: integer;
+  out ASelectedText: string): integer;
 function InputDateTime(const ACaption, APrompt: string): TDateTime;
 
 implementation
@@ -51,8 +52,7 @@ begin
   MessageDlgHandler := AHandler;
 end;
 
-procedure SetStartMarkStageChoiceHandler(
-  AHandler: TStartMarkStageChoiceHandler);
+procedure SetStartMarkStageChoiceHandler(AHandler: TStartMarkStageChoiceHandler);
 begin
   StartMarkStageChoiceHandler := AHandler;
 end;
@@ -62,23 +62,24 @@ begin
   StartMarkStageChoiceHandler := nil;
 end;
 
-function AskStartMarkStageChoice(const ACaption, AMessage,
-  AReceivedStageButton, ACurrentStageButton: string): TStartMarkStageChoice;
+function AskStartMarkStageChoice(
+  const ACaption, AMessage, AReceivedStageButton, ACurrentStageButton: string):
+TStartMarkStageChoice;
 var
   DialogResult: TModalResult;
 begin
   if Assigned(StartMarkStageChoiceHandler) then
-    Exit(StartMarkStageChoiceHandler(ACaption, AMessage,
-      AReceivedStageButton, ACurrentStageButton));
+    Exit(StartMarkStageChoiceHandler(ACaption, AMessage, AReceivedStageButton,
+      ACurrentStageButton));
 
   DialogResult := QuestionDlg(ACaption, AMessage, mtWarning,
-    [mrYes, AReceivedStageButton, 'IsDefault',
-     mrNo, ACurrentStageButton,
-     mrCancel, 'IsCancel'], 0);
+    [mrYes, AReceivedStageButton, 'IsDefault', mrNo, ACurrentStageButton,
+    mrCancel, 'IsCancel'], 0);
   case DialogResult of
     mrYes: Result := smscReceivedStage;
     mrNo: Result := smscCurrentStage;
-    else Result := smscCancel;
+    else
+      Result := smscCancel;
   end;
 end;
 
@@ -114,9 +115,9 @@ begin
     AStageIndex := StageSelectionHandler(ACaption, APrompt);
 end;
 
-function MyDoInputCombo(const ACaption, APrompt: string;
-  const AList: TStrings; AIndex: integer; AllowInput: boolean;
-  out ASelected: integer; out ASelectedText: string): integer;
+function MyDoInputCombo(const ACaption, APrompt: string; const AList: TStrings;
+  AIndex: integer; AllowInput: boolean; out ASelected: integer;
+  out ASelectedText: string): integer;
 const
   CBStyles: array[boolean] of TComboBoxStyle = (csDropDownList, csDropDown);
 var

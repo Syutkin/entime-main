@@ -38,6 +38,8 @@ type
     procedure Parse_WithoutResultRows_RaisesValidationError;
     procedure Parse_HeaderRow_IsSkipped;
     procedure Parse_ArbitraryHeaderRow_IsSkipped;
+    procedure Parse_MultilineHeaderWithHash_PreservesResultRows;
+    procedure Parse_MultilineTimeWithHash_IsReportedUnchanged;
     procedure Parse_InvalidParticipantNumbers_RaiseValidationError;
     procedure Parse_DuplicateParticipantNumber_RaisesValidationError;
     procedure Parse_SupportedTimes_AreNormalized;
@@ -53,8 +55,7 @@ type
 
 implementation
 
-function TResultsCsvParserTests.BuildCsv(
-  const ALines: array of string): string;
+function TResultsCsvParserTests.BuildCsv(const ALines: array of string): string;
 var
   line: string;
 begin
@@ -109,9 +110,8 @@ begin
   end;
 end;
 
-procedure TResultsCsvParserTests.AssertRowFieldCountMismatch(
-  const ACsvText: string; const ARowNumber, AActualFieldCount,
-  AExpectedFieldCount: integer);
+procedure TResultsCsvParserTests.AssertRowFieldCountMismatch(const ACsvText: string;
+  const ARowNumber, AActualFieldCount, AExpectedFieldCount: integer);
 var
   parseResult: TResultsCsvParseResult;
 begin
@@ -151,10 +151,7 @@ end;
 
 procedure TResultsCsvParserTests.Parse_OnlyComments_RaisesValidationError;
 begin
-  AssertEmptyCsv(BuildCsv([
-    '# number;finish time',
-    '   # another comment'
-  ]));
+  AssertEmptyCsv(BuildCsv(['# number;finish time', '   # another comment']));
 end;
 
 procedure TResultsCsvParserTests.Parse_TwoColumns_MapsFinishRows;
@@ -162,11 +159,8 @@ var
   parseResult: TResultsCsvParseResult;
   item: TResultImportItem;
 begin
-  parseResult := FParser.Parse(BuildCsv([
-    '# number;finish time',
-    '101;11:00:00.123',
-    '102;DNF'
-  ]));
+  parseResult := FParser.Parse(BuildCsv(['# number;finish time',
+    '101;11:00:00.123', '102;DNF']));
   try
     AssertEquals(Ord(rcfFinish), Ord(parseResult.Format));
     AssertEquals(2, parseResult.Items.Count);
@@ -199,11 +193,9 @@ var
   parseResult: TResultsCsvParseResult;
   item: TResultImportItem;
 begin
-  parseResult := FParser.Parse(BuildCsv([
-    '# number;start time;correction',
-    '201;10:00:00;-250',
-    '202;10:01:00;DNS'
-  ]));
+  parseResult := FParser.Parse(
+    BuildCsv(['# number;start time;correction', '201;10:00:00;-250',
+    '202;10:01:00;DNS']));
   try
     AssertEquals(Ord(rcfStart), Ord(parseResult.Format));
     AssertEquals(2, parseResult.Items.Count);
@@ -245,10 +237,9 @@ var
   parseResult: TResultsCsvParseResult;
   item: TResultImportItem;
 begin
-  parseResult := FParser.Parse(BuildCsv([
-    '# number;start time;correction;finish time;penalty;status',
-    '301;10:00:00;-250;11:00:00.123;00:00:05;1'
-  ]));
+  parseResult := FParser.Parse(
+    BuildCsv(['# number;start time;correction;finish time;penalty;status',
+    '301;10:00:00;-250;11:00:00.123;00:00:05;1']));
   try
     AssertEquals(Ord(rcfFullStage), Ord(parseResult.Format));
     AssertEquals(1, parseResult.Items.Count);
@@ -269,10 +260,8 @@ end;
 
 procedure TResultsCsvParserTests.Parse_FormatIsDeterminedByFirstDataRow;
 begin
-  AssertRowFieldCountMismatch(BuildCsv([
-    '401;11:00:00',
-    '402;12:00:00;unexpected;value'
-  ]), 2, 4, 2);
+  AssertRowFieldCountMismatch(
+    BuildCsv(['401;11:00:00', '402;12:00:00;unexpected;value']), 2, 4, 2);
 end;
 
 procedure TResultsCsvParserTests.Parse_UnsupportedColumnCount_RaisesValidationError;
@@ -289,26 +278,18 @@ end;
 
 procedure TResultsCsvParserTests.Parse_MissingFields_RaisesValidationError;
 begin
-  AssertRowFieldCountMismatch(BuildCsv([
-    '601;11:00:00',
-    '602'
-  ]), 2, 1, 2);
+  AssertRowFieldCountMismatch(BuildCsv(['601;11:00:00', '602']), 2, 1, 2);
 end;
 
 procedure TResultsCsvParserTests.Parse_ExtraFields_RaisesValidationError;
 begin
-  AssertRowFieldCountMismatch(BuildCsv([
-    '611;11:00:00',
-    '612;12:00:00;unexpected'
-  ]), 2, 3, 2);
+  AssertRowFieldCountMismatch(
+    BuildCsv(['611;11:00:00', '612;12:00:00;unexpected']), 2, 3, 2);
 end;
 
 procedure TResultsCsvParserTests.Parse_WithoutResultRows_RaisesValidationError;
 begin
-  AssertParseError(BuildCsv([
-    ';',
-    ';;'
-  ]), EResultsRowsNotFound);
+  AssertParseError(BuildCsv([';', ';;']), EResultsRowsNotFound);
   AssertParseError('number;finishtime',
     EResultsRowsNotFound);
 end;
@@ -318,10 +299,7 @@ var
   parseResult: TResultsCsvParseResult;
   item: TResultImportItem;
 begin
-  parseResult := FParser.Parse(BuildCsv([
-    'number;finishtime',
-    '901;11:00:00'
-  ]));
+  parseResult := FParser.Parse(BuildCsv(['number;finishtime', '901;11:00:00']));
   try
     AssertEquals(Ord(rcfFinish), Ord(parseResult.Format));
     AssertEquals(1, parseResult.Items.Count);
@@ -337,10 +315,9 @@ var
   parseResult: TResultsCsvParseResult;
   item: TResultImportItem;
 begin
-  parseResult := FParser.Parse(BuildCsv([
-    'Произвольный заголовок;Время финиша',
-    '902;11:00:00'
-  ]));
+  parseResult := FParser.Parse(
+    BuildCsv(['Произвольный заголовок;Время финиша',
+    '902;11:00:00']));
   try
     AssertEquals(Ord(rcfFinish), Ord(parseResult.Format));
     AssertEquals(1, parseResult.Items.Count);
@@ -351,32 +328,69 @@ begin
   end;
 end;
 
+procedure TResultsCsvParserTests.Parse_MultilineHeaderWithHash_PreservesResultRows;
+var
+  csvLineEnding: string;
+  parseResult: TResultsCsvParseResult;
+begin
+  for csvLineEnding in [#10, #13#10] do
+  begin
+    parseResult := FParser.Parse(
+      StringReplace(BuildCsv(['# ignored "', 'number;"Finish ""time""',
+      '# closing header"', '902;11:00:00', '  # ignored "',
+      '903;12:00:00']), LineEnding, csvLineEnding, [rfReplaceAll]));
+    try
+      AssertEquals(2, parseResult.Items.Count);
+      AssertEquals(902, TResultImportItem(parseResult.Items[0]).ParticipantNumber);
+      AssertEquals('11:00:00', TResultImportItem(parseResult.Items[0]).FinishTime);
+      AssertEquals(903, TResultImportItem(parseResult.Items[1]).ParticipantNumber);
+    finally
+      parseResult.Free;
+    end;
+  end;
+end;
+
+procedure TResultsCsvParserTests.Parse_MultilineTimeWithHash_IsReportedUnchanged;
+var
+  csvLineEnding: string;
+  parseResult: TResultsCsvParseResult;
+  raised: boolean;
+begin
+  for csvLineEnding in [#10, #13#10] do
+  begin
+    parseResult := nil;
+    raised := False;
+    try
+      try
+        parseResult := FParser.Parse('number;finish time' + csvLineEnding +
+          '902;"11:00:00' + csvLineEnding + '# invalid' + csvLineEnding + 'end"');
+      except
+        on E: EInvalidResultTime do
+        begin
+          raised := True;
+          AssertEquals(2, E.RowNumber);
+          AssertEquals('11:00:00' + LineEnding + '# invalid' + LineEnding +
+            'end', E.TimeText);
+        end;
+      end;
+      AssertTrue('Expected EInvalidResultTime', raised);
+    finally
+      parseResult.Free;
+    end;
+  end;
+end;
+
 procedure TResultsCsvParserTests.Parse_InvalidParticipantNumbers_RaiseValidationError;
 begin
-  AssertParseError(BuildCsv([
-    '900;10:00:00',
-    ';11:00:00'
-  ]),
+  AssertParseError(BuildCsv(['900;10:00:00', ';11:00:00']),
     EInvalidResultParticipantNumber);
-  AssertParseError(BuildCsv([
-    '900;10:00:00',
-    '0;11:00:00'
-  ]),
+  AssertParseError(BuildCsv(['900;10:00:00', '0;11:00:00']),
     EInvalidResultParticipantNumber);
-  AssertParseError(BuildCsv([
-    '900;10:00:00',
-    '-1;11:00:00'
-  ]),
+  AssertParseError(BuildCsv(['900;10:00:00', '-1;11:00:00']),
     EInvalidResultParticipantNumber);
-  AssertParseError(BuildCsv([
-    '900;10:00:00',
-    'not-a-number;11:00:00'
-  ]),
+  AssertParseError(BuildCsv(['900;10:00:00', 'not-a-number;11:00:00']),
     EInvalidResultParticipantNumber);
-  AssertParseError(BuildCsv([
-    '900;10:00:00',
-    '999999999999999999999;11:00:00'
-  ]),
+  AssertParseError(BuildCsv(['900;10:00:00', '999999999999999999999;11:00:00']),
     EInvalidResultParticipantNumber);
 end;
 
@@ -387,12 +401,9 @@ begin
   parseResult := nil;
   try
     try
-      parseResult := FParser.Parse(BuildCsv([
-        '# comment before results',
-        '701;11:00:00',
-        '# comment between results',
-        '701;12:00:00'
-      ]));
+      parseResult := FParser.Parse(
+        BuildCsv(['# comment before results', '701;11:00:00',
+        '# comment between results', '701;12:00:00']));
     except
       on E: EDuplicateResultParticipantNumber do
       begin
@@ -413,12 +424,9 @@ var
   parseResult: TResultsCsvParseResult;
   item: TResultImportItem;
 begin
-  parseResult := FParser.Parse(BuildCsv([
-    '801;09:15;;10:20;;',
-    '802;09:15:42;;10:20:30;;',
-    '803;09:15:42,123;;10:20:30,456;;',
-    '804;09:15:42.123;;10:20:30.456;;'
-  ]));
+  parseResult := FParser.Parse(BuildCsv(['801;09:15;;10:20;;',
+    '802;09:15:42;;10:20:30;;', '803;09:15:42,123;;10:20:30,456;;',
+    '804;09:15:42.123;;10:20:30.456;;']));
   try
     item := TResultImportItem(parseResult.Items[0]);
     AssertEquals('09:15', item.StartTime);
@@ -459,11 +467,8 @@ var
   parseResult: TResultsCsvParseResult;
   item: TResultImportItem;
 begin
-  parseResult := FParser.Parse(BuildCsv([
-    '902;10:00;250',
-    '903;10:00;-250',
-    '904;10:00;0'
-  ]));
+  parseResult := FParser.Parse(BuildCsv(['902;10:00;250',
+    '903;10:00;-250', '904;10:00;0']));
   try
     item := TResultImportItem(parseResult.Items[0]);
     AssertTrue(item.HasCorrection);
@@ -491,7 +496,8 @@ begin
     EInvalidResultCorrection);
 end;
 
-procedure TResultsCsvParserTests.Parse_SixColumns_InvalidCorrections_RaiseValidationError;
+procedure TResultsCsvParserTests.
+Parse_SixColumns_InvalidCorrections_RaiseValidationError;
 begin
   AssertParseError('913;10:00;invalid;11:00;;',
     EInvalidResultCorrection);
@@ -503,11 +509,8 @@ procedure TResultsCsvParserTests.Parse_ValidPenalties_AreNormalized;
 var
   parseResult: TResultsCsvParseResult;
 begin
-  parseResult := FParser.Parse(BuildCsv([
-    '1001;10:00;;11:00;05:30;',
-    '1002;10:00;;11:00;23:05:30;',
-    '1003;10:00;;11:00;45;'
-  ]));
+  parseResult := FParser.Parse(BuildCsv(['1001;10:00;;11:00;05:30;',
+    '1002;10:00;;11:00;23:05:30;', '1003;10:00;;11:00;45;']));
   try
     AssertEquals('00:05:30',
       TResultImportItem(parseResult.Items[0]).Penalty);
@@ -540,16 +543,10 @@ procedure TResultsCsvParserTests.Parse_TextAndNumericStatuses_AreMapped;
 var
   parseResult: TResultsCsvParseResult;
 begin
-  parseResult := FParser.Parse(BuildCsv([
-    '1101;10:00;;11:00;;DNF',
-    '1102;10:00;;11:00;;dnf',
-    '1103;10:00;;11:00;;DNS',
-    '1104;10:00;;11:00;;DSQ',
-    '1105;10:00;;11:00;;1',
-    '1106;10:00;;11:00;;2',
-    '1107;10:00;;11:00;;3',
-    '1108;10:00;;11:00;;'
-  ]));
+  parseResult := FParser.Parse(BuildCsv(['1101;10:00;;11:00;;DNF',
+    '1102;10:00;;11:00;;dnf', '1103;10:00;;11:00;;DNS',
+    '1104;10:00;;11:00;;DSQ', '1105;10:00;;11:00;;1', '1106;10:00;;11:00;;2',
+    '1107;10:00;;11:00;;3', '1108;10:00;;11:00;;']));
   try
     AssertEquals(Ord(psDNF),
       Ord(TResultImportItem(parseResult.Items[0]).Status));

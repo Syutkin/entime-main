@@ -69,8 +69,7 @@ begin
   AssertEquals(0, number);
 end;
 
-procedure TValidatorsTests.AssertValidTime(const AValue,
-  AExpectedValue: string);
+procedure TValidatorsTests.AssertValidTime(const AValue, AExpectedValue: string);
 var
   normalizedValue: string;
 begin
@@ -89,8 +88,7 @@ begin
   AssertEquals('', normalizedValue);
 end;
 
-procedure TValidatorsTests.AssertValidDuration(
-  const AValue, AExpectedValue: string);
+procedure TValidatorsTests.AssertValidDuration(const AValue, AExpectedValue: string);
 var
   normalizedValue: string;
 begin

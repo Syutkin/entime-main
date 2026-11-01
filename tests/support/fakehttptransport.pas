@@ -12,17 +12,17 @@ type
   private
     FResponses: array of THttpResponse;
     FRequests: array of THttpRequest;
-    FCancelled: Boolean;
-    FCancelCount: Integer;
-    function GetRequest(const AIndex: Integer): THttpRequest;
+    FCancelled: boolean;
+    FCancelCount: integer;
+    function GetRequest(const AIndex: integer): THttpRequest;
   public
     procedure QueueResponse(const AResponse: THttpResponse);
     function Execute(const ARequest: THttpRequest): THttpResponse;
     procedure Cancel;
-    function RequestCount: Integer;
-    property Requests[const AIndex: Integer]: THttpRequest read GetRequest;
-    property Cancelled: Boolean read FCancelled;
-    property CancelCount: Integer read FCancelCount;
+    function RequestCount: integer;
+    property Requests[const AIndex: integer]: THttpRequest read GetRequest;
+    property Cancelled: boolean read FCancelled;
+    property CancelCount: integer read FCancelCount;
   end;
 
   TFakeHttpTransportFactory = class(TInterfacedObject, IHttpTransportFactory)
@@ -30,13 +30,12 @@ type
     FResponses: array of THttpResponse;
     FTransportInterfaces: array of IHttpTransport;
     FTransports: array of TFakeHttpTransport;
-    function GetTransport(const AIndex: Integer): TFakeHttpTransport;
+    function GetTransport(const AIndex: integer): TFakeHttpTransport;
   public
     procedure QueueResponse(const AResponse: THttpResponse);
     function CreateTransport: IHttpTransport;
-    function TransportCount: Integer;
-    property Transports[const AIndex: Integer]: TFakeHttpTransport
-      read GetTransport;
+    function TransportCount: integer;
+    property Transports[const AIndex: integer]: TFakeHttpTransport read GetTransport;
   end;
 
 implementation
@@ -57,30 +56,29 @@ end;
 
 procedure RemoveFirstResponse(var AResponses: array of THttpResponse);
 var
-  Index: Integer;
+  Index: integer;
 begin
   for Index := 1 to High(AResponses) do
     AResponses[Index - 1] := AResponses[Index];
 end;
 
-function TFakeHttpTransport.GetRequest(const AIndex: Integer): THttpRequest;
+function TFakeHttpTransport.GetRequest(const AIndex: integer): THttpRequest;
 begin
   Result := CloneHttpRequest(FRequests[AIndex]);
 end;
 
 procedure TFakeHttpTransport.QueueResponse(const AResponse: THttpResponse);
 var
-  Index: Integer;
+  Index: integer;
 begin
   Index := Length(FResponses);
   SetLength(FResponses, Index + 1);
   FResponses[Index] := CloneHttpResponse(AResponse);
 end;
 
-function TFakeHttpTransport.Execute(
-  const ARequest: THttpRequest): THttpResponse;
+function TFakeHttpTransport.Execute(const ARequest: THttpRequest): THttpResponse;
 var
-  RequestIndex: Integer;
+  RequestIndex: integer;
 begin
   if FCancelled then
     Exit(CancelledResponse);
@@ -103,21 +101,20 @@ begin
   Inc(FCancelCount);
 end;
 
-function TFakeHttpTransport.RequestCount: Integer;
+function TFakeHttpTransport.RequestCount: integer;
 begin
   Result := Length(FRequests);
 end;
 
-function TFakeHttpTransportFactory.GetTransport(
-  const AIndex: Integer): TFakeHttpTransport;
+function TFakeHttpTransportFactory.GetTransport(const AIndex: integer):
+TFakeHttpTransport;
 begin
   Result := FTransports[AIndex];
 end;
 
-procedure TFakeHttpTransportFactory.QueueResponse(
-  const AResponse: THttpResponse);
+procedure TFakeHttpTransportFactory.QueueResponse(const AResponse: THttpResponse);
 var
-  Index: Integer;
+  Index: integer;
 begin
   Index := Length(FResponses);
   SetLength(FResponses, Index + 1);
@@ -126,7 +123,7 @@ end;
 
 function TFakeHttpTransportFactory.CreateTransport: IHttpTransport;
 var
-  Index: Integer;
+  Index: integer;
   Transport: TFakeHttpTransport;
 begin
   Transport := TFakeHttpTransport.Create;
@@ -145,7 +142,7 @@ begin
   FTransportInterfaces[Index] := Result;
 end;
 
-function TFakeHttpTransportFactory.TransportCount: Integer;
+function TFakeHttpTransportFactory.TransportCount: integer;
 begin
   Result := Length(FTransports);
 end;

@@ -21,19 +21,17 @@ type
   public
     class function SelectAll: string; static;
     class function SelectJournal: string; static; overload;
-    class function SelectJournal(
-      const AFilter: TFinishMarkJournalFilter): string; static; overload;
+    class function SelectJournal(const AFilter: TFinishMarkJournalFilter;
+      const AStageIndex: integer = 0): string; static; overload;
     class procedure BindJournalParameters(Q: TSQLQuery;
-      const AFilter: TFinishMarkJournalFilter;
-      const AReceivedSince: TDateTime;
+      const AFilter: TFinishMarkJournalFilter; const AReceivedSince: TDateTime;
       const AStageIndex: integer); static;
     class function SelectWorkQueue: string; static;
     class function ExecInsert(Q: TSQLQuery;
       const AMark: TFinishMark): TFinishMark; static;
-    class procedure ExecUpdate(Q: TSQLQuery;
-      const AMark: TFinishMark); static;
-    class function TryReadCurrent(Q: TSQLQuery;
-      out AMark: TFinishMark): boolean; static;
+    class procedure ExecUpdate(Q: TSQLQuery; const AMark: TFinishMark); static;
+    class function TryReadCurrent(Q: TSQLQuery; out AMark: TFinishMark): boolean;
+      static;
   end;
 
   TFinishMarkRepository = class
@@ -42,8 +40,7 @@ type
   public
     constructor Create(const AContext: TCompetitionDbContext);
     function Insert(const AMark: TFinishMark): TFinishMark;
-    function TryLoadById(const AMarkId: int64;
-      out AMark: TFinishMark): boolean;
+    function TryLoadById(const AMarkId: int64; out AMark: TFinishMark): boolean;
     function HideWorkQueue: integer;
     procedure Update(const AMark: TFinishMark);
     function LoadAll: TFinishMarkArray;
@@ -109,8 +106,8 @@ procedure RequireSeparator(const AText, AFieldName: string;
   const APosition: integer; const ASeparator: char);
 begin
   if (APosition > Length(AText)) or (AText[APosition] <> ASeparator) then
-    raise EDatabaseError.CreateFmt(
-      'Invalid %s value "%s" in finish_marks.', [AFieldName, AText]);
+    raise EDatabaseError.CreateFmt('Invalid %s value "%s" in finish_marks.',
+      [AFieldName, AText]);
 end;
 
 function ParseEventTime(const AText: string): TDateTime;
@@ -138,8 +135,8 @@ var
   Year, Month, Day, Hour, Minute, Second, Millisecond: word;
 begin
   if Length(AText) <> 23 then
-    raise EDatabaseError.CreateFmt(
-      'Invalid %s value "%s" in finish_marks.', [AFieldName, AText]);
+    raise EDatabaseError.CreateFmt('Invalid %s value "%s" in finish_marks.',
+      [AFieldName, AText]);
   RequireSeparator(AText, AFieldName, 5, '-');
   RequireSeparator(AText, AFieldName, 8, '-');
   RequireSeparator(AText, AFieldName, 11, 'T');
@@ -153,10 +150,10 @@ begin
   Minute := ParseDigits(AText, AFieldName, 15, 2);
   Second := ParseDigits(AText, AFieldName, 18, 2);
   Millisecond := ParseDigits(AText, AFieldName, 21, 3);
-  if not TryEncodeDate(Year, Month, Day, DatePart) or
-    not TryEncodeTime(Hour, Minute, Second, Millisecond, TimePart) then
-    raise EDatabaseError.CreateFmt(
-      'Invalid %s value "%s" in finish_marks.', [AFieldName, AText]);
+  if not TryEncodeDate(Year, Month, Day, DatePart) or not
+    TryEncodeTime(Hour, Minute, Second, Millisecond, TimePart) then
+    raise EDatabaseError.CreateFmt('Invalid %s value "%s" in finish_marks.',
+      [AFieldName, AText]);
   Result := DatePart + TimePart;
 end;
 
@@ -175,15 +172,13 @@ var
 begin
   KindText := Q.FieldByName('source_kind').AsString;
   if KindText = 'serial' then
-    Exit(TTimingMarkSource.Serial(
-      Q.FieldByName('source_device_id').AsString));
+    Exit(TTimingMarkSource.Serial(Q.FieldByName('source_device_id').AsString));
   if KindText = 'ble' then
-    Exit(TTimingMarkSource.Ble(
-      Q.FieldByName('source_device_id').AsString));
+    Exit(TTimingMarkSource.Ble(Q.FieldByName('source_device_id').AsString));
   if KindText = 'manual' then
     Exit(TTimingMarkSource.Manual);
-  raise EDatabaseError.CreateFmt(
-    'Invalid source_kind value "%s" in finish_marks.', [KindText]);
+  raise EDatabaseError.CreateFmt('Invalid source_kind value "%s" in finish_marks.',
+    [KindText]);
 end;
 
 function ParseStatus(const AText: string): TFinishMarkStatus;
@@ -249,9 +244,11 @@ begin
   Result := SelectJournal(fmjfAll);
 end;
 
-class function TFinishMarkSql.SelectJournal(
-  const AFilter: TFinishMarkJournalFilter): string;
+class function TFinishMarkSql.SelectJournal(const AFilter: TFinishMarkJournalFilter;
+  const AStageIndex: integer): string;
 begin
+  if AStageIndex < 0 then
+    raise EArgumentOutOfRangeException.Create('Stage index must not be negative.');
   Result := 'SELECT * FROM finish_marks';
   case AFilter of
     fmjfAll: ;
@@ -266,6 +263,13 @@ begin
     fmjfCurrentStage:
       Result := Result + ' WHERE stage_index = :STAGE_INDEX';
   end;
+  if (AStageIndex > 0) and (AFilter <> fmjfCurrentStage) then
+  begin
+    if AFilter = fmjfAll then Result := Result + ' WHERE '
+    else
+      Result := Result + ' AND ';
+    Result := Result + 'stage_index = :STAGE_INDEX';
+  end;
   Result := Result + ' ORDER BY received_at DESC, id DESC;';
 end;
 
@@ -275,18 +279,12 @@ class procedure TFinishMarkSql.BindJournalParameters(Q: TSQLQuery;
 begin
   if Q = nil then
     raise EArgumentNilException.Create('Q');
-  case AFilter of
-    fmjfLast15Minutes:
-      Q.ParamByName('RECEIVED_SINCE').AsString :=
-        TimestampText(AReceivedSince);
-    fmjfCurrentStage:
-      begin
-        if AStageIndex < 1 then
-          raise EArgumentOutOfRangeException.Create(
-            'Stage index must be positive.');
-        Q.ParamByName('STAGE_INDEX').AsInteger := AStageIndex;
-      end;
-  end;
+  if (AStageIndex < 0) or ((AFilter = fmjfCurrentStage) and (AStageIndex = 0)) then
+    raise EArgumentOutOfRangeException.Create('Invalid stage scope.');
+  if AFilter = fmjfLast15Minutes then
+    Q.ParamByName('RECEIVED_SINCE').AsString := TimestampText(AReceivedSince);
+  if AStageIndex > 0 then
+    Q.ParamByName('STAGE_INDEX').AsInteger := AStageIndex;
 end;
 
 class function TFinishMarkSql.SelectWorkQueue: string;
@@ -328,8 +326,7 @@ begin
   end;
 end;
 
-class procedure TFinishMarkSql.ExecUpdate(Q: TSQLQuery;
-  const AMark: TFinishMark);
+class procedure TFinishMarkSql.ExecUpdate(Q: TSQLQuery; const AMark: TFinishMark);
 begin
   if Q = nil then
     raise EArgumentNilException.Create('Q');
@@ -342,8 +339,8 @@ begin
   Q.ParamByName('ID').AsLargeInt := AMark.Id;
   Q.ExecSQL;
   if Q.RowsAffected <> 1 then
-    raise EDatabaseError.CreateFmt(
-      'Finish mark %d was not found for update.', [AMark.Id]);
+    raise EDatabaseError.CreateFmt('Finish mark %d was not found for update.',
+      [AMark.Id]);
   Q.Close;
 end;
 
@@ -357,14 +354,13 @@ begin
   AMark.Id := Q.FieldByName('id').AsLargeInt;
   AMark.StageIndex := Q.FieldByName('stage_index').AsInteger;
   AMark.EventTime := ParseEventTime(Q.FieldByName('event_time').AsString);
-  AMark.HasParticipantNumber :=
-    not Q.FieldByName('participant_number').IsNull;
+  AMark.HasParticipantNumber := not Q.FieldByName('participant_number').IsNull;
   if AMark.HasParticipantNumber then
     AMark.ParticipantNumber :=
       Q.FieldByName('participant_number').AsInteger;
   AMark.Source := SourceFromFields(Q);
-  AMark.ReceivedAt := ParseTimestamp(
-    Q.FieldByName('received_at').AsString, 'received_at');
+  AMark.ReceivedAt := ParseTimestamp(Q.FieldByName('received_at').AsString,
+    'received_at');
   AMark.HasAssignmentMode := not Q.FieldByName('assignment_mode').IsNull;
   if AMark.HasAssignmentMode then
   begin
@@ -377,14 +373,13 @@ begin
   AMark.Status := ParseStatus(Q.FieldByName('status').AsString);
   AMark.HasAppliedAt := not Q.FieldByName('applied_at').IsNull;
   if AMark.HasAppliedAt then
-    AMark.AppliedAt := ParseTimestamp(
-      Q.FieldByName('applied_at').AsString, 'applied_at');
+    AMark.AppliedAt := ParseTimestamp(Q.FieldByName('applied_at').AsString,
+      'applied_at');
   if not Q.FieldByName('diagnostic').IsNull then
     AMark.Diagnostic := Q.FieldByName('diagnostic').AsString;
 end;
 
-constructor TFinishMarkRepository.Create(
-  const AContext: TCompetitionDbContext);
+constructor TFinishMarkRepository.Create(const AContext: TCompetitionDbContext);
 begin
   inherited Create;
   if AContext = nil then
@@ -392,8 +387,7 @@ begin
   FContext := AContext;
 end;
 
-function TFinishMarkRepository.Insert(
-  const AMark: TFinishMark): TFinishMark;
+function TFinishMarkRepository.Insert(const AMark: TFinishMark): TFinishMark;
 var
   Q: TSQLQuery;
   UnitOfWork: TCompetitionUnitOfWork;

@@ -16,7 +16,7 @@ type
     FDeviceId: string;
     FLastErrorCode: integer;
     FLastErrorMessage: string;
-    FLastWritten: RawByteString;
+    FLastWritten: rawbytestring;
     FOnDataAvailable: TNotifyEvent;
     FWriteCount: integer;
     function GetActive: boolean;
@@ -26,15 +26,13 @@ type
     function GetOnDataAvailable: TNotifyEvent;
     procedure SetOnDataAvailable(const AHandler: TNotifyEvent);
   public
-    function ReadData: RawByteString;
-    function WriteData(const AData: RawByteString): integer;
+    function ReadData: rawbytestring;
+    function WriteData(const AData: rawbytestring): integer;
     property Active: boolean read FActive write FActive;
     property DeviceId: string read FDeviceId write FDeviceId;
-    property LastErrorCode: integer read FLastErrorCode
-      write FLastErrorCode;
-    property LastErrorMessage: string read FLastErrorMessage
-      write FLastErrorMessage;
-    property LastWritten: RawByteString read FLastWritten;
+    property LastErrorCode: integer read FLastErrorCode write FLastErrorCode;
+    property LastErrorMessage: string read FLastErrorMessage write FLastErrorMessage;
+    property LastWritten: rawbytestring read FLastWritten;
     property OnDataAvailable: TNotifyEvent read FOnDataAvailable;
     property WriteCount: integer read FWriteCount;
   end;
@@ -43,11 +41,11 @@ type
   private
     FConnection: TFakeSerialTimingConnection;
     FConnectionInterface: ISerialTimingConnection;
-    FData: RawByteString;
+    FData: rawbytestring;
     FSource: TTimingMarkSource;
     FTransport: TSerialTimingTransport;
     FTransportInterface: ITimingTransport;
-    procedure DataReceived(Sender: TObject; const AData: RawByteString;
+    procedure DataReceived(Sender: TObject; const AData: rawbytestring;
       const ASource: TTimingMarkSource);
   protected
     procedure SetUp; override;
@@ -85,19 +83,17 @@ begin
   Result := FOnDataAvailable;
 end;
 
-procedure TFakeSerialTimingConnection.SetOnDataAvailable(
-  const AHandler: TNotifyEvent);
+procedure TFakeSerialTimingConnection.SetOnDataAvailable(const AHandler: TNotifyEvent);
 begin
   FOnDataAvailable := AHandler;
 end;
 
-function TFakeSerialTimingConnection.ReadData: RawByteString;
+function TFakeSerialTimingConnection.ReadData: rawbytestring;
 begin
   Result := 'serial-input';
 end;
 
-function TFakeSerialTimingConnection.WriteData(
-  const AData: RawByteString): integer;
+function TFakeSerialTimingConnection.WriteData(const AData: rawbytestring): integer;
 begin
   Inc(FWriteCount);
   FLastWritten := AData;
@@ -126,7 +122,7 @@ begin
 end;
 
 procedure TSerialTimingTransportTests.DataReceived(Sender: TObject;
-  const AData: RawByteString; const ASource: TTimingMarkSource);
+  const AData: rawbytestring; const ASource: TTimingMarkSource);
 begin
   AssertSame(FTransport, Sender);
   FData := AData;
@@ -148,7 +144,7 @@ begin
 end;
 
 procedure TSerialTimingTransportTests.
-  SendAsync_ReportsDisconnectedAndWriteErrors;
+SendAsync_ReportsDisconnectedAndWriteErrors;
 var
   Operation: ITimingSendOperation;
 begin
@@ -168,7 +164,7 @@ begin
 end;
 
 procedure TSerialTimingTransportTests.
-  IncomingData_IsTaggedWithCurrentSerialDevice;
+IncomingData_IsTaggedWithCurrentSerialDevice;
 begin
   FConnection.OnDataAvailable(FConnection);
 

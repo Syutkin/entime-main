@@ -14,8 +14,8 @@ type
 
   TMyRxDbGridColumns = class(TRxDbGridColumns)
   protected
-    procedure Notify(Item: TCollectionItem;
-      Action: TCollectionNotification); override;
+    procedure Notify(Item: TCollectionItem; Action: TCollectionNotification);
+      override;
   end;
 
   { TMyRxDBGrid }
@@ -36,7 +36,7 @@ type
   public
     procedure BeginColumnsUpdate;
     procedure EndColumnsUpdate;
-    function GetRow: Integer;
+    function GetRow: integer;
     procedure RestoreCurrentRow(const ASavedRow: integer);
   end;
 
@@ -174,7 +174,7 @@ begin
   end;
 end;
 
-function TMyRxDBGrid.GetRow: Integer;
+function TMyRxDBGrid.GetRow: integer;
 begin
   Result := Row;
 end;

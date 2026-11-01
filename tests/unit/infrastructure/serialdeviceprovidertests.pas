@@ -29,8 +29,7 @@ var
   FakeProviderValue: TSerialDeviceInfoArray = nil;
 
 function SerialDevice(const ADevice: string; const AVendor: string = '';
-  const AModel: string = ''; const ASerialShort: string = ''):
-  TSerialDeviceInfo;
+  const AModel: string = ''; const ASerialShort: string = ''): TSerialDeviceInfo;
 begin
   Result := Default(TSerialDeviceInfo);
   Result.Device := ADevice;
@@ -53,7 +52,7 @@ begin
 end;
 
 procedure TSerialDeviceProviderTests.
-  Availability_FindsStructuredDeviceWithoutChangingSnapshot;
+Availability_FindsStructuredDeviceWithoutChangingSnapshot;
 var
   devices: TSerialDeviceInfoArray;
 begin
@@ -95,7 +94,7 @@ begin
 end;
 
 procedure TSerialDeviceProviderTests.
-  DeviceAvailability_AcceptsCharacterDeviceOnlyOnUnix;
+DeviceAvailability_AcceptsCharacterDeviceOnlyOnUnix;
 var
   devices: TSerialDeviceInfoArray;
 begin
@@ -111,18 +110,14 @@ begin
 end;
 
 procedure TSerialDeviceProviderTests.
-  ProviderOverride_ReturnsStructuredSnapshotForEveryRefresh;
+ProviderOverride_ReturnsStructuredSnapshotForEveryRefresh;
 var
   devices: TSerialDeviceInfoArray;
 begin
   FakeProviderCallCount := 0;
   SetLength(FakeProviderValue, 1);
-  FakeProviderValue[0] := SerialDevice(
-    'COM1',
-    'ENTime',
-    'USB UART',
-    'ABC123'
-  );
+  FakeProviderValue[0] := SerialDevice('COM1', 'ENTime',
+    'USB UART', 'ABC123');
   SetSerialDevicesProvider(@FakeSerialDevicesProvider);
 
   devices := ReadSerialDevices;

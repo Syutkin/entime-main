@@ -1,0 +1,576 @@
+object StartLabelsPrintForm: TStartLabelsPrintForm
+  Left = 0
+  Height = 820
+  Top = 0
+  Width = 1160
+  Caption = 'Стартовые наклейки'
+  ClientHeight = 820
+  ClientWidth = 1160
+  Constraints.MinHeight = 480
+  Constraints.MinWidth = 820
+  PopupMode = pmAuto
+  Position = poOwnerFormCenter
+  LCLVersion = '4.8.0.0'
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  object FooterPanel: TPanel
+    Left = 8
+    Height = 28
+    Top = 784
+    Width = 1144
+    Align = alBottom
+    AutoSize = True
+    BorderSpacing.Around = 8
+    BevelOuter = bvNone
+    TabOrder = 0
+    object FooterActionsPanel: TPanel
+      Align = alRight
+      AutoSize = True
+      BevelOuter = bvNone
+      BorderSpacing.Left = 8
+      ChildSizing.HorizontalSpacing = 8
+      ChildSizing.EnlargeVertical = crsHomogenousChildResize
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 2
+      TabOrder = 0
+      object SaveButton: TButton
+        AutoSize = True
+        BorderSpacing.CellAlignVertical = ccaRightBottom
+        Caption = 'Сохранить PDF…'
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 0
+        OnClick = SaveClick
+      end
+      object CloseButton: TButton
+        AutoSize = True
+        BorderSpacing.CellAlignVertical = ccaRightBottom
+        Cancel = True
+        Caption = 'Закрыть'
+        TabOrder = 1
+        OnClick = CloseClick
+      end
+    end
+    object StateLabel: TLabel
+      Align = alClient
+      AutoSize = True
+      Layout = tlCenter
+      WordWrap = True
+    end
+  end
+  object NavigationPanel: TPanel
+    Left = 8
+    Height = 32
+    Top = 8
+    Width = 1144
+    Align = alTop
+    AutoSize = True
+    BorderSpacing.Around = 8
+    BevelOuter = bvNone
+    ChildSizing.HorizontalSpacing = 6
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 8
+    ClientHeight = 32
+    ClientWidth = 1144
+    TabOrder = 1
+    object FirstButton: TButton
+      Left = 0
+      Height = 32
+      Top = 0
+      Width = 29
+      AutoSize = True
+      Caption = '|<'
+      TabOrder = 0
+      OnClick = NavigateClick
+    end
+    object PreviousButton: TButton
+      Left = 35
+      Height = 32
+      Top = 0
+      Width = 21
+      AutoSize = True
+      Caption = '<'
+      TabOrder = 1
+      OnClick = NavigateClick
+    end
+    object NextButton: TButton
+      Left = 62
+      Height = 32
+      Top = 0
+      Width = 21
+      AutoSize = True
+      Caption = '>'
+      TabOrder = 2
+      OnClick = NavigateClick
+    end
+    object LastButton: TButton
+      Left = 89
+      Height = 32
+      Top = 0
+      Width = 29
+      AutoSize = True
+      Caption = '>|'
+      TabOrder = 3
+      OnClick = NavigateClick
+    end
+    object PageSpin: TSpinEdit
+      Left = 124
+      Height = 32
+      Top = 0
+      Width = 50
+      MaxValue = 1
+      MinValue = 1
+      TabOrder = 4
+      Value = 1
+      OnChange = PageChange
+    end
+    object PageCountLabel: TLabel
+      Left = 180
+      Height = 32
+      Top = 0
+      Width = 16
+      Caption = '/ 0'
+      Layout = tlCenter
+    end
+    object ZoomCombo: TComboBox
+      Left = 202
+      Height = 32
+      Top = 0
+      Width = 100
+      ItemHeight = 25
+      Style = csDropDownList
+      TabOrder = 5
+      OnChange = ZoomChange
+    end
+    object GridLabel: TLabel
+      Left = 308
+      Height = 32
+      Top = 0
+      Width = 1
+      Layout = tlCenter
+    end
+  end
+  object ParametersScroll: TScrollBox
+    Left = 8
+    Height = 728
+    Top = 48
+    Width = 310
+    HorzScrollBar.Page = 1
+    HorzScrollBar.Visible = False
+    VertScrollBar.Page = 670
+    Align = alLeft
+    BorderSpacing.Around = 8
+    BorderStyle = bsNone
+    ClientHeight = 728
+    ClientWidth = 310
+    TabOrder = 2
+    object SettingsPanel: TPanel
+      Left = 0
+      Height = 670
+      Top = 0
+      Width = 310
+      Align = alTop
+      AutoSize = True
+      BevelOuter = bvNone
+      ChildSizing.VerticalSpacing = 8
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 1
+      ClientHeight = 670
+      ClientWidth = 310
+      TabOrder = 0
+      object TemplatePanel: TPanel
+        AutoSize = True
+        BevelOuter = bvNone
+        TabOrder = 0
+        object TemplateLabel: TLabel
+          Align = alLeft
+          AutoSize = True
+          Layout = tlCenter
+          Caption = 'Шаблон'
+          BorderSpacing.Right = 6
+        end
+        object TemplateCombo: TComboBox
+          AnchorSideLeft.Control = TemplateLabel
+          AnchorSideLeft.Side = asrBottom
+          AnchorSideRight.Control = TemplateMenuButton
+          BorderSpacing.Right = 6
+          Anchors = [akTop, akLeft, akRight]
+          Style = csDropDownList
+          OnChange = TemplateChange
+          TabOrder = 0
+        end
+        object TemplateMenuButton: TButton
+          AnchorSideRight.Control = TemplatePanel
+          AnchorSideRight.Side = asrBottom
+          Anchors = [akTop, akRight]
+          AutoSize = True
+          Caption = '⋯'
+          TabOrder = 1
+          OnClick = TemplateMenuClick
+        end
+      end
+      object PaperGroup: TGroupBox
+        Left = 0
+        Height = 109
+        Top = 0
+        Width = 310
+        AutoSize = True
+        Caption = 'Наклейка, мм'
+        ChildSizing.LeftRightSpacing = 6
+        ChildSizing.TopBottomSpacing = 6
+        ChildSizing.HorizontalSpacing = 6
+        ChildSizing.VerticalSpacing = 4
+        ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 2
+        ClientHeight = 80
+        ClientWidth = 306
+        TabOrder = 1
+        object WidthLabel: TLabel
+          Left = 6
+          Height = 32
+          Top = 6
+          Width = 146
+          Caption = 'Ширина'
+        end
+        object WidthEdit: TMyFloatSpinEdit
+          DecimalPlaces = 3
+          Left = 158
+          Height = 32
+          Top = 6
+          Width = 142
+          MaxValue = 297
+          TabOrder = 0
+          OnEditingDone = ParametersChange
+          OnStep = ParametersChange
+        end
+        object HeightLabel: TLabel
+          Left = 6
+          Height = 32
+          Top = 42
+          Width = 146
+          Caption = 'Высота'
+        end
+        object HeightEdit: TMyFloatSpinEdit
+          DecimalPlaces = 3
+          Left = 158
+          Height = 32
+          Top = 42
+          Width = 142
+          MaxValue = 297
+          TabOrder = 1
+          OnEditingDone = ParametersChange
+          OnStep = ParametersChange
+        end
+      end
+      object MarginsGroup: TGroupBox
+        Left = 0
+        Height = 181
+        Top = 117
+        Width = 310
+        AutoSize = True
+        Caption = 'Поля листа, мм'
+        ChildSizing.LeftRightSpacing = 6
+        ChildSizing.TopBottomSpacing = 6
+        ChildSizing.HorizontalSpacing = 6
+        ChildSizing.VerticalSpacing = 4
+        ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 2
+        ClientHeight = 152
+        ClientWidth = 306
+        TabOrder = 2
+        object LeftLabel: TLabel
+          Left = 6
+          Height = 32
+          Top = 6
+          Width = 142
+          Caption = 'Слева'
+        end
+        object LeftEdit: TMyFloatSpinEdit
+          DecimalPlaces = 3
+          Left = 154
+          Height = 32
+          Top = 6
+          Width = 146
+          Increment = 0.1
+          MaxValue = 297
+          TabOrder = 0
+          OnEditingDone = ParametersChange
+          OnStep = ParametersChange
+        end
+        object RightLabel: TLabel
+          Left = 6
+          Height = 32
+          Top = 42
+          Width = 142
+          Caption = 'Справа'
+        end
+        object RightEdit: TMyFloatSpinEdit
+          DecimalPlaces = 3
+          Left = 154
+          Height = 32
+          Top = 42
+          Width = 146
+          Increment = 0.1
+          MaxValue = 297
+          TabOrder = 1
+          OnEditingDone = ParametersChange
+          OnStep = ParametersChange
+        end
+        object TopLabel: TLabel
+          Left = 6
+          Height = 32
+          Top = 78
+          Width = 142
+          Caption = 'Сверху'
+        end
+        object TopEdit: TMyFloatSpinEdit
+          DecimalPlaces = 3
+          Left = 154
+          Height = 32
+          Top = 78
+          Width = 146
+          Increment = 0.1
+          MaxValue = 297
+          TabOrder = 2
+          OnEditingDone = ParametersChange
+          OnStep = ParametersChange
+        end
+        object BottomLabel: TLabel
+          Left = 6
+          Height = 32
+          Top = 114
+          Width = 142
+          Caption = 'Снизу'
+        end
+        object BottomEdit: TMyFloatSpinEdit
+          DecimalPlaces = 3
+          Left = 154
+          Height = 32
+          Top = 114
+          Width = 146
+          Increment = 0.1
+          MaxValue = 297
+          TabOrder = 3
+          OnEditingDone = ParametersChange
+          OnStep = ParametersChange
+        end
+      end
+      object GapsGroup: TGroupBox
+        Left = 0
+        Height = 109
+        Top = 306
+        Width = 310
+        AutoSize = True
+        Caption = 'Промежутки, мм'
+        ChildSizing.LeftRightSpacing = 6
+        ChildSizing.TopBottomSpacing = 6
+        ChildSizing.HorizontalSpacing = 6
+        ChildSizing.VerticalSpacing = 4
+        ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 2
+        ClientHeight = 80
+        ClientWidth = 306
+        TabOrder = 3
+        object GapXLabel: TLabel
+          Left = 6
+          Height = 32
+          Top = 6
+          Width = 177
+          Caption = 'Между колонками'
+        end
+        object GapXEdit: TMyFloatSpinEdit
+          DecimalPlaces = 3
+          Left = 189
+          Height = 32
+          Top = 6
+          Width = 111
+          Increment = 0.1
+          MaxValue = 297
+          TabOrder = 0
+          OnEditingDone = ParametersChange
+          OnStep = ParametersChange
+        end
+        object GapYLabel: TLabel
+          Left = 6
+          Height = 32
+          Top = 42
+          Width = 177
+          Caption = 'Между рядами'
+        end
+        object GapYEdit: TMyFloatSpinEdit
+          DecimalPlaces = 3
+          Left = 189
+          Height = 32
+          Top = 42
+          Width = 111
+          Increment = 0.1
+          MaxValue = 297
+          TabOrder = 1
+          OnEditingDone = ParametersChange
+          OnStep = ParametersChange
+        end
+      end
+      object TextGroup: TGroupBox
+        Left = 0
+        Height = 217
+        Top = 423
+        Width = 310
+        AutoSize = True
+        Caption = 'Содержимое'
+        ChildSizing.LeftRightSpacing = 6
+        ChildSizing.TopBottomSpacing = 6
+        ChildSizing.HorizontalSpacing = 6
+        ChildSizing.VerticalSpacing = 4
+        ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 2
+        ClientHeight = 188
+        ClientWidth = 306
+        TabOrder = 4
+        object PaddingLabel: TLabel
+          Left = 6
+          Height = 32
+          Top = 6
+          Width = 174
+          Caption = 'Внутренний отступ, мм'
+        end
+        object PaddingEdit: TMyFloatSpinEdit
+          DecimalPlaces = 3
+          Left = 186
+          Height = 32
+          Top = 6
+          Width = 114
+          Increment = 0.1
+          MaxValue = 297
+          TabOrder = 0
+          OnEditingDone = ParametersChange
+          OnStep = ParametersChange
+        end
+        object FontLabel: TLabel
+          Left = 6
+          Height = 32
+          Top = 42
+          Width = 174
+          Caption = 'Шрифт таблицы, пт'
+        end
+        object FontEdit: TMySpinEdit
+          Left = 186
+          Height = 32
+          Top = 42
+          Width = 114
+          MinValue = 6
+          MaxValue = 36
+          TabOrder = 1
+          OnEditingDone = ParametersChange
+          OnStep = ParametersChange
+        end
+        object MinFontLabel: TLabel
+          Left = 6
+          Height = 32
+          Top = 78
+          Width = 174
+          Caption = 'Минимальный шрифт, пт'
+        end
+        object MinFontEdit: TMySpinEdit
+          Left = 186
+          Height = 32
+          Top = 78
+          Width = 114
+          MinValue = 1
+          MaxValue = 36
+          TabOrder = 2
+          OnEditingDone = ParametersChange
+          OnStep = ParametersChange
+        end
+        object FirstSlotLabel: TLabel
+          Left = 6
+          Height = 32
+          Top = 114
+          Width = 174
+          Caption = 'Первая наклейка'
+        end
+        object FirstSlotEdit: TMySpinEdit
+          Left = 186
+          Height = 32
+          Top = 114
+          Width = 114
+          MaxValue = 623700000
+          TabOrder = 3
+          OnEditingDone = ParametersChange
+          OnStep = ParametersChange
+        end
+        object StartColumnsLabel: TLabel
+          Left = 6
+          Height = 32
+          Top = 150
+          Width = 174
+          Caption = 'Колонки стартов'
+        end
+        object StartColumnsCombo: TComboBox
+          Left = 186
+          Height = 32
+          Top = 150
+          Width = 114
+          ItemHeight = 25
+          ItemIndex = 0
+          Items.Strings = (
+            '1'
+            '2'
+          )
+          Style = csDropDownList
+          TabOrder = 4
+          Text = '1'
+          OnChange = ParametersChange
+        end
+      end
+      object BordersCheck: TCheckBox
+        Left = 0
+        Height = 22
+        Top = 648
+        Width = 310
+        Caption = 'Печатать границы наклеек'
+        TabOrder = 5
+        OnChange = ParametersChange
+      end
+    end
+  end
+  object PreviewScroll: TScrollBox
+    Left = 326
+    Height = 728
+    Top = 48
+    Width = 826
+    HorzScrollBar.Page = 1
+    VertScrollBar.Page = 1
+    Align = alClient
+    BorderSpacing.Around = 8
+    ClientHeight = 728
+    ClientWidth = 826
+    TabOrder = 3
+    OnResize = ViewResize
+    object PageCanvas: TPaintBox
+      Left = 0
+      Height = 1
+      Top = 0
+      Width = 1
+      OnPaint = PaintPage
+    end
+  end
+  object TemplateMenu: TPopupMenu
+    object SaveTemplateAsItem: TMenuItem
+      Caption = 'Сохранить как…'
+      OnClick = SaveTemplateAsClick
+    end
+    object SaveTemplateChangesItem: TMenuItem
+      Caption = 'Сохранить изменения'
+      OnClick = SaveTemplateChangesClick
+    end
+  end
+  object SaveDialog: TSaveDialog
+    DefaultExt = '.pdf'
+    Filter = 'PDF|*.pdf'
+  end
+end

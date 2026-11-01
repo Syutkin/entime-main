@@ -25,24 +25,24 @@ type
     hekTimeout,
     hekNetwork,
     hekProtocol
-  );
+    );
 
   THttpRequest = record
     Method: THttpMethod;
     Url: string;
     Headers: THttpHeaders;
-    Body: RawByteString;
-    ConnectTimeoutMs: Integer;
-    ReadTimeoutMs: Integer;
-    AllowRedirects: Boolean;
+    Body: rawbytestring;
+    ConnectTimeoutMs: integer;
+    ReadTimeoutMs: integer;
+    AllowRedirects: boolean;
   end;
 
   THttpResponse = record
-    Completed: Boolean;
-    StatusCode: Integer;
+    Completed: boolean;
+    StatusCode: integer;
     StatusText: string;
     Headers: THttpHeaders;
-    Body: RawByteString;
+    Body: rawbytestring;
     ErrorKind: THttpErrorKind;
     ErrorMessage: string;
   end;
@@ -60,22 +60,22 @@ type
 
 function HttpHeader(const AName, AValue: string): THttpHeader;
 function HttpFormField(const AName, AValue: string): THttpFormField;
-function FormUrlEncode(const AValue: string): RawByteString;
-function BuildHttpGetRequest(const AUrl: string;
-  const AFields: THttpFormFields; const AConnectTimeoutMs,
-  AReadTimeoutMs: Integer; const AAllowRedirects: Boolean = True): THttpRequest;
-function BuildHttpFormPostRequest(const AUrl: string;
-  const AFields: THttpFormFields; const AConnectTimeoutMs,
-  AReadTimeoutMs: Integer; const AAllowRedirects: Boolean = True): THttpRequest;
+function FormUrlEncode(const AValue: string): rawbytestring;
+function BuildHttpGetRequest(const AUrl: string; const AFields: THttpFormFields;
+  const AConnectTimeoutMs, AReadTimeoutMs: integer;
+  const AAllowRedirects: boolean = True): THttpRequest;
+function BuildHttpFormPostRequest(const AUrl: string; const AFields: THttpFormFields;
+  const AConnectTimeoutMs, AReadTimeoutMs: integer;
+  const AAllowRedirects: boolean = True): THttpRequest;
 function CloneHttpHeaders(const AHeaders: THttpHeaders): THttpHeaders;
 function CloneHttpRequest(const ARequest: THttpRequest): THttpRequest;
 function CloneHttpResponse(const AResponse: THttpResponse): THttpResponse;
-function IsHttpSuccessStatus(const AStatusCode: Integer): Boolean;
+function IsHttpSuccessStatus(const AStatusCode: integer): boolean;
 
 implementation
 
 const
-  HEX_DIGITS: array[0..15] of AnsiChar = '0123456789ABCDEF';
+  HEX_DIGITS: array[0..15] of ansichar = '0123456789ABCDEF';
 
 function HttpHeader(const AName, AValue: string): THttpHeader;
 begin
@@ -89,28 +89,27 @@ begin
   Result.Value := AValue;
 end;
 
-function IsUnreservedByte(const AValue: Byte): Boolean;
+function IsUnreservedByte(const AValue: byte): boolean;
 begin
   Result := ((AValue >= Ord('a')) and (AValue <= Ord('z'))) or
     ((AValue >= Ord('A')) and (AValue <= Ord('Z'))) or
-    ((AValue >= Ord('0')) and (AValue <= Ord('9'))) or
-    (AValue = Ord('-')) or (AValue = Ord('.')) or
-    (AValue = Ord('_')) or (AValue = Ord('~'));
+    ((AValue >= Ord('0')) and (AValue <= Ord('9'))) or (AValue = Ord('-')) or
+    (AValue = Ord('.')) or (AValue = Ord('_')) or (AValue = Ord('~'));
 end;
 
-function FormUrlEncode(const AValue: string): RawByteString;
+function FormUrlEncode(const AValue: string): rawbytestring;
 var
-  Source: RawByteString;
-  SourceByte: Byte;
-  Index: Integer;
+  Source: rawbytestring;
+  SourceByte: byte;
+  Index: integer;
 begin
-  Source := UTF8Encode(UnicodeString(AValue));
+  Source := UTF8Encode(unicodestring(AValue));
   Result := '';
   for Index := 1 to Length(Source) do
   begin
-    SourceByte := Byte(Source[Index]);
+    SourceByte := byte(Source[Index]);
     if IsUnreservedByte(SourceByte) then
-      Result := Result + AnsiChar(SourceByte)
+      Result := Result + ansichar(SourceByte)
     else if SourceByte = Ord(' ') then
       Result := Result + '+'
     else
@@ -119,9 +118,9 @@ begin
   end;
 end;
 
-function BuildFormBody(const AFields: THttpFormFields): RawByteString;
+function BuildFormBody(const AFields: THttpFormFields): rawbytestring;
 var
-  Index: Integer;
+  Index: integer;
 begin
   Result := '';
   for Index := 0 to High(AFields) do
@@ -133,13 +132,12 @@ begin
   end;
 end;
 
-function AppendQuery(const AUrl: string;
-  const AFields: THttpFormFields): string;
+function AppendQuery(const AUrl: string; const AFields: THttpFormFields): string;
 var
   BaseUrl: string;
   Fragment: string;
   FragmentPosition: SizeInt;
-  Query: RawByteString;
+  Query: rawbytestring;
 begin
   if Length(AFields) = 0 then
     Exit(AUrl);
@@ -164,9 +162,9 @@ begin
   Result := BaseUrl + string(Query) + Fragment;
 end;
 
-function BuildHttpGetRequest(const AUrl: string;
-  const AFields: THttpFormFields; const AConnectTimeoutMs,
-  AReadTimeoutMs: Integer; const AAllowRedirects: Boolean): THttpRequest;
+function BuildHttpGetRequest(const AUrl: string; const AFields: THttpFormFields;
+  const AConnectTimeoutMs, AReadTimeoutMs: integer;
+  const AAllowRedirects: boolean): THttpRequest;
 begin
   Result := Default(THttpRequest);
   Result.Method := hmGet;
@@ -176,9 +174,9 @@ begin
   Result.AllowRedirects := AAllowRedirects;
 end;
 
-function BuildHttpFormPostRequest(const AUrl: string;
-  const AFields: THttpFormFields; const AConnectTimeoutMs,
-  AReadTimeoutMs: Integer; const AAllowRedirects: Boolean): THttpRequest;
+function BuildHttpFormPostRequest(const AUrl: string; const AFields: THttpFormFields;
+  const AConnectTimeoutMs, AReadTimeoutMs: integer;
+  const AAllowRedirects: boolean): THttpRequest;
 begin
   Result := Default(THttpRequest);
   Result.Method := hmPost;
@@ -194,7 +192,7 @@ end;
 
 function CloneHttpHeaders(const AHeaders: THttpHeaders): THttpHeaders;
 var
-  Index: Integer;
+  Index: integer;
 begin
   SetLength(Result, Length(AHeaders));
   for Index := 0 to High(AHeaders) do
@@ -213,7 +211,7 @@ begin
   Result.Headers := CloneHttpHeaders(AResponse.Headers);
 end;
 
-function IsHttpSuccessStatus(const AStatusCode: Integer): Boolean;
+function IsHttpSuccessStatus(const AStatusCode: integer): boolean;
 begin
   Result := (AStatusCode >= 200) and (AStatusCode <= 299);
 end;

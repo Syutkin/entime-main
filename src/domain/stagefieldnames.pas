@@ -15,7 +15,7 @@ type
     sfkDiffLeader,
     sfkPlace,
     sfkStatus
-  );
+    );
 
 function StageFieldPrefix(const AKind: TStageFieldKind): string;
 function TryParseStageFieldName(const AFieldName: string;
@@ -39,7 +39,8 @@ begin
     sfkDiffLeader: Result := 'diffleader';
     sfkPlace: Result := 'place';
     sfkStatus: Result := 'status';
-    else Result := '';
+    else
+      Result := '';
   end;
 end;
 
@@ -57,8 +58,7 @@ begin
     if not StartsText(Prefix, AFieldName) then
       Continue;
     Suffix := Copy(AFieldName, Length(Prefix) + 1, MaxInt);
-    if TryStrToInt(Suffix, AStageIndex) and
-      IsValidStageCount(AStageIndex) and
+    if TryStrToInt(Suffix, AStageIndex) and IsValidStageCount(AStageIndex) and
       (Suffix = IntToStr(AStageIndex)) then
     begin
       AKind := Kind;

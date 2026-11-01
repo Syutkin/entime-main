@@ -19,8 +19,7 @@ type
     procedure Execute; override;
   public
     constructor Create(const ACoordinator: TCompetitionBackupCoordinator;
-      const ARequest: TCompetitionBackupRequest;
-      AAction: TCompetitionBackupAction);
+      const ARequest: TCompetitionBackupRequest; AAction: TCompetitionBackupAction);
     property BackupResult: TCompetitionBackupResult read FResult;
   end;
 
@@ -35,11 +34,12 @@ type
     function BackupDirectory: string;
     function FixtureBackupFileName(const AKind: TCompetitionBackupKind;
       const AReason: TCompetitionBackupReason; const ABackupTime: TDateTime;
-      const ADatabaseFile: string): string;
+      const ADatabaseFile: string; const ACollisionIndex: integer = 0): string;
+    procedure CheckCleanupIsolation(const AKind: TCompetitionBackupKind;
+      const AUseQuota: boolean);
     procedure BackupCompleted(Sender: TObject;
       const AResult: TCompetitionBackupResult);
-    procedure CreateFixtureFile(const AFileName: string;
-      const ASize: integer = 1);
+    procedure CreateFixtureFile(const AFileName: string; const ASize: integer = 1);
     procedure CreateCompetitionFile;
     procedure DeleteBackupFiles;
     procedure WaitForCompletion;
@@ -56,6 +56,10 @@ type
     procedure SafetyBackup_KeepsOnePerWeekWithinArchiveWindow;
     procedure FailedBackup_DoesNotPruneExistingFiles;
     procedure Cleanup_DoesNotTouchAnotherDatabase;
+    procedure AutomaticBackup_AgeCleanupPreservesMatchingDatabaseSuffix;
+    procedure SafetyBackup_AgeCleanupPreservesMatchingDatabaseSuffix;
+    procedure AutomaticBackup_QuotaIgnoresMatchingDatabaseSuffix;
+    procedure SafetyBackup_QuotaIgnoresMatchingDatabaseSuffix;
     procedure Controller_QueuesCompletionAndRejectsConcurrentStart;
     procedure Controller_CancelWaitsAndSuppressesCompletion;
     procedure Coordinator_SafetyWaitsAndAutomaticBackupsAreSkipped;
@@ -75,7 +79,7 @@ var
   CoordinatedSafetyStarted: PRTLEvent;
 
 function FakeCreateBackup(const ARequest: TCompetitionBackupRequest):
-  TCompetitionBackupResult;
+TCompetitionBackupResult;
 begin
   RTLEventSetEvent(FakeBackupStarted);
   if FakeBackupShouldBlock then
@@ -86,22 +90,22 @@ begin
   Result.ErrorMessage := '';
 end;
 
-function CoordinatedFakeCreateBackup(
-  const ARequest: TCompetitionBackupRequest): TCompetitionBackupResult;
+function CoordinatedFakeCreateBackup(const ARequest: TCompetitionBackupRequest):
+TCompetitionBackupResult;
 begin
   case ARequest.Kind of
     cbkAutomatic:
-      begin
-        InterlockedIncrement(CoordinatedAutomaticCallCount);
-        RTLEventSetEvent(CoordinatedAutomaticStarted);
-        RTLEventWaitFor(CoordinatedAutomaticRelease);
-      end;
+    begin
+      InterlockedIncrement(CoordinatedAutomaticCallCount);
+      RTLEventSetEvent(CoordinatedAutomaticStarted);
+      RTLEventWaitFor(CoordinatedAutomaticRelease);
+    end;
     cbkSafety:
-      begin
-        InterlockedIncrement(CoordinatedSafetyCallCount);
-        RTLEventSetEvent(CoordinatedSafetyStarted);
-        RTLEventWaitFor(CoordinatedSafetyRelease);
-      end;
+    begin
+      InterlockedIncrement(CoordinatedSafetyCallCount);
+      RTLEventSetEvent(CoordinatedSafetyStarted);
+      RTLEventWaitFor(CoordinatedSafetyRelease);
+    end;
   end;
   Result := Default(TCompetitionBackupResult);
   Result.Status := cbsCreated;
@@ -112,8 +116,7 @@ end;
 
 constructor TCoordinatedBackupThread.Create(
   const ACoordinator: TCompetitionBackupCoordinator;
-  const ARequest: TCompetitionBackupRequest;
-  AAction: TCompetitionBackupAction);
+  const ARequest: TCompetitionBackupRequest; AAction: TCompetitionBackupAction);
 begin
   inherited Create(True);
   FreeOnTerminate := False;
@@ -135,9 +138,9 @@ begin
 end;
 
 function TCompetitionBackupServiceTests.FixtureBackupFileName(
-  const AKind: TCompetitionBackupKind;
-  const AReason: TCompetitionBackupReason; const ABackupTime: TDateTime;
-  const ADatabaseFile: string): string;
+  const AKind: TCompetitionBackupKind; const AReason: TCompetitionBackupReason;
+  const ABackupTime: TDateTime; const ADatabaseFile: string;
+  const ACollisionIndex: integer): string;
 var
   Prefix: string;
 begin
@@ -149,19 +152,21 @@ begin
         cbrBeforeClear: Prefix := 'safety_before-clear';
         cbrBeforeMigration: Prefix := 'safety_before-migration';
         cbrBeforeStageExpansion: Prefix := 'safety_before-stage-expansion';
-      else
-        Prefix := 'safety_unspecified';
+        else
+          Prefix := 'safety_unspecified';
       end;
-  else
-    Prefix := 'manual';
+    else
+      Prefix := 'manual';
   end;
-  Result := IncludeTrailingPathDelimiter(BackupDirectory) + Prefix + '_' +
-    FormatDateTime('yyyy-mm-dd_hh-nn-ss-zzz', ABackupTime) + ' ' +
-    ExtractFileName(ADatabaseFile);
+  Result := IncludeTrailingPathDelimiter(BackupDirectory) + Prefix +
+    '_' + FormatDateTime('yyyy-mm-dd_hh-nn-ss-zzz', ABackupTime);
+  if ACollisionIndex > 0 then
+    Result := Result + '_' + IntToStr(ACollisionIndex);
+  Result := Result + ' ' + ExtractFileName(ADatabaseFile);
 end;
 
-procedure TCompetitionBackupServiceTests.CreateFixtureFile(
-  const AFileName: string; const ASize: integer);
+procedure TCompetitionBackupServiceTests.CreateFixtureFile(const AFileName: string;
+  const ASize: integer);
 var
   ByteValue: byte;
   Stream: TFileStream;
@@ -190,8 +195,7 @@ begin
     repeat
       if (Search.Name <> '.') and (Search.Name <> '..') and
         ((Search.Attr and faDirectory) = 0) then
-        DeleteFile(IncludeTrailingPathDelimiter(BackupDirectory) +
-          Search.Name);
+        DeleteFile(IncludeTrailingPathDelimiter(BackupDirectory) + Search.Name);
     until FindNext(Search) <> 0;
   finally
     FindClose(Search);
@@ -284,7 +288,7 @@ begin
 end;
 
 procedure TCompetitionBackupServiceTests.
-  CreateBackup_CreatesTimestampedDatabaseCopy;
+CreateBackup_CreatesTimestampedDatabaseCopy;
 var
   Result: TCompetitionBackupResult;
   BackupStream: TFileStream;
@@ -296,12 +300,11 @@ begin
 
   AssertEquals(Ord(cbsCreated), Ord(Result.Status));
   AssertEquals(IncludeTrailingPathDelimiter(FTempDirectory) + 'backup' +
-    DirectorySeparator +
-    'manual_2026-08-13_10-11-12-000 competition.sqlite',
+    DirectorySeparator + 'manual_2026-08-13_10-11-12-000 competition.sqlite',
     Result.BackupFileName);
   AssertTrue(FileExists(Result.BackupFileName));
-  BackupStream := TFileStream.Create(Result.BackupFileName,
-    fmOpenRead or fmShareDenyNone);
+  BackupStream := TFileStream.Create(Result.BackupFileName, fmOpenRead or
+    fmShareDenyNone);
   try
     AssertTrue(BackupStream.Size > 0);
   finally
@@ -311,7 +314,7 @@ begin
 end;
 
 procedure TCompetitionBackupServiceTests.
-  CreateBackup_MissingDatabaseReturnsFailure;
+CreateBackup_MissingDatabaseReturnsFailure;
 var
   Result: TCompetitionBackupResult;
 begin
@@ -324,7 +327,7 @@ begin
 end;
 
 procedure TCompetitionBackupServiceTests.
-  CreateBackup_SameMillisecondUsesUniqueNames;
+CreateBackup_SameMillisecondUsesUniqueNames;
 var
   FirstResult, SecondResult: TCompetitionBackupResult;
   BackupTime: TDateTime;
@@ -332,10 +335,8 @@ begin
   CreateCompetitionFile;
   BackupTime := EncodeDateTime(2026, 8, 13, 10, 11, 12, 123);
 
-  FirstResult := TCompetitionBackupService.CreateBackup(FDatabaseFile,
-    BackupTime);
-  SecondResult := TCompetitionBackupService.CreateBackup(FDatabaseFile,
-    BackupTime);
+  FirstResult := TCompetitionBackupService.CreateBackup(FDatabaseFile, BackupTime);
+  SecondResult := TCompetitionBackupService.CreateBackup(FDatabaseFile, BackupTime);
 
   AssertEquals(Ord(cbsCreated), Ord(FirstResult.Status));
   AssertEquals(Ord(cbsCreated), Ord(SecondResult.Status));
@@ -347,10 +348,9 @@ begin
 end;
 
 procedure TCompetitionBackupServiceTests.
-  AutomaticBackup_PrunesByAgeAndDayButPreservesOtherKinds;
+AutomaticBackup_PrunesByAgeAndDayButPreservesOtherKinds;
 var
-  DailyKept, DailyRemoved, ExpiredAuto, ManualFile, RecentAuto,
-  SafetyFile: string;
+  DailyKept, DailyRemoved, ExpiredAuto, ManualFile, RecentAuto, SafetyFile: string;
   Policy: TBackupRetentionPolicy;
   Request: TCompetitionBackupRequest;
   Result: TCompetitionBackupResult;
@@ -395,7 +395,7 @@ begin
 end;
 
 procedure TCompetitionBackupServiceTests.
-  AutomaticBackup_QuotaPreservesNewBackupAndReportsOverflow;
+AutomaticBackup_QuotaPreservesNewBackupAndReportsOverflow;
 var
   OldAuto: string;
   Policy: TBackupRetentionPolicy;
@@ -423,7 +423,7 @@ begin
 end;
 
 procedure TCompetitionBackupServiceTests.
-  SafetyBackup_PreservesMinimumCopiesAndPrunesOlderFiles;
+SafetyBackup_PreservesMinimumCopiesAndPrunesOlderFiles;
 var
   FileName: string;
   I: integer;
@@ -466,7 +466,7 @@ begin
 end;
 
 procedure TCompetitionBackupServiceTests.
-  SafetyBackup_KeepsOnePerWeekWithinArchiveWindow;
+SafetyBackup_KeepsOnePerWeekWithinArchiveWindow;
 var
   NewerSameWeek, OlderSameWeek, OtherWeek, Expired: string;
   Policy: TBackupRetentionPolicy;
@@ -506,7 +506,7 @@ begin
 end;
 
 procedure TCompetitionBackupServiceTests.
-  FailedBackup_DoesNotPruneExistingFiles;
+FailedBackup_DoesNotPruneExistingFiles;
 var
   ExistingFile: string;
   Policy: TBackupRetentionPolicy;
@@ -529,7 +529,7 @@ begin
 end;
 
 procedure TCompetitionBackupServiceTests.
-  Cleanup_DoesNotTouchAnotherDatabase;
+Cleanup_DoesNotTouchAnotherDatabase;
 var
   OtherDatabase, OtherFile, ThisFile: string;
   Policy: TBackupRetentionPolicy;
@@ -539,8 +539,7 @@ var
 begin
   CreateCompetitionFile;
   ReferenceTime := EncodeDateTime(2026, 8, 16, 12, 0, 0, 0);
-  OtherDatabase := IncludeTrailingPathDelimiter(FTempDirectory) +
-    'other.sqlite';
+  OtherDatabase := IncludeTrailingPathDelimiter(FTempDirectory) + 'other.sqlite';
   OtherFile := FixtureBackupFileName(cbkAutomatic, cbrNone,
     IncDay(ReferenceTime, -60), OtherDatabase);
   ThisFile := FixtureBackupFileName(cbkAutomatic, cbrNone,
@@ -559,7 +558,118 @@ begin
 end;
 
 procedure TCompetitionBackupServiceTests.
-  Controller_QueuesCompletionAndRejectsConcurrentStart;
+CheckCleanupIsolation(const AKind: TCompetitionBackupKind; const AUseQuota: boolean);
+var
+  OwnFiles, OtherFiles, UnrecognizedFiles: array[0..1] of string;
+  OtherDatabase, ManualFile, Prefix: string;
+  Policy: TBackupRetentionPolicy;
+  Result: TCompetitionBackupResult;
+  ReferenceTime, OwnTime, OtherTime: TDateTime;
+  Stream: TFileStream;
+  QuotaBytes: int64;
+  I: integer;
+begin
+  FDatabaseFile := IncludeTrailingPathDelimiter(FTempDirectory) + 'short race.sqlite';
+  OtherDatabase := IncludeTrailingPathDelimiter(FTempDirectory) +
+    'long short race.sqlite';
+  CreateCompetitionFile;
+  ReferenceTime := EncodeDateTime(2026, 8, 16, 12, 0, 0, 0);
+  // Measure a real backup so both own recent copies fit exactly in the quota.
+  Result := TCompetitionBackupService.CreateBackup(FDatabaseFile, ReferenceTime);
+  AssertEquals(Ord(cbsCreated), Ord(Result.Status));
+  ManualFile := Result.BackupFileName;
+  Stream := TFileStream.Create(ManualFile, fmOpenRead or fmShareDenyNone);
+  try
+    QuotaBytes := Stream.Size + 20;
+  finally
+    Stream.Free;
+  end;
+  if AUseQuota then
+  begin
+    OwnTime := IncHour(ReferenceTime, -1);
+    OtherTime := IncHour(ReferenceTime, 1);
+  end
+  else
+  begin
+    OwnTime := IncDay(ReferenceTime, -200);
+    OtherTime := IncDay(ReferenceTime, -201);
+  end;
+  for I := 0 to 1 do
+  begin
+    OwnFiles[I] := FixtureBackupFileName(AKind, cbrBeforeImport,
+      OwnTime, FDatabaseFile, I);
+    OtherFiles[I] := FixtureBackupFileName(AKind, cbrBeforeMigration,
+      OtherTime, OtherDatabase, I);
+    CreateFixtureFile(OwnFiles[I], 10);
+    CreateFixtureFile(OtherFiles[I], 1024);
+  end;
+  if AKind = cbkAutomatic then Prefix := 'auto'
+  else
+    Prefix := 'safety_before-clear';
+  UnrecognizedFiles[0] := IncludeTrailingPathDelimiter(BackupDirectory) +
+    Prefix + '_invalid_2025-01-01_00-00-00-000 ' + ExtractFileName(FDatabaseFile);
+  UnrecognizedFiles[1] := IncludeTrailingPathDelimiter(BackupDirectory) +
+    Prefix + '_2025-01-01_00-00-00-000_x ' + ExtractFileName(FDatabaseFile);
+  for I := 0 to 1 do
+    CreateFixtureFile(UnrecognizedFiles[I], 1024);
+  Policy := DefaultBackupRetentionPolicy;
+  Policy.SafetyMinCopies := 1;
+  if AUseQuota then
+  begin
+    Policy.AutomaticMaxTotalBytes := QuotaBytes;
+    Policy.SafetyMaxTotalBytes := QuotaBytes;
+  end;
+
+  Result := TCompetitionBackupService.CreateBackup(NewCompetitionBackupRequest(
+    FDatabaseFile, ReferenceTime, AKind, cbrBeforeClear, Policy));
+
+  AssertEquals(Ord(cbsCreated), Ord(Result.Status));
+  AssertTrue(FileExists(Result.BackupFileName));
+  AssertTrue('Manual backups must be preserved', FileExists(ManualFile));
+  for I := 0 to 1 do
+  begin
+    AssertTrue('Another database backup must be preserved: ' + OtherFiles[I],
+      FileExists(OtherFiles[I]));
+    AssertEquals('Only own expired backups may be removed: ' + OwnFiles[I],
+      AUseQuota, FileExists(OwnFiles[I]));
+    AssertTrue('Unrecognized backup names must be preserved',
+      FileExists(UnrecognizedFiles[I]));
+  end;
+  if AUseQuota then
+    AssertEquals('Foreign files must not count towards the quota',
+      0, Result.Cleanup.DeletedCount)
+  else
+    AssertEquals('Both own expired copies, including the collision, must rotate',
+      2, Result.Cleanup.DeletedCount);
+  AssertEquals('', Result.Cleanup.WarningMessage);
+end;
+
+procedure TCompetitionBackupServiceTests.
+AutomaticBackup_AgeCleanupPreservesMatchingDatabaseSuffix;
+begin
+  CheckCleanupIsolation(cbkAutomatic, False);
+end;
+
+procedure TCompetitionBackupServiceTests.
+SafetyBackup_AgeCleanupPreservesMatchingDatabaseSuffix;
+begin
+  CheckCleanupIsolation(cbkSafety, False);
+end;
+
+procedure TCompetitionBackupServiceTests.
+AutomaticBackup_QuotaIgnoresMatchingDatabaseSuffix;
+begin
+  CheckCleanupIsolation(cbkAutomatic, True);
+end;
+
+procedure TCompetitionBackupServiceTests.
+SafetyBackup_QuotaIgnoresMatchingDatabaseSuffix;
+begin
+  CheckCleanupIsolation(cbkSafety, True);
+end;
+
+procedure TCompetitionBackupServiceTests.
+Controller_QueuesCompletionAndRejectsConcurrentStart;
 var
   MainThreadId: TThreadID;
 begin
@@ -568,8 +678,8 @@ begin
   FController := TCompetitionBackupController.Create(
     @FakeCreateBackup, @BackupCompleted);
 
-  AssertTrue(FController.Start(FDatabaseFile,
-    EncodeDateTime(2026, 8, 13, 10, 11, 12, 0)));
+  AssertTrue(FController.Start(FDatabaseFile, EncodeDateTime(2026,
+    8, 13, 10, 11, 12, 0)));
   RTLEventWaitFor(FakeBackupStarted, 1000);
   AssertTrue(FController.Busy);
   AssertFalse(FController.Start(FDatabaseFile, Now));
@@ -582,7 +692,7 @@ begin
 end;
 
 procedure TCompetitionBackupServiceTests.
-  Controller_CancelWaitsAndSuppressesCompletion;
+Controller_CancelWaitsAndSuppressesCompletion;
 begin
   FakeBackupShouldBlock := True;
   FController := TCompetitionBackupController.Create(
@@ -599,7 +709,7 @@ begin
 end;
 
 procedure TCompetitionBackupServiceTests.
-  Coordinator_SafetyWaitsAndAutomaticBackupsAreSkipped;
+Coordinator_SafetyWaitsAndAutomaticBackupsAreSkipped;
 var
   AutomaticRequest, SafetyRequest: TCompetitionBackupRequest;
   AutomaticThread, SafetyThread: TCoordinatedBackupThread;

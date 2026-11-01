@@ -20,24 +20,24 @@ const
 
 type
   TTelegramRetryPolicy = record
-    Enabled: Boolean;
-    RetryCount: Integer;
-    DelaySeconds: Integer;
-    class function Create(const AEnabled: Boolean; const ARetryCount,
-      ADelaySeconds: Integer): TTelegramRetryPolicy; static;
+    Enabled: boolean;
+    RetryCount: integer;
+    DelaySeconds: integer;
+    class function Create(const AEnabled: boolean;
+      const ARetryCount, ADelaySeconds: integer): TTelegramRetryPolicy; static;
     class function Disabled: TTelegramRetryPolicy; static;
   end;
 
   TTelegramQueueItemInfo = record
-    ParticipantNumber: Integer;
+    ParticipantNumber: integer;
     EnqueuedAt: TDateTime;
-    IsTest: Boolean;
+    IsTest: boolean;
   end;
 
   TTelegramDeliveryResult = record
     Item: TTelegramQueueItemInfo;
     Outcome: TFinishNotificationOutcome;
-    AttemptCount: Integer;
+    AttemptCount: integer;
   end;
 
   TTelegramCompletedEvent = procedure(Sender: TObject;
@@ -57,7 +57,8 @@ type
   end;
 
   TTelegramNotificationCoordinator = class
-  private type
+  private
+  type
     TQueueItem = record
       Info: TTelegramQueueItemInfo;
       Endpoint: string;
@@ -66,6 +67,7 @@ type
     end;
     TQueueItems = array of TQueueItem;
     TQueuedEventKind = (qekCompleted, qekDropped);
+
     TQueuedEvent = record
       Kind: TQueuedEventKind;
       Delivery: TTelegramDeliveryResult;
@@ -81,46 +83,41 @@ type
     FEvents: TQueuedEvents;
     FWorker: TTelegramNotificationWorker;
     FActiveTransport: IHttpTransport;
-    FActive: Boolean;
-    FClosing: Boolean;
+    FActive: boolean;
+    FClosing: boolean;
     FOnCompleted: TTelegramCompletedEvent;
     FOnDropped: TTelegramDroppedEvent;
-    function EnqueueItem(const AItem: TQueueItem): Boolean;
-    function TakeNext(out AItem: TQueueItem): Boolean;
-    function IsClosing: Boolean;
+    function EnqueueItem(const AItem: TQueueItem): boolean;
+    function TakeNext(out AItem: TQueueItem): boolean;
+    function IsClosing: boolean;
     procedure SetActiveTransport(const ATransport: IHttpTransport);
     procedure ClearActiveTransport;
     procedure FinishItem(const AItem: TQueueItem;
-      const AOutcome: TFinishNotificationOutcome;
-      const AAttemptCount: Integer);
+      const AOutcome: TFinishNotificationOutcome; const AAttemptCount: integer);
     procedure QueueDropped(const AItem: TTelegramQueueItemInfo);
     procedure QueueCompleted(const ADelivery: TTelegramDeliveryResult);
     procedure DeliverNextEvent;
     procedure ExecuteItem(const AItem: TQueueItem);
     class function IsRetryable(
-      const AOutcome: TFinishNotificationOutcome): Boolean; static;
-    function GetPendingCount: Integer;
+      const AOutcome: TFinishNotificationOutcome): boolean;
+      static;
+    function GetPendingCount: integer;
   public
     constructor Create(const AFactory: IHttpTransportFactory);
     destructor Destroy; override;
     function EnqueueResult(const AResult: TFinishResult;
-      const AEndpoint: string; const ARetryPolicy: TTelegramRetryPolicy):
-      Boolean;
+      const AEndpoint: string; const ARetryPolicy: TTelegramRetryPolicy): boolean;
     function EnqueueFields(const AFields: THttpFormFields;
-      const AEndpoint: string; const ARetryPolicy: TTelegramRetryPolicy):
-      Boolean;
-    function Shutdown: Integer;
-    property PendingCount: Integer read GetPendingCount;
-    property OnCompleted: TTelegramCompletedEvent read FOnCompleted
-      write FOnCompleted;
-    property OnDropped: TTelegramDroppedEvent read FOnDropped
-      write FOnDropped;
+      const AEndpoint: string; const ARetryPolicy: TTelegramRetryPolicy): boolean;
+    function Shutdown: integer;
+    property PendingCount: integer read GetPendingCount;
+    property OnCompleted: TTelegramCompletedEvent read FOnCompleted write FOnCompleted;
+    property OnDropped: TTelegramDroppedEvent read FOnDropped write FOnDropped;
   end;
 
 implementation
 
-function ClampOrDefault(const AValue, AMinimum, AMaximum,
-  ADefault: Integer): Integer;
+function ClampOrDefault(const AValue, AMinimum, AMaximum, ADefault: integer): integer;
 begin
   if (AValue < AMinimum) or (AValue > AMaximum) then
     Result := ADefault
@@ -128,13 +125,12 @@ begin
     Result := AValue;
 end;
 
-class function TTelegramRetryPolicy.Create(const AEnabled: Boolean;
-  const ARetryCount, ADelaySeconds: Integer): TTelegramRetryPolicy;
+class function TTelegramRetryPolicy.Create(const AEnabled: boolean;
+  const ARetryCount, ADelaySeconds: integer): TTelegramRetryPolicy;
 begin
   Result.Enabled := AEnabled;
-  Result.RetryCount := ClampOrDefault(ARetryCount,
-    TELEGRAM_RETRY_MIN_COUNT, TELEGRAM_RETRY_MAX_COUNT,
-    TELEGRAM_RETRY_DEFAULT_COUNT);
+  Result.RetryCount := ClampOrDefault(ARetryCount, TELEGRAM_RETRY_MIN_COUNT,
+    TELEGRAM_RETRY_MAX_COUNT, TELEGRAM_RETRY_DEFAULT_COUNT);
   Result.DelaySeconds := ClampOrDefault(ADelaySeconds,
     TELEGRAM_RETRY_MIN_DELAY_SECONDS, TELEGRAM_RETRY_MAX_DELAY_SECONDS,
     TELEGRAM_RETRY_DEFAULT_DELAY_SECONDS);
@@ -204,9 +200,8 @@ begin
   inherited Destroy;
 end;
 
-function TTelegramNotificationCoordinator.EnqueueResult(
-  const AResult: TFinishResult; const AEndpoint: string;
-  const ARetryPolicy: TTelegramRetryPolicy): Boolean;
+function TTelegramNotificationCoordinator.EnqueueResult(const AResult: TFinishResult;
+  const AEndpoint: string; const ARetryPolicy: TTelegramRetryPolicy): boolean;
 var
   Item: TQueueItem;
 begin
@@ -219,9 +214,8 @@ begin
   Result := EnqueueItem(Item);
 end;
 
-function TTelegramNotificationCoordinator.EnqueueFields(
-  const AFields: THttpFormFields; const AEndpoint: string;
-  const ARetryPolicy: TTelegramRetryPolicy): Boolean;
+function TTelegramNotificationCoordinator.EnqueueFields(const AFields: THttpFormFields;
+  const AEndpoint: string; const ARetryPolicy: TTelegramRetryPolicy): boolean;
 var
   Item: TQueueItem;
 begin
@@ -235,11 +229,11 @@ begin
 end;
 
 function TTelegramNotificationCoordinator.EnqueueItem(
-  const AItem: TQueueItem): Boolean;
+  const AItem: TQueueItem): boolean;
 var
   Dropped: TTelegramQueueItemInfo;
-  HasDropped: Boolean;
-  Index: Integer;
+  HasDropped: boolean;
+  Index: integer;
 begin
   Result := False;
   HasDropped := False;
@@ -266,10 +260,9 @@ begin
     QueueDropped(Dropped);
 end;
 
-function TTelegramNotificationCoordinator.TakeNext(
-  out AItem: TQueueItem): Boolean;
+function TTelegramNotificationCoordinator.TakeNext(out AItem: TQueueItem): boolean;
 var
-  Index: Integer;
+  Index: integer;
 begin
   Result := False;
   AItem := Default(TQueueItem);
@@ -293,7 +286,7 @@ begin
   end;
 end;
 
-function TTelegramNotificationCoordinator.IsClosing: Boolean;
+function TTelegramNotificationCoordinator.IsClosing: boolean;
 begin
   EnterCriticalSection(FLock);
   try
@@ -325,20 +318,18 @@ begin
 end;
 
 class function TTelegramNotificationCoordinator.IsRetryable(
-  const AOutcome: TFinishNotificationOutcome): Boolean;
+  const AOutcome: TFinishNotificationOutcome): boolean;
 begin
   if AOutcome.TransportErrorKind <> hekNone then
     Exit(AOutcome.TransportErrorKind <> hekCancelled);
   Result := (AOutcome.ResponseStatusCode = 408) or
     (AOutcome.ResponseStatusCode = 429) or
-    ((AOutcome.ResponseStatusCode >= 500) and
-    (AOutcome.ResponseStatusCode <= 599));
+    ((AOutcome.ResponseStatusCode >= 500) and (AOutcome.ResponseStatusCode <= 599));
 end;
 
-procedure TTelegramNotificationCoordinator.ExecuteItem(
-  const AItem: TQueueItem);
+procedure TTelegramNotificationCoordinator.ExecuteItem(const AItem: TQueueItem);
 var
-  Attempt, MaximumAttempts: Integer;
+  Attempt, MaximumAttempts: integer;
   Outcome: TFinishNotificationOutcome;
   Transport: IHttpTransport;
 begin
@@ -363,17 +354,16 @@ begin
       (Attempt >= MaximumAttempts) then
       Break;
     RTLEventWaitFor(FCancelEvent,
-      Cardinal(AItem.RetryPolicy.DelaySeconds) * 1000);
+      cardinal(AItem.RetryPolicy.DelaySeconds) * 1000);
   end;
   FinishItem(AItem, Outcome, Attempt);
 end;
 
-procedure TTelegramNotificationCoordinator.FinishItem(
-  const AItem: TQueueItem; const AOutcome: TFinishNotificationOutcome;
-  const AAttemptCount: Integer);
+procedure TTelegramNotificationCoordinator.FinishItem(const AItem: TQueueItem;
+  const AOutcome: TFinishNotificationOutcome; const AAttemptCount: integer);
 var
   Delivery: TTelegramDeliveryResult;
-  Closing: Boolean;
+  Closing: boolean;
 begin
   EnterCriticalSection(FLock);
   try
@@ -434,7 +424,7 @@ end;
 procedure TTelegramNotificationCoordinator.DeliverNextEvent;
 var
   Event: TQueuedEvent;
-  Index: Integer;
+  Index: integer;
 begin
   Event := Default(TQueuedEvent);
   EnterCriticalSection(FLock);
@@ -458,7 +448,7 @@ begin
   end;
 end;
 
-function TTelegramNotificationCoordinator.GetPendingCount: Integer;
+function TTelegramNotificationCoordinator.GetPendingCount: integer;
 begin
   EnterCriticalSection(FLock);
   try
@@ -468,7 +458,7 @@ begin
   end;
 end;
 
-function TTelegramNotificationCoordinator.Shutdown: Integer;
+function TTelegramNotificationCoordinator.Shutdown: integer;
 var
   ActiveTransport: IHttpTransport;
 begin

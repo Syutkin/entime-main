@@ -10,7 +10,7 @@ uses
 
 type
   TLedPanelDeliveryResult = record
-    IsTest: Boolean;
+    IsTest: boolean;
     Outcome: TFinishNotificationOutcome;
   end;
 
@@ -29,9 +29,10 @@ type
   end;
 
   TLedPanelCoordinator = class
-  private type
+  private
+  type
     TQueueItem = record
-      IsTest: Boolean;
+      IsTest: boolean;
       Request: THttpRequest;
     end;
     TDeliveryArray = array of TLedPanelDeliveryResult;
@@ -41,30 +42,29 @@ type
     FWorkEvent: PRTLEvent;
     FWorker: TLedPanelWorker;
     FPending: TQueueItem;
-    FHasPending: Boolean;
-    FClosing: Boolean;
+    FHasPending: boolean;
+    FClosing: boolean;
     FActiveTransport: IHttpTransport;
     FDeliveries: TDeliveryArray;
     FOnCompleted: TLedPanelCompletedEvent;
     function EnqueueRequest(const ARequest: THttpRequest;
-      const AIsTest: Boolean): Boolean;
-    function TakePending(out AItem: TQueueItem): Boolean;
-    function IsClosing: Boolean;
+      const AIsTest: boolean): boolean;
+    function TakePending(out AItem: TQueueItem): boolean;
+    function IsClosing: boolean;
     procedure ExecuteItem(const AItem: TQueueItem);
     procedure QueueDelivery(const ADelivery: TLedPanelDeliveryResult);
     procedure DeliverNext;
-    function GetPendingCount: Integer;
+    function GetPendingCount: integer;
   public
     constructor Create(const AFactory: IHttpTransportFactory);
     destructor Destroy; override;
     function EnqueueFinish(const AResult: TFinishResult;
-      const AAddress: string): Boolean;
+      const AAddress: string): boolean;
     function EnqueueTest(const AAddress, ASingleLine, AUpperLine,
-      ABottomLine: string): Boolean;
+      ABottomLine: string): boolean;
     procedure Shutdown;
-    property PendingCount: Integer read GetPendingCount;
-    property OnCompleted: TLedPanelCompletedEvent read FOnCompleted
-      write FOnCompleted;
+    property PendingCount: integer read GetPendingCount;
+    property OnCompleted: TLedPanelCompletedEvent read FOnCompleted write FOnCompleted;
   end;
 
 implementation
@@ -93,8 +93,7 @@ begin
   end;
 end;
 
-constructor TLedPanelCoordinator.Create(
-  const AFactory: IHttpTransportFactory);
+constructor TLedPanelCoordinator.Create(const AFactory: IHttpTransportFactory);
 begin
   inherited Create;
   if not Assigned(AFactory) then
@@ -124,16 +123,16 @@ begin
 end;
 
 function TLedPanelCoordinator.EnqueueFinish(const AResult: TFinishResult;
-  const AAddress: string): Boolean;
+  const AAddress: string): boolean;
 var
   Request: THttpRequest;
 begin
-  Result := TLedPanelClient.TryBuildFinishRequest(AResult, AAddress,
-    Request) and EnqueueRequest(Request, False);
+  Result := TLedPanelClient.TryBuildFinishRequest(AResult, AAddress, Request) and
+    EnqueueRequest(Request, False);
 end;
 
-function TLedPanelCoordinator.EnqueueTest(const AAddress, ASingleLine,
-  AUpperLine, ABottomLine: string): Boolean;
+function TLedPanelCoordinator.EnqueueTest(
+  const AAddress, ASingleLine, AUpperLine, ABottomLine: string): boolean;
 var
   Request: THttpRequest;
 begin
@@ -142,7 +141,7 @@ begin
 end;
 
 function TLedPanelCoordinator.EnqueueRequest(const ARequest: THttpRequest;
-  const AIsTest: Boolean): Boolean;
+  const AIsTest: boolean): boolean;
 begin
   Result := False;
   EnterCriticalSection(FLock);
@@ -160,7 +159,7 @@ begin
   end;
 end;
 
-function TLedPanelCoordinator.TakePending(out AItem: TQueueItem): Boolean;
+function TLedPanelCoordinator.TakePending(out AItem: TQueueItem): boolean;
 begin
   Result := False;
   AItem := Default(TQueueItem);
@@ -181,7 +180,7 @@ begin
   end;
 end;
 
-function TLedPanelCoordinator.IsClosing: Boolean;
+function TLedPanelCoordinator.IsClosing: boolean;
 begin
   EnterCriticalSection(FLock);
   try
@@ -224,8 +223,7 @@ begin
     QueueDelivery(Delivery);
 end;
 
-procedure TLedPanelCoordinator.QueueDelivery(
-  const ADelivery: TLedPanelDeliveryResult);
+procedure TLedPanelCoordinator.QueueDelivery(const ADelivery: TLedPanelDeliveryResult);
 begin
   EnterCriticalSection(FLock);
   try
@@ -242,7 +240,7 @@ end;
 procedure TLedPanelCoordinator.DeliverNext;
 var
   Delivery: TLedPanelDeliveryResult;
-  Index: Integer;
+  Index: integer;
 begin
   Delivery := Default(TLedPanelDeliveryResult);
   EnterCriticalSection(FLock);
@@ -260,7 +258,7 @@ begin
     FOnCompleted(Self, Delivery);
 end;
 
-function TLedPanelCoordinator.GetPendingCount: Integer;
+function TLedPanelCoordinator.GetPendingCount: integer;
 begin
   EnterCriticalSection(FLock);
   try

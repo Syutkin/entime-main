@@ -18,22 +18,20 @@ type
     FSerialTransport: ITimingTransport;
     function ActiveTransport: ITimingTransport;
     procedure SetActiveKind(const AValue: TTimingTransportKind);
-    procedure TransportDataReceived(Sender: TObject;
-      const AData: RawByteString; const ASource: TTimingMarkSource);
+    procedure TransportDataReceived(Sender: TObject; const AData: rawbytestring;
+      const ASource: TTimingMarkSource);
   public
-    constructor Create(const ASerialTransport,
-      ABleTransport: ITimingTransport);
+    constructor Create(const ASerialTransport, ABleTransport: ITimingTransport);
     destructor Destroy; override;
-    function SendAsync(const AData: RawByteString): ITimingSendOperation;
-    property ActiveKind: TTimingTransportKind read FActiveKind
-      write SetActiveKind;
+    function SendAsync(const AData: rawbytestring): ITimingSendOperation;
+    property ActiveKind: TTimingTransportKind read FActiveKind write SetActiveKind;
     property OnData: TTimingTransportDataEvent read FOnData write FOnData;
   end;
 
 implementation
 
-constructor TTimingTransportController.Create(const ASerialTransport,
-  ABleTransport: ITimingTransport);
+constructor TTimingTransportController.Create(
+  const ASerialTransport, ABleTransport: ITimingTransport);
 begin
   inherited Create;
   if not Assigned(ASerialTransport) then
@@ -72,14 +70,13 @@ begin
   end;
 end;
 
-procedure TTimingTransportController.SetActiveKind(
-  const AValue: TTimingTransportKind);
+procedure TTimingTransportController.SetActiveKind(const AValue: TTimingTransportKind);
 begin
   FActiveKind := AValue;
 end;
 
-function TTimingTransportController.SendAsync(
-  const AData: RawByteString): ITimingSendOperation;
+function TTimingTransportController.SendAsync(const AData: rawbytestring):
+ITimingSendOperation;
 var
   Transport: ITimingTransport;
 begin
@@ -91,7 +88,7 @@ begin
 end;
 
 procedure TTimingTransportController.TransportDataReceived(Sender: TObject;
-  const AData: RawByteString; const ASource: TTimingMarkSource);
+  const AData: rawbytestring; const ASource: TTimingMarkSource);
 var
   Handler: TTimingTransportDataEvent;
 begin

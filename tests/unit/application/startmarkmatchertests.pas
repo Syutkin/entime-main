@@ -31,16 +31,16 @@ implementation
 function TStartMarkMatcherTests.MarkAt(const ATime: TDateTime;
   const AStageIndex: integer): TStartMark;
 begin
-  Result := TStartMark.FromTimingMark(TTimingMark.Start(ATime, True, 10,
-    TTimingMarkSource.Serial('COM1'), EncodeDate(2026, 8, 13) + ATime),
+  Result := TStartMark.FromTimingMark(TTimingMark.Start(ATime, True,
+    10, TTimingMarkSource.Serial('COM1'), EncodeDate(2026, 8, 13) + ATime),
     AStageIndex);
 end;
 
-function TStartMarkMatcherTests.Candidate(const AParticipantNumber,
-  AStageIndex: integer; const AStartTime: TDateTime): TStartMarkCandidate;
+function TStartMarkMatcherTests.Candidate(
+  const AParticipantNumber, AStageIndex: integer;
+  const AStartTime: TDateTime): TStartMarkCandidate;
 begin
-  Result := TStartMarkCandidate.Create(AParticipantNumber, AStageIndex,
-    AStartTime);
+  Result := TStartMarkCandidate.Create(AParticipantNumber, AStageIndex, AStartTime);
 end;
 
 procedure TStartMarkMatcherTests.Match_OneCandidateWithinTolerance;
@@ -50,8 +50,7 @@ var
 begin
   Candidates[0] := Candidate(17, 2, EncodeTime(10, 0, 10, 250));
 
-  Match := TStartMarkMatcher.Match(MarkAt(EncodeTime(10, 0, 0, 0)),
-    Candidates, 15);
+  Match := TStartMarkMatcher.Match(MarkAt(EncodeTime(10, 0, 0, 0)), Candidates, 15);
 
   AssertEquals(Ord(smmMatched), Ord(Match.Status));
   AssertTrue(Match.HasParticipantNumber);
@@ -70,8 +69,7 @@ begin
   Candidates[1] := Candidate(20, 2, EncodeTime(10, 0, 2, 0));
   Candidates[2] := Candidate(10, 2, EncodeTime(10, 0, 8, 0));
 
-  Match := TStartMarkMatcher.Match(MarkAt(EncodeTime(10, 0, 0, 0)),
-    Candidates, 15);
+  Match := TStartMarkMatcher.Match(MarkAt(EncodeTime(10, 0, 0, 0)), Candidates, 15);
 
   AssertEquals(Ord(smmMatched), Ord(Match.Status));
   AssertEquals(20, Match.ParticipantNumber);
@@ -85,8 +83,7 @@ var
 begin
   Candidates[0] := Candidate(17, 2, EncodeTime(10, 0, 15, 0));
 
-  Match := TStartMarkMatcher.Match(MarkAt(EncodeTime(10, 0, 0, 0)),
-    Candidates, 15);
+  Match := TStartMarkMatcher.Match(MarkAt(EncodeTime(10, 0, 0, 0)), Candidates, 15);
 
   AssertEquals(Ord(smmMatched), Ord(Match.Status));
   AssertEquals(15000, Match.DeltaMs);
@@ -103,8 +100,7 @@ begin
   Candidates[2] := Candidate(3, 2, EncodeTime(11, 58, 59, 999));
   Candidates[3] := Candidate(4, 2, EncodeTime(12, 1, 0, 1));
 
-  Match := TStartMarkMatcher.Match(MarkAt(EncodeTime(12, 0, 0, 0)),
-    Candidates, 60);
+  Match := TStartMarkMatcher.Match(MarkAt(EncodeTime(12, 0, 0, 0)), Candidates, 60);
 
   AssertEquals(Ord(smmAmbiguous), Ord(Match.Status));
   AssertFalse(Match.HasParticipantNumber);
@@ -150,8 +146,7 @@ begin
   Candidates[0] := Candidate(1, 2, EncodeTime(9, 59, 44, 999));
   Candidates[1] := Candidate(2, 2, EncodeTime(10, 0, 15, 1));
 
-  Match := TStartMarkMatcher.Match(MarkAt(EncodeTime(10, 0, 0, 0)),
-    Candidates, 15);
+  Match := TStartMarkMatcher.Match(MarkAt(EncodeTime(10, 0, 0, 0)), Candidates, 15);
 
   AssertEquals(Ord(smmNoMatch), Ord(Match.Status));
   AssertFalse(Match.HasParticipantNumber);
@@ -168,8 +163,7 @@ begin
   Candidates[1] := Candidate(20, 2, EncodeTime(10, 0, 5, 0));
   Candidates[2] := Candidate(30, 2, EncodeTime(10, 0, 8, 0));
 
-  Match := TStartMarkMatcher.Match(MarkAt(EncodeTime(10, 0, 0, 0)),
-    Candidates, 15);
+  Match := TStartMarkMatcher.Match(MarkAt(EncodeTime(10, 0, 0, 0)), Candidates, 15);
 
   AssertEquals(Ord(smmAmbiguous), Ord(Match.Status));
   AssertFalse(Match.HasParticipantNumber);
@@ -184,14 +178,12 @@ var
   Match: TStartMarkMatch;
 begin
   Candidates[0] := Candidate(1, 2, EncodeTime(0, 0, 5, 0));
-  Match := TStartMarkMatcher.Match(MarkAt(EncodeTime(23, 59, 55, 0)),
-    Candidates, 15);
+  Match := TStartMarkMatcher.Match(MarkAt(EncodeTime(23, 59, 55, 0)), Candidates, 15);
   AssertEquals(Ord(smmMatched), Ord(Match.Status));
   AssertEquals(10000, Match.DeltaMs);
 
   Candidates[0] := Candidate(2, 2, EncodeTime(23, 59, 55, 0));
-  Match := TStartMarkMatcher.Match(MarkAt(EncodeTime(0, 0, 5, 0)),
-    Candidates, 15);
+  Match := TStartMarkMatcher.Match(MarkAt(EncodeTime(0, 0, 5, 0)), Candidates, 15);
   AssertEquals(Ord(smmMatched), Ord(Match.Status));
   AssertEquals(10000, Match.DeltaMs);
 end;

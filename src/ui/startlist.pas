@@ -223,8 +223,8 @@ begin
         // если есть, то запрашиваем подтверждение
         if (not StageHasFinishes(selectedStageIndex)) or
           (AskMessageDlg(Format(rsFinishResultsNotEmpty,
-          [ComboBoxStageSelection.Text]),
-          mtWarning, [mbYes, mbNo], 0) = mrYes) then
+          [ComboBoxStageSelection.Text]), mtWarning, [mbYes, mbNo], 0) =
+          mrYes) then
         begin
           generation := Default(TStartListGeneration);
           generation.StageIndex := selectedStageIndex;
@@ -237,8 +237,7 @@ begin
           generation.IncludeDNS := config.addDNS;
           generation.IncludeDNF := config.addDNF;
           generation.IncludeDSQ := config.addDSQ;
-          generation.ActivateStage :=
-            not stages[selectedStageIndex].isActive;
+          generation.ActivateStage := not stages[selectedStageIndex].isActive;
           TCompetitionStartListService.GenerateStartTimes(
             MainForm.CompetitionDb, stages, config.categories, generation);
           Result := True;

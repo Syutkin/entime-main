@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="12"/>
+    <General>
+      <SessionStorage Value="InProjectDir"/>
+      <Title Value="SqlBenchmark"/>
+      <ResourceType Value="res"/>
+      <Resources Count="1">
+        <Resource_0 FileName="$(ProjPath)/../resources/sql/schema.sql" Type="RCDATA" ResourceName="ENTIME_SCHEMA"/>
+      </Resources>
+    </General>
+    <BuildModes Count="1"><Item1 Name="default" Default="True"/></BuildModes>
+    <RequiredPackages Count="1"><Item1><PackageName Value="FCL"/></Item1></RequiredPackages>
+    <Units Count="1"><Unit0><Filename Value="sqlbenchmark.lpr"/><IsPartOfProject Value="True"/></Unit0></Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <Target><Filename Value=".test_build/sqlbenchmark"/></Target>
+    <SearchPaths>
+      <OtherUnitFiles Value="../src/domain;../src/application;../src/data;../src/infrastructure"/>
+      <UnitOutputDirectory Value=".test_build/benchmark-units"/>
+    </SearchPaths>
+    <CodeGeneration><Checks><IOChecks Value="True"/><RangeChecks Value="True"/><OverflowChecks Value="True"/></Checks></CodeGeneration>
+  </CompilerOptions>
+</CONFIG>

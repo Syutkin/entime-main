@@ -12,7 +12,7 @@ type
 
   TTransportFrame = record
     Kind: TTransportFrameKind;
-    Text: RawByteString;
+    Text: rawbytestring;
   end;
 
   TTransportFrameArray = array of TTransportFrame;
@@ -21,30 +21,26 @@ type
 
   TTransportStreamFramer = class
   private
-    FBuffer: RawByteString;
+    FBuffer: rawbytestring;
     FOverflowCount: cardinal;
     class procedure AddFrame(var AFrames: TTransportFrameArray;
-      const AKind: TTransportFrameKind;
-      const AText: RawByteString); static;
-    class function FirstLineEnd(const AValue: RawByteString): integer; static;
-    class function FindNextTimingStart(
-      const AValue: RawByteString): integer; static;
-    class procedure RemoveLeadingLineEnds(
-      var AValue: RawByteString); static;
+      const AKind: TTransportFrameKind; const AText: rawbytestring); static;
+    class function FirstLineEnd(const AValue: rawbytestring): integer; static;
+    class function FindNextTimingStart(const AValue: rawbytestring): integer;
+      static;
+    class procedure RemoveLeadingLineEnds(var AValue: rawbytestring); static;
     procedure ExtractLine(var AFrames: TTransportFrameArray;
       const AKind: TTransportFrameKind; const ALineEndPosition: integer);
   public
-    procedure Feed(const AChunk: RawByteString;
-      out AFrames: TTransportFrameArray);
+    procedure Feed(const AChunk: rawbytestring; out AFrames: TTransportFrameArray);
     procedure Reset;
     property OverflowCount: cardinal read FOverflowCount;
   end;
 
 implementation
 
-class procedure TTransportStreamFramer.AddFrame(
-  var AFrames: TTransportFrameArray; const AKind: TTransportFrameKind;
-  const AText: RawByteString);
+class procedure TTransportStreamFramer.AddFrame(var AFrames: TTransportFrameArray;
+  const AKind: TTransportFrameKind; const AText: rawbytestring);
 var
   Index: integer;
 begin
@@ -57,7 +53,7 @@ begin
 end;
 
 class function TTransportStreamFramer.FirstLineEnd(
-  const AValue: RawByteString): integer;
+  const AValue: rawbytestring): integer;
 var
   CarriageReturnPosition, LineFeedPosition: integer;
 begin
@@ -74,7 +70,7 @@ begin
 end;
 
 class function TTransportStreamFramer.FindNextTimingStart(
-  const AValue: RawByteString): integer;
+  const AValue: rawbytestring): integer;
 var
   Position: integer;
 begin
@@ -86,18 +82,17 @@ begin
 end;
 
 class procedure TTransportStreamFramer.RemoveLeadingLineEnds(
-  var AValue: RawByteString);
+  var AValue: rawbytestring);
 begin
   while (AValue <> '') and (AValue[1] in [#10, #13]) do
     Delete(AValue, 1, 1);
 end;
 
-procedure TTransportStreamFramer.ExtractLine(
-  var AFrames: TTransportFrameArray; const AKind: TTransportFrameKind;
-  const ALineEndPosition: integer);
+procedure TTransportStreamFramer.ExtractLine(var AFrames: TTransportFrameArray;
+  const AKind: TTransportFrameKind; const ALineEndPosition: integer);
 var
   FrameKind: TTransportFrameKind;
-  Line: RawByteString;
+  Line: rawbytestring;
 begin
   Line := Copy(FBuffer, 1, ALineEndPosition - 1);
   Delete(FBuffer, 1, ALineEndPosition);
@@ -111,10 +106,10 @@ begin
   AddFrame(AFrames, FrameKind, Line);
 end;
 
-procedure TTransportStreamFramer.Feed(const AChunk: RawByteString;
+procedure TTransportStreamFramer.Feed(const AChunk: rawbytestring;
   out AFrames: TTransportFrameArray);
 var
-  FrameText: RawByteString;
+  FrameText: rawbytestring;
   LineEndPosition, MessageStart, PacketEndPosition: integer;
 begin
   AFrames := nil;
@@ -131,8 +126,7 @@ begin
     if FBuffer[1] in ['$', 'F'] then
     begin
       PacketEndPosition := Pos('#', FBuffer);
-      if (PacketEndPosition > 0) and
-        ((LineEndPosition = 0) or
+      if (PacketEndPosition > 0) and ((LineEndPosition = 0) or
         (PacketEndPosition < LineEndPosition)) then
       begin
         FrameText := Copy(FBuffer, 1, PacketEndPosition);

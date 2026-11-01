@@ -45,15 +45,14 @@ type
 
   TCompetitionExportService = record
   public
-    class function BuildStartListFieldSpecs(const AStages: TStages):
-      TExportFieldSpecs; static;
+    class function BuildStartListFieldSpecs(
+      const AStages: TStages): TExportFieldSpecs; static;
     class function BuildResultsFieldSpecs(const AStages: TStages;
       const AResultCaption, ADiffLeaderCaption, APlaceCaption,
       ASumResultCaption: string): TExportFieldSpecs; static;
     class procedure ExportDataSetToCsv(const AExporter: TCSVExporter;
       const ADataSet: TDataSet; const AFileName: string;
-      const ABaseFieldCount: integer;
-      const AFieldSpecs: TExportFieldSpecs); static;
+      const ABaseFieldCount: integer; const AFieldSpecs: TExportFieldSpecs); static;
     class procedure ExportQueryToCsv(const AFileName: string;
       const AQuery: TSQLQuery; const AHeaders: boolean = False); static;
     class procedure ExportStageResultsToCsv(const AFileName: string;
@@ -95,9 +94,8 @@ type
   TCompetitionExportDataLoader = class
   private
     class procedure ConfigureFinishColumns(const AStages: TStages;
-      const ALabels: TCompetitionExportLabels;
-      const AShowPenalty: boolean; const AData: TCompetitionExportData);
-      static;
+      const ALabels: TCompetitionExportLabels; const AShowPenalty: boolean;
+      const AData: TCompetitionExportData); static;
     class procedure ConfigureThroughColumns(const AStages: TStages;
       const ALabels: TCompetitionExportLabels;
       const AData: TCompetitionExportData); static;
@@ -122,8 +120,7 @@ type
     procedure ConfigureFinishColumnWidth(const AColumn: integer);
     procedure ConfigureThroughColumnWidth(const AColumn: integer);
     procedure WriteFinishHeader(const ARow: integer);
-    procedure WriteFinishValue(const ARow, AColumn: integer;
-      const AValue: string);
+    procedure WriteFinishValue(const ARow, AColumn: integer; const AValue: string);
     procedure WriteFinishSheet;
     procedure WriteThroughSheet;
   public
@@ -151,8 +148,7 @@ begin
   Result := AStages;
 end;
 
-function RequireQuery(const AQuery: TSQLQuery;
-  const AParameterName: string): TSQLQuery;
+function RequireQuery(const AQuery: TSQLQuery; const AParameterName: string): TSQLQuery;
 begin
   if AQuery = nil then
     raise EArgumentNilException.Create(AParameterName + ' is required.');
@@ -258,8 +254,8 @@ begin
   end;
 end;
 
-class function TCompetitionExportDataLoader.Load(const AQuery,
-  AThroughResultsQuery: TSQLQuery; const AStages: TStages;
+class function TCompetitionExportDataLoader.Load(
+  const AQuery, AThroughResultsQuery: TSQLQuery; const AStages: TStages;
   const ALabels: TCompetitionExportLabels): TCompetitionExportData;
 var
   Categories: TStringList;
@@ -272,8 +268,8 @@ begin
   Categories := TStringList.Create;
   try
     try
-      Result.PenaltyGroupCount := TMainSql.GetPenaltyGroupsCount(AQuery,
-        AStages.Count);
+      Result.PenaltyGroupCount :=
+        TMainSql.GetPenaltyGroupsCount(AQuery, AStages.Count);
       ConfigureFinishColumns(AStages, ALabels,
         Result.PenaltyGroupCount > 1, Result);
       ConfigureThroughColumns(AStages, ALabels, Result);
@@ -286,13 +282,13 @@ begin
         Result.Categories[CategoryIndex].Name := Categories[CategoryIndex];
         TMainSql.ConfigureCategoryResults(AQuery,
           Result.FinishColumns.CommaText, Categories[CategoryIndex]);
-        Result.Categories[CategoryIndex].Snapshot := TDatasetSql.Capture(
-          AQuery, True, True);
+        Result.Categories[CategoryIndex].Snapshot :=
+          TDatasetSql.Capture(AQuery, True, True);
         Inc(Result.FinishRowCount,
           Length(Result.Categories[CategoryIndex].Snapshot.Rows));
       end;
-      Result.ThroughSnapshot := TDatasetSql.Capture(AThroughResultsQuery,
-        False, False);
+      Result.ThroughSnapshot :=
+        TDatasetSql.Capture(AThroughResultsQuery, False, False);
     except
       Result.Free;
       raise;
@@ -304,9 +300,8 @@ end;
 
 { TCompetitionWorkbookBuilder }
 
-constructor TCompetitionWorkbookBuilder.Create(
-  const AData: TCompetitionExportData; const AStages: TStages;
-  const ALabels: TCompetitionExportLabels);
+constructor TCompetitionWorkbookBuilder.Create(const AData: TCompetitionExportData;
+  const AStages: TStages; const ALabels: TCompetitionExportLabels);
 begin
   inherited Create;
   if AData = nil then
@@ -345,9 +340,9 @@ var
   ColumnName: string;
 begin
   ColumnName := FData.FinishColumns[AColumn];
-  if (Pos('number', ColumnName) > 0) or
-    (Pos('place', ColumnName) > 0) or (ColumnName = 'age') or
-    (Pos('penalty', ColumnName) > 0) or (ColumnName = 'sumstages') then
+  if (Pos('number', ColumnName) > 0) or (Pos('place', ColumnName) > 0) or
+    (ColumnName = 'age') or (Pos('penalty', ColumnName) > 0) or
+    (ColumnName = 'sumstages') then
     FFinishWorksheet.WriteColWidth(AColumn, 50, TsSizeUnits.suPoints)
   else if ColumnName = 'name' then
     FFinishWorksheet.WriteColWidth(AColumn, 125, TsSizeUnits.suPoints);
@@ -380,8 +375,8 @@ begin
   end;
 end;
 
-procedure TCompetitionWorkbookBuilder.WriteFinishValue(const ARow,
-  AColumn: integer; const AValue: string);
+procedure TCompetitionWorkbookBuilder.WriteFinishValue(const ARow, AColumn: integer;
+  const AValue: string);
 var
   ColumnName: string;
 begin
@@ -392,8 +387,8 @@ begin
     FFinishWorksheet.WriteNumber(ARow, AColumn, StrToIntDef(AValue, 0));
     FFinishWorksheet.WriteHorAlignment(ARow, AColumn, haCenter);
   end
-  else if (Pos('result', ColumnName) > 0) or
-    (Pos('diff', ColumnName) > 0) or (Pos('penalty', ColumnName) > 0) then
+  else if (Pos('result', ColumnName) > 0) or (Pos('diff', ColumnName) > 0) or
+    (Pos('penalty', ColumnName) > 0) then
   begin
     FFinishWorksheet.WriteText(ARow, AColumn, HideLeadingZeroHour(AValue));
     FFinishWorksheet.WriteHorAlignment(ARow, AColumn, haRight);
@@ -560,9 +555,9 @@ begin
   end;
 end;
 
-class function TCompetitionExportService.BuildResultsFieldSpecs(
-  const AStages: TStages; const AResultCaption, ADiffLeaderCaption,
-  APlaceCaption, ASumResultCaption: string): TExportFieldSpecs;
+class function TCompetitionExportService.BuildResultsFieldSpecs(const AStages: TStages;
+  const AResultCaption, ADiffLeaderCaption, APlaceCaption, ASumResultCaption: string):
+TExportFieldSpecs;
 var
   StageIndex: integer;
 begin
@@ -582,8 +577,8 @@ begin
   AppendFieldSpec(Result, 'sumdiffleader', ADiffLeaderCaption);
 end;
 
-class procedure TCompetitionExportService.ExportQueryToCsv(
-  const AFileName: string; const AQuery: TSQLQuery; const AHeaders: boolean);
+class procedure TCompetitionExportService.ExportQueryToCsv(const AFileName: string;
+  const AQuery: TSQLQuery; const AHeaders: boolean);
 var
   CsvLines: TStringList;
   Line: string;
@@ -636,16 +631,16 @@ begin
 end;
 
 class function TCompetitionExportService.ExportAllResultsToXlsx(
-  const AFileName: string; const AQuery, AThroughResultsQuery: TSQLQuery;
-  const AStages: TStages; const ALabels: TCompetitionExportLabels):
-  TXlsxExportOutcome;
+  const AFileName: string;
+  const AQuery, AThroughResultsQuery: TSQLQuery; const AStages: TStages;
+  const ALabels: TCompetitionExportLabels): TXlsxExportOutcome;
 var
   ExportData: TCompetitionExportData;
   WorkbookBuilder: TCompetitionWorkbookBuilder;
 begin
   Result := Default(TXlsxExportOutcome);
-  ExportData := TCompetitionExportDataLoader.Load(AQuery,
-    AThroughResultsQuery, AStages, ALabels);
+  ExportData := TCompetitionExportDataLoader.Load(AQuery, AThroughResultsQuery,
+    AStages, ALabels);
   try
     WorkbookBuilder := TCompetitionWorkbookBuilder.Create(ExportData,
       AStages, ALabels);

@@ -28,8 +28,8 @@ type
     function GetQuery: TSQLQuery;
   public
     constructor Create(const APageControl: TPageControl;
-      const AContext: TCompetitionDbContext; const AStageIndex,
-      AStageCount: integer); reintroduce;
+      const AContext: TCompetitionDbContext;
+      const AStageIndex, AStageCount: integer); reintroduce;
     procedure EnsureContent;
     procedure Configure(const ADisplayName: string; const AActive: boolean);
     property Active: boolean read FActive;
@@ -63,11 +63,9 @@ type
     procedure Rebuild(const AStageCount: integer);
     procedure ConfigureStage(const AStageIndex: integer;
       const ADisplayName: string; const AActive: boolean);
-    function RefreshQueries(out AErrors: string;
-      out AQueryCount: integer): integer;
+    function RefreshQueries(out AErrors: string; out AQueryCount: integer): integer;
     property Count: integer read GetCount;
-    property Items[const AStageIndex: integer]: TStageResultView
-      read GetItem; default;
+    property Items[const AStageIndex: integer]: TStageResultView read GetItem; default;
   end;
 
   TStageResultSumColumns = class
@@ -93,8 +91,7 @@ uses
   i18n, StageConfig;
 
 constructor TStageResultView.Create(const APageControl: TPageControl;
-  const AContext: TCompetitionDbContext; const AStageIndex,
-  AStageCount: integer);
+  const AContext: TCompetitionDbContext; const AStageIndex, AStageCount: integer);
 var
   StageSuffix: string;
 begin
@@ -118,7 +115,6 @@ begin
   FSheet.Name := 'SheetStage' + StageSuffix;
   FSheet.ParentFont := False;
   FSheet.PageControl := APageControl;
-  FSheet.PageIndex := AStageIndex - 1;
 end;
 
 procedure TStageResultView.EnsureContent;
@@ -149,8 +145,7 @@ begin
     FGrid.SelectedColor := clHighlight;
     FGrid.FixedCols := 0;
     FGrid.Options := [dgTitles, dgColumnResize, dgColLines, dgRowLines,
-      dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit,
-      dgDblClickAutoSize];
+      dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize];
     FGrid.ParentFont := False;
     FGrid.ReadOnly := True;
     FGrid.DataSource := FDataSource;
@@ -196,8 +191,7 @@ begin
 end;
 
 function TStageResultView.AddColumn(const AFieldName, ATitle: string;
-  const AWidth: integer; const AAlignment: TAlignment;
-  const ABold: boolean): TRxColumn;
+  const AWidth: integer; const AAlignment: TAlignment; const ABold: boolean): TRxColumn;
 begin
   Result := FGrid.Columns.Add;
   Result.FieldName := AFieldName;
@@ -241,8 +235,7 @@ begin
   inherited Destroy;
 end;
 
-function TStageResultTabs.FindBySheet(
-  const ASheet: TTabSheet): TStageResultView;
+function TStageResultTabs.FindBySheet(const ASheet: TTabSheet): TStageResultView;
 var
   View: TStageResultView;
 begin
@@ -280,8 +273,7 @@ begin
   Result := FItems.Count;
 end;
 
-function TStageResultTabs.GetItem(
-  const AStageIndex: integer): TStageResultView;
+function TStageResultTabs.GetItem(const AStageIndex: integer): TStageResultView;
 begin
   if (AStageIndex < 1) or (AStageIndex > FItems.Count) then
     raise EArgumentOutOfRangeException.CreateFmt(
@@ -296,28 +288,55 @@ var
 begin
   View := Items[AStageIndex];
   if not View.Active then
-    raise EArgumentException.CreateFmt('Stage %d is not active.',
-      [AStageIndex]);
+    raise EArgumentException.CreateFmt('Stage %d is not active.', [AStageIndex]);
   FPageControl.ActivePage := View.Sheet;
   OpenViewQuery(View);
 end;
 
 procedure TStageResultTabs.Rebuild(const AStageCount: integer);
+type
+  TStaticPageState = record
+    Sheet: TTabSheet;
+    TabVisible: boolean;
+  end;
 var
-  StageIndex: integer;
+  StageIndex, I, StaticPageCount: integer;
+  StaticPages: array of TStaticPageState;
 begin
   if not IsValidStageCount(AStageCount) then
     raise EArgumentOutOfRangeException.CreateFmt(
-      rsStageCountRangeError,
-      [IntToStr(AStageCount), MIN_STAGE_COUNT, MAX_SUPPORTED_STAGE_COUNT]);
+      rsStageCountRangeError, [IntToStr(AStageCount), MIN_STAGE_COUNT,
+      MAX_SUPPORTED_STAGE_COUNT]);
+  // Append in final display order. Moving new pages ahead of existing pages
+  // can leave Qt's page order/selection out of sync with LCL after rebuilding.
+  SetLength(StaticPages, FPageControl.PageCount);
+  StaticPageCount := 0;
+  for I := 0 to FPageControl.PageCount - 1 do
+    if FindBySheet(FPageControl.Pages[I]) = nil then
+    begin
+      StaticPages[StaticPageCount].Sheet := FPageControl.Pages[I];
+      StaticPages[StaticPageCount].TabVisible := FPageControl.Pages[I].TabVisible;
+      Inc(StaticPageCount);
+    end;
+  SetLength(StaticPages, StaticPageCount);
   FQueriesEnabled := False;
   FPageControl.DisableAlign;
   try
     FItems.Clear;
-    FItems.Capacity := AStageCount;
-    for StageIndex := 1 to AStageCount do
-      FItems.Add(TStageResultView.Create(FPageControl, FContext,
-        StageIndex, AStageCount));
+    for I := 0 to High(StaticPages) do StaticPages[I].Sheet.PageControl := nil;
+    try
+      FItems.Capacity := AStageCount;
+      for StageIndex := 1 to AStageCount do
+        FItems.Add(TStageResultView.Create(FPageControl, FContext,
+          StageIndex, AStageCount));
+    finally
+      for I := 0 to High(StaticPages) do
+      begin
+        // LCL clears TabVisible when removing a page from its page control.
+        StaticPages[I].Sheet.TabVisible := StaticPages[I].TabVisible;
+        StaticPages[I].Sheet.PageControl := FPageControl;
+      end;
+    end;
   finally
     FPageControl.EnableAlign;
   end;
@@ -385,8 +404,7 @@ begin
   Result := FColumns.Count;
 end;
 
-function TStageResultSumColumns.GetColumn(
-  const AStageIndex: integer): TRxColumn;
+function TStageResultSumColumns.GetColumn(const AStageIndex: integer): TRxColumn;
 begin
   if (AStageIndex < 1) or (AStageIndex > FColumns.Count) then
     raise EArgumentOutOfRangeException.CreateFmt(
@@ -402,8 +420,8 @@ var
 begin
   if not IsValidStageCount(AStageCount) then
     raise EArgumentOutOfRangeException.CreateFmt(
-      rsStageCountRangeError,
-      [IntToStr(AStageCount), MIN_STAGE_COUNT, MAX_SUPPORTED_STAGE_COUNT]);
+      rsStageCountRangeError, [IntToStr(AStageCount), MIN_STAGE_COUNT,
+      MAX_SUPPORTED_STAGE_COUNT]);
   Clear;
   FColumns.Capacity := AStageCount;
   if FGrid.ColumnByFieldName('sumresult') = nil then

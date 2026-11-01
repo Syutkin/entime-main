@@ -100,8 +100,8 @@ begin
   ParticipantNumber := AParticipantNumber;
 end;
 
-procedure TStartMark.SetParticipantNumber(
-  const AHasParticipantNumber: boolean; const AParticipantNumber: integer);
+procedure TStartMark.SetParticipantNumber(const AHasParticipantNumber: boolean;
+  const AParticipantNumber: integer);
 begin
   if not (Status in [smsPending, smsConflict]) then
     raise EInvalidOp.CreateFmt(
@@ -109,9 +109,8 @@ begin
       [StartMarkStatusCode(Status)]);
   if AHasParticipantNumber then
     RequirePositive(AParticipantNumber, 'Participant number');
-  if HasMatchDeltaMs and
-    ((not HasParticipantNumber) or (not AHasParticipantNumber) or
-    (ParticipantNumber <> AParticipantNumber)) then
+  if HasMatchDeltaMs and ((not HasParticipantNumber) or
+    (not AHasParticipantNumber) or (ParticipantNumber <> AParticipantNumber)) then
   begin
     HasMatchDeltaMs := False;
     MatchDeltaMs := 0;
@@ -123,21 +122,18 @@ begin
     ParticipantNumber := 0;
 end;
 
-function TStartMark.TryApply(const AParticipantNumber,
-  AAppliedStageIndex: integer;
+function TStartMark.TryApply(const AParticipantNumber, AAppliedStageIndex: integer;
   const AAssignmentMode: TStartMarkAssignmentMode;
   const AAppliedAt: TDateTime): boolean;
 begin
   if Status = smsApplied then
     Exit(False);
   if not (Status in [smsPending, smsConflict]) then
-    raise EInvalidOp.CreateFmt(
-      'A start mark in status %s cannot be applied.',
+    raise EInvalidOp.CreateFmt('A start mark in status %s cannot be applied.',
       [StartMarkStatusCode(Status)]);
   RequirePositive(AParticipantNumber, 'Participant number');
   RequirePositive(AAppliedStageIndex, 'Applied stage index');
-  if (AAssignmentMode = smamAutomatic) and
-    (AAppliedStageIndex <> StageIndex) then
+  if (AAssignmentMode = smamAutomatic) and (AAppliedStageIndex <> StageIndex) then
     raise EArgumentException.CreateFmt(
       'Automatic assignment must use received stage %d, not stage %d.',
       [StageIndex, AAppliedStageIndex]);
@@ -171,8 +167,7 @@ end;
 procedure TStartMark.MarkError(const ADiagnostic: string);
 begin
   if not (Status in [smsPending, smsConflict]) then
-    raise EInvalidOp.CreateFmt(
-      'A start mark in status %s cannot become an error.',
+    raise EInvalidOp.CreateFmt('A start mark in status %s cannot become an error.',
       [StartMarkStatusCode(Status)]);
   Status := smsError;
   Diagnostic := ADiagnostic;
@@ -183,8 +178,7 @@ begin
   if Status = smsHidden then
     Exit;
   if not (Status in [smsPending, smsConflict]) then
-    raise EInvalidOp.CreateFmt(
-      'A start mark in status %s cannot be hidden.',
+    raise EInvalidOp.CreateFmt('A start mark in status %s cannot be hidden.',
       [StartMarkStatusCode(Status)]);
   Status := smsHidden;
 end;

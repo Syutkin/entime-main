@@ -193,8 +193,7 @@ type
       const AAvailability: TBleAvailability);
     procedure ApplyStageDraftToModel;
     procedure BuildStageRows;
-    function DetectChanges(
-      const AActiveStageIndex: integer): TSettingsChangeSet;
+    function DetectChanges(const AActiveStageIndex: integer): TSettingsChangeSet;
     function DraftActiveStageIndex: integer;
     function DraftActiveStagesCount: integer;
     function DraftFirstActiveStageIndex: integer;
@@ -203,13 +202,12 @@ type
     procedure RefreshTimingInputPanels;
     function SelectedSerialDevice: string;
     function SelectedTimingInputTransport: TTimingTransportKind;
-    procedure SaveCompetitionSettingsToDatabase(
-      const AActiveStageIndex: integer);
+    procedure SaveCompetitionSettingsToDatabase(const AActiveStageIndex: integer);
     procedure StageRowChange(Sender: TObject);
     procedure UpdateCollectionTranslations(AUpdateIntervalIndex: integer);
   protected
-    function ExecuteBleDeviceSelection(
-      out ADevice: TBleDeviceInfo): Boolean; virtual;
+    function ExecuteBleDeviceSelection(out ADevice: TBleDeviceInfo): boolean;
+      virtual;
     procedure ApplyTimingInputSettings;
   public
     destructor Destroy; override;
@@ -222,7 +220,7 @@ implementation
 
 uses Main, InputDialogs, LazSerialSetup, LazSerialCommon, DbSql,
   AppLogger, StageConfig, Math,
-  LazBleDeviceSelectForm, LazBleDeviceControl,
+  LazBleDeviceSelectForm, BleTimingUi,
   CompetitionLifecycleService, CompetitionBackupService;
 
   {$R *.lfm}
@@ -230,7 +228,7 @@ uses Main, InputDialogs, LazSerialSetup, LazSerialCommon, DbSql,
 const
   STAGE_SETTINGS_ROW_HEIGHT = 34;
 
-{ TSettingsForm }
+  { TSettingsForm }
 
 procedure TSettingsForm.InitializeStageDraft;
 var
@@ -246,8 +244,7 @@ begin
   if IsCompetitionDatabaseOpen then
   begin
     FPhysicalStageCapacity :=
-      TCompetitionLifecycleService.PhysicalStageCapacity(
-        MainForm.CompetitionDb);
+      TCompetitionLifecycleService.PhysicalStageCapacity(MainForm.CompetitionDb);
     Configuration := TCompetitionLifecycleService.LoadConfiguration(
       MainForm.CompetitionDb, FPhysicalStageCapacity, 0);
   end;
@@ -264,8 +261,7 @@ begin
       FStageDraft[i].Name := stages[i].Name;
       FStageDraft[i].Active := stages[i].isActive;
     end
-    else if HasDatabaseConfiguration and
-      (i <= FPhysicalStageCapacity) then
+    else if HasDatabaseConfiguration and (i <= FPhysicalStageCapacity) then
     begin
       if Configuration.StageNames[i - 1] <> '' then
         FStageDraft[i].Name := Configuration.StageNames[i - 1];
@@ -357,8 +353,7 @@ begin
       Exit(i);
 end;
 
-procedure TSettingsForm.RebuildActiveStageItems(
-  const APreferredStageIndex: integer);
+procedure TSettingsForm.RebuildActiveStageItems(const APreferredStageIndex: integer);
 var
   i, selectedIndex: integer;
 begin
@@ -369,8 +364,7 @@ begin
       if FStageDraft[i].Active then
         ComboBoxAStage.Items.Add(IntToStr(i));
 
-    selectedIndex := ComboBoxAStage.Items.IndexOf(
-      IntToStr(APreferredStageIndex));
+    selectedIndex := ComboBoxAStage.Items.IndexOf(IntToStr(APreferredStageIndex));
     if selectedIndex < 0 then
       selectedIndex := 0;
 
@@ -392,9 +386,8 @@ end;
 
 function TSettingsForm.DraftActiveStageIndex: integer;
 begin
-  if not TryStrToInt(ComboBoxAStage.Text, Result) or
-    (Result < 1) or (Result > FStageDraftCount) or
-    (not FStageDraft[Result].Active) then
+  if not TryStrToInt(ComboBoxAStage.Text, Result) or (Result < 1) or
+    (Result > FStageDraftCount) or (not FStageDraft[Result].Active) then
     Result := DraftFirstActiveStageIndex;
 end;
 
@@ -443,8 +436,8 @@ begin
   end;
 end;
 
-function TSettingsForm.DetectChanges(
-  const AActiveStageIndex: integer): TSettingsChangeSet;
+function TSettingsForm.DetectChanges(const AActiveStageIndex: integer):
+TSettingsChangeSet;
 var
   categoryChanged, currentResultStageChanged, raceNameChanged,
   showStageNameChanged: boolean;
@@ -460,29 +453,28 @@ begin
       Result.StageNamesChanged := True;
   end;
 
-  Result.ResultParametersChanged := Result.StageCountChanged or
-    Result.StageActivityChanged;
+  Result.ResultParametersChanged :=
+    Result.StageCountChanged or Result.StageActivityChanged;
   raceNameChanged := NameEdit.Text <> raceName;
   categoryChanged := False;
   for i := 1 to VISIBLECAT do
     if (FindComponent('Edit' + IntToStr(i)) as TComboBox).Text <> cat[i] then
       categoryChanged := True;
-  currentResultStageChanged := AActiveStageIndex <>
-    stages.NormalizeActiveIndex(StrToIntDef(astage, 0));
+  currentResultStageChanged :=
+    AActiveStageIndex <> stages.NormalizeActiveIndex(StrToIntDef(astage, 0));
   Result.ZeroHourChanged := CheckBoxHideZeroHour.Checked <> zerohour;
   showStageNameChanged :=
     CheckBoxShowStageName.Checked <> showStageNameForSingleStage;
 
-  Result.PresentationChanged := Result.StageNamesChanged or
-    raceNameChanged or categoryChanged or currentResultStageChanged or
-    Result.ZeroHourChanged or showStageNameChanged;
-  Result.ResultViewQueriesChanged := categoryChanged or
-    currentResultStageChanged;
+  Result.PresentationChanged :=
+    Result.StageNamesChanged or raceNameChanged or categoryChanged or
+    currentResultStageChanged or Result.ZeroHourChanged or showStageNameChanged;
+  Result.ResultViewQueriesChanged := categoryChanged or currentResultStageChanged;
   Result.StageUiChanged := Result.ResultParametersChanged or
     Result.StageNamesChanged or showStageNameChanged;
-  Result.CompetitionDatabaseChanged := Result.ResultParametersChanged or
-    Result.StageNamesChanged or raceNameChanged or categoryChanged or
-    currentResultStageChanged;
+  Result.CompetitionDatabaseChanged :=
+    Result.ResultParametersChanged or Result.StageNamesChanged or
+    raceNameChanged or categoryChanged or currentResultStageChanged;
 
   Result.SerialSettingsChanged :=
     (SelectedSerialDevice <> MainForm.Serial.Device) or
@@ -498,9 +490,8 @@ begin
     (StartMarkMatchDeltaSpin.Value <> startMarkMatchDeltaSeconds) or
     (CheckBoxStartMarkAutomaticApply.Checked <> startMarkAutomaticApply);
   Result.EquipmentChanged := Result.SerialSettingsChanged or
-    (LEDAdress.Text <> ledpaneladress) or
-    (TelegramBotAdressEdit.Text <> telegrambotadress) or
-    (CheckBoxTelegramRetry.Checked <> telegramRetryEnabled) or
+    (LEDAdress.Text <> ledpaneladress) or (TelegramBotAdressEdit.Text <>
+    telegrambotadress) or (CheckBoxTelegramRetry.Checked <> telegramRetryEnabled) or
     (SpinTelegramRetryCount.Value <> telegramRetryCount) or
     (SpinTelegramRetryDelay.Value <> telegramRetryDelaySeconds);
 
@@ -508,8 +499,8 @@ begin
     0: selectedUpdateInterval := -1;
     1: selectedUpdateInterval := 1;
     2: selectedUpdateInterval := 7;
-  else
-    selectedUpdateInterval := 30;
+    else
+      selectedUpdateInterval := 30;
   end;
   Result.ApplicationSettingsChanged :=
     (CheckBoxUpdateAtStartup.Checked <> checkUpdateAtStartup) or
@@ -519,8 +510,7 @@ begin
     (SpinBackupRetentionDays.Value <> automaticBackupRetentionDays) or
     (SpinBackupMaxSizeMb.Value <> automaticBackupMaxSizeMb) or
     (DelayEdit.Value <> MainForm.FinishDebounceInterval) or
-    (FInitialLanguage <> CurrentLang) or
-    Result.TimingInputSettingsChanged;
+    (FInitialLanguage <> CurrentLang) or Result.TimingInputSettingsChanged;
 end;
 
 procedure TSettingsForm.SaveCompetitionSettingsToDatabase(
@@ -529,8 +519,7 @@ var
   i: integer;
   Configuration: TCompetitionConfiguration;
 begin
-  Configuration := TCompetitionConfiguration.Create(FStageDraftCount,
-    VISIBLECAT);
+  Configuration := TCompetitionConfiguration.Create(FStageDraftCount, VISIBLECAT);
   Configuration.RaceName := NameEdit.Text;
   Configuration.ActiveStageIndex := AActiveStageIndex;
   for i := 1 to VISIBLECAT do
@@ -562,8 +551,8 @@ begin
     Exit;
 
   try
-    if TMainSql.HasAnyDataInStageRange(MainForm.SQLQuery1,
-      FStageDraftCount + 1, FInitialStageCount, FPhysicalStageCapacity) then
+    if TMainSql.HasAnyDataInStageRange(MainForm.SQLQuery1, FStageDraftCount +
+      1, FInitialStageCount, FPhysicalStageCapacity) then
     begin
       CanClose := AskMessageDlg(Format(rsStageCountReductionWarning,
         [FInitialStageCount, FStageDraftCount]), mtWarning,
@@ -582,8 +571,7 @@ begin
   end;
 end;
 
-procedure TSettingsForm.UpdateCollectionTranslations(
-  AUpdateIntervalIndex: integer);
+procedure TSettingsForm.UpdateCollectionTranslations(AUpdateIntervalIndex: integer);
 var
   i: integer;
 begin
@@ -628,8 +616,8 @@ begin
   finally
     ComboBoxUpdateInterval.Items.EndUpdate;
   end;
-  if (AUpdateIntervalIndex >= 0) and
-    (AUpdateIntervalIndex < ComboBoxUpdateInterval.Items.Count) then
+  if (AUpdateIntervalIndex >= 0) and (AUpdateIntervalIndex <
+    ComboBoxUpdateInterval.Items.Count) then
     ComboBoxUpdateInterval.ItemIndex := AUpdateIntervalIndex;
 end;
 
@@ -742,8 +730,7 @@ begin
   FBleAvailability := MainForm.LazBleComponent1.Availability;
   FPreviousBleAvailabilityChanged :=
     MainForm.LazBleComponent1.OnAvailabilityChanged;
-  MainForm.LazBleComponent1.OnAvailabilityChanged :=
-    @BleAvailabilityChanged;
+  MainForm.LazBleComponent1.OnAvailabilityChanged := @BleAvailabilityChanged;
   RefreshTimingInputPanels;
 
 end;
@@ -793,7 +780,7 @@ begin
   RadioButtonTimingInputBle.Hint := '';
   if FBleAvailability in [lbaChecking, lbaUnavailable] then
   begin
-    BleStatus := LazBleStatusText(MainForm.LazBleLclClient1);
+    BleStatus := BleTimingStatusText(MainForm.LazBleLclClient1);
     if BleStatus <> '' then
       RadioButtonTimingInputBle.Hint := BleStatus;
   end;
@@ -813,7 +800,7 @@ begin
   BleDeviceIdEdit.Text := FSelectedBleDevice.DeviceId;
   ButtonSelectBleDevice.Enabled :=
     (FBleAvailability in [lbaUnknown, lbaAvailable]) and
-    LazBleCanSelectDevice(MainForm.LazBleLclClient1);
+    BleTimingCanSelectDevice(MainForm.LazBleLclClient1);
 end;
 
 procedure TSettingsForm.TimingInputModeChanged(Sender: TObject);
@@ -821,8 +808,7 @@ begin
   RefreshTimingInputPanels;
 end;
 
-function TSettingsForm.ExecuteBleDeviceSelection(
-  out ADevice: TBleDeviceInfo): Boolean;
+function TSettingsForm.ExecuteBleDeviceSelection(out ADevice: TBleDeviceInfo): boolean;
 var
   dialog: TBleDeviceSelectForm;
 begin
@@ -883,11 +869,12 @@ begin
       allInfo, alvStatus, alsDatabase);
     if BackupResult.Cleanup.DeletedCount > 0 then
       AppLog(Format(rsBackupCleanupCompleted,
-        [BackupResult.Cleanup.DeletedCount,
-        BackupResult.Cleanup.FreedBytes]), allInfo, alvDetails, alsDatabase);
+        [BackupResult.Cleanup.DeletedCount, BackupResult.Cleanup.FreedBytes]),
+        allInfo, alvDetails, alsDatabase);
     if BackupResult.Cleanup.WarningMessage <> '' then
       AppLog(Format(rsBackupCleanupWarning,
-        [BackupResult.Cleanup.WarningMessage]), allWarning, alvDetails,
+        [BackupResult.Cleanup.WarningMessage]),
+        allWarning, alvDetails,
         alsDatabase);
   end
   else
@@ -908,8 +895,8 @@ end;
 
 procedure TSettingsForm.RunSettings(ActivePage: integer = 0);
 var
-  i, activeStageIndex, previousActiveStagesCount,
-  previousCurrentStageIndex, previousParticipantId: integer;
+  i, activeStageIndex, previousActiveStagesCount, previousCurrentStageIndex,
+  previousParticipantId: integer;
   hadOpenDatabase, restoreCurrentParticipant: boolean;
   changes: TSettingsChangeSet;
   messageText: string;
@@ -928,13 +915,12 @@ begin
         changes := DetectChanges(activeStageIndex);
         previousActiveStagesCount := stages.ActiveStagesCount;
         previousCurrentStageIndex := MainForm.CurrentStageIndex;
-        restoreCurrentParticipant := hadOpenDatabase and
-          MainForm.MainDataset1.Active and
+        restoreCurrentParticipant :=
+          hadOpenDatabase and MainForm.MainDataset1.Active and
           TMainSql.TryGetCurrentId(MainForm.MainDataset1,
           previousParticipantId);
 
-        if hadOpenDatabase and
-          changes.StageCountChanged and
+        if hadOpenDatabase and changes.StageCountChanged and
           (FStageDraftCount > FPhysicalStageCapacity) and
           (not CreateSettingsBackup) then
         begin
@@ -946,20 +932,20 @@ begin
         end;
 
         if hadOpenDatabase and changes.CompetitionDatabaseChanged then
-          try
-            SaveCompetitionSettingsToDatabase(activeStageIndex);
-          except
-            on E: Exception do
-            begin
-              messageText := Format(rsCompetitionSettingsSaveError,
-                [E.Message]);
-              if FStageDraftCount > FPhysicalStageCapacity then
-                MainForm.RecoverCompetitionAfterSettingsFailure;
-              AppLog(messageText, allError, alvStatus, alsDatabase);
-              AskMessageDlg(messageText, mtError, [mbOK], 0);
-              Exit;
-            end;
+        try
+          SaveCompetitionSettingsToDatabase(activeStageIndex);
+        except
+          on E: Exception do
+          begin
+            messageText := Format(rsCompetitionSettingsSaveError,
+              [E.Message]);
+            if FStageDraftCount > FPhysicalStageCapacity then
+              MainForm.RecoverCompetitionAfterSettingsFailure;
+            AppLog(messageText, allError, alvStatus, alsDatabase);
+            AskMessageDlg(messageText, mtError, [mbOK], 0);
+            Exit;
           end;
+        end;
 
         // Глобальное состояние меняется только после успешной записи БД.
         ApplyTimingInputSettings;
@@ -1012,12 +998,11 @@ begin
         astage := IntToStr(activeStageIndex);
         // Определяем переход от работы с одним этапом на несколько.
         if changes.ResultParametersChanged and
-          (previousActiveStagesCount = 1) and
-          (DraftActiveStagesCount > 1) then
+          (previousActiveStagesCount = 1) and (DraftActiveStagesCount > 1) then
           //для того, чтобы освободить место для таблицы с вводом поправки
           //без этого в текущей организации GUI были коллизии
-          MainForm.Splitter1.Top := MainForm.Splitter1.Top +
-            MainForm.CurrentStageGroup.Height;
+          MainForm.Splitter1.Top :=
+            MainForm.Splitter1.Top + MainForm.CurrentStageGroup.Height;
         for i := 1 to VISIBLECAT do
         begin
           //сохраняем название категорий, которые будут выводиться на окно результатов
@@ -1043,8 +1028,8 @@ begin
             hadOpenDatabase, changes.StageUiChanged,
             changes.ResultViewQueriesChanged, changes.StageNamesChanged,
             changes.ZeroHourChanged);
-        AppLog(Format(rsShownCategories, [cat[1] + ', ' + cat[2] + ', ' +
-          cat[3] + ', ' + cat[4] + ', ' + cat[5] + ', ' + cat[6]]),
+        AppLog(Format(rsShownCategories, [cat[1] + ', ' + cat[2] +
+          ', ' + cat[3] + ', ' + cat[4] + ', ' + cat[5] + ', ' + cat[6]]),
           allDebug, alvNone, alsApplication);
         AppLog(rsSettingsSaved, allInfo, alvNone, alsApplication);
       end;
@@ -1080,7 +1065,7 @@ var
 
   procedure AddField(const AName, AValue: string);
   var
-    Index: Integer;
+    Index: integer;
   begin
     if AValue = '' then
       Exit;
@@ -1099,7 +1084,7 @@ begin
   AddField('place', TelegramPlace.Text);
   MainForm.QueueTelegramTest(TelegramBotAdressEdit.Text, Fields,
     TTelegramRetryPolicy.Create(CheckBoxTelegramRetry.Checked,
-      SpinTelegramRetryCount.Value, SpinTelegramRetryDelay.Value));
+    SpinTelegramRetryCount.Value, SpinTelegramRetryDelay.Value));
 end;
 
 procedure TSettingsForm.CheckBoxTelegramRetryChange(Sender: TObject);

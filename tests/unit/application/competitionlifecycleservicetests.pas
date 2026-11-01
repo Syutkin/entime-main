@@ -36,7 +36,7 @@ begin
 end;
 
 procedure TCompetitionLifecycleServiceTests.
-  OpenExisting_CurrentVersionCreatesMissingFinishMarks;
+OpenExisting_CurrentVersionCreatesMissingFinishMarks;
 var
   Preparation: TCompetitionPreparation;
   UnitOfWork: TCompetitionUnitOfWork;
@@ -53,8 +53,8 @@ begin
   end;
   BackupRequested := False;
 
-  Preparation := TCompetitionLifecycleService.OpenCompetition(FContext, True,
-    DEFAULT_STAGE_COUNT, ['A', 'B', 'C', 'D', 'E'], 'Ignored', @AcceptBackup);
+  Preparation := TCompetitionLifecycleService.OpenCompetition(FContext,
+    True, DEFAULT_STAGE_COUNT, ['A', 'B', 'C', 'D', 'E'], 'Ignored', @AcceptBackup);
 
   AssertTrue(BackupRequested);
   AssertTrue(Preparation.Migrated);
@@ -68,7 +68,7 @@ begin
 end;
 
 procedure TCompetitionLifecycleServiceTests.
-  OpenExisting_CurrentVersionCreatesMissingStartMarks;
+OpenExisting_CurrentVersionCreatesMissingStartMarks;
 var
   Preparation: TCompetitionPreparation;
   UnitOfWork: TCompetitionUnitOfWork;
@@ -85,8 +85,8 @@ begin
   end;
   BackupRequested := False;
 
-  Preparation := TCompetitionLifecycleService.OpenCompetition(FContext, True,
-    DEFAULT_STAGE_COUNT, ['A', 'B', 'C', 'D', 'E'], 'Ignored', @AcceptBackup);
+  Preparation := TCompetitionLifecycleService.OpenCompetition(FContext,
+    True, DEFAULT_STAGE_COUNT, ['A', 'B', 'C', 'D', 'E'], 'Ignored', @AcceptBackup);
 
   AssertTrue(BackupRequested);
   AssertTrue(Preparation.Migrated);
@@ -109,7 +109,7 @@ begin
 end;
 
 procedure TCompetitionLifecycleServiceTests.
-  OpenExisting_MigratesSchemaAfterBackup;
+OpenExisting_MigratesSchemaAfterBackup;
 var
   Preparation: TCompetitionPreparation;
   UnitOfWork: TCompetitionUnitOfWork;
@@ -126,8 +126,8 @@ begin
     UnitOfWork.Free;
   end;
 
-  Preparation := TCompetitionLifecycleService.OpenCompetition(FContext, True,
-    DEFAULT_STAGE_COUNT, ['A', 'B', 'C', 'D', 'E'], 'Ignored', @AcceptBackup);
+  Preparation := TCompetitionLifecycleService.OpenCompetition(FContext,
+    True, DEFAULT_STAGE_COUNT, ['A', 'B', 'C', 'D', 'E'], 'Ignored', @AcceptBackup);
 
   AssertTrue(BackupRequested);
   AssertTrue(Preparation.Migrated);
@@ -147,8 +147,8 @@ procedure TCompetitionLifecycleServiceTests.OpenNew_CreatesVersionedSchema;
 var
   Preparation: TCompetitionPreparation;
 begin
-  Preparation := TCompetitionLifecycleService.OpenCompetition(FContext, False,
-    DEFAULT_STAGE_COUNT, ['A', 'B', 'C', 'D', 'E'], 'Test race', nil);
+  Preparation := TCompetitionLifecycleService.OpenCompetition(FContext,
+    False, DEFAULT_STAGE_COUNT, ['A', 'B', 'C', 'D', 'E'], 'Test race', nil);
 
   AssertEquals(DEFAULT_STAGE_COUNT, Preparation.RequiredStageCount);
   AssertEquals(DEFAULT_STAGE_COUNT, Preparation.PhysicalStageCount);
@@ -163,7 +163,7 @@ begin
 end;
 
 procedure TCompetitionLifecycleServiceTests.
-  SaveAndLoadConfiguration_ExpandsCapacityAndMapsValues;
+SaveAndLoadConfiguration_ExpandsCapacityAndMapsValues;
 var
   Configuration, Loaded: TCompetitionConfiguration;
   NewCapacity: integer;

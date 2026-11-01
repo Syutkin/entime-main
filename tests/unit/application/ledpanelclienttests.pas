@@ -14,6 +14,7 @@ type
     procedure Address_NormalizesHostAndPort;
     procedure Address_RejectsSchemePathAndInvalidPort;
     procedure FinishRequest_UsesEncodedPostAndLanTimeouts;
+    procedure FinishRequest_FitsBothLinesWithoutLosingHours;
     procedure Send_AcceptsEveryTwoHundredStatusWithoutBody;
     procedure Send_RejectsClientAndServerErrors;
   end;
@@ -31,7 +32,7 @@ begin
   Result.PreviousLeaderResult := '00:01:43.936';
 end;
 
-function HttpResponse(const AStatus: Integer): THttpResponse;
+function HttpResponse(const AStatus: integer): THttpResponse;
 begin
   Result := Default(THttpResponse);
   Result.Completed := True;
@@ -52,12 +53,9 @@ procedure TLedPanelClientTests.Address_RejectsSchemePathAndInvalidPort;
 var
   Endpoint: string;
 begin
-  AssertFalse(TLedPanelClient.TryBuildEndpoint(
-    'http://192.168.1.10', Endpoint));
-  AssertFalse(TLedPanelClient.TryBuildEndpoint(
-    '192.168.1.10/post', Endpoint));
-  AssertFalse(TLedPanelClient.TryBuildEndpoint(
-    'panel.local:70000', Endpoint));
+  AssertFalse(TLedPanelClient.TryBuildEndpoint('http://192.168.1.10', Endpoint));
+  AssertFalse(TLedPanelClient.TryBuildEndpoint('192.168.1.10/post', Endpoint));
+  AssertFalse(TLedPanelClient.TryBuildEndpoint('panel.local:70000', Endpoint));
   AssertFalse(TLedPanelClient.TryBuildEndpoint('', Endpoint));
 end;
 
@@ -75,6 +73,56 @@ begin
   AssertTrue(Pos('upperline=', string(Request.Body)) > 0);
   AssertTrue(Pos('bottomline=', string(Request.Body)) > 0);
   AssertEquals(0, Pos(' ', string(Request.Body)));
+end;
+
+procedure TLedPanelClientTests.FinishRequest_FitsBothLinesWithoutLosingHours;
+const
+  Times: array[0..4] of string = ('00:02:34.567', '00:59:59.999',
+    '01:00:00.000', '01:02:03.456', '10:02:03.456');
+  TimeFields: array[0..4] of string = (' 2:34.567', '59:59.999',
+    '1:00:00.0', '1:02:03.4', ' 10:02:03');
+var
+  Finish: TFinishResult;
+  Request: THttpRequest;
+  Fields: TStringList;
+  Upper, Bottom: string;
+  I, Place: integer;
+begin
+  Finish := FinishResult;
+  Finish.PreviousLeaderResult := '10:02:03.456';
+  Finish.Difference := '01:02:03.456';
+  Fields := TStringList.Create;
+  try
+    Fields.StrictDelimiter := True;
+    Fields.Delimiter := '&';
+    for I := Low(Times) to High(Times) do
+      for Place := 1 to 2 do
+      begin
+        Finish.ResultValue := Times[I];
+        Finish.Place := Place;
+        AssertTrue(TLedPanelClient.TryBuildFinishRequest(Finish,
+          'panel.local', Request));
+        Fields.DelimitedText := string(Request.Body);
+        if Place = 1 then
+        begin
+          Upper := ' 25 ' + TimeFields[I] + ' -1:02:03   1';
+          Bottom := ' 17  10:02:03' + StringOfChar(' ', 11) + '2';
+        end
+        else
+        begin
+          Upper := ' 17  10:02:03' + StringOfChar(' ', 11) + '1';
+          Bottom := ' 25 ' + TimeFields[I] + ' 1:02:03   2';
+        end;
+        AssertTrue(Length(Upper) <= 26);
+        AssertTrue(Length(Bottom) <= 26);
+        AssertEquals('Upper line for ' + Times[I],
+          string(FormUrlEncode(Upper)), Fields.Values['upperline']);
+        AssertEquals('Bottom line for ' + Times[I],
+          string(FormUrlEncode(Bottom)), Fields.Values['bottomline']);
+      end;
+  finally
+    Fields.Free;
+  end;
 end;
 
 procedure TLedPanelClientTests.Send_AcceptsEveryTwoHundredStatusWithoutBody;

@@ -121,13 +121,11 @@ begin
   AssertTrue(TMainSql.TryLoadIdentity(FQuery, 101, ParticipantName, Category));
   AssertEquals('Rider', ParticipantName);
   AssertEquals('A', Category);
-  AssertTrue(TMainSql.TryLoadParticipantStageData(FQuery, 101, 2, 2,
-    StageData));
+  AssertTrue(TMainSql.TryLoadParticipantStageData(FQuery, 101, 2, 2, StageData));
   AssertTrue(StageData.HasCorrection);
   AssertEquals(-1500, StageData.Correction);
   AssertEquals(Ord(psDNF), Ord(StageData.Status));
-  AssertTrue(TMainSql.LoadStatuses(FQuery, 101, 2, GlobalStatus,
-    StageStatuses));
+  AssertTrue(TMainSql.LoadStatuses(FQuery, 101, 2, GlobalStatus, StageStatuses));
   AssertEquals(2, Length(StageStatuses));
   AssertEquals(Ord(psDNF), Ord(StageStatuses[1]));
   ActiveStageIndexes[0] := 2;
@@ -141,8 +139,7 @@ begin
   finally
     TMainSql.FinishPreparedGlobalStatusUpdates(FQuery);
   end;
-  AssertTrue(TMainSql.LoadStatuses(FQuery, 101, 2, GlobalStatus,
-    StageStatuses));
+  AssertTrue(TMainSql.LoadStatuses(FQuery, 101, 2, GlobalStatus, StageStatuses));
   AssertEquals(Ord(psDNF), Ord(GlobalStatus));
   Numbers := TStringList.Create;
   try

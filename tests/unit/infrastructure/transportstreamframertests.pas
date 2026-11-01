@@ -37,7 +37,7 @@ begin
 end;
 
 procedure TTransportStreamFramerTests.
-  Feed_ReassemblesFragmentedTimingAndJsonFrames;
+Feed_ReassemblesFragmentedTimingAndJsonFrames;
 var
   Frames: TTransportFrameArray;
 begin
@@ -56,13 +56,13 @@ begin
 end;
 
 procedure TTransportStreamFramerTests.
-  Feed_ReassemblesFramesAtEverySplitPosition;
+Feed_ReassemblesFramesAtEverySplitPosition;
 const
-  WireValues: array[0..2] of RawByteString = (
+  WireValues: array[0..2] of rawbytestring = (
     '$12:34:56,789;-1234#',
     'F23:59:59,999#',
     '{"status":"ok"}' + #10
-  );
+    );
 var
   ExpectedKind: TTransportFrameKind;
   ExpectedText: string;
@@ -97,8 +97,8 @@ procedure TTransportStreamFramerTests.Feed_SeparatesInterleavedFramesInOrder;
 var
   Frames: TTransportFrameArray;
 begin
-  FFramer.Feed('{"id":1}' + #10 + '$01:02:03#' +
-    '{"id":2}' + #10 + 'F04:05:06#', Frames);
+  FFramer.Feed('{"id":1}' + #10 + '$01:02:03#' + '{"id":2}' + #10 +
+    'F04:05:06#', Frames);
 
   AssertEquals(4, Length(Frames));
   AssertEquals(Ord(tfkFirmwareResponse), Ord(Frames[0].Kind));
@@ -112,10 +112,10 @@ begin
 end;
 
 procedure TTransportStreamFramerTests.
-  Feed_EmitsDiagnosticsAndRecoversAfterOversizedJson;
+Feed_EmitsDiagnosticsAndRecoversAfterOversizedJson;
 var
   Frames: TTransportFrameArray;
-  OversizedJson: RawByteString;
+  OversizedJson: rawbytestring;
 begin
   FFramer.Feed('DEBUG F12:34:56#' + #10 + '$invalid#', Frames);
   AssertEquals(2, Length(Frames));
@@ -124,9 +124,8 @@ begin
   AssertEquals(Ord(tfkTimingPacket), Ord(Frames[1].Kind));
   AssertEquals('$invalid#', string(Frames[1].Text));
 
-  OversizedJson := '{"value":"' +
-    RawByteString(StringOfChar('x', TRANSPORT_STREAM_MAX_MESSAGE_SIZE)) +
-    '"}' + 'F12:34:56#';
+  OversizedJson := '{"value":"' + rawbytestring(StringOfChar('x',
+    TRANSPORT_STREAM_MAX_MESSAGE_SIZE)) + '"}' + 'F12:34:56#';
   FFramer.Feed(OversizedJson, Frames);
 
   AssertEquals(2, Length(Frames));

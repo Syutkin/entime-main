@@ -28,18 +28,18 @@ type
 
   TBackupCleanupResult = record
     DeletedCount: integer;
-    FreedBytes: Int64;
+    FreedBytes: int64;
     WarningMessage: string;
   end;
 
   TBackupRetentionPolicy = record
     AutomaticRecentHours: integer;
     AutomaticRetentionDays: integer;
-    AutomaticMaxTotalBytes: Int64;
+    AutomaticMaxTotalBytes: int64;
     SafetyFullRetentionDays: integer;
     SafetyWeeklyRetentionDays: integer;
     SafetyMinCopies: integer;
-    SafetyMaxTotalBytes: Int64;
+    SafetyMaxTotalBytes: int64;
   end;
 
   TCompetitionBackupRequest = record
@@ -58,8 +58,8 @@ type
     Cleanup: TBackupCleanupResult;
   end;
 
-  TCompetitionBackupAction = function(
-    const ARequest: TCompetitionBackupRequest): TCompetitionBackupResult;
+  TCompetitionBackupAction = function(const ARequest: TCompetitionBackupRequest):
+    TCompetitionBackupResult;
   TCompetitionBackupCompletedEvent = procedure(Sender: TObject;
     const AResult: TCompetitionBackupResult) of object;
 
@@ -85,8 +85,9 @@ type
   public
     class function CreateBackup(const ADatabaseFile: string;
       const ABackupTime: TDateTime): TCompetitionBackupResult; static; overload;
-    class function CreateBackup(const ARequest: TCompetitionBackupRequest):
-      TCompetitionBackupResult; static; overload;
+    class function CreateBackup(
+      const ARequest: TCompetitionBackupRequest): TCompetitionBackupResult;
+      static; overload;
   end;
 
   TCompetitionBackupThread = class(TThread)
@@ -119,8 +120,8 @@ type
       ACoordinator: TCompetitionBackupCoordinator = nil);
     destructor Destroy; override;
     function Start(const ARequest: TCompetitionBackupRequest): boolean; overload;
-    function Start(const ADatabaseFile: string; const ABackupTime: TDateTime):
-      boolean; overload;
+    function Start(const ADatabaseFile: string;
+      const ABackupTime: TDateTime): boolean; overload;
     function Start(const ADatabaseFile: string; const ABackupTime: TDateTime;
       const ARetentionPolicy: TBackupRetentionPolicy): boolean; overload;
     procedure Cancel;
@@ -142,13 +143,13 @@ uses
 const
   BACKUP_BUSY_TIMEOUT_MS = DEFAULT_SQLITE_BUSY_TIMEOUT_MS;
   BackupFolder = 'backup';
-  Megabyte = Int64(1024) * 1024;
+  Megabyte = int64(1024) * 1024;
 
 type
   TBackupFileInfo = record
     FileName: string;
     CreatedAt: TDateTime;
-    Size: Int64;
+    Size: int64;
     Keep: boolean;
     IsNew: boolean;
     DeleteAttempted: boolean;
@@ -170,14 +171,14 @@ begin
   Result.AutomaticRecentHours := DEFAULT_AUTOMATIC_BACKUP_RECENT_HOURS;
   Result.AutomaticRetentionDays := DEFAULT_AUTOMATIC_BACKUP_RETENTION_DAYS;
   Result.AutomaticMaxTotalBytes :=
-    Int64(DEFAULT_AUTOMATIC_BACKUP_MAX_SIZE_MB) * Megabyte;
+    int64(DEFAULT_AUTOMATIC_BACKUP_MAX_SIZE_MB) * Megabyte;
   Result.SafetyFullRetentionDays :=
     DEFAULT_SAFETY_BACKUP_FULL_RETENTION_DAYS;
   Result.SafetyWeeklyRetentionDays :=
     DEFAULT_SAFETY_BACKUP_WEEKLY_RETENTION_DAYS;
   Result.SafetyMinCopies := DEFAULT_SAFETY_BACKUP_MIN_COPIES;
   Result.SafetyMaxTotalBytes :=
-    Int64(DEFAULT_SAFETY_BACKUP_MAX_SIZE_MB) * Megabyte;
+    int64(DEFAULT_SAFETY_BACKUP_MAX_SIZE_MB) * Megabyte;
 end;
 
 function NewCompetitionBackupRequest(const ADatabaseFile: string;
@@ -259,17 +260,17 @@ begin
           'Failed while waiting for the backup coordinator');
       Acquired := False;
       FLock.Acquire;
-      try
-        if not FActive then
-        begin
-          FActive := True;
-          Dec(FPriorityWaiters);
-          FIdleEvent.ResetEvent;
-          Acquired := True;
-        end;
-      finally
-        FLock.Release;
+    try
+      if not FActive then
+      begin
+        FActive := True;
+        Dec(FPriorityWaiters);
+        FIdleEvent.ResetEvent;
+        Acquired := True;
       end;
+    finally
+      FLock.Release;
+    end;
     until Acquired;
   except
     FLock.Acquire;
@@ -315,8 +316,7 @@ begin
 
   try
     if not Assigned(AAction) then
-      Result := FailedBackup(cbfCreate, '',
-        'Backup action is not configured')
+      Result := FailedBackup(cbfCreate, '', 'Backup action is not configured')
     else
       Result := AAction(ARequest);
   finally
@@ -341,11 +341,11 @@ var
 begin
   repeat
     FLock.Acquire;
-    try
-      IsIdle := not FActive and (FPriorityWaiters = 0);
-    finally
-      FLock.Release;
-    end;
+  try
+    IsIdle := not FActive and (FPriorityWaiters = 0);
+  finally
+    FLock.Release;
+  end;
     if not IsIdle then
     begin
       FIdleEvent.WaitFor(10);
@@ -374,8 +374,8 @@ begin
   case AKind of
     cbkAutomatic: Result := 'auto';
     cbkSafety: Result := 'safety';
-  else
-    Result := 'manual';
+    else
+      Result := 'manual';
   end;
 end;
 
@@ -386,8 +386,8 @@ begin
     cbrBeforeClear: Result := 'before-clear';
     cbrBeforeMigration: Result := 'before-migration';
     cbrBeforeStageExpansion: Result := 'before-stage-expansion';
-  else
-    Result := 'unspecified';
+    else
+      Result := 'unspecified';
   end;
 end;
 
@@ -414,8 +414,8 @@ begin
       CollisionSuffix := ''
     else
       CollisionSuffix := '_' + IntToStr(CollisionIndex);
-    Candidate := IncludeTrailingPathDelimiter(ABackupDirectory) + BaseName +
-      CollisionSuffix + ' ' + ASourceFileName;
+    Candidate := IncludeTrailingPathDelimiter(ABackupDirectory) +
+      BaseName + CollisionSuffix + ' ' + ASourceFileName;
     Inc(CollisionIndex);
   until not FileExists(Candidate);
   Result := Candidate;
@@ -435,18 +435,18 @@ begin
   Result := False;
   if AStart + 22 > Length(AValue) then
     Exit;
-  if not (IsDigitAt(AValue, AStart) and
-    IsDigitAt(AValue, AStart + 1) and IsDigitAt(AValue, AStart + 2) and
-    IsDigitAt(AValue, AStart + 3) and (AValue[AStart + 4] = '-') and
-    IsDigitAt(AValue, AStart + 5) and IsDigitAt(AValue, AStart + 6) and
-    (AValue[AStart + 7] = '-') and IsDigitAt(AValue, AStart + 8) and
-    IsDigitAt(AValue, AStart + 9) and (AValue[AStart + 10] = '_') and
-    IsDigitAt(AValue, AStart + 11) and IsDigitAt(AValue, AStart + 12) and
-    (AValue[AStart + 13] = '-') and IsDigitAt(AValue, AStart + 14) and
-    IsDigitAt(AValue, AStart + 15) and (AValue[AStart + 16] = '-') and
-    IsDigitAt(AValue, AStart + 17) and IsDigitAt(AValue, AStart + 18) and
-    (AValue[AStart + 19] = '-') and IsDigitAt(AValue, AStart + 20) and
-    IsDigitAt(AValue, AStart + 21) and IsDigitAt(AValue, AStart + 22)) then
+  if not (IsDigitAt(AValue, AStart) and IsDigitAt(AValue, AStart + 1) and
+    IsDigitAt(AValue, AStart + 2) and IsDigitAt(AValue, AStart + 3) and
+    (AValue[AStart + 4] = '-') and IsDigitAt(AValue, AStart + 5) and
+    IsDigitAt(AValue, AStart + 6) and (AValue[AStart + 7] = '-') and
+    IsDigitAt(AValue, AStart + 8) and IsDigitAt(AValue, AStart + 9) and
+    (AValue[AStart + 10] = '_') and IsDigitAt(AValue, AStart + 11) and
+    IsDigitAt(AValue, AStart + 12) and (AValue[AStart + 13] = '-') and
+    IsDigitAt(AValue, AStart + 14) and IsDigitAt(AValue, AStart + 15) and
+    (AValue[AStart + 16] = '-') and IsDigitAt(AValue, AStart + 17) and
+    IsDigitAt(AValue, AStart + 18) and (AValue[AStart + 19] = '-') and
+    IsDigitAt(AValue, AStart + 20) and IsDigitAt(AValue, AStart + 21) and
+    IsDigitAt(AValue, AStart + 22)) then
     Exit;
   if not TryStrToInt(Copy(AValue, AStart, 4), Year) then
     Exit;
@@ -466,19 +466,66 @@ begin
     Millisecond, ATimestamp);
 end;
 
-function TryExtractBackupTimestamp(const AFileName: string;
+function TryParseBackupFileName(const AFileName: string;
+  const AKind: TCompetitionBackupKind; out ASourceFileName: string;
   out ATimestamp: TDateTime): boolean;
 var
-  Index: integer;
+  Header, Prefix, Candidate: string;
+  Index, SeparatorIndex, TimestampIndex: integer;
+  Reason: TCompetitionBackupReason;
 begin
   Result := False;
-  for Index := 1 to Length(AFileName) - 22 do
-    if TryParseTimestampAt(AFileName, Index, ATimestamp) then
-      Exit(True);
+  ASourceFileName := '';
+  // The generated header has no spaces; everything after its first space
+  // is the complete source name, including any spaces or timestamps in it.
+  SeparatorIndex := Pos(' ', AFileName);
+  if (SeparatorIndex <= 1) or (SeparatorIndex = Length(AFileName)) then
+    Exit;
+  Header := Copy(AFileName, 1, SeparatorIndex - 1);
+  Prefix := BackupFilePrefix(AKind, cbrNone) + '_';
+  if AKind = cbkSafety then
+  begin
+    Prefix := '';
+    for Reason := Low(TCompetitionBackupReason) to High(TCompetitionBackupReason) do
+    begin
+      Candidate := BackupFilePrefix(AKind, Reason) + '_';
+      if StartsStr(Candidate, Header) then
+      begin
+        Prefix := Candidate;
+        Break;
+      end;
+    end;
+    if Prefix = '' then
+      Exit;
+  end;
+  if not StartsStr(Prefix, Header) then
+    Exit;
+  TimestampIndex := Length(Prefix) + 1;
+  if not TryParseTimestampAt(Header, TimestampIndex, ATimestamp) then
+    Exit;
+  Index := TimestampIndex + 23;
+  if Index <= Length(Header) then
+  begin
+    if Header[Index] <> '_' then
+      Exit;
+    Inc(Index);
+    if not IsDigitAt(Header, Index) then
+      Exit;
+    if Header[Index] = '0' then
+      Exit;
+    while Index <= Length(Header) do
+    begin
+      if not IsDigitAt(Header, Index) then
+        Exit;
+      Inc(Index);
+    end;
+  end;
+  ASourceFileName := Copy(AFileName, SeparatorIndex + 1, MaxInt);
+  Result := True;
 end;
 
 procedure AppendBackupFile(var AFiles: TBackupFileInfoArray;
-  const AFileName: string; const ACreatedAt: TDateTime; const ASize: Int64;
+  const AFileName: string; const ACreatedAt: TDateTime; const ASize: int64;
   const AIsNew: boolean);
 var
   Index: integer;
@@ -510,21 +557,15 @@ begin
   end;
 end;
 
-function BackupKindFilePrefix(const AKind: TCompetitionBackupKind): string;
-begin
-  Result := BackupKindToken(AKind) + '_';
-end;
-
-function CollectBackupFiles(const ABackupDirectory, ASourceFile,
-  ANewBackupFile: string; const AKind: TCompetitionBackupKind):
-  TBackupFileInfoArray;
+function CollectBackupFiles(const ABackupDirectory, ASourceFile, ANewBackupFile: string;
+  const AKind: TCompetitionBackupKind): TBackupFileInfoArray;
 var
   CreatedAt: TDateTime;
-  FullName, SourceSuffix: string;
+  FullName, SourceFileName, ParsedSourceFileName: string;
   Search: TSearchRec;
 begin
   Result := nil;
-  SourceSuffix := ' ' + ExtractFileName(ASourceFile);
+  SourceFileName := ExtractFileName(ASourceFile);
   if FindFirst(IncludeTrailingPathDelimiter(ABackupDirectory) + '*',
     faAnyFile, Search) <> 0 then
     Exit;
@@ -532,9 +573,8 @@ begin
     repeat
       if (Search.Name = '.') or (Search.Name = '..') or
         ((Search.Attr and faDirectory) <> 0) or
-        (not StartsStr(BackupKindFilePrefix(AKind), Search.Name)) or
-        (not EndsStr(SourceSuffix, Search.Name)) or
-        (not TryExtractBackupTimestamp(Search.Name, CreatedAt)) then
+        (not TryParseBackupFileName(Search.Name, AKind, ParsedSourceFileName,
+        CreatedAt)) or (ParsedSourceFileName <> SourceFileName) then
         Continue;
       FullName := IncludeTrailingPathDelimiter(ABackupDirectory) + Search.Name;
       if FileIsSymlink(FullName) then
@@ -602,10 +642,9 @@ begin
     for I := 0 to High(AFiles) do
     begin
       AgeDays := BackupAgeDays(ANow, AFiles[I].CreatedAt);
-      AFiles[I].Keep := AFiles[I].IsNew or
-        (AgeDays * HoursPerDay <= APolicy.AutomaticRecentHours);
-      if (not AFiles[I].Keep) and
-        (AgeDays <= APolicy.AutomaticRetentionDays) then
+      AFiles[I].Keep := AFiles[I].IsNew or (AgeDays * HoursPerDay <=
+        APolicy.AutomaticRecentHours);
+      if (not AFiles[I].Keep) and (AgeDays <= APolicy.AutomaticRetentionDays) then
       begin
         DayKey := FormatDateTime('yyyy-mm-dd', AFiles[I].CreatedAt);
         if KeptDays.IndexOf(DayKey) < 0 then
@@ -637,11 +676,10 @@ begin
     for I := 0 to High(AFiles) do
     begin
       AgeDays := BackupAgeDays(ANow, AFiles[I].CreatedAt);
-      AFiles[I].Keep := AFiles[I].IsNew or
-        (I < APolicy.SafetyMinCopies) or
+      AFiles[I].Keep := AFiles[I].IsNew or (I < APolicy.SafetyMinCopies) or
         (AgeDays <= APolicy.SafetyFullRetentionDays);
-      if (not AFiles[I].Keep) and
-        (AgeDays <= APolicy.SafetyWeeklyRetentionDays) then
+      if (not AFiles[I].Keep) and (AgeDays <=
+        APolicy.SafetyWeeklyRetentionDays) then
       begin
         WeekKey := CalendarWeekKey(AFiles[I].CreatedAt);
         if KeptWeeks.IndexOf(WeekKey) < 0 then
@@ -658,7 +696,7 @@ begin
   end;
 end;
 
-function TotalRemainingSize(const AFiles: TBackupFileInfoArray): Int64;
+function TotalRemainingSize(const AFiles: TBackupFileInfoArray): int64;
 var
   I: integer;
 begin
@@ -682,7 +720,7 @@ procedure EnforceSizeQuota(var AFiles: TBackupFileInfoArray;
   var AResult: TBackupCleanupResult);
 var
   I: integer;
-  MaxBytes, TotalBytes: Int64;
+  MaxBytes, TotalBytes: int64;
 begin
   if AKind = cbkAutomatic then
     MaxBytes := APolicy.AutomaticMaxTotalBytes
@@ -708,10 +746,9 @@ begin
       [TotalBytes, MaxBytes]));
 end;
 
-function CleanupBackups(const ABackupDirectory, ASourceFile,
-  ANewBackupFile: string; const AKind: TCompetitionBackupKind;
-  const ANow: TDateTime; const APolicy: TBackupRetentionPolicy):
-  TBackupCleanupResult;
+function CleanupBackups(const ABackupDirectory, ASourceFile, ANewBackupFile: string;
+  const AKind: TCompetitionBackupKind; const ANow: TDateTime;
+  const APolicy: TBackupRetentionPolicy): TBackupCleanupResult;
 var
   Files: TBackupFileInfoArray;
   I: integer;
@@ -736,8 +773,8 @@ begin
   end;
 end;
 
-function ExecuteBackupRequestCore(const ARequest: TCompetitionBackupRequest):
-  TCompetitionBackupResult;
+function ExecuteBackupRequestCore(
+  const ARequest: TCompetitionBackupRequest): TCompetitionBackupResult;
 var
   BackupDirectory, BackupFile, SourceFile: string;
   Context: TCompetitionDbContext;
@@ -745,16 +782,14 @@ begin
   SourceFile := ExpandFileName(ARequest.DatabaseFile);
   BackupDirectory := IncludeTrailingPathDelimiter(ExtractFilePath(SourceFile)) +
     BackupFolder;
-  BackupFile := UniqueBackupFileName(BackupDirectory,
-    ExtractFileName(SourceFile), ARequest.BackupTime, ARequest.Kind,
-    ARequest.Reason);
+  BackupFile := UniqueBackupFileName(BackupDirectory, ExtractFileName(SourceFile),
+    ARequest.BackupTime, ARequest.Kind, ARequest.Reason);
 
   if (ARequest.DatabaseFile = '') or not FileExists(SourceFile) then
     Exit(FailedBackup(cbfInvalidSource, BackupFile,
       'Competition database file does not exist: ' + SourceFile));
 
-  if not DirectoryExists(BackupDirectory) and
-    not CreateDir(BackupDirectory) then
+  if not DirectoryExists(BackupDirectory) and not CreateDir(BackupDirectory) then
     Exit(FailedBackup(cbfDirectoryCreate, BackupFile,
       'Cannot create backup directory: ' + BackupDirectory));
 
@@ -771,8 +806,8 @@ begin
       Result.Status := cbsCreated;
       Result.Failure := cbfNone;
       Result.BackupFileName := BackupFile;
-      Result.Cleanup := CleanupBackups(BackupDirectory, SourceFile, BackupFile,
-        ARequest.Kind, ARequest.BackupTime, ARequest.RetentionPolicy);
+      Result.Cleanup := CleanupBackups(BackupDirectory, SourceFile,
+        BackupFile, ARequest.Kind, ARequest.BackupTime, ARequest.RetentionPolicy);
     except
       on E: Exception do
         Result := FailedBackup(cbfCreate, BackupFile, E.Message);
@@ -782,8 +817,7 @@ begin
   end;
 end;
 
-class function TCompetitionBackupService.CreateBackup(
-  const ADatabaseFile: string;
+class function TCompetitionBackupService.CreateBackup(const ADatabaseFile: string;
   const ABackupTime: TDateTime): TCompetitionBackupResult;
 var
   Request: TCompetitionBackupRequest;
@@ -844,8 +878,7 @@ begin
   Terminate;
 end;
 
-constructor TCompetitionBackupController.Create(
-  AAction: TCompetitionBackupAction;
+constructor TCompetitionBackupController.Create(AAction: TCompetitionBackupAction;
   AOnCompleted: TCompetitionBackupCompletedEvent;
   ACoordinator: TCompetitionBackupCoordinator);
 begin

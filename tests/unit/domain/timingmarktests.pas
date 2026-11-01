@@ -42,8 +42,8 @@ begin
   EventTime := EncodeTime(10, 11, 12, 345);
   ReceivedAt := EncodeDateTime(2026, 8, 13, 10, 11, 13, 456);
 
-  Mark := TTimingMark.Start(EventTime, True, -17,
-    TTimingMarkSource.Serial('COM7'), ReceivedAt);
+  Mark := TTimingMark.Start(EventTime, True, -17, TTimingMarkSource.Serial('COM7'),
+    ReceivedAt);
 
   AssertEquals(Ord(tmkStart), Ord(Mark.Kind));
   AssertEquals(EventTime, Mark.EventTime);
@@ -59,8 +59,7 @@ var
   Mark: TTimingMark;
 begin
   Mark := TTimingMark.Finish(EncodeTime(11, 12, 13, 14),
-    TTimingMarkSource.Ble('device-2'),
-    EncodeDateTime(2026, 8, 13, 11, 12, 14, 15));
+    TTimingMarkSource.Ble('device-2'), EncodeDateTime(2026, 8, 13, 11, 12, 14, 15));
 
   AssertEquals(Ord(tmkFinish), Ord(Mark.Kind));
   AssertFalse(Mark.HasCorrection);

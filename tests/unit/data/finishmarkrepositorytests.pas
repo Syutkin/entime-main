@@ -6,7 +6,8 @@ interface
 
 uses
   SysUtils, DateUtils, DB, FPCUnit, TestRegistry, SQLDB, CompetitionDbContext,
-  CompetitionSchemaMigrator, TimingMark, FinishMark, FinishMarkRepository;
+  CompetitionSchemaMigrator, TimingMark, FinishMark, FinishMarkRepository,
+  CompetitionQueryProvider;
 
 type
   TFinishMarkRepositoryTests = class(TTestCase)
@@ -28,6 +29,8 @@ type
     procedure SelectWorkQueue_ReturnsPendingMarksInReceiptOrder;
     procedure SelectJournal_ReturnsEveryStatusNewestFirst;
     procedure SelectJournal_FiltersByStatusTimeAndReceivedStage;
+    procedure SelectJournal_CombinesReceivedStageWithEveryStateFilter;
+    procedure SelectJournal_RejectsNegativeStageScope;
   end;
 
 implementation
@@ -59,8 +62,9 @@ begin
   inherited TearDown;
 end;
 
-function TFinishMarkRepositoryTests.PendingMark(const AEventTime,
-  AReceivedAt: TDateTime; const ASource: TTimingMarkSource): TFinishMark;
+function TFinishMarkRepositoryTests.PendingMark(
+  const AEventTime, AReceivedAt: TDateTime;
+  const ASource: TTimingMarkSource): TFinishMark;
 begin
   Result := TFinishMark.FromTimingMark(
     TTimingMark.Finish(AEventTime, ASource, AReceivedAt), 2);
@@ -74,8 +78,7 @@ var
 begin
   AppliedAt := EncodeDateTime(2026, 8, 15, 10, 0, 3, 456);
   Mark := PendingMark(EncodeTime(9, 59, 58, 123),
-    EncodeDateTime(2026, 8, 15, 10, 0, 0, 321),
-    TTimingMarkSource.Ble('ENTime-3'));
+    EncodeDateTime(2026, 8, 15, 10, 0, 0, 321), TTimingMarkSource.Ble('ENTime-3'));
   AssertTrue(Mark.TryApply(17, AppliedAt));
 
   Inserted := FRepository.Insert(Mark);
@@ -99,14 +102,13 @@ begin
 end;
 
 procedure TFinishMarkRepositoryTests.
-  InsertAndLoadAll_PreserveNullableManualMark;
+InsertAndLoadAll_PreserveNullableManualMark;
 var
   Inserted: TFinishMark;
   Marks: TFinishMarkArray;
 begin
   Inserted := FRepository.Insert(PendingMark(EncodeTime(10, 0, 0, 0),
-    EncodeDateTime(2026, 8, 15, 10, 0, 1, 0),
-    TTimingMarkSource.Manual));
+    EncodeDateTime(2026, 8, 15, 10, 0, 1, 0), TTimingMarkSource.Manual));
 
   FQuery.SQL.Text := 'SELECT * FROM finish_marks WHERE id = :ID;';
   FQuery.ParamByName('ID').AsLargeInt := Inserted.Id;
@@ -133,12 +135,12 @@ var
   Marks: TFinishMarkArray;
 begin
   FirstTime := EncodeDateTime(2026, 8, 15, 10, 0, 1, 0);
-  FRepository.Insert(PendingMark(EncodeTime(10, 0, 2, 0),
-    IncSecond(FirstTime), TTimingMarkSource.Serial('COM7')));
-  FRepository.Insert(PendingMark(EncodeTime(10, 0, 0, 0),
-    FirstTime, TTimingMarkSource.Serial('COM7')));
-  FRepository.Insert(PendingMark(EncodeTime(10, 0, 1, 0),
-    FirstTime, TTimingMarkSource.Serial('COM7')));
+  FRepository.Insert(PendingMark(EncodeTime(10, 0, 2, 0), IncSecond(FirstTime),
+    TTimingMarkSource.Serial('COM7')));
+  FRepository.Insert(PendingMark(EncodeTime(10, 0, 0, 0), FirstTime,
+    TTimingMarkSource.Serial('COM7')));
+  FRepository.Insert(PendingMark(EncodeTime(10, 0, 1, 0), FirstTime,
+    TTimingMarkSource.Serial('COM7')));
 
   Marks := FRepository.LoadAll;
 
@@ -149,17 +151,15 @@ begin
 end;
 
 procedure TFinishMarkRepositoryTests.
-  Update_PersistsMutableStateWithoutChangingReceivedStage;
+Update_PersistsMutableStateWithoutChangingReceivedStage;
 var
   Changed, Inserted, Loaded: TFinishMark;
 begin
   Inserted := FRepository.Insert(PendingMark(EncodeTime(10, 0, 0, 0),
-    EncodeDateTime(2026, 8, 15, 10, 0, 1, 0),
-    TTimingMarkSource.Serial('COM7')));
+    EncodeDateTime(2026, 8, 15, 10, 0, 1, 0), TTimingMarkSource.Serial('COM7')));
   Changed := Inserted;
   Changed.StageIndex := 9;
-  AssertTrue(Changed.TryApply(23,
-    EncodeDateTime(2026, 8, 15, 10, 0, 2, 0)));
+  AssertTrue(Changed.TryApply(23, EncodeDateTime(2026, 8, 15, 10, 0, 2, 0)));
 
   FRepository.Update(Changed);
   AssertTrue(FRepository.TryLoadById(Inserted.Id, Loaded));
@@ -174,18 +174,14 @@ var
   Applied, Ignored: TFinishMark;
 begin
   FRepository.Insert(PendingMark(EncodeTime(10, 0, 0, 0),
-    EncodeDateTime(2026, 8, 15, 10, 0, 1, 0),
-    TTimingMarkSource.Serial('COM7')));
+    EncodeDateTime(2026, 8, 15, 10, 0, 1, 0), TTimingMarkSource.Serial('COM7')));
   Ignored := FRepository.Insert(PendingMark(EncodeTime(10, 0, 1, 0),
-    EncodeDateTime(2026, 8, 15, 10, 0, 2, 0),
-    TTimingMarkSource.Serial('COM7')));
+    EncodeDateTime(2026, 8, 15, 10, 0, 2, 0), TTimingMarkSource.Serial('COM7')));
   Ignored.MarkIgnoredDebounce('debounce');
   FRepository.Update(Ignored);
   Applied := FRepository.Insert(PendingMark(EncodeTime(10, 0, 2, 0),
-    EncodeDateTime(2026, 8, 15, 10, 0, 3, 0),
-    TTimingMarkSource.Serial('COM7')));
-  AssertTrue(Applied.TryApply(5,
-    EncodeDateTime(2026, 8, 15, 10, 0, 4, 0)));
+    EncodeDateTime(2026, 8, 15, 10, 0, 3, 0), TTimingMarkSource.Serial('COM7')));
+  AssertTrue(Applied.TryApply(5, EncodeDateTime(2026, 8, 15, 10, 0, 4, 0)));
   FRepository.Update(Applied);
 
   AssertEquals(1, FRepository.HideWorkQueue);
@@ -193,19 +189,16 @@ begin
 end;
 
 procedure TFinishMarkRepositoryTests.
-  SelectWorkQueue_ReturnsPendingMarksInReceiptOrder;
+SelectWorkQueue_ReturnsPendingMarksInReceiptOrder;
 var
   Ignored: TFinishMark;
 begin
   FRepository.Insert(PendingMark(EncodeTime(10, 0, 2, 0),
-    EncodeDateTime(2026, 8, 15, 10, 0, 2, 0),
-    TTimingMarkSource.Ble('A')));
+    EncodeDateTime(2026, 8, 15, 10, 0, 2, 0), TTimingMarkSource.Ble('A')));
   FRepository.Insert(PendingMark(EncodeTime(10, 0, 1, 0),
-    EncodeDateTime(2026, 8, 15, 10, 0, 1, 0),
-    TTimingMarkSource.Ble('A')));
+    EncodeDateTime(2026, 8, 15, 10, 0, 1, 0), TTimingMarkSource.Ble('A')));
   Ignored := FRepository.Insert(PendingMark(EncodeTime(10, 0, 3, 0),
-    EncodeDateTime(2026, 8, 15, 10, 0, 3, 0),
-    TTimingMarkSource.Ble('A')));
+    EncodeDateTime(2026, 8, 15, 10, 0, 3, 0), TTimingMarkSource.Ble('A')));
   Ignored.MarkIgnoredDebounce('debounce');
   FRepository.Update(Ignored);
 
@@ -223,24 +216,20 @@ begin
 end;
 
 procedure TFinishMarkRepositoryTests.
-  SelectJournal_ReturnsEveryStatusNewestFirst;
+SelectJournal_ReturnsEveryStatusNewestFirst;
 var
   Applied, Hidden, Ignored: TFinishMark;
 begin
   Hidden := FRepository.Insert(PendingMark(EncodeTime(10, 0, 0, 0),
-    EncodeDateTime(2026, 8, 23, 10, 0, 1, 0),
-    TTimingMarkSource.Serial('COM7')));
+    EncodeDateTime(2026, 8, 23, 10, 0, 1, 0), TTimingMarkSource.Serial('COM7')));
   Hidden.Hide;
   FRepository.Update(Hidden);
   Applied := FRepository.Insert(PendingMark(EncodeTime(10, 0, 1, 0),
-    EncodeDateTime(2026, 8, 23, 10, 0, 2, 0),
-    TTimingMarkSource.Ble('ENTime-1')));
-  AssertTrue(Applied.TryApply(17,
-    EncodeDateTime(2026, 8, 23, 10, 0, 3, 0)));
+    EncodeDateTime(2026, 8, 23, 10, 0, 2, 0), TTimingMarkSource.Ble('ENTime-1')));
+  AssertTrue(Applied.TryApply(17, EncodeDateTime(2026, 8, 23, 10, 0, 3, 0)));
   FRepository.Update(Applied);
   Ignored := FRepository.Insert(PendingMark(EncodeTime(10, 0, 2, 0),
-    EncodeDateTime(2026, 8, 23, 10, 0, 4, 0),
-    TTimingMarkSource.Ble('ENTime-1')));
+    EncodeDateTime(2026, 8, 23, 10, 0, 4, 0), TTimingMarkSource.Ble('ENTime-1')));
   Ignored.MarkIgnoredDebounce('debounce');
   FRepository.Update(Ignored);
 
@@ -261,13 +250,13 @@ begin
 end;
 
 procedure TFinishMarkRepositoryTests.
-  SelectJournal_FiltersByStatusTimeAndReceivedStage;
+SelectJournal_FiltersByStatusTimeAndReceivedStage;
 var
   Applied, ErrorMark, Hidden, Ignored, Recent: TFinishMark;
 
   procedure AssertFilter(const AFilter: TFinishMarkJournalFilter;
-    const AExpectedCount: integer; const AReceivedSince: TDateTime;
-    const AStageIndex: integer);
+  const AExpectedCount: integer; const AReceivedSince: TDateTime;
+  const AStageIndex: integer);
   begin
     FQuery.Close;
     FQuery.SQL.Text := TFinishMarkSql.SelectJournal(AFilter);
@@ -279,32 +268,25 @@ var
 
 begin
   FRepository.Insert(PendingMark(EncodeTime(10, 0, 0, 0),
-    EncodeDateTime(2026, 8, 23, 9, 40, 0, 0),
-    TTimingMarkSource.Serial('COM7')));
+    EncodeDateTime(2026, 8, 23, 9, 40, 0, 0), TTimingMarkSource.Serial('COM7')));
   Ignored := FRepository.Insert(PendingMark(EncodeTime(10, 0, 1, 0),
-    EncodeDateTime(2026, 8, 23, 9, 50, 0, 0),
-    TTimingMarkSource.Serial('COM7')));
+    EncodeDateTime(2026, 8, 23, 9, 50, 0, 0), TTimingMarkSource.Serial('COM7')));
   Ignored.MarkIgnoredDebounce('debounce');
   FRepository.Update(Ignored);
   ErrorMark := FRepository.Insert(PendingMark(EncodeTime(10, 0, 2, 0),
-    EncodeDateTime(2026, 8, 23, 9, 55, 0, 0),
-    TTimingMarkSource.Serial('COM7')));
+    EncodeDateTime(2026, 8, 23, 9, 55, 0, 0), TTimingMarkSource.Serial('COM7')));
   ErrorMark.MarkError('failed');
   FRepository.Update(ErrorMark);
   Hidden := FRepository.Insert(PendingMark(EncodeTime(10, 0, 3, 0),
-    EncodeDateTime(2026, 8, 23, 9, 56, 0, 0),
-    TTimingMarkSource.Serial('COM7')));
+    EncodeDateTime(2026, 8, 23, 9, 56, 0, 0), TTimingMarkSource.Serial('COM7')));
   Hidden.Hide;
   FRepository.Update(Hidden);
   Applied := FRepository.Insert(PendingMark(EncodeTime(10, 0, 4, 0),
-    EncodeDateTime(2026, 8, 23, 9, 57, 0, 0),
-    TTimingMarkSource.Serial('COM7')));
-  AssertTrue(Applied.TryApply(17,
-    EncodeDateTime(2026, 8, 23, 9, 58, 0, 0)));
+    EncodeDateTime(2026, 8, 23, 9, 57, 0, 0), TTimingMarkSource.Serial('COM7')));
+  AssertTrue(Applied.TryApply(17, EncodeDateTime(2026, 8, 23, 9, 58, 0, 0)));
   FRepository.Update(Applied);
   Recent := PendingMark(EncodeTime(10, 0, 5, 0),
-    EncodeDateTime(2026, 8, 23, 10, 0, 0, 0),
-    TTimingMarkSource.Ble('ENTime-1'));
+    EncodeDateTime(2026, 8, 23, 10, 0, 0, 0), TTimingMarkSource.Ble('ENTime-1'));
   Recent.StageIndex := 1;
   FRepository.Insert(Recent);
 
@@ -317,6 +299,57 @@ begin
   AssertFilter(fmjfLast15Minutes, 5,
     EncodeDateTime(2026, 8, 23, 9, 45, 0, 0), 0);
   AssertFilter(fmjfCurrentStage, 1, 0, 1);
+end;
+
+procedure TFinishMarkRepositoryTests.
+SelectJournal_CombinesReceivedStageWithEveryStateFilter;
+const
+  EXPECTED: array[TFinishMarkJournalFilter] of integer = (5, 1, 1, 1, 1, 1, 5, 5);
+var
+  Mark: TFinishMark;
+  Status: TFinishMarkStatus;
+  StageIndex: integer;
+  Filter: TFinishMarkJournalFilter;
+begin
+  for StageIndex := 1 to 2 do
+    for Status := Low(TFinishMarkStatus) to High(TFinishMarkStatus) do
+    begin
+      Mark := PendingMark(EncodeTime(10, 0, 0, 0),
+        EncodeDateTime(2026, 10, 29, 8 + StageIndex, Ord(Status), 0, 0),
+        TTimingMarkSource.Manual);
+      Mark.StageIndex := StageIndex;
+      Mark.Status := Status;
+      Mark.HasParticipantNumber := True;
+      Mark.ParticipantNumber := 17;
+      FRepository.Insert(Mark);
+    end;
+  for Filter := Low(TFinishMarkJournalFilter) to High(TFinishMarkJournalFilter) do
+  begin
+    TDatasetSql.ConfigureFinishMarkJournal(FQuery, Filter,
+      EncodeDateTime(2026, 10, 29, 9, 45, 0, 0), 2);
+    FQuery.Open;
+    AssertEquals('Filter ' + IntToStr(Ord(Filter)), EXPECTED[Filter],
+      FQuery.RecordCount);
+    while not FQuery.EOF do
+    begin
+      AssertEquals(2, FQuery.FieldByName('stage_index').AsInteger);
+      FQuery.Next;
+    end;
+    FQuery.Close;
+  end;
+  TDatasetSql.ConfigureFinishMarkJournal(FQuery);
+  FQuery.Open;
+  AssertEquals(10, FQuery.RecordCount);
+end;
+
+procedure TFinishMarkRepositoryTests.SelectJournal_RejectsNegativeStageScope;
+begin
+  try
+    TDatasetSql.ConfigureFinishMarkJournal(FQuery, fmjfError, 0, -1);
+    Fail('Expected invalid stage scope');
+  except
+    on E: EArgumentOutOfRangeException do ;
+  end;
 end;
 
 initialization

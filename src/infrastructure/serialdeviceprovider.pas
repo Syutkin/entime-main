@@ -36,10 +36,10 @@ end;
 
 function SerialDeviceIsAvailable(const ADevice: string;
   const ADevices: TSerialDeviceInfoArray): boolean;
-{$IFDEF UNIX}
+  {$IFDEF UNIX}
 var
   DeviceInfo: Stat;
-{$ENDIF}
+  {$ENDIF}
 begin
   Result := (ADevice <> '') and ContainsSerialDevice(ADevices, ADevice);
   {$IFDEF UNIX}

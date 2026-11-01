@@ -1,0 +1,301 @@
+object ParticipantCardForm: TParticipantCardForm
+  Height = 760
+  Width = 1120
+  ClientHeight = 760
+  ClientWidth = 1120
+  Constraints.MinHeight = 660
+  Constraints.MinWidth = 760
+  Position = poOwnerFormCenter
+  PopupMode = pmAuto
+  KeyPreview = True
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnKeyDown = FormKeyDown
+  object HeaderPanel: TPanel
+    Align = alTop
+    AutoSize = True
+    BevelOuter = bvNone
+    BorderSpacing.Around = 8
+    object TitleLabel: TLabel
+      AnchorSideLeft.Control = HeaderPanel
+      AnchorSideTop.Control = HeaderPanel
+      AnchorSideRight.Control = HeaderPanel
+      AnchorSideRight.Side = asrBottom
+      Anchors = [akTop, akLeft, akRight]
+      AutoSize = True
+      WordWrap = True
+      Font.Style = [fsBold]
+      ParentFont = False
+      Caption = 'Карточка участника'
+    end
+    object MetaLabel: TLabel
+      AnchorSideLeft.Control = TitleLabel
+      AnchorSideTop.Control = TitleLabel
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = HeaderPanel
+      AnchorSideRight.Side = asrBottom
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 4
+      WordWrap = True
+      Caption = 'Сведения'
+    end
+    object SummaryLabel: TLabel
+      AnchorSideLeft.Control = MetaLabel
+      AnchorSideTop.Control = MetaLabel
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = HeaderPanel
+      AnchorSideRight.Side = asrBottom
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 4
+      WordWrap = True
+      Caption = 'Итог'
+    end
+    object StateLabel: TLabel
+      AnchorSideLeft.Control = SummaryLabel
+      AnchorSideTop.Control = SummaryLabel
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = HeaderPanel
+      AnchorSideRight.Side = asrBottom
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 4
+      WordWrap = True
+      Caption = 'Показаны сохранённые данные.'
+    end
+  end
+  object FooterPanel: TPanel
+    Align = alBottom
+    AutoSize = True
+    BevelOuter = bvNone
+    object JournalButton: TButton
+      AnchorSideTop.Control = CloseButton
+      AnchorSideRight.Control = ParticipantButton
+      Anchors = [akTop, akRight]
+      BorderSpacing.Right = 8
+      AutoSize = True
+      Action = JournalAction
+      TabOrder = 0
+    end
+    object ParticipantButton: TButton
+      AnchorSideTop.Control = CloseButton
+      AnchorSideRight.Control = RefreshButton
+      Anchors = [akTop, akRight]
+      BorderSpacing.Right = 8
+      AutoSize = True
+      Action = ParticipantAction
+      TabOrder = 1
+    end
+    object RefreshButton: TButton
+      AnchorSideTop.Control = CloseButton
+      AnchorSideRight.Control = CloseButton
+      Anchors = [akTop, akRight]
+      BorderSpacing.Right = 8
+      AutoSize = True
+      Action = RefreshAction
+      ShowHint = True
+      TabOrder = 2
+    end
+    object CloseButton: TButton
+      AnchorSideTop.Control = FooterPanel
+      AnchorSideRight.Control = FooterPanel
+      AnchorSideRight.Side = asrBottom
+      Anchors = [akTop, akRight]
+      BorderSpacing.Around = 8
+      AutoSize = True
+      Action = CloseAction
+      TabOrder = 3
+    end
+  end
+  object Pages: TPageControl
+    Align = alClient
+    BorderSpacing.Left = 8
+    BorderSpacing.Right = 8
+    ActivePage = ResultsPage
+    TabOrder = 0
+    object ResultsPage: TTabSheet
+      Caption = 'Результаты'
+      object StagePanel: TPanel
+        Top = 0
+        Align = alTop
+        Height = 220
+        BevelOuter = bvNone
+        Constraints.MinHeight = 80
+        object StagesGrid: TStringGrid
+          Align = alClient
+          ColCount = 10
+          RowCount = 2
+          FixedCols = 0
+          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goRowSelect, goTabs, goTruncCellHints]
+          ShowHint = True
+          OnSelectCell = StageSelect
+          TabOrder = 0
+          Columns = <
+            item
+              ReadOnly = True
+              Width = 140
+            end
+            item
+              ReadOnly = True
+              Width = 130
+            end
+            item
+              ReadOnly = True
+              Width = 130
+            end
+            item
+              ReadOnly = True
+              Width = 90
+            end
+            item
+              ReadOnly = True
+              Width = 110
+            end
+            item
+              ReadOnly = True
+              Width = 120
+            end
+            item
+              ReadOnly = True
+              Width = 65
+            end
+            item
+              ReadOnly = True
+              Width = 120
+            end
+            item
+              ReadOnly = True
+              Width = 80
+            end
+            item
+              ReadOnly = True
+              Width = 180
+            end>
+        end
+      end
+      object StageSplitter: TSplitter
+        Top = 220
+        Align = alTop
+        Height = 6
+        Beveled = True
+        AutoSnap = False
+        MinSize = 80
+        ResizeAnchor = akTop
+      end
+      object MarksPanel: TPanel
+        Top = 226
+        Align = alClient
+        BevelOuter = bvNone
+        Constraints.MinHeight = 200
+        object MarksHeaderPanel: TPanel
+          Align = alTop
+          AutoSize = True
+          BevelOuter = bvNone
+          BorderSpacing.Top = 4
+          BorderSpacing.Bottom = 4
+          object MarksLabel: TLabel
+            AnchorSideLeft.Control = MarksHeaderPanel
+            AnchorSideTop.Control = MarksHeaderPanel
+            AnchorSideRight.Control = MarksHeaderPanel
+            AnchorSideRight.Side = asrBottom
+            Anchors = [akTop, akLeft, akRight]
+            WordWrap = True
+            Caption = 'Отсечки'
+          end
+          object ScopeComboBox: TComboBox
+            AnchorSideLeft.Control = MarksLabel
+            AnchorSideTop.Control = MarksLabel
+            AnchorSideTop.Side = asrBottom
+            BorderSpacing.Top = 4
+            Width = 220
+            Style = csDropDownList
+            OnChange = ScopeChange
+            TabOrder = 0
+          end
+          object ScopeNoticeLabel: TLabel
+            AnchorSideLeft.Control = MarksLabel
+            AnchorSideTop.Control = ScopeComboBox
+            AnchorSideTop.Side = asrBottom
+            AnchorSideRight.Control = MarksHeaderPanel
+            AnchorSideRight.Side = asrBottom
+            Anchors = [akTop, akLeft, akRight]
+            BorderSpacing.Top = 4
+            WordWrap = True
+            Caption = 'Записи с сохранённым номером'
+          end
+        end
+        object DetailMemo: TMemo
+          Align = alBottom
+          Height = 110
+          ReadOnly = True
+          ScrollBars = ssAutoBoth
+          TabOrder = 2
+        end
+        object MarksGrid: TStringGrid
+          Align = alClient
+          ColCount = 7
+          RowCount = 2
+          FixedCols = 0
+          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goRowSelect, goTabs, goTruncCellHints]
+          ShowHint = True
+          OnSelectCell = MarkSelect
+          OnClick = MarkClick
+          OnDblClick = MarkDblClick
+          OnKeyDown = MarkKeyDown
+          TabOrder = 1
+          Columns = <
+            item
+              ReadOnly = True
+              Width = 100
+            end
+            item
+              ReadOnly = True
+              Width = 150
+            end
+            item
+              ReadOnly = True
+              Width = 140
+            end
+            item
+              ReadOnly = True
+              Width = 90
+            end
+            item
+              ReadOnly = True
+              Width = 110
+            end
+            item
+              ReadOnly = True
+              Width = 150
+            end
+            item
+              ReadOnly = True
+              Width = 150
+            end>
+        end
+      end
+    end
+    object PersonalPage: TTabSheet
+      Caption = 'Сведения'
+      object PersonalMemo: TMemo
+        Align = alClient
+        ReadOnly = True
+        ScrollBars = ssAutoBoth
+        TabOrder = 0
+      end
+    end
+  end
+  object Actions: TActionList
+    object JournalAction: TAction
+      OnExecute = CommandExecute
+    end
+    object ParticipantAction: TAction
+      OnExecute = CommandExecute
+    end
+    object RefreshAction: TAction
+      ShortCut = 116
+      OnExecute = CommandExecute
+    end
+    object CloseAction: TAction
+      OnExecute = CommandExecute
+    end
+  end
+end

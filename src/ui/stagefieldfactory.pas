@@ -9,8 +9,7 @@ uses
 
 type
   TStageFieldChangeEvent = procedure(Sender: TField) of object;
-  TStageFieldSetTextEvent = procedure(Sender: TField;
-    const AText: string) of object;
+  TStageFieldSetTextEvent = procedure(Sender: TField; const AText: string) of object;
   TStageFieldGetTextEvent = procedure(Sender: TField; var AText: string;
     DisplayText: boolean) of object;
 
@@ -95,8 +94,7 @@ begin
   AField.Required := False;
 end;
 
-function TStageFieldFactory.EnsureStringField(
-  const AFieldName: string): TStringField;
+function TStageFieldFactory.EnsureStringField(const AFieldName: string): TStringField;
 var
   ExistingField: TField;
 begin
@@ -119,8 +117,8 @@ begin
   Result.Size := STAGE_STRING_FIELD_SIZE;
 end;
 
-function TStageFieldFactory.EnsureLongintField(
-  const AFieldName: string): TLongintField;
+function TStageFieldFactory.EnsureLongintField(const AFieldName: string):
+TLongintField;
 var
   ExistingField: TField;
 begin
@@ -142,8 +140,8 @@ begin
   ConfigureDataField(Result);
 end;
 
-function TStageFieldFactory.EnsureStageFields(
-  const AStageIndex: integer): TStageFields;
+function TStageFieldFactory.EnsureStageFields(const AStageIndex: integer):
+TStageFields;
 var
   StageSuffix: string;
 begin
@@ -179,8 +177,8 @@ var
 begin
   if not IsValidStageCount(AStageCount) then
     raise EArgumentOutOfRangeException.CreateFmt(
-      rsStageCountRangeError,
-      [IntToStr(AStageCount), MIN_STAGE_COUNT, MAX_SUPPORTED_STAGE_COUNT]);
+      rsStageCountRangeError, [IntToStr(AStageCount), MIN_STAGE_COUNT,
+      MAX_SUPPORTED_STAGE_COUNT]);
 
   SetLength(StageIndexes, AStageCount);
   for StageIndex := 1 to AStageCount do
@@ -188,8 +186,7 @@ begin
   EnsureStageIndexes(StageIndexes);
 end;
 
-procedure TStageFieldFactory.EnsureStageIndexes(
-  const AStageIndexes: array of integer);
+procedure TStageFieldFactory.EnsureStageIndexes(const AStageIndexes: array of integer);
 var
   Seen: array[MIN_STAGE_COUNT..MAX_SUPPORTED_STAGE_COUNT] of boolean;
   ArrayIndex, StageIndex: integer;
@@ -210,8 +207,8 @@ begin
         'Stage index must be in the range %d..%d, got %d.',
         [MIN_STAGE_COUNT, MAX_SUPPORTED_STAGE_COUNT, StageIndex]);
     if Seen[StageIndex] then
-      raise EArgumentException.CreateFmt(
-        'Duplicate stage index: %d.', [StageIndex]);
+      raise EArgumentException.CreateFmt('Duplicate stage index: %d.',
+        [StageIndex]);
     Seen[StageIndex] := True;
   end;
 

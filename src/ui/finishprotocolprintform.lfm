@@ -1,0 +1,145 @@
+inherited FinishProtocolPrintForm: TFinishProtocolPrintForm
+  Height = 840
+  Constraints.MinHeight = 700
+  Caption = 'Финишный протокол'
+  OnCreate = FinishCreate
+  inherited ParametersPanel: TPanel
+    inherited StageLabel: TLabel
+      Visible = False
+    end
+    inherited StageCombo: TComboBox
+      Visible = False
+      TabStop = False
+    end
+    inherited IncompleteCheck: TCheckBox
+      AnchorSideTop.Control = SourcePanel
+      AnchorSideTop.Side = asrBottom
+    end
+    inherited CategoryLabel: TLabel
+      AnchorSideTop.Control = OptionsPanel
+      AnchorSideTop.Side = asrBottom
+    end
+    object SourcePanel: TPanel
+      AnchorSideLeft.Control = ParametersPanel
+      AnchorSideTop.Control = TemplatePanel
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = ParametersPanel
+      AnchorSideRight.Side = asrBottom
+      Anchors = [akTop, akLeft, akRight]
+      AutoSize = True
+      BorderSpacing.Top = 8
+      BevelOuter = bvNone
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 1
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      TabOrder = 2
+      object ModePanel: TPanel
+        AutoSize = True
+        BevelOuter = bvNone
+        BorderSpacing.Bottom = 6
+        TabOrder = 0
+        object ModeLabel: TLabel
+          AnchorSideLeft.Control = ModePanel
+          AnchorSideTop.Control = ModePanel
+          Caption = 'Протокол'
+        end
+        object ModeCombo: TComboBox
+          AnchorSideLeft.Control = ModePanel
+          AnchorSideTop.Control = ModeLabel
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = ModePanel
+          AnchorSideRight.Side = asrBottom
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Top = 4
+          Style = csDropDownList
+          TabOrder = 0
+          OnChange = SourceChange
+        end
+      end
+      object FitWidthCheck: TCheckBox
+        AutoSize = True
+        Caption = 'Вместить по горизонтали'
+        TabOrder = 1
+        OnChange = SourceChange
+      end
+      object SingleStagePanel: TPanel
+        AutoSize = True
+        BevelOuter = bvNone
+        BorderSpacing.Bottom = 6
+        TabOrder = 2
+        object SelectStageLabel: TLabel
+          AnchorSideLeft.Control = SingleStagePanel
+          AnchorSideTop.Control = SingleStagePanel
+          Caption = 'СУ'
+        end
+        object SelectStageCombo: TComboBox
+          AnchorSideLeft.Control = SingleStagePanel
+          AnchorSideTop.Control = SelectStageLabel
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = SingleStagePanel
+          AnchorSideRight.Side = asrBottom
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Top = 4
+          Style = csDropDownList
+          TabOrder = 0
+          OnChange = SourceChange
+        end
+      end
+    end
+    object OptionsPanel: TPanel
+      AnchorSideLeft.Control = ParametersPanel
+      AnchorSideTop.Control = FooterCheck
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = ParametersPanel
+      AnchorSideRight.Side = asrBottom
+      Anchors = [akTop, akLeft, akRight]
+      AutoSize = True
+      BorderSpacing.Top = 4
+      BevelOuter = bvNone
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 1
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      TabOrder = 7
+      object PenaltyCheck: TCheckBox
+        AutoSize = True
+        Caption = 'Штраф'
+        TabOrder = 0
+        OnChange = ParametersChange
+      end
+      object DetailsPanel: TPanel
+        AutoSize = True
+        BevelOuter = bvNone
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 1
+        ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+        TabOrder = 1
+        object DetailedCheck: TCheckBox
+          AutoSize = True
+          Caption = 'Результаты СУ'
+          Checked = True
+          State = cbChecked
+          TabOrder = 0
+          OnChange = SourceChange
+        end
+        object StagePlacesCheck: TCheckBox
+          AutoSize = True
+          Caption = 'Места на СУ'
+          TabOrder = 1
+          OnChange = SourceChange
+        end
+        object StageGapsCheck: TCheckBox
+          AutoSize = True
+          Caption = 'Отставания на СУ'
+          TabOrder = 2
+          OnChange = SourceChange
+        end
+        object StagePenaltyCheck: TCheckBox
+          AutoSize = True
+          Caption = 'Штрафы на СУ'
+          TabOrder = 3
+          OnChange = SourceChange
+        end
+      end
+    end
+  end
+end

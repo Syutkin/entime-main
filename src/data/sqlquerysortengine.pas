@@ -76,15 +76,14 @@ begin
     Result := Result + ';';
 end;
 
-procedure TEntimeSQLQuerySortEngine.Sort(FieldName: string;
-  ADataSet: TDataSet; Asc: boolean; SortOptions: TRxSortEngineOptions);
+procedure TEntimeSQLQuerySortEngine.Sort(FieldName: string; ADataSet: TDataSet;
+  Asc: boolean; SortOptions: TRxSortEngineOptions);
 begin
   SortList(FieldName, ADataSet, [Asc], SortOptions);
 end;
 
 procedure TEntimeSQLQuerySortEngine.SortList(ListField: string;
-  ADataSet: TDataSet; Asc: array of boolean;
-  SortOptions: TRxSortEngineOptions);
+  ADataSet: TDataSet; Asc: array of boolean; SortOptions: TRxSortEngineOptions);
 var
   query: TSQLQuery;
   orderBy: string;

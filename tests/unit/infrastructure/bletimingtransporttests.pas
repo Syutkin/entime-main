@@ -25,20 +25,6 @@ uses
 type
   TBleTimingTransportTests = class;
 
-  TNotificationThread = class(TThread)
-  private
-    FBackend: TFakeLazBleBackend;
-    FCompletedEvent: PRTLEvent;
-    FEvent: TLazBleBackendEvent;
-  protected
-    procedure Execute; override;
-  public
-    constructor Create(const ABackend: TFakeLazBleBackend;
-      const AEvent: TLazBleBackendEvent);
-    destructor Destroy; override;
-    procedure WaitForEmission;
-  end;
-
   TBleTimingTransportTests = class(TTestCase)
   private
     FBackend: ILazBleBackend;
@@ -48,22 +34,22 @@ type
     FSerialProcessor: TTransportStreamProcessor;
     FPackets: array of TTimingPacket;
     FSources: array of TTimingMarkSource;
-    FRejectedCount: Integer;
+    FRejectedCount: integer;
     FLastCallbackThreadId: TThreadID;
     FSubscriptionId: TBleSubscriptionId;
     procedure PacketReceived(Sender: TObject; const APacket: TTimingPacket;
       const ASource: TTimingMarkSource);
-    procedure DataReceived(Sender: TObject; const AData: RawByteString;
+    procedure DataReceived(Sender: TObject; const AData: rawbytestring;
       const ASource: TTimingMarkSource);
-    procedure SerialPacketReceived(Sender: TObject;
-      const APacket: TTimingPacket; const ASource: TTimingMarkSource);
+    procedure SerialPacketReceived(Sender: TObject; const APacket: TTimingPacket;
+      const ASource: TTimingMarkSource);
     procedure PacketRejected(Sender: TObject;
       const ARejected: TTransportStreamRejected);
     procedure ConnectInput;
-    procedure CompleteConnection(const ASubscriptionId: TBleSubscriptionId);
-    function NotificationEvent(const AValue: RawByteString):
-      TLazBleBackendEvent;
-    procedure EmitNotification(const AValue: RawByteString);
+    procedure CompleteConnection(const ASubscriptionId: TBleSubscriptionId;
+      const AEarlyData: rawbytestring = '');
+    function NotificationEvent(const AValue: rawbytestring): TLazBleBackendEvent;
+    procedure EmitNotification(const AValue: rawbytestring);
     procedure DisconnectInput;
   protected
     procedure SetUp; override;
@@ -74,51 +60,24 @@ type
     procedure BleDisconnectDoesNotResetSerialDecoder;
     procedure RejectedPacketDoesNotBlockFollowingPacket;
     procedure DisconnectDropsIncompletePacket;
-    procedure BackgroundNotificationIsDeliveredOnMainThread;
-    procedure QueuedNotificationIsIgnoredAfterDestroy;
+    procedure NotificationIsDeliveredOnMainThread;
+    procedure NotificationsStopAfterDetach;
     procedure ExternalClientRemainsOwnedByItsFacade;
     procedure RecreatedExternalClientReceivesNusProfile;
     procedure ChangingDeviceReconfiguresProfileAndSource;
     procedure SendAsync_WritesToNusRx;
     procedure SendAsync_WhenDisconnectedReturnsFailure;
+    procedure RepeatedConfigurationDoesNotDuplicateNusProfile;
+    procedure SendFailureMayHaveEmptyDiagnostics;
+    procedure NotificationsBeginAfterSubscriptionReady;
+    procedure ShutdownIsIdempotentAndStopsDelivery;
+    procedure OldDeviceNotificationIsIgnoredAfterSelectionChanges;
   end;
 
 implementation
 
 type
   TBleClientAccess = class(TBleClient);
-
-constructor TNotificationThread.Create(const ABackend: TFakeLazBleBackend;
-  const AEvent: TLazBleBackendEvent);
-begin
-  inherited Create(True);
-  FreeOnTerminate := False;
-  FBackend := ABackend;
-  FCompletedEvent := RTLEventCreate;
-  FEvent := AEvent;
-  FEvent.Value := Copy(AEvent.Value);
-end;
-
-procedure TNotificationThread.Execute;
-begin
-  try
-    FBackend.EmitProgress(FEvent);
-  finally
-    RTLEventSetEvent(FCompletedEvent);
-  end;
-end;
-
-destructor TNotificationThread.Destroy;
-begin
-  WaitFor;
-  RTLEventDestroy(FCompletedEvent);
-  inherited Destroy;
-end;
-
-procedure TNotificationThread.WaitForEmission;
-begin
-  RTLEventWaitFor(FCompletedEvent);
-end;
 
 procedure TBleTimingTransportTests.SetUp;
 begin
@@ -138,12 +97,17 @@ end;
 
 procedure TBleTimingTransportTests.TearDown;
 begin
+  if Assigned(FInput) then
+  begin
+    FInput.ShutdownAsync;
+    FBackendObject.CompletePendingOperations;
+    FBackendObject.CompleteShutdown;
+    FreeAndNil(FInput);
+  end;
   FSerialProcessor.Free;
   FSerialProcessor := nil;
   FInputProcessor.Free;
   FInputProcessor := nil;
-  FInput.Free;
-  FInput := nil;
   FBackend := nil;
   FBackendObject := nil;
   inherited TearDown;
@@ -152,7 +116,7 @@ end;
 procedure TBleTimingTransportTests.SerialPacketReceived(Sender: TObject;
   const APacket: TTimingPacket; const ASource: TTimingMarkSource);
 var
-  Index: Integer;
+  Index: integer;
 begin
   AssertSame(FSerialProcessor, Sender);
   Index := Length(FPackets);
@@ -165,7 +129,7 @@ end;
 procedure TBleTimingTransportTests.PacketReceived(Sender: TObject;
   const APacket: TTimingPacket; const ASource: TTimingMarkSource);
 var
-  Index: Integer;
+  Index: integer;
 begin
   AssertSame(FInputProcessor, Sender);
   Index := Length(FPackets);
@@ -177,7 +141,7 @@ begin
 end;
 
 procedure TBleTimingTransportTests.DataReceived(Sender: TObject;
-  const AData: RawByteString; const ASource: TTimingMarkSource);
+  const AData: rawbytestring; const ASource: TTimingMarkSource);
 begin
   AssertSame(FInput, Sender);
   FInputProcessor.Feed(AData, ASource, Now);
@@ -201,15 +165,14 @@ begin
 end;
 
 procedure TBleTimingTransportTests.CompleteConnection(
-  const ASubscriptionId: TBleSubscriptionId);
+  const ASubscriptionId: TBleSubscriptionId; const AEarlyData: rawbytestring);
 var
   BackendEvent: TLazBleBackendEvent;
   Command: TLazBleBackendCommand;
   OperationId: TBleOperationId;
 begin
   Command := FBackendObject.Commands[FBackendObject.CommandCount - 1];
-  OperationId := FBackendObject.OperationIds[
-    FBackendObject.CommandCount - 1];
+  OperationId := FBackendObject.OperationIds[FBackendObject.CommandCount - 1];
   AssertEquals(Ord(lbckConnect), Ord(Command.Kind));
 
   BackendEvent := Default(TLazBleBackendEvent);
@@ -219,12 +182,14 @@ begin
   BackendEvent.Generation := Command.Generation;
   AssertTrue(FBackendObject.EmitProgress(BackendEvent));
 
+  AssertTrue(FBackendObject.CompleteOperation(OperationId, lbekOperationSucceeded));
+
   Command := FBackendObject.Commands[FBackendObject.CommandCount - 1];
-  OperationId := FBackendObject.OperationIds[
-    FBackendObject.CommandCount - 1];
+  OperationId := FBackendObject.OperationIds[FBackendObject.CommandCount - 1];
   AssertEquals(Ord(lbckDiscoverServices), Ord(Command.Kind));
   BackendEvent := Default(TLazBleBackendEvent);
   BackendEvent.Kind := lbekServicesDiscovered;
+  BackendEvent.MaxWriteSize := 20;
   BackendEvent.OperationId := OperationId;
   BackendEvent.DeviceId := Command.DeviceId;
   BackendEvent.Generation := Command.Generation;
@@ -233,16 +198,15 @@ begin
   SetLength(BackendEvent.Services[0].Characteristics, 2);
   BackendEvent.Services[0].Characteristics[0].Uuid :=
     NusRxCharacteristicUuid;
-  BackendEvent.Services[0].Characteristics[0].Properties :=
-    [lbgcpWriteCommand];
+  BackendEvent.Services[0].Characteristics[0].CanWriteCommand := True;
   BackendEvent.Services[0].Characteristics[1].Uuid :=
     NusTxCharacteristicUuid;
-  BackendEvent.Services[0].Characteristics[1].Properties := [lbgcpNotify];
+  BackendEvent.Services[0].Characteristics[1].CanNotify := True;
   AssertTrue(FBackendObject.EmitProgress(BackendEvent));
+  AssertTrue(FBackendObject.CompleteOperation(OperationId, lbekOperationSucceeded));
 
   Command := FBackendObject.Commands[FBackendObject.CommandCount - 1];
-  OperationId := FBackendObject.OperationIds[
-    FBackendObject.CommandCount - 1];
+  OperationId := FBackendObject.OperationIds[FBackendObject.CommandCount - 1];
   AssertEquals(Ord(lbckSubscribe), Ord(Command.Kind));
   BackendEvent := Default(TLazBleBackendEvent);
   BackendEvent.Kind := lbekSubscribed;
@@ -250,29 +214,33 @@ begin
   BackendEvent.SubscriptionId := ASubscriptionId;
   BackendEvent.DeviceId := Command.DeviceId;
   BackendEvent.Generation := Command.Generation;
+  if AEarlyData <> '' then
+  begin
+    AssertEquals(Ord(tssFailed), Ord(FInput.SendAsync('too early').State));
+    EmitNotification(AEarlyData);
+  end;
   AssertTrue(FBackendObject.EmitProgress(BackendEvent));
-  AssertTrue(FBackendObject.CompleteOperation(OperationId,
-    lbekOperationSucceeded));
+  AssertTrue(FBackendObject.CompleteOperation(OperationId, lbekOperationSucceeded));
 end;
 
 function TBleTimingTransportTests.NotificationEvent(
-  const AValue: RawByteString): TLazBleBackendEvent;
+  const AValue: rawbytestring): TLazBleBackendEvent;
 var
-  Index: Integer;
+  Index: integer;
 begin
   Result := Default(TLazBleBackendEvent);
   Result.Kind := lbekNotification;
   Result.OperationId := InvalidBleOperationId;
   Result.SubscriptionId := FSubscriptionId;
   Result.DeviceId := FInput.DeviceId;
-  Result.Generation := FBackendObject.Commands[
-    FBackendObject.CommandCount - 1].Generation;
+  Result.Generation := FBackendObject.Commands[FBackendObject.CommandCount -
+    1].Generation;
   SetLength(Result.Value, Length(AValue));
   for Index := 1 to Length(AValue) do
-    Result.Value[Index - 1] := Byte(AValue[Index]);
+    Result.Value[Index - 1] := byte(AValue[Index]);
 end;
 
-procedure TBleTimingTransportTests.EmitNotification(const AValue: RawByteString);
+procedure TBleTimingTransportTests.EmitNotification(const AValue: rawbytestring);
 var
   BackendEvent: TLazBleBackendEvent;
 begin
@@ -288,8 +256,7 @@ var
 begin
   FInput.DisconnectAsync;
   Command := FBackendObject.Commands[FBackendObject.CommandCount - 1];
-  OperationId := FBackendObject.OperationIds[
-    FBackendObject.CommandCount - 1];
+  OperationId := FBackendObject.OperationIds[FBackendObject.CommandCount - 1];
   AssertEquals(Ord(lbckDisconnect), Ord(Command.Kind));
   BackendEvent := Default(TLazBleBackendEvent);
   BackendEvent.Kind := lbekDisconnected;
@@ -297,8 +264,7 @@ begin
   BackendEvent.DeviceId := Command.DeviceId;
   BackendEvent.Generation := Command.Generation;
   AssertTrue(FBackendObject.EmitProgress(BackendEvent));
-  AssertTrue(FBackendObject.CompleteOperation(OperationId,
-    lbekOperationSucceeded));
+  AssertTrue(FBackendObject.CompleteOperation(OperationId, lbekOperationSucceeded));
   AssertEquals(Ord(lbcstDisconnected), Ord(FInput.State));
   FInputProcessor.Reset;
 end;
@@ -377,41 +343,23 @@ begin
   AssertEquals('F03:04:05#', FPackets[0].RawText);
 end;
 
-procedure TBleTimingTransportTests.BackgroundNotificationIsDeliveredOnMainThread;
-var
-  NotificationThread: TNotificationThread;
+procedure TBleTimingTransportTests.NotificationIsDeliveredOnMainThread;
 begin
-  NotificationThread := TNotificationThread.Create(FBackendObject,
-    NotificationEvent('F12:34:56#'));
-  try
-    NotificationThread.Start;
-    NotificationThread.WaitForEmission;
-    AssertEquals(0, Length(FPackets));
-    CheckSynchronize;
-    AssertEquals(1, Length(FPackets));
-    AssertEquals(MainThreadID, FLastCallbackThreadId);
-  finally
-    NotificationThread.Free;
-  end;
+  EmitNotification('F12:34:56#');
+  AssertEquals(1, Length(FPackets));
+  AssertTrue(MainThreadID = FLastCallbackThreadId);
 end;
 
-procedure TBleTimingTransportTests.QueuedNotificationIsIgnoredAfterDestroy;
+procedure TBleTimingTransportTests.NotificationsStopAfterDetach;
 var
-  NotificationThread: TNotificationThread;
+  Event: TLazBleBackendEvent;
 begin
-  NotificationThread := TNotificationThread.Create(FBackendObject,
-    NotificationEvent('F12:34:56#'));
-  try
-    NotificationThread.Start;
-    NotificationThread.WaitForEmission;
-    FInput.Free;
-    FInput := nil;
-    CheckSynchronize;
-
-    AssertEquals(0, Length(FPackets));
-  finally
-    NotificationThread.Free;
-  end;
+  Event := NotificationEvent('F12:34:56#');
+  FInput.Detach;
+  AssertTrue(FBackendObject.EmitProgress(Event));
+  AssertEquals(0, Length(FPackets));
+  AssertFalse(FInput.Connected);
+  AssertEquals(Ord(tssFailed), Ord(FInput.SendAsync('ignored').State));
 end;
 
 procedure TBleTimingTransportTests.ExternalClientRemainsOwnedByItsFacade;
@@ -439,6 +387,9 @@ begin
     AssertEquals(0, BackendObject.CommandCount);
   finally
     Adapter.Free;
+    Ble.ShutdownAsync;
+    BackendObject.CompletePendingOperations;
+    BackendObject.CompleteShutdown;
     Ble.Free;
     Backend := nil;
   end;
@@ -461,6 +412,7 @@ begin
     Adapter.ConfigureClient(Client);
     AssertEquals(1, TBleClientAccess(Client).ProfileCount);
 
+    Adapter.ReleaseClient;
     Ble.RemoveClient(Client);
     Client := Ble.CreateClient('external-device');
     Adapter.ConfigureClient(Client);
@@ -469,6 +421,9 @@ begin
       1, TBleClientAccess(Client).ProfileCount);
   finally
     Adapter.Free;
+    Ble.ShutdownAsync;
+    BackendObject.CompletePendingOperations;
+    BackendObject.CompleteShutdown;
     Ble.Free;
     Backend := nil;
   end;
@@ -503,6 +458,10 @@ begin
   AssertEquals(NusRxCharacteristicUuid, Command.CharacteristicUuid);
   AssertEquals(4, Length(Command.Value));
   AssertEquals(Ord('T'), Command.Value[0]);
+  AssertTrue(FBackendObject.CompleteOperation(
+    FBackendObject.OperationIds[FBackendObject.CommandCount - 1],
+    lbekOperationSucceeded));
+  AssertEquals(Ord(tssSucceeded), Ord(Operation.State));
 end;
 
 procedure TBleTimingTransportTests.SendAsync_WhenDisconnectedReturnsFailure;
@@ -518,6 +477,101 @@ begin
 
   AssertEquals(Ord(tssFailed), Ord(Operation.State));
   AssertEquals(CommandCountBefore, FBackendObject.CommandCount);
+end;
+
+procedure TBleTimingTransportTests.RepeatedConfigurationDoesNotDuplicateNusProfile;
+var
+  Backend: ILazBleBackend;
+  BackendObject: TFakeLazBleBackend;
+  Ble: TLazBle;
+  Client: TBleClient;
+  Input: TBleTimingTransport;
+begin
+  BackendObject := TFakeLazBleBackend.Create;
+  Backend := BackendObject;
+  Ble := TLazBle.Create(Backend);
+  Input := TBleTimingTransport.Create;
+  try
+    Client := Ble.CreateClient('borrowed-device');
+    Input.ConfigureClient(Client);
+    Input.ConfigureClient(Client);
+    AssertEquals(1, TBleClientAccess(Client).ProfileCount);
+    Input.ReleaseClient;
+    Ble.RemoveClient(Client);
+    AssertEquals(Ord(lbcstDisconnected), Ord(Input.State));
+    AssertFalse(Input.Connected);
+  finally
+    Input.Free;
+    Ble.ShutdownAsync;
+    BackendObject.CompletePendingOperations;
+    BackendObject.CompleteShutdown;
+    Ble.Free;
+    Backend := nil;
+  end;
+end;
+
+procedure TBleTimingTransportTests.SendFailureMayHaveEmptyDiagnostics;
+var
+  Operation: ITimingSendOperation;
+begin
+  Operation := FInput.SendAsync('command');
+  AssertEquals(Ord(tssPending), Ord(Operation.State));
+  AssertTrue(FBackendObject.CompleteOperation(
+    FBackendObject.OperationIds[FBackendObject.CommandCount - 1],
+    lbekOperationFailed));
+  AssertEquals(Ord(tssFailed), Ord(Operation.State));
+  AssertEquals(0, Operation.ErrorCode);
+  AssertEquals('', Operation.ErrorMessage);
+end;
+
+procedure TBleTimingTransportTests.NotificationsBeginAfterSubscriptionReady;
+begin
+  DisconnectInput;
+  Inc(FSubscriptionId);
+  FInput.ConnectAsync('ENTime-1');
+  CompleteConnection(FSubscriptionId, 'F01:02:03#');
+  AssertEquals('Early data is outside the supported subscription window',
+    0, Length(FPackets));
+  EmitNotification('F02:03:04#');
+  AssertEquals(1, Length(FPackets));
+  AssertEquals('F02:03:04#', FPackets[0].RawText);
+end;
+
+procedure TBleTimingTransportTests.ShutdownIsIdempotentAndStopsDelivery;
+var
+  Operation: IBleOperation;
+  Event: TLazBleBackendEvent;
+  CommandCount: integer;
+begin
+  Event := NotificationEvent('F01:02:03#');
+  Operation := FInput.ShutdownAsync;
+  AssertTrue(Operation = FInput.ShutdownAsync);
+  AssertEquals(Ord(lbopPending), Ord(Operation.State));
+  AssertFalse(FInput.Connected);
+  CommandCount := FBackendObject.CommandCount;
+  AssertEquals(Ord(tssFailed), Ord(FInput.SendAsync('command').State));
+  AssertEquals(CommandCount, FBackendObject.CommandCount);
+  FBackendObject.EmitProgress(Event);
+  AssertEquals(0, Length(FPackets));
+  FBackendObject.CompletePendingOperations;
+  AssertTrue(FBackendObject.CompleteShutdown(0, '', True));
+  AssertEquals(Ord(lbopFailed), Ord(Operation.State));
+end;
+
+procedure TBleTimingTransportTests.OldDeviceNotificationIsIgnoredAfterSelectionChanges;
+var
+  OldNotification: TLazBleBackendEvent;
+begin
+  OldNotification := NotificationEvent('F01:02:03#');
+  DisconnectInput;
+  Inc(FSubscriptionId);
+  FInput.ConnectAsync('ENTime-2');
+  CompleteConnection(FSubscriptionId);
+  FBackendObject.EmitProgress(OldNotification);
+  AssertEquals(0, Length(FPackets));
+  EmitNotification('F02:03:04#');
+  AssertEquals(1, Length(FPackets));
+  AssertEquals('ENTime-2', FSources[0].DeviceId);
 end;
 
 initialization

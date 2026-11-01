@@ -39,6 +39,7 @@ type
     FTransaction: TSQLTransaction;
     FQueries: TSqlQueryList;
     FUnitOfWorkActive: boolean;
+    FSessionGeneration, FIdentity: QWord;
     procedure BeginWrite;
     procedure CommitWrite;
     procedure RollbackWrite;
@@ -46,8 +47,7 @@ type
     procedure CloseRegisteredDatasets;
     procedure ConfigureQuery(const AQuery: TSQLQuery);
   protected
-    procedure Notification(AComponent: TComponent;
-      Operation: TOperation); override;
+    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
   public
     constructor Create(AOwner: TComponent = nil); override;
     destructor Destroy; override;
@@ -68,12 +68,18 @@ type
       out AErrors: string): integer; overload;
     property Connection: TSQLite3Connection read FConnection;
     property Transaction: TSQLTransaction read FTransaction;
+    property UnitOfWorkActive: boolean read FUnitOfWorkActive;
+    property SessionGeneration: QWord read FSessionGeneration;
+    property Identity: QWord read FIdentity;
   end;
 
 implementation
 
 uses
   SqlValueHelpers, sqlite3dyn;
+
+var
+  NextContextIdentity: QWord;
 
 procedure ConfigureSQLiteBusyTimeout(const AConnection: TSQLite3Connection;
   const ATimeoutMs: integer);
@@ -86,8 +92,7 @@ begin
     raise EArgumentOutOfRangeException.Create('ATimeoutMs');
   if not AConnection.Connected then
     AConnection.Open;
-  SQLiteResult := sqlite3_busy_timeout(psqlite3(AConnection.Handle),
-    ATimeoutMs);
+  SQLiteResult := sqlite3_busy_timeout(psqlite3(AConnection.Handle), ATimeoutMs);
   if SQLiteResult <> SQLITE_OK then
     raise EDatabaseError.CreateFmt(
       'Cannot configure SQLite busy timeout: error %d', [SQLiteResult]);
@@ -95,8 +100,7 @@ end;
 
 { TCompetitionUnitOfWork }
 
-constructor TCompetitionUnitOfWork.Create(
-  const AContext: TCompetitionDbContext);
+constructor TCompetitionUnitOfWork.Create(const AContext: TCompetitionDbContext);
 begin
   inherited Create;
   if AContext = nil then
@@ -150,8 +154,7 @@ procedure TCompetitionDbContext.Notification(AComponent: TComponent;
   Operation: TOperation);
 begin
   inherited Notification(AComponent, Operation);
-  if (Operation = opRemove) and (AComponent is TSQLQuery) and
-    Assigned(FQueries) then
+  if (Operation = opRemove) and (AComponent is TSQLQuery) and Assigned(FQueries) then
     FQueries.Remove(TSQLQuery(AComponent));
 end;
 
@@ -165,6 +168,8 @@ end;
 constructor TCompetitionDbContext.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  Inc(NextContextIdentity);
+  FIdentity := NextContextIdentity;
   FQueries := TSqlQueryList.Create;
   FConnection := TSQLite3Connection.Create(nil);
   FConnection.LoginPrompt := False;
@@ -220,6 +225,7 @@ begin
     raise EDatabaseError.Create('Database file must be assigned before opening');
   if not FConnection.Connected then
   begin
+    Inc(FSessionGeneration);
     FConnection.Open;
     ConfigureSQLiteBusyTimeout(FConnection);
   end;
@@ -234,6 +240,7 @@ end;
 
 procedure TCompetitionDbContext.CloseFile;
 begin
+  Inc(FSessionGeneration);
   CloseRegisteredDatasets;
   if FTransaction.Active then
     FTransaction.Rollback;
@@ -306,12 +313,11 @@ procedure TCompetitionDbContext.ConfigureEditableQuery(const AQuery: TSQLQuery;
 var
   Field: TField;
   FieldNames, FieldValues, FieldAssignments: TStringList;
-  QuotedTableName, QuotedKeyField, QuotedFieldName,
-    QuotedOldKeyParameter: string;
+  QuotedTableName, QuotedKeyField, QuotedFieldName, QuotedOldKeyParameter: string;
 
   function JoinSqlParts(const Values: TStrings): string;
   var
-    Index: Integer;
+    Index: integer;
   begin
     Result := '';
     for Index := 0 to Values.Count - 1 do
@@ -321,6 +327,7 @@ var
       Result := Result + Values[Index];
     end;
   end;
+
 begin
   if AQuery = nil then
     Exit;
@@ -353,12 +360,12 @@ begin
     AQuery.InsertSQL.Text := 'INSERT INTO ' + QuotedTableName + ' (' +
       JoinSqlParts(FieldNames) + ') VALUES (' + JoinSqlParts(FieldValues) + ')';
     AQuery.UpdateSQL.Text := 'UPDATE ' + QuotedTableName + ' SET ' +
-      JoinSqlParts(FieldAssignments) +
-      ' WHERE ' + QuotedKeyField + '=:' + QuotedOldKeyParameter;
+      JoinSqlParts(FieldAssignments) + ' WHERE ' + QuotedKeyField +
+      '=:' + QuotedOldKeyParameter;
     AQuery.DeleteSQL.Text := 'DELETE FROM ' + QuotedTableName + ' WHERE ' +
       QuotedKeyField + '=:' + QuotedOldKeyParameter;
-    AQuery.RefreshSQL.Text := 'SELECT * FROM ' + QuotedTableName + ' WHERE ' +
-      QuotedKeyField + '=:' + QuotedKeyField;
+    AQuery.RefreshSQL.Text := 'SELECT * FROM ' + QuotedTableName +
+      ' WHERE ' + QuotedKeyField + '=:' + QuotedKeyField;
   finally
     FieldAssignments.Free;
     FieldValues.Free;
@@ -366,8 +373,7 @@ begin
   end;
 end;
 
-procedure TCompetitionDbContext.ApplyUpdatesAndRefreshUi(
-  const AQuery: TSQLQuery);
+procedure TCompetitionDbContext.ApplyUpdatesAndRefreshUi(const AQuery: TSQLQuery);
 var
   UnitOfWork: TCompetitionUnitOfWork;
 begin
@@ -400,8 +406,7 @@ begin
   end;
 end;
 
-procedure TCompetitionDbContext.RefreshQueries(
-  const AQueries: array of TSQLQuery);
+procedure TCompetitionDbContext.RefreshQueries(const AQueries: array of TSQLQuery);
 var
   Errors: string;
 begin
@@ -409,8 +414,8 @@ begin
     raise EDatabaseError.Create(Errors);
 end;
 
-function TCompetitionDbContext.RefreshQueries(
-  const AQueries: array of TSQLQuery; out AErrors: string): integer;
+function TCompetitionDbContext.RefreshQueries(const AQueries: array of TSQLQuery;
+  out AErrors: string): integer;
 var
   Query: TSQLQuery;
 begin

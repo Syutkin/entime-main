@@ -18,7 +18,7 @@
         </MacroValues>
       </Item1>
     </BuildModes>
-    <RequiredPackages Count="8">
+    <RequiredPackages Count="10">
       <Item1>
         <PackageName Value="FCL"/>
       </Item1>
@@ -39,16 +39,113 @@
       </Item6>
       <Item7>
         <PackageName Value="LazBle"/>
+        <MinVersion Major="2" Valid="True"/>
       </Item7>
       <Item8>
         <PackageName Value="LazSerialPort"/>
       </Item8>
+      <Item9>
+        <PackageName Value="fpvectorialpkg"/>
+      </Item9>
+      <Item10>
+        <PackageName Value="laz_fpspreadsheet"/>
+      </Item10>
     </RequiredPackages>
-    <Units Count="1">
+    <Units Count="19">
       <Unit0>
         <Filename Value="entimetests.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
+      <Unit1>
+        <Filename Value="unit/domain/protocolbalancetests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ProtocolBalanceTests"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="unit/data/protocolbalancerepositorytests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ProtocolBalanceRepositoryTests"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="unit/domain/resultsimportcomparisontests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ResultsImportComparisonTests"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="unit/application/resultsimportpreviewservicetests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ResultsImportPreviewServiceTests"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="unit/domain/participantcardmodeltests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ParticipantCardModelTests"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="unit/application/participantcardservicetests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ParticipantCardServiceTests"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="unit/infrastructure/stagefinishreportbackendtests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageFinishReportBackendTests"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="unit/domain/stagefinishreportmodeltests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageFinishReportModelTests"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="unit/application/stagefinishreportservicetests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageFinishReportServiceTests"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="unit/infrastructure/stagefinishreportbuildertests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageFinishReportBuilderTests"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="unit/infrastructure/stagefinishpdfwritertests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageFinishPdfWriterTests"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="unit/infrastructure/stagefinishdocxwritertests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageFinishDocxWriterTests"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="unit/infrastructure/stagefinishxlsxwritertests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageFinishXlsxWriterTests"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="unit/infrastructure/reporttemplatelibrarytests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ReportTemplateLibraryTests"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="unit/domain/reporttemplatemodeltests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ReportTemplateModelTests"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="unit/infrastructure/htmlreporttemplatereadertests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="HtmlReportTemplateReaderTests"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="unit/infrastructure/reporttemplatefilestests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ReportTemplateFilesTests"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="unit/infrastructure/reporttextmetricstests.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ReportTextMetricsTests"/>
+      </Unit18>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

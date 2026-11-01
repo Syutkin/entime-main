@@ -17,7 +17,7 @@ type
 implementation
 
 procedure TFirmwareResponseProtocolTests.
-  TryParse_PreservesRawJsonSourceAndReceivedAt;
+TryParse_PreservesRawJsonSourceAndReceivedAt;
 const
   ReceivedAt: TDateTime = 45678.25;
 var
@@ -44,7 +44,7 @@ begin
 end;
 
 procedure TFirmwareResponseProtocolTests.
-  TryParse_RejectsInvalidJsonWithoutCreatingResponse;
+TryParse_RejectsInvalidJsonWithoutCreatingResponse;
 var
   Error: TFirmwareResponseParseError;
   Parser: TFirmwareResponseParser;
@@ -52,8 +52,8 @@ var
 begin
   Parser := TFirmwareResponseParser.Create;
   try
-    AssertFalse(Parser.TryParse('{invalid}',
-      TTimingMarkSource.Serial('COM1'), 123, Response, Error));
+    AssertFalse(Parser.TryParse('{invalid}', TTimingMarkSource.Serial('COM1'),
+      123, Response, Error));
     AssertEquals(Ord(frpeInvalidJson), Ord(Error));
     AssertEquals('', Response.RawJson);
   finally

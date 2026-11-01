@@ -14,7 +14,7 @@ type
   TTimingSendState = (tssPending, tssSucceeded, tssFailed);
   TTimingSendCompletedEvent = procedure(Sender: TObject) of object;
   TTimingTransportDataEvent = procedure(Sender: TObject;
-    const AData: RawByteString; const ASource: TTimingMarkSource) of object;
+    const AData: rawbytestring; const ASource: TTimingMarkSource) of object;
 
   ITimingSendOperation = interface
     ['{9B31D9DC-9536-4D9A-8C36-C92506DF88EC}']
@@ -26,8 +26,8 @@ type
     procedure SetOnCompleted(const AHandler: TTimingSendCompletedEvent);
     property ErrorCode: integer read GetErrorCode;
     property ErrorMessage: string read GetErrorMessage;
-    property OnCompleted: TTimingSendCompletedEvent read GetOnCompleted
-      write SetOnCompleted;
+    property OnCompleted: TTimingSendCompletedEvent
+      read GetOnCompleted write SetOnCompleted;
     property Source: TTimingMarkSource read GetSource;
     property State: TTimingSendState read GetState;
   end;
@@ -40,7 +40,7 @@ type
     function GetSource: TTimingMarkSource;
     function GetTransportState: TTimingTransportState;
     procedure SetOnData(const AHandler: TTimingTransportDataEvent);
-    function SendAsync(const AData: RawByteString): ITimingSendOperation;
+    function SendAsync(const AData: rawbytestring): ITimingSendOperation;
     property Connected: boolean read GetConnected;
     property Kind: TTimingTransportKind read GetKind;
     property OnData: TTimingTransportDataEvent read GetOnData write SetOnData;
@@ -68,10 +68,11 @@ type
       const AState: TTimingSendState; const AErrorCode: integer = 0;
       const AErrorMessage: string = '');
     class function Succeeded(const ASource: TTimingMarkSource):
-      ITimingSendOperation; static;
+      ITimingSendOperation;
+      static;
     class function Failed(const ASource: TTimingMarkSource;
-      const AErrorMessage: string; const AErrorCode: integer = 0):
-      ITimingSendOperation; static;
+      const AErrorMessage: string;
+      const AErrorCode: integer = 0): ITimingSendOperation; static;
   end;
 
 implementation
@@ -127,8 +128,7 @@ begin
 end;
 
 class function TTimingSendOperation.Failed(const ASource: TTimingMarkSource;
-  const AErrorMessage: string; const AErrorCode: integer):
-  ITimingSendOperation;
+  const AErrorMessage: string; const AErrorCode: integer): ITimingSendOperation;
 begin
   Result := TTimingSendOperation.Create(ASource, tssFailed, AErrorCode,
     AErrorMessage);

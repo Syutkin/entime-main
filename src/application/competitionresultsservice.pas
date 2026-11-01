@@ -43,22 +43,29 @@ type
   TResultCalculationService = record
   private
     class procedure RecalculateStageResultsCore(const AQuery: TSQLQuery;
-      const AStages: TStages); static;
+      const AStages: TStages; const AChangedStages: array of integer;
+      const APreserveFinish: boolean = False); static;
     class function RecalculateSumResultsCore(
-      const AReadQuery, AWriteQuery: TSQLQuery;
-      const AStages: TStages): integer; static;
-    class procedure RecalculateThruResultsCore(
-      const AQuery: TSQLQuery); static;
-    class procedure RecalculateAllCore(const AContext: TCompetitionDbContext;
-      const AStages: TStages); static;
+      const AReadQuery, AWriteQuery: TSQLQuery; const AStages: TStages): integer;
+      static;
+    class procedure RecalculateThruResultsCore(const AQuery: TSQLQuery); static;
+    class procedure RecalculateCore(const AContext: TCompetitionDbContext;
+      const AStages: TStages; const AChangedStages: array of integer;
+      const APreserveFinish: boolean = False); static;
   public
     class procedure RecalculateAll(const AContext: TCompetitionDbContext;
       const AStages: TStages); static;
     class procedure RecalculateAllInCurrentTransaction(
-      const AContext: TCompetitionDbContext;
-      const AStages: TStages); static;
-    class procedure RecalculateSumResults(
-      const AContext: TCompetitionDbContext;
+      const AContext: TCompetitionDbContext; const AStages: TStages;
+      const APreserveFinish: boolean = False); static;
+    // Stage indices are deduplicated; inactive stages retain their stored data.
+    // Summary and through standings still include all active stages.
+    class procedure RecalculateStages(const AContext: TCompetitionDbContext;
+      const AStages: TStages; const AChangedStages: array of integer); static;
+    class procedure RecalculateStagesInCurrentTransaction(
+      const AContext: TCompetitionDbContext; const AStages: TStages;
+      const AChangedStages: array of integer); static;
+    class procedure RecalculateSumResults(const AContext: TCompetitionDbContext;
       const AStages: TStages); static;
     class procedure ClearResults(const AContext: TCompetitionDbContext;
       const AStageCount: integer); static;
@@ -67,8 +74,7 @@ type
   TParticipantStatusService = record
   private
     class function RecalculateParticipant(const AQuery: TSQLQuery;
-      const AStages: TStages; const AParticipantNumber: integer): boolean;
-      static;
+      const AStages: TStages; const AParticipantNumber: integer): boolean; static;
     class function RecalculateAllCore(const AContext: TCompetitionDbContext;
       const AStages: TStages): TStatusRecalculationOutcome; static;
   public
@@ -81,15 +87,14 @@ type
     class function RecalculateAll(const AContext: TCompetitionDbContext;
       const AStages: TStages): TStatusRecalculationOutcome; static;
     class function RecalculateAllInCurrentTransaction(
-      const AContext: TCompetitionDbContext; const AStages: TStages):
-      TStatusRecalculationOutcome; static;
+      const AContext: TCompetitionDbContext;
+      const AStages: TStages): TStatusRecalculationOutcome; static;
   end;
 
   TCompetitionStartListService = record
   public
     class procedure LoadCategories(const AContext: TCompetitionDbContext;
-      const AStageIndex, AStageCount: integer;
-      const ACategories: TStrings); static;
+      const AStageIndex, AStageCount: integer; const ACategories: TStrings); static;
     class function HasFinishes(const AContext: TCompetitionDbContext;
       const AStageIndex, AStageCount: integer): boolean; static;
     class procedure GenerateStartTimes(const AContext: TCompetitionDbContext;
@@ -97,11 +102,19 @@ type
       const AGeneration: TStartListGeneration); static;
   end;
 
+  TParticipantEditService = record
+  public
+    class procedure ApplyChanges(const AContext: TCompetitionDbContext;
+      const AQuery: TSQLQuery; const AStages: TStages); static;
+    class procedure ApplyChangesKeepingInput(const AContext: TCompetitionDbContext;
+      const AQuery: TSQLQuery; const AStages: TStages); static;
+  end;
+
   TParticipantStageService = record
   public
     class procedure SaveCorrection(const AContext: TCompetitionDbContext;
-      const AStages: TStages; const AParticipantNumber, AStageIndex,
-      ACorrection: integer); static;
+      const AStages: TStages;
+      const AParticipantNumber, AStageIndex, ACorrection: integer); static;
     class function SaveStartTime(const AContext: TCompetitionDbContext;
       const AStages: TStages; const AParticipantNumber, AStageIndex: integer;
       const AStartTime: string): TParticipantStageValueOutcome; static;
@@ -111,6 +124,69 @@ implementation
 
 uses
   DateUtils, i18n, ParticipantStageData, AppLogger;
+
+class procedure TParticipantEditService.ApplyChangesKeepingInput(
+  const AContext: TCompetitionDbContext; const AQuery: TSQLQuery;
+  const AStages: TStages);
+var
+  Pending: TMemoryStream;
+  CurrentNumber: integer;
+begin
+  if AQuery = nil then raise EArgumentNilException.Create('Participant query');
+  // SQLDB's packet includes the original values and the complete change log,
+  // so even a failed calculation after ApplyUpdates can restore every edit.
+  if AQuery.State in [dsEdit, dsInsert] then AQuery.Post;
+  CurrentNumber := AQuery.FieldByName('number').AsInteger;
+  Pending := TMemoryStream.Create;
+  AQuery.DisableControls;
+  try
+    AQuery.SaveToStream(Pending);
+    AQuery.Locate('number', CurrentNumber, []);
+    try
+      ApplyChanges(AContext, AQuery, AStages);
+    except
+      AQuery.Close;
+      Pending.Position := 0;
+      AQuery.LoadFromStream(Pending);
+      AQuery.Locate('number', CurrentNumber, []);
+      raise;
+    end;
+  finally
+    AQuery.EnableControls;
+    Pending.Free;
+  end;
+end;
+
+class procedure TParticipantEditService.ApplyChanges(
+  const AContext: TCompetitionDbContext; const AQuery: TSQLQuery;
+  const AStages: TStages);
+var
+  UnitOfWork: TCompetitionUnitOfWork;
+begin
+  if AContext = nil then
+    raise EArgumentNilException.Create('AContext');
+  if AQuery = nil then
+    raise EArgumentNilException.Create('AQuery');
+  if AStages = nil then
+    raise EArgumentNilException.Create('AStages');
+  try
+    if AQuery.State in [dsEdit, dsInsert] then
+      AQuery.Post;
+    UnitOfWork := AContext.BeginUnitOfWork;
+    try
+      AQuery.ApplyUpdates;
+      TResultCalculationService.RecalculateAllInCurrentTransaction(
+        AContext, AStages);
+      UnitOfWork.Commit;
+    finally
+      UnitOfWork.Free;
+    end;
+  except
+    if AQuery.Active and (AQuery.ChangeCount > 0) then
+      AQuery.CancelUpdates;
+    raise;
+  end;
+end;
 
 class procedure TParticipantStageService.SaveCorrection(
   const AContext: TCompetitionDbContext; const AStages: TStages;
@@ -129,8 +205,8 @@ begin
     UnitOfWork := AContext.BeginUnitOfWork;
     TMainSql.ExecUpdateCorrection(Query, AStageIndex, ACorrection,
       AParticipantNumber, AStages.Count);
-    TResultCalculationService.RecalculateAllInCurrentTransaction(
-      AContext, AStages);
+    TResultCalculationService.RecalculateStagesInCurrentTransaction(
+      AContext, AStages, [AStageIndex]);
     UnitOfWork.Commit;
   finally
     UnitOfWork.Free;
@@ -162,8 +238,8 @@ begin
     UnitOfWork := AContext.BeginUnitOfWork;
     TMainSql.ExecUpdateStartTimeForNumber(Query, AStageIndex, AStartTime,
       AParticipantNumber, AStages.Count);
-    TResultCalculationService.RecalculateAllInCurrentTransaction(
-      AContext, AStages);
+    TResultCalculationService.RecalculateStagesInCurrentTransaction(
+      AContext, AStages, [AStageIndex]);
     UnitOfWork.Commit;
     Result.Changed := Result.PreviousValue <> Result.CurrentValue;
   finally
@@ -173,8 +249,7 @@ begin
 end;
 
 class procedure TCompetitionStartListService.LoadCategories(
-  const AContext: TCompetitionDbContext;
-  const AStageIndex, AStageCount: integer;
+  const AContext: TCompetitionDbContext; const AStageIndex, AStageCount: integer;
   const ACategories: TStrings);
 var
   Query: TSQLQuery;
@@ -210,8 +285,7 @@ end;
 
 class procedure TCompetitionStartListService.GenerateStartTimes(
   const AContext: TCompetitionDbContext; const AStages: TStages;
-  const ACategories: TStrings;
-  const AGeneration: TStartListGeneration);
+  const ACategories: TStrings; const AGeneration: TStartListGeneration);
 var
   CategoryIndex, ParticipantNumber: integer;
   CurrentStartTime: TDateTime;
@@ -226,8 +300,7 @@ begin
     raise EArgumentNilException.Create('ACategories');
   if not AStages.IsValidIndex(AGeneration.StageIndex) then
     raise EArgumentOutOfRangeException.CreateFmt(
-      'Stage index %d is outside the competition range.',
-      [AGeneration.StageIndex]);
+      'Stage index %d is outside the competition range.', [AGeneration.StageIndex]);
   if not (AGeneration.SortBy in [0..4]) then
     raise EArgumentOutOfRangeException.CreateFmt(
       'Unsupported start-list sort mode: %d.', [AGeneration.SortBy]);
@@ -281,18 +354,29 @@ begin
 end;
 
 class procedure TResultCalculationService.RecalculateStageResultsCore(
-  const AQuery: TSQLQuery; const AStages: TStages);
+  const AQuery: TSQLQuery; const AStages: TStages;
+  const AChangedStages: array of integer; const APreserveFinish: boolean);
 var
-  StageIndex: integer;
+  I, StageIndex: integer;
+  Changed: array of boolean;
 begin
+  SetLength(Changed, AStages.Count + 1);
+  for I := 0 to High(AChangedStages) do
+  begin
+    StageIndex := AChangedStages[I];
+    if not AStages.IsValidIndex(StageIndex) then
+      raise EArgumentOutOfRangeException.CreateFmt(
+        'Stage %d is outside the competition range.', [StageIndex]);
+    Changed[StageIndex] := True;
+  end;
   try
     for StageIndex := 1 to AStages.Count do
-      if AStages[StageIndex].isActive then
-        TResultsSql.ExecCalculateStage(AQuery, StageIndex, AStages.Count);
+      if Changed[StageIndex] and AStages[StageIndex].isActive then
+        TResultsSql.ExecCalculateStage(AQuery, StageIndex, AStages.Count,
+          APreserveFinish);
   except
     on E: Exception do
-      raise EDatabaseError.CreateFmt(rsStageResultsCalculationError,
-        [E.Message]);
+      raise EDatabaseError.CreateFmt(rsStageResultsCalculationError, [E.Message]);
   end;
 end;
 
@@ -384,13 +468,13 @@ begin
     TResultsSql.ExecCalculateThru(AQuery, rsSU);
   except
     on E: Exception do
-      raise EDatabaseError.CreateFmt(rsThruResultsCalculationError,
-        [E.Message]);
+      raise EDatabaseError.CreateFmt(rsThruResultsCalculationError, [E.Message]);
   end;
 end;
 
-class procedure TResultCalculationService.RecalculateAllCore(
-  const AContext: TCompetitionDbContext; const AStages: TStages);
+class procedure TResultCalculationService.RecalculateCore(
+  const AContext: TCompetitionDbContext; const AStages: TStages;
+  const AChangedStages: array of integer; const APreserveFinish: boolean);
 var
   ReadQuery, WriteQuery: TSQLQuery;
 begin
@@ -402,7 +486,7 @@ begin
   ReadQuery := AContext.CreateQuery(nil);
   WriteQuery := AContext.CreateQuery(nil);
   try
-    RecalculateStageResultsCore(WriteQuery, AStages);
+    RecalculateStageResultsCore(WriteQuery, AStages, AChangedStages, APreserveFinish);
     RecalculateSumResultsCore(ReadQuery, WriteQuery, AStages);
     RecalculateThruResultsCore(WriteQuery);
   finally
@@ -413,6 +497,15 @@ end;
 
 class procedure TResultCalculationService.RecalculateAll(
   const AContext: TCompetitionDbContext; const AStages: TStages);
+begin
+  if AStages = nil then
+    raise EArgumentNilException.Create('AStages');
+  RecalculateStages(AContext, AStages, AStages.ActiveIndices);
+end;
+
+class procedure TResultCalculationService.RecalculateStages(
+  const AContext: TCompetitionDbContext; const AStages: TStages;
+  const AChangedStages: array of integer);
 var
   UnitOfWork: TCompetitionUnitOfWork;
 begin
@@ -421,7 +514,7 @@ begin
   UnitOfWork := nil;
   try
     UnitOfWork := AContext.BeginUnitOfWork;
-    RecalculateAllCore(AContext, AStages);
+    RecalculateCore(AContext, AStages, AChangedStages);
     UnitOfWork.Commit;
   finally
     UnitOfWork.Free;
@@ -429,9 +522,19 @@ begin
 end;
 
 class procedure TResultCalculationService.RecalculateAllInCurrentTransaction(
-  const AContext: TCompetitionDbContext; const AStages: TStages);
+  const AContext: TCompetitionDbContext; const AStages: TStages;
+  const APreserveFinish: boolean);
 begin
-  RecalculateAllCore(AContext, AStages);
+  if AStages = nil then
+    raise EArgumentNilException.Create('AStages');
+  RecalculateCore(AContext, AStages, AStages.ActiveIndices, APreserveFinish);
+end;
+
+class procedure TResultCalculationService.RecalculateStagesInCurrentTransaction(
+  const AContext: TCompetitionDbContext; const AStages: TStages;
+  const AChangedStages: array of integer);
+begin
+  RecalculateCore(AContext, AStages, AChangedStages);
 end;
 
 class procedure TResultCalculationService.RecalculateSumResults(
@@ -479,8 +582,8 @@ begin
 end;
 
 class function TParticipantStatusService.RecalculateParticipant(
-  const AQuery: TSQLQuery; const AStages: TStages;
-  const AParticipantNumber: integer): boolean;
+  const AQuery: TSQLQuery;
+  const AStages: TStages; const AParticipantNumber: integer): boolean;
 var
   CurrentStatus, DesiredStatus: TParticipantStatus;
   StageStatuses: TParticipantStatusArray;
@@ -498,8 +601,8 @@ begin
 end;
 
 class function TParticipantStatusService.SetStatus(
-  const AContext: TCompetitionDbContext; const AStages: TStages;
-  const AParticipantNumber, AStageIndex: integer;
+  const AContext: TCompetitionDbContext;
+  const AStages: TStages; const AParticipantNumber, AStageIndex: integer;
   const AStatus: TParticipantStatus): TParticipantStatusOutcome;
 var
   CurrentGlobalStatus: TParticipantStatus;
@@ -541,8 +644,11 @@ begin
         IntToStr(AParticipantNumber), AStages.Count);
       RecalculateParticipant(Query, AStages, AParticipantNumber);
     end;
-    TResultCalculationService.RecalculateAllInCurrentTransaction(
-      AContext, AStages);
+    if AStatus = psDSQ then
+      TResultCalculationService.RecalculateAllInCurrentTransaction(AContext, AStages)
+    else
+      TResultCalculationService.RecalculateStagesInCurrentTransaction(
+        AContext, AStages, [AStageIndex]);
     UnitOfWork.Commit;
     Result.Changed := Result.PreviousStatus <> AStatus;
   finally
@@ -556,6 +662,8 @@ class procedure TParticipantStatusService.ClearStatus(
   const AParticipantNumber, AStageIndex: integer;
   const ACommand: TParticipantClearStatusCommand);
 var
+  PreviousGlobalStatus: TParticipantStatus;
+  StageStatuses: TParticipantStatusArray;
   Query: TSQLQuery;
   UnitOfWork: TCompetitionUnitOfWork;
 begin
@@ -563,8 +671,7 @@ begin
     raise EArgumentNilException.Create('AContext');
   if AStages = nil then
     raise EArgumentNilException.Create('AStages');
-  if (ACommand <> pcscGlobalOnly) and
-    (not AStages.IsActiveIndex(AStageIndex)) then
+  if (ACommand <> pcscGlobalOnly) and (not AStages.IsActiveIndex(AStageIndex)) then
     raise EArgumentOutOfRangeException.CreateFmt(
       'Stage %d is not an active competition stage.', [AStageIndex]);
 
@@ -572,6 +679,9 @@ begin
   UnitOfWork := nil;
   try
     UnitOfWork := AContext.BeginUnitOfWork;
+    PreviousGlobalStatus := psNone;
+    TMainSql.LoadStatuses(Query, AParticipantNumber, AStages.Count,
+      PreviousGlobalStatus, StageStatuses);
     if ACommand = pcscGlobalOnly then
     begin
       TMainSql.ExecClearOnlyGlobalStatus(Query, IntToStr(AParticipantNumber));
@@ -585,13 +695,16 @@ begin
         pcscStageOnly:
           TMainSql.ExecClearStageStatus(Query, AStageIndex,
             IntToStr(AParticipantNumber), AStages.Count);
-      else
-        raise EArgumentException.Create('Unsupported clear status command.');
+        else
+          raise EArgumentException.Create('Unsupported clear status command.');
       end;
     end;
     RecalculateParticipant(Query, AStages, AParticipantNumber);
-    TResultCalculationService.RecalculateAllInCurrentTransaction(
-      AContext, AStages);
+    if (ACommand = pcscGlobalOnly) or (PreviousGlobalStatus = psDSQ) then
+      TResultCalculationService.RecalculateAllInCurrentTransaction(AContext, AStages)
+    else
+      TResultCalculationService.RecalculateStagesInCurrentTransaction(
+        AContext, AStages, [AStageIndex]);
     UnitOfWork.Commit;
   finally
     UnitOfWork.Free;
@@ -600,8 +713,8 @@ begin
 end;
 
 class function TParticipantStatusService.RecalculateAllCore(
-  const AContext: TCompetitionDbContext; const AStages: TStages):
-  TStatusRecalculationOutcome;
+  const AContext: TCompetitionDbContext;
+  const AStages: TStages): TStatusRecalculationOutcome;
 var
   ActiveStageIndexes: TStageIndexArray;
   DesiredStatuses: array of TParticipantStatus;
@@ -627,9 +740,9 @@ begin
     SetLength(DesiredStatuses, Length(Rows));
     for Index := 0 to High(Rows) do
     begin
-      DesiredStatuses[Index] := DeriveGlobalParticipantStatus(
-        Rows[Index].GlobalStatus, Rows[Index].StageStatuses,
-        ActiveStageIndexes);
+      DesiredStatuses[Index] :=
+        DeriveGlobalParticipantStatus(Rows[Index].GlobalStatus,
+        Rows[Index].StageStatuses, ActiveStageIndexes);
       if DesiredStatuses[Index] <> Rows[Index].GlobalStatus then
         Inc(Result.ChangedCount);
     end;
@@ -653,8 +766,8 @@ begin
 end;
 
 class function TParticipantStatusService.RecalculateAll(
-  const AContext: TCompetitionDbContext; const AStages: TStages):
-  TStatusRecalculationOutcome;
+  const AContext: TCompetitionDbContext;
+  const AStages: TStages): TStatusRecalculationOutcome;
 var
   UnitOfWork: TCompetitionUnitOfWork;
 begin
@@ -670,8 +783,8 @@ begin
 end;
 
 class function TParticipantStatusService.RecalculateAllInCurrentTransaction(
-  const AContext: TCompetitionDbContext; const AStages: TStages):
-  TStatusRecalculationOutcome;
+  const AContext: TCompetitionDbContext;
+  const AStages: TStages): TStatusRecalculationOutcome;
 begin
   Result := RecalculateAllCore(AContext, AStages);
 end;

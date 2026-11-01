@@ -1,9 +1,9 @@
-    Unit VersionSupport;
-     
-    {$mode objfpc}
-     
-    Interface
-     
+unit VersionSupport;
+
+{$mode objfpc}
+
+interface
+
     (*
       Building on the excellent vinfo.pas supplied by Paul Ishenin and available elsewhere on the Lazarus
       Forums
@@ -32,221 +32,222 @@
       Changes:
       January 2017:   Updated code to cope with refactored LCL Platform Definitions
     *)
-     
-    Uses
-      Classes, SysUtils;
-     
-    // Surfacing general defines and lookups
-    Function GetCompiledDate: String;
-    Function GetCompilerInfo: String;
-    Function GetTargetInfo: String;
-    Function GetOS: String;
-    Function GetCPU: String;
-    Function GetLCLVersion: String;
-    Function GetWidgetSet: String;
-     
-    // Exposing resource and version info compiled into exe
-    Function GetResourceStrings(oStringList : TStringList) : Boolean;
-    Function GetFileVersion: String;
-    Function GetProductVersion: String;
-     
-    Implementation
-     
-    Uses
-      resource, versiontypes, versionresource, LCLVersion, InterfaceBase, LCLPlatformDef;
-     
-    Function GetWidgetSet: String;
-    Begin
-      Result := LCLPlatformDisplayNames[WidgetSet.LCLPlatform];
-    End;
-     
-    Function GetCompilerInfo: String;
-    begin
-      Result := 'FPC '+{$I %FPCVERSION%};
-    end;
-     
-    Function GetTargetInfo: String;
-    Begin
-      Result := {$I %FPCTARGETCPU%}+' - '+{$I %FPCTARGETOS%};
-    End;
-     
-    Function GetOS: String;
-    Begin
-      Result := {$I %FPCTARGETOS%};
-    End;
-     
-    function GetCPU: String;
-    begin
-      Result := {$I %FPCTARGETCPU%};
-    end;
-     
-    Function GetLCLVersion: String;
-    Begin
-      Result := 'LCL '+lcl_version;
-    End;
-     
-    Function GetCompiledDate: String;
-    Var
-      sDate, sTime: String;
-    Begin
-      sDate := {$I %DATE%};
-      sTime := {$I %TIME%};
-     
-      Result := sDate + ' at ' + sTime;
-    End;
-     
-    { Routines to expose TVersionInfo data }
-     
-    Type
-      TVersionInfo = Class
-      private
-        FBuildInfoAvailable: Boolean;
-        FVersResource: TVersionResource;
-        Function GetFixedInfo: TVersionFixedInfo;
-        Function GetStringFileInfo: TVersionStringFileInfo;
-        Function GetVarFileInfo: TVersionVarFileInfo;
-      public
-        Constructor Create;
-        Destructor Destroy; override;
-     
-        Procedure Load(Instance: THandle);
-     
-        Property BuildInfoAvailable: Boolean Read FBuildInfoAvailable;
-     
-        Property FixedInfo: TVersionFixedInfo Read GetFixedInfo;
-        Property StringFileInfo: TVersionStringFileInfo Read GetStringFileInfo;
-        Property VarFileInfo: TVersionVarFileInfo Read GetVarFileInfo;
-      End;
-     
-    Var
-      FInfo: TVersionInfo;
-     
-    Procedure CreateInfo;
-    Begin
-      If Not Assigned(FInfo) Then
-      Begin
-        FInfo := TVersionInfo.Create;
-        FInfo.Load(HINSTANCE);
-      End;
-    End;
-     
-    Function GetResourceStrings(oStringList: TStringList): Boolean;
-    Var
-      i, j : Integer;
-      oTable : TVersionStringTable;
-    begin
-      CreateInfo;
-     
-      oStringList.Clear;
-      Result := False;
-     
-      If FInfo.BuildInfoAvailable Then
-      Begin
-        Result := True;
-        For i := 0 To FInfo.StringFileInfo.Count-1 Do
-        Begin
-          oTable := FInfo.StringFileInfo.Items[i];
-     
-          For j := 0 To oTable.Count-1 Do
-            If Trim(oTable.ValuesByIndex[j])<>'' Then
-              oStringList.Values[oTable.Keys[j]] := oTable.ValuesByIndex[j];
-        end;
-      end;
-    end;
-     
-    Function ProductVersionToString(PV: TFileProductVersion): String;
-    Begin
-      Result := Format('%d.%d.%d.%d', [PV[0], PV[1], PV[2], PV[3]]);
-    End;
-     
-    Function GetProductVersion: String;
-    Begin
-      CreateInfo;
-     
-      If FInfo.BuildInfoAvailable Then
-        Result := ProductVersionToString(FInfo.FixedInfo.ProductVersion)
-      Else
-        Result := 'No build information available';
-    End;
-     
-    Function GetFileVersion: String;
-    Begin
-      CreateInfo;
-     
-      If FInfo.BuildInfoAvailable Then
-        Result := ProductVersionToString(FInfo.FixedInfo.FileVersion)
-      Else
-        Result := 'No build information available';
-    End;
-     
-    { TVersionInfo }
-     
-    Function TVersionInfo.GetFixedInfo: TVersionFixedInfo;
-    Begin
-      Result := FVersResource.FixedInfo;
-    End;
-     
-    Function TVersionInfo.GetStringFileInfo: TVersionStringFileInfo;
-    Begin
-      Result := FVersResource.StringFileInfo;
-    End;
-     
-    Function TVersionInfo.GetVarFileInfo: TVersionVarFileInfo;
-    Begin
-      Result := FVersResource.VarFileInfo;
-    End;
-     
-    Constructor TVersionInfo.Create;
-    Begin
-      Inherited Create;
-     
-      FVersResource := TVersionResource.Create;
-      FBuildInfoAvailable := False;
-    End;
-     
-    Destructor TVersionInfo.Destroy;
-    Begin
-      FVersResource.Free;
-     
-      Inherited Destroy;
-    End;
-     
-    Procedure TVersionInfo.Load(Instance: THandle);
-    Var
-      Stream: TResourceStream;
-      ResID: Integer;
-    Begin
-      FBuildInfoAvailable := False;
-      ResID := 1;
 
-      Stream := nil;
-      Try
-        Try
-          Stream := TResourceStream.CreateFromID(Instance, ResID,
-            PChar(RT_VERSION));
-        Except
-          On EResNotFound Do
-            Exit;
-        End;
+uses
+  Classes, SysUtils;
 
-        FVersResource.SetCustomRawDataStream(Stream);
-        Try
-          // Accessing a property loads the version data from the stream.
-          FVersResource.FixedInfo;
-          FBuildInfoAvailable := True;
-        Finally
-          FVersResource.SetCustomRawDataStream(nil);
-        End;
-      Finally
-        Stream.Free;
-      End;
-    End;
-     
-    Initialization
-      FInfo := nil;
-     
-    Finalization
-      If Assigned(FInfo) Then
-        FInfo.Free;
-    End.
+// Surfacing general defines and lookups
+function GetCompiledDate: string;
+function GetCompilerInfo: string;
+function GetTargetInfo: string;
+function GetOS: string;
+function GetCPU: string;
+function GetLCLVersion: string;
+function GetWidgetSet: string;
+
+// Exposing resource and version info compiled into exe
+function GetResourceStrings(oStringList: TStringList): boolean;
+function GetFileVersion: string;
+function GetProductVersion: string;
+
+implementation
+
+uses
+  resource, versiontypes, versionresource, LCLVersion, InterfaceBase,
+  LCLPlatformDef;
+
+function GetWidgetSet: string;
+begin
+  Result := LCLPlatformDisplayNames[WidgetSet.LCLPlatform];
+end;
+
+function GetCompilerInfo: string;
+begin
+  Result := 'FPC ' + {$I %FPCVERSION%};
+end;
+
+function GetTargetInfo: string;
+begin
+  Result := {$I %FPCTARGETCPU%} + ' - ' + {$I %FPCTARGETOS%};
+end;
+
+function GetOS: string;
+begin
+  Result := {$I %FPCTARGETOS%};
+end;
+
+function GetCPU: string;
+begin
+  Result := {$I %FPCTARGETCPU%};
+end;
+
+function GetLCLVersion: string;
+begin
+  Result := 'LCL ' + lcl_version;
+end;
+
+function GetCompiledDate: string;
+var
+  sDate, sTime: string;
+begin
+  sDate := {$I %DATE%};
+  sTime := {$I %TIME%};
+
+  Result := sDate + ' at ' + sTime;
+end;
+
+{ Routines to expose TVersionInfo data }
+
+type
+  TVersionInfo = class
+  private
+    FBuildInfoAvailable: boolean;
+    FVersResource: TVersionResource;
+    function GetFixedInfo: TVersionFixedInfo;
+    function GetStringFileInfo: TVersionStringFileInfo;
+    function GetVarFileInfo: TVersionVarFileInfo;
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    procedure Load(Instance: THandle);
+
+    property BuildInfoAvailable: boolean read FBuildInfoAvailable;
+
+    property FixedInfo: TVersionFixedInfo read GetFixedInfo;
+    property StringFileInfo: TVersionStringFileInfo read GetStringFileInfo;
+    property VarFileInfo: TVersionVarFileInfo read GetVarFileInfo;
+  end;
+
+var
+  FInfo: TVersionInfo;
+
+procedure CreateInfo;
+begin
+  if not Assigned(FInfo) then
+  begin
+    FInfo := TVersionInfo.Create;
+    FInfo.Load(HINSTANCE);
+  end;
+end;
+
+function GetResourceStrings(oStringList: TStringList): boolean;
+var
+  i, j: integer;
+  oTable: TVersionStringTable;
+begin
+  CreateInfo;
+
+  oStringList.Clear;
+  Result := False;
+
+  if FInfo.BuildInfoAvailable then
+  begin
+    Result := True;
+    for i := 0 to FInfo.StringFileInfo.Count - 1 do
+    begin
+      oTable := FInfo.StringFileInfo.Items[i];
+
+      for j := 0 to oTable.Count - 1 do
+        if Trim(oTable.ValuesByIndex[j]) <> '' then
+          oStringList.Values[oTable.Keys[j]] := oTable.ValuesByIndex[j];
+    end;
+  end;
+end;
+
+function ProductVersionToString(PV: TFileProductVersion): string;
+begin
+  Result := Format('%d.%d.%d.%d', [PV[0], PV[1], PV[2], PV[3]]);
+end;
+
+function GetProductVersion: string;
+begin
+  CreateInfo;
+
+  if FInfo.BuildInfoAvailable then
+    Result := ProductVersionToString(FInfo.FixedInfo.ProductVersion)
+  else
+    Result := 'No build information available';
+end;
+
+function GetFileVersion: string;
+begin
+  CreateInfo;
+
+  if FInfo.BuildInfoAvailable then
+    Result := ProductVersionToString(FInfo.FixedInfo.FileVersion)
+  else
+    Result := 'No build information available';
+end;
+
+{ TVersionInfo }
+
+function TVersionInfo.GetFixedInfo: TVersionFixedInfo;
+begin
+  Result := FVersResource.FixedInfo;
+end;
+
+function TVersionInfo.GetStringFileInfo: TVersionStringFileInfo;
+begin
+  Result := FVersResource.StringFileInfo;
+end;
+
+function TVersionInfo.GetVarFileInfo: TVersionVarFileInfo;
+begin
+  Result := FVersResource.VarFileInfo;
+end;
+
+constructor TVersionInfo.Create;
+begin
+  inherited Create;
+
+  FVersResource := TVersionResource.Create;
+  FBuildInfoAvailable := False;
+end;
+
+destructor TVersionInfo.Destroy;
+begin
+  FVersResource.Free;
+
+  inherited Destroy;
+end;
+
+procedure TVersionInfo.Load(Instance: THandle);
+var
+  Stream: TResourceStream;
+  ResID: integer;
+begin
+  FBuildInfoAvailable := False;
+  ResID := 1;
+
+  Stream := nil;
+  try
+    try
+      Stream := TResourceStream.CreateFromID(Instance, ResID,
+        PChar(RT_VERSION));
+    except
+      On EResNotFound do
+        Exit;
+    end;
+
+    FVersResource.SetCustomRawDataStream(Stream);
+    try
+      // Accessing a property loads the version data from the stream.
+      FVersResource.FixedInfo;
+      FBuildInfoAvailable := True;
+    finally
+      FVersResource.SetCustomRawDataStream(nil);
+    end;
+  finally
+    Stream.Free;
+  end;
+end;
+
+initialization
+  FInfo := nil;
+
+finalization
+  if Assigned(FInfo) then
+    FInfo.Free;
+end.
      

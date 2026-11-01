@@ -20,9 +20,8 @@ type
 
   TFirmwareResponseParser = class
   public
-    function TryParse(const ARawJson: string;
-      const ASource: TTimingMarkSource; const AReceivedAt: TDateTime;
-      out AResponse: TFirmwareResponse;
+    function TryParse(const ARawJson: string; const ASource: TTimingMarkSource;
+      const AReceivedAt: TDateTime; out AResponse: TFirmwareResponse;
       out AError: TFirmwareResponseParseError): boolean;
   end;
 
@@ -46,8 +45,7 @@ end;
 
 function TFirmwareResponseParser.TryParse(const ARawJson: string;
   const ASource: TTimingMarkSource; const AReceivedAt: TDateTime;
-  out AResponse: TFirmwareResponse;
-  out AError: TFirmwareResponseParseError): boolean;
+  out AResponse: TFirmwareResponse; out AError: TFirmwareResponseParseError): boolean;
 var
   Json: TJSONData;
   JsonText: string;

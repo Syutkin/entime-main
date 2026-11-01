@@ -12,7 +12,7 @@ type
   TStartMarkArray = array of TStartMark;
   TStartMarkJournalFilter = (smjfAll, smjfPending, smjfApplied,
     smjfHidden, smjfConflictOrError, smjfLast15Minutes,
-    smjfCurrentStage);
+    smjfCurrentStage, smjfPendingOrConflict, smjfError);
 
   { TStartMarkSql }
 
@@ -23,19 +23,17 @@ type
   public
     class function SelectAll: string; static;
     class function SelectJournal: string; static; overload;
-    class function SelectJournal(
-      const AFilter: TStartMarkJournalFilter): string; static; overload;
+    class function SelectJournal(const AFilter: TStartMarkJournalFilter;
+      const AStageIndex: integer = 0): string; static; overload;
     class procedure BindJournalParameters(Q: TSQLQuery;
-      const AFilter: TStartMarkJournalFilter;
-      const AReceivedSince: TDateTime;
+      const AFilter: TStartMarkJournalFilter; const AReceivedSince: TDateTime;
       const AStageIndex: integer); static;
     class function SelectWorkQueue: string; static;
     class function ExecInsert(Q: TSQLQuery;
       const AMark: TStartMark): TStartMark; static;
-    class procedure ExecUpdate(Q: TSQLQuery;
-      const AMark: TStartMark); static;
-    class function TryReadCurrent(Q: TSQLQuery;
-      out AMark: TStartMark): boolean; static;
+    class procedure ExecUpdate(Q: TSQLQuery; const AMark: TStartMark); static;
+    class function TryReadCurrent(Q: TSQLQuery; out AMark: TStartMark): boolean;
+      static;
   end;
 
   { TStartMarkRepository }
@@ -46,8 +44,7 @@ type
   public
     constructor Create(const AContext: TCompetitionDbContext);
     function Insert(const AMark: TStartMark): TStartMark;
-    function TryLoadById(const AMarkId: int64;
-      out AMark: TStartMark): boolean;
+    function TryLoadById(const AMarkId: int64; out AMark: TStartMark): boolean;
     function HideWorkQueue: integer;
     procedure Update(const AMark: TStartMark);
     function LoadAll: TStartMarkArray;
@@ -102,8 +99,8 @@ begin
   for I := AStart to AStart + ACount - 1 do
   begin
     if (I > Length(AText)) or not (AText[I] in ['0'..'9']) then
-      raise EDatabaseError.CreateFmt(
-        'Invalid %s value "%s" in start_marks.', [AFieldName, AText]);
+      raise EDatabaseError.CreateFmt('Invalid %s value "%s" in start_marks.',
+        [AFieldName, AText]);
     Value := Value * 10 + Ord(AText[I]) - Ord('0');
   end;
   Result := Value;
@@ -113,8 +110,8 @@ procedure RequireSeparator(const AText, AFieldName: string;
   const APosition: integer; const ASeparator: char);
 begin
   if (APosition > Length(AText)) or (AText[APosition] <> ASeparator) then
-    raise EDatabaseError.CreateFmt(
-      'Invalid %s value "%s" in start_marks.', [AFieldName, AText]);
+    raise EDatabaseError.CreateFmt('Invalid %s value "%s" in start_marks.',
+      [AFieldName, AText]);
 end;
 
 function ParseEventTime(const AText: string): TDateTime;
@@ -142,8 +139,8 @@ var
   Year, Month, Day, Hour, Minute, Second, Millisecond: word;
 begin
   if Length(AText) <> 23 then
-    raise EDatabaseError.CreateFmt(
-      'Invalid %s value "%s" in start_marks.', [AFieldName, AText]);
+    raise EDatabaseError.CreateFmt('Invalid %s value "%s" in start_marks.',
+      [AFieldName, AText]);
   RequireSeparator(AText, AFieldName, 5, '-');
   RequireSeparator(AText, AFieldName, 8, '-');
   RequireSeparator(AText, AFieldName, 11, 'T');
@@ -157,10 +154,10 @@ begin
   Minute := ParseDigits(AText, AFieldName, 15, 2);
   Second := ParseDigits(AText, AFieldName, 18, 2);
   Millisecond := ParseDigits(AText, AFieldName, 21, 3);
-  if not TryEncodeDate(Year, Month, Day, DatePart) or
-    not TryEncodeTime(Hour, Minute, Second, Millisecond, TimePart) then
-    raise EDatabaseError.CreateFmt(
-      'Invalid %s value "%s" in start_marks.', [AFieldName, AText]);
+  if not TryEncodeDate(Year, Month, Day, DatePart) or not
+    TryEncodeTime(Hour, Minute, Second, Millisecond, TimePart) then
+    raise EDatabaseError.CreateFmt('Invalid %s value "%s" in start_marks.',
+      [AFieldName, AText]);
   Result := DatePart + TimePart;
 end;
 
@@ -185,8 +182,8 @@ begin
     Exit(TTimingMarkSource.Serial(DeviceId));
   if KindText = 'ble' then
     Exit(TTimingMarkSource.Ble(DeviceId));
-  raise EDatabaseError.CreateFmt(
-    'Invalid source_kind value "%s" in start_marks.', [KindText]);
+  raise EDatabaseError.CreateFmt('Invalid source_kind value "%s" in start_marks.',
+    [KindText]);
 end;
 
 function AssignmentModeText(const AMode: TStartMarkAssignmentMode): string;
@@ -264,20 +261,18 @@ begin
     'participant_number, match_delta_ms, source_kind, source_device_id, received_at, ' +
     'assignment_mode, status, applied_at, diagnostic) VALUES (' +
     ':STAGE_INDEX, :APPLIED_STAGE_INDEX, :EVENT_TIME, :CORRECTION_MS, ' +
-    ':PARTICIPANT_NUMBER, :MATCH_DELTA_MS, :SOURCE_KIND, :SOURCE_DEVICE_ID, :RECEIVED_AT, ' +
-    ':ASSIGNMENT_MODE, :STATUS, :APPLIED_AT, :DIAGNOSTIC);';
+    ':PARTICIPANT_NUMBER, :MATCH_DELTA_MS, :SOURCE_KIND, :SOURCE_DEVICE_ID, :RECEIVED_AT, '
+    + ':ASSIGNMENT_MODE, :STATUS, :APPLIED_AT, :DIAGNOSTIC);';
 end;
 
 class function TStartMarkSql.UpdateStatement: string;
 begin
   Result :=
-    'UPDATE start_marks SET ' +
-    'applied_stage_index = :APPLIED_STAGE_INDEX, ' +
+    'UPDATE start_marks SET ' + 'applied_stage_index = :APPLIED_STAGE_INDEX, ' +
     'participant_number = :PARTICIPANT_NUMBER, ' +
     'match_delta_ms = :MATCH_DELTA_MS, ' +
     'assignment_mode = :ASSIGNMENT_MODE, status = :STATUS, ' +
-    'applied_at = :APPLIED_AT, diagnostic = :DIAGNOSTIC ' +
-    'WHERE id = :ID;';
+    'applied_at = :APPLIED_AT, diagnostic = :DIAGNOSTIC ' + 'WHERE id = :ID;';
 end;
 
 class function TStartMarkSql.SelectAll: string;
@@ -290,9 +285,11 @@ begin
   Result := SelectJournal(smjfAll);
 end;
 
-class function TStartMarkSql.SelectJournal(
-  const AFilter: TStartMarkJournalFilter): string;
+class function TStartMarkSql.SelectJournal(const AFilter: TStartMarkJournalFilter;
+  const AStageIndex: integer): string;
 begin
+  if AStageIndex < 0 then
+    raise EArgumentOutOfRangeException.Create('Stage index must not be negative.');
   Result := 'SELECT * FROM start_marks';
   case AFilter of
     smjfAll: ;
@@ -305,6 +302,16 @@ begin
       Result := Result + ' WHERE received_at >= :RECEIVED_SINCE';
     smjfCurrentStage:
       Result := Result + ' WHERE stage_index = :STAGE_INDEX';
+    smjfPendingOrConflict:
+      Result := Result + ' WHERE status IN (''pending'', ''conflict'')';
+    smjfError: Result := Result + ' WHERE status = ''error''';
+  end;
+  if (AStageIndex > 0) and (AFilter <> smjfCurrentStage) then
+  begin
+    if AFilter = smjfAll then Result := Result + ' WHERE '
+    else
+      Result := Result + ' AND ';
+    Result := Result + 'stage_index = :STAGE_INDEX';
   end;
   Result := Result + ' ORDER BY received_at DESC, id DESC;';
 end;
@@ -315,18 +322,12 @@ class procedure TStartMarkSql.BindJournalParameters(Q: TSQLQuery;
 begin
   if Q = nil then
     raise EArgumentNilException.Create('Q');
-  case AFilter of
-    smjfLast15Minutes:
-      Q.ParamByName('RECEIVED_SINCE').AsString :=
-        TimestampText(AReceivedSince);
-    smjfCurrentStage:
-      begin
-        if AStageIndex < 1 then
-          raise EArgumentOutOfRangeException.Create(
-            'Stage index must be positive.');
-        Q.ParamByName('STAGE_INDEX').AsInteger := AStageIndex;
-      end;
-  end;
+  if (AStageIndex < 0) or ((AFilter = smjfCurrentStage) and (AStageIndex = 0)) then
+    raise EArgumentOutOfRangeException.Create('Invalid stage scope.');
+  if AFilter = smjfLast15Minutes then
+    Q.ParamByName('RECEIVED_SINCE').AsString := TimestampText(AReceivedSince);
+  if AStageIndex > 0 then
+    Q.ParamByName('STAGE_INDEX').AsInteger := AStageIndex;
 end;
 
 class function TStartMarkSql.SelectWorkQueue: string;
@@ -368,8 +369,7 @@ begin
   end;
 end;
 
-class procedure TStartMarkSql.ExecUpdate(Q: TSQLQuery;
-  const AMark: TStartMark);
+class procedure TStartMarkSql.ExecUpdate(Q: TSQLQuery; const AMark: TStartMark);
 begin
   if Q = nil then
     raise EArgumentNilException.Create('Q');
@@ -382,8 +382,8 @@ begin
   Q.ParamByName('ID').AsLargeInt := AMark.Id;
   Q.ExecSQL;
   if Q.RowsAffected <> 1 then
-    raise EDatabaseError.CreateFmt(
-      'Start mark %d was not found for update.', [AMark.Id]);
+    raise EDatabaseError.CreateFmt('Start mark %d was not found for update.',
+      [AMark.Id]);
   Q.Close;
 end;
 
@@ -397,8 +397,7 @@ begin
 
   AMark.Id := Q.FieldByName('id').AsLargeInt;
   AMark.StageIndex := Q.FieldByName('stage_index').AsInteger;
-  AMark.HasAppliedStageIndex :=
-    not Q.FieldByName('applied_stage_index').IsNull;
+  AMark.HasAppliedStageIndex := not Q.FieldByName('applied_stage_index').IsNull;
   if AMark.HasAppliedStageIndex then
     AMark.AppliedStageIndex :=
       Q.FieldByName('applied_stage_index').AsInteger;
@@ -406,8 +405,7 @@ begin
   AMark.HasCorrection := not Q.FieldByName('correction_ms').IsNull;
   if AMark.HasCorrection then
     AMark.CorrectionMs := Q.FieldByName('correction_ms').AsInteger;
-  AMark.HasParticipantNumber :=
-    not Q.FieldByName('participant_number').IsNull;
+  AMark.HasParticipantNumber := not Q.FieldByName('participant_number').IsNull;
   if AMark.HasParticipantNumber then
     AMark.ParticipantNumber :=
       Q.FieldByName('participant_number').AsInteger;
@@ -415,8 +413,8 @@ begin
   if AMark.HasMatchDeltaMs then
     AMark.MatchDeltaMs := Q.FieldByName('match_delta_ms').AsInteger;
   AMark.Source := SourceFromFields(Q);
-  AMark.ReceivedAt := ParseTimestamp(
-    Q.FieldByName('received_at').AsString, 'received_at');
+  AMark.ReceivedAt := ParseTimestamp(Q.FieldByName('received_at').AsString,
+    'received_at');
   AMark.HasAssignmentMode := not Q.FieldByName('assignment_mode').IsNull;
   if AMark.HasAssignmentMode then
     AMark.AssignmentMode := ParseAssignmentMode(
@@ -424,14 +422,13 @@ begin
   AMark.Status := ParseStatus(Q.FieldByName('status').AsString);
   AMark.HasAppliedAt := not Q.FieldByName('applied_at').IsNull;
   if AMark.HasAppliedAt then
-    AMark.AppliedAt := ParseTimestamp(
-      Q.FieldByName('applied_at').AsString, 'applied_at');
+    AMark.AppliedAt := ParseTimestamp(Q.FieldByName('applied_at').AsString,
+      'applied_at');
   if not Q.FieldByName('diagnostic').IsNull then
     AMark.Diagnostic := Q.FieldByName('diagnostic').AsString;
 end;
 
-constructor TStartMarkRepository.Create(
-  const AContext: TCompetitionDbContext);
+constructor TStartMarkRepository.Create(const AContext: TCompetitionDbContext);
 begin
   inherited Create;
   if AContext = nil then
@@ -439,8 +436,7 @@ begin
   FContext := AContext;
 end;
 
-function TStartMarkRepository.Insert(
-  const AMark: TStartMark): TStartMark;
+function TStartMarkRepository.Insert(const AMark: TStartMark): TStartMark;
 var
   Q: TSQLQuery;
   UnitOfWork: TCompetitionUnitOfWork;

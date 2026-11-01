@@ -17,8 +17,7 @@ type
     constructor Create(const AContext: TCompetitionDbContext);
     destructor Destroy; override;
     function Insert(const AMark: TFinishMark): TFinishMark;
-    function TryLoadById(const AMarkId: int64;
-      out AMark: TFinishMark): boolean;
+    function TryLoadById(const AMarkId: int64; out AMark: TFinishMark): boolean;
     function HideWorkQueue: integer;
     procedure Update(const AMark: TFinishMark);
   end;
@@ -28,8 +27,7 @@ implementation
 uses
   SysUtils;
 
-constructor TSqliteFinishMarkPersistence.Create(
-  const AContext: TCompetitionDbContext);
+constructor TSqliteFinishMarkPersistence.Create(const AContext: TCompetitionDbContext);
 begin
   inherited Create;
   if AContext = nil then
@@ -43,8 +41,7 @@ begin
   inherited Destroy;
 end;
 
-function TSqliteFinishMarkPersistence.Insert(
-  const AMark: TFinishMark): TFinishMark;
+function TSqliteFinishMarkPersistence.Insert(const AMark: TFinishMark): TFinishMark;
 begin
   Result := FRepository.Insert(AMark);
 end;

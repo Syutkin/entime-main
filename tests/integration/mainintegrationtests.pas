@@ -20,7 +20,7 @@ uses
   BleTimingTransport, LazBleBackend,
   LazBleOperation, LazBleClient, LazBleComponent, LazBleTypes,
   LazBleNus, DateTimePicker,
-  FakeLazBleBackend;
+  FakeLazBleBackend, SQLDB, GuiTestSupport;
 
 type
   TMainFlowIntegrationTests = class(TTestCase)
@@ -34,6 +34,46 @@ type
     FCorrectionDatasetOpenCount: integer;
     FResultDatasetOpenCount: integer;
     FBleTestProcessor: TTransportStreamProcessor;
+    FBleCloseCount: integer;
+    FShutdownBackend: TFakeLazBleBackend;
+    FShutdownAcknowledged: boolean;
+    FBalanceWasVisible: boolean;
+    FBalanceReadCount: integer;
+    FBalanceJournalError: string;
+    FPreviewAccept: boolean;
+    FPreviewOpened, FPreviewUnknownCount, FPreviewMode: integer;
+    FPreviewError: string;
+    FCardJournalKind: TTimingMarkKind;
+    FCardJournalVisited: boolean;
+    FCardJournalError: string;
+    FCardReads: integer;
+    FPrintMode, FPrintOpened: integer;
+    FPrintError: string;
+    procedure QueueStartPrintCheck(Sender: TObject);
+    procedure QueueLabelsPrintCheck(Sender: TObject);
+    procedure InspectLabelsPrintAndClose(Data: PtrInt);
+    procedure InspectStartPrintAndClose(Data: PtrInt);
+    procedure QueuePrintCheck(Sender: TObject);
+    procedure InspectPrintAndClose(Data: PtrInt);
+    procedure TraceCardSql(Sender: TSQLConnection; EventType: TDBEventType;
+      const Msg: string);
+    procedure QueueCardJournalCheck(Sender: TObject);
+    procedure InspectCardJournalAndClose(Data: PtrInt);
+    procedure AcceptImportPreview(Data: PtrInt);
+    procedure ReceivePreviewBleFinish;
+    procedure CreateBalanceFixture;
+    function OpenBalance: TGuiTestSession;
+    procedure CloseBalance(const AGui: TGuiTestSession);
+    procedure ExecBalanceSql(const ASql: string);
+    procedure TraceBalanceSql(Sender: TSQLConnection; EventType: TDBEventType;
+      const Msg: string);
+    procedure AssertBalanceCounts(
+      const AParticipants, AResults, ADns, ADnf, ADsq, AUnresolved: integer);
+    procedure InspectBalanceJournalAndClose(Data: PtrInt);
+    procedure CompleteBleShutdownOnMain;
+    procedure RecordBleClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure ExerciseBleClose(const AKind: TLazBleBackendCommandKind;
+      const AImmediate, AFailed: boolean);
 
     class function ResolveRepoRoot: string; static;
     procedure EnsureFormsCreated;
@@ -48,18 +88,20 @@ type
     procedure ExportResultsFile(const AFileName: string);
     procedure ExportAllResultsFile(const AFileName: string);
     procedure ApplyStartPacketAt(const ATime: TDateTime;
-      const AHasCorrection: boolean = False;
-      const ACorrectionMs: integer = 0);
+      const AHasCorrection: boolean = False; const ACorrectionMs: integer = 0);
     procedure ApplyFinishPacketAt(const ATime: TDateTime);
     procedure SelectFinishMarkAt(const AIndex: integer);
-    procedure SetFinishMarkNumberAt(const AIndex,
-      AParticipantNumber: integer; const APersist: boolean = True);
+    procedure SetFinishMarkNumberAt(const AIndex, AParticipantNumber: integer;
+      const APersist: boolean = True);
     procedure ApplyStageActivityToUi(const APreferredStageIndex: integer);
-    procedure ApplyStagePresentationToUi(
-      const APreferredStageIndex: integer = 0);
+    procedure ApplyStagePresentationToUi(const APreferredStageIndex: integer = 0);
     procedure RefreshResultViewConfiguration;
     procedure CreateEmptyCompetitionFixture(const AStageCount: integer);
     procedure WriteCsv(const ALines: array of string);
+    procedure WriteEncodedCsv(const ALines: array of string;
+      const ALineEnding: string; const AUseCp1251: boolean);
+    procedure AssertRussianCsvImport(const ALineEnding: string;
+      const AUseCp1251: boolean);
     procedure AssertTableExists(const ATableName: string);
     procedure AssertMainRowCount(const AExpectedCount: integer);
     procedure AssertDynamicStageFields(const AStageCount: integer);
@@ -72,9 +114,23 @@ type
     procedure CreateSchemaFixture(const APhysicalStageCount: integer;
       const AStageCountValue, ASchemaVersionValue: string);
     function FindBackupFile: string;
-    function LoadConfigValueFromFile(const AFileName, AKey,
-      ADefaultValue: string): string;
+    function LoadConfigValueFromFile(
+      const AFileName, AKey, ADefaultValue: string): string;
     procedure DeleteBackupFiles;
+    procedure ExerciseClearResults(const AConfirmation, AWithoutBackup: integer;
+      const AFailBackup, AExpectCleared: boolean);
+    procedure ExercisePenaltyRemoval(const AEmptyText: string);
+    procedure CreateMutationFixture;
+    function MutationSnapshot: string;
+    procedure BlockMutationCalculation;
+    procedure AssertPlacement(const ANumber: integer; const ACategory: string;
+      const APlace, AThruPlace: integer;
+      const AStageGap, AStage2Gap, ASumGap, AThruGap: string);
+    procedure ExerciseCategoryMutation(
+      const AUseCombo, AEmptyCategory, AFail: boolean;
+      const AMixedStageEdit: boolean = False);
+    procedure ExerciseParticipantDeletion(const ANumber: integer;
+      const AConfirm: boolean; const AFail: boolean = False);
     procedure CloseSettingsForm(Data: PtrInt);
     procedure SelectFriendlySerialDeviceAndClose(Data: PtrInt);
     procedure EnterCustomSerialDeviceAndClose(Data: PtrInt);
@@ -84,6 +140,8 @@ type
     procedure ActivateAllStagesAndClose(Data: PtrInt);
     procedure RenameFirstStageAndClose(Data: PtrInt);
     procedure ChangeResultCategoryAndClose(Data: PtrInt);
+    procedure ExerciseSettingsAndClose(Data: PtrInt);
+    procedure RaiseQueuedGuiException(Data: PtrInt);
     procedure CountMainDatasetOpen(DataSet: TDataSet);
     procedure CountStatDatasetOpen(DataSet: TDataSet);
     procedure CountCorrectionDatasetOpen(DataSet: TDataSet);
@@ -99,15 +157,14 @@ type
     procedure AcceptInputDateTimeDialog(Data: PtrInt);
     procedure BleTimingPacketReceived(Sender: TObject;
       const APacket: TTimingPacket; const ASource: TTimingMarkSource);
-    procedure BleTimingDataReceived(Sender: TObject;
-      const AData: RawByteString; const ASource: TTimingMarkSource);
-    procedure CompleteBleTimingConnection(
-      const ABackend: TFakeLazBleBackend;
-      const ASubscriptionId: TBleSubscriptionId);
-    procedure EmitBleTimingNotification(const ABackend: TFakeLazBleBackend;
-      const AInput: TBleTimingTransport;
+    procedure BleTimingDataReceived(Sender: TObject; const AData: rawbytestring;
+      const ASource: TTimingMarkSource);
+    procedure CompleteBleTimingConnection(const ABackend: TFakeLazBleBackend;
       const ASubscriptionId: TBleSubscriptionId;
-      const AValue: RawByteString);
+      const AFinishSubscription: boolean = True);
+    procedure EmitBleTimingNotification(const ABackend: TFakeLazBleBackend;
+      const AInput: TBleTimingTransport; const ASubscriptionId: TBleSubscriptionId;
+      const AValue: rawbytestring);
   protected
     procedure SetUp; override;
     procedure TearDown; override;
@@ -125,8 +182,72 @@ type
     procedure FinishMarkPanel_NumberEditPersistsWithoutApplying;
     procedure FinishMarkPanel_ZeroNumberShowsDeferredDialog;
     procedure SqlQuerySortEngine_SortsMainGridDataset;
+    procedure StageResultTabs_VisibleGridsAcceptFocusAndMouseClicks;
+    procedure StageResultTabs_RebuildPreservesStaticTabVisibility;
+    procedure GuiSmoke_NavigateAfterReopenAndStageResize;
+    procedure ProtocolBalance_EnterAndDoubleClickNavigateThroughCategoryFilter;
+    procedure ParticipantCard_OpeningKeepsUnsavedEditorAndReusesWindow;
+    procedure ParticipantCard_BalanceOpensSelectedParticipantAndStage;
+    procedure ParticipantCard_CompetitionCloseAndSwitchCloseWindow;
+    procedure ParticipantCard_UnsavedInsertCannotOpenCard;
+    procedure ParticipantCard_StartAndFinishOpenExactJournalRecord;
+    procedure ParticipantCard_ChangedMarkRequiresNewSelection;
+    procedure ParticipantCard_ReturnToInactiveStageDoesNotChangeWorkingStage;
+    procedure ParticipantCard_CancelAndFailedSavePreserveEditor;
+    procedure ParticipantCard_LiveMarksRefreshResultsAndKeepJournals;
+    procedure ParticipantCard_NotificationsCoalesceAndClosedCardDoesNotRead;
+    procedure ParticipantCard_UnsavedInputRenumberingAndImportRefresh;
+    procedure ParticipantCard_BusyRollbackAndCloseDiscardQueuedRead;
+    procedure ParticipantCard_ReadErrorCanRetryAndDeletedIdDoesNotFollowNumber;
+    procedure ParticipantCard_LanguageSwitchKeepsSelectionAndFilter;
+    procedure ParticipantCard_NativeEditorInputSurvivesOpening;
+    procedure StartPrint_MenuModesPendingInputAndSessionClosure;
+    procedure StartLabels_MenuFilterPendingAndReopen;
+    procedure StartLabels_CloseAndSwitchEndModalSession;
+    procedure FinishPrint_MenuOpensOverallAndSwitchesStage;
+    procedure FinishPrint_UsesCurrentStageAndIgnoresGridFilter;
+    procedure FinishPrint_NativeAndPendingEditsSurviveContinueAndCancel;
+    procedure FinishPrint_LiveAndCsvDataKeepFrozenDocument;
+    procedure FinishPrint_CompetitionCloseAndSwitchEndModalSession;
+    procedure ProtocolBalance_CancelNavigationPreservesPendingEdit;
+    procedure ProtocolBalance_MissingParticipantAndInactiveStageRefreshSelection;
+    procedure ProtocolBalance_ImportStatusCorrectionPenaltyAndClearRefreshCounts;
+    procedure ProtocolBalance_ParticipantImportRefreshesSummaryAndDetails;
+    procedure ProtocolBalance_SummaryFiltersMatchDisplayedCounts;
+    procedure ProtocolBalance_ReceiveUpdatesCountersAndPreservesOpenJournals;
+    procedure ProtocolBalance_ApplyStartAndFinishUpdatesResultAndQueues;
+    procedure ProtocolBalance_ConflictErrorAndHiddenMarksRefreshCounters;
+    procedure ProtocolBalance_NotificationsCoalesceAndHiddenViewReadsOnce;
+    procedure ProtocolBalance_RefreshPreservesSelectionAndHandlesRemovedRows;
+    procedure ProtocolBalance_StageReductionUsesAvailableSelection;
+    procedure ProtocolBalance_CloseCancelsPendingRefresh;
+    procedure ProtocolBalance_SwitchDatabaseDiscardsQueuedOldData;
+    procedure ProtocolBalance_RefreshPreservesUnsavedParticipantInput;
+    procedure ProtocolBalance_ReadErrorDisablesNavigationAndRetryRestoresSelection;
+    procedure ProtocolBalance_UncommittedChangesStayStaleUntilSaved;
+    procedure ProtocolBalance_JournalActionsUseSelectedStageAndStatus;
+    procedure GuiSmoke_SettingsPagesApplyAndCancel;
+    procedure GuiSmoke_EditingSurvivesIncomingMarks;
+    procedure GuiSmoke_QueuedExceptionsAreReported;
+    procedure Statistics_TimerReadsTrackOnlyWhileVisible;
     procedure RefreshAll_RefreshesLegacyDatasetsAndSqlQueries;
-    procedure CategoryEdit_RefreshesOnlyAffectedQueriesAfterCommit;
+    procedure CategoryEdit_RefreshesCalculatedQueriesAfterCommit;
+    procedure ParticipantImport_RecalculatesStartsAndCategories;
+    procedure ParticipantImport_WithoutStagesClearsStaleResults;
+    procedure ParticipantImport_StageActivityRecalculatesStatusesAndTotals;
+    procedure ParticipantImport_CalculationFailureRollsBackSchemaAndData;
+    procedure ParticipantDelete_LeaderRecalculatesStandings;
+    procedure ParticipantDelete_MiddleRecalculatesStandings;
+    procedure ParticipantDelete_LastRecalculatesStandings;
+    procedure ParticipantDelete_CancelPreservesResults;
+    procedure ParticipantDelete_CalculationFailureRollsBackDeletion;
+    procedure CategoryCombo_RecalculatesBothCategories;
+    procedure CategoryCombo_MoveToEmptyCategoryRecalculates;
+    procedure CategoryGrid_RecalculatesBothCategories;
+    procedure CategoryGrid_MoveToEmptyCategoryRecalculates;
+    procedure CategoryCombo_CalculationFailureRollsBackEdit;
+    procedure CategoryGrid_CalculationFailureRollsBackEdit;
+    procedure CategoryGrid_MixedStageEditRecalculatesWithAutomaticUpdateDisabled;
     procedure CreateNewCompetitionFile_ViaMainFormHandler_CreatesDbAndOpensDatasets;
     procedure NewCompetitionSchema_IsVersionedAndReopensWithoutMigration;
     procedure CompetitionConfigModel_LoadDoesNotApplyUiUntilExplicitPhase;
@@ -136,6 +257,12 @@ type
     procedure CompetitionFileCreateError_ReportsPathAndLeavesDatabaseClosed;
     procedure CompetitionFileOpenError_DoesNotPublishFailedFile;
     procedure LegacySchemaMigration_CreatesBackupAndPreservesData;
+    procedure ClearResults_DeclinedPreservesDataWithoutBackup;
+    procedure ClearResults_DismissedPreservesDataWithoutBackup;
+    procedure ClearResults_ConfirmedBacksUpBeforeClearing;
+    procedure ClearResults_BackupFailureDeclinedPreservesData;
+    procedure ClearResults_BackupFailureDismissedPreservesData;
+    procedure ClearResults_BackupFailureAcceptedClearsData;
     procedure ConfiguredSchemaMigration_ExpandsCapacity;
     procedure MinimumStageCount_ResizesModelBeforeConfigLoad;
     procedure MaximumStageCount_ResizesModelBeforeConfigLoad;
@@ -143,9 +270,15 @@ type
     procedure StageSelection_UsesFullFieldSuffix;
     procedure StageIndexes_RejectInvalidSelectionsAndNormalizeStoredValues;
     procedure DynamicStageFields_EditRecalculateAndReopen;
+    procedure PenaltyEdit_EmptyTextRestoresResultsAndStandings;
+    procedure PenaltyEdit_WhitespaceRestoresResultsAndStandings;
     procedure NewerSchema_IsRejectedWithoutOpeningDatasets;
     procedure ImportStartListCp1251_ViaMainFormHandler_LoadsUtf8DataToMainTable;
     procedure ImportStartListCp1251_DoesNotRequireInteractiveDialogsInCI;
+    procedure ImportRussianUtf8LfCsv_DetectsDecodesAndStoresText;
+    procedure ImportRussianUtf8CrlfCsv_DetectsDecodesAndStoresText;
+    procedure ImportRussianCp1251LfCsv_DetectsDecodesAndStoresText;
+    procedure ImportRussianCp1251CrlfCsv_DetectsDecodesAndStoresText;
     procedure LoadParticipantsList_MinimalUtf8Csv_MapsParticipantAndStage;
     procedure LoadParticipantsList_CategoryDeclinedStillAppliesDetectedStages;
     procedure LoadParticipantsList_WithoutStageColumnsPreservesActiveStages;
@@ -173,6 +306,14 @@ type
     procedure LoadStageResults_DuplicateNumber_ReportsLocalizedCsvError;
     procedure LoadStageResults_UnknownParticipant_ConfirmationCreatesParticipant;
     procedure LoadStageResults_UnknownParticipant_RejectionSkipsOnlyUnknownResult;
+    procedure LoadStageResults_PreviewCancellationPreservesDatabase;
+    procedure LoadStageResults_PreviewKeepsLiveSerialAndBleMarks;
+    procedure LoadStageResults_LiveAssignedFinishRequiresReview;
+    procedure LoadStageResults_UnselectedLiveFinishIsPreserved;
+    procedure LoadStageResults_RefreshFailureReportsSavedImport;
+    procedure LoadStageResults_PendingEditCanCancelBeforePreview;
+    procedure LoadStageResults_FailedEditorSavePreservesInputBeforePreview;
+    procedure LoadStageResults_SavesEditorBeforeOpeningPreview;
     procedure ExportStageResultsCsv_StageAboveEightUsesDynamicFields;
     procedure DynamicCsvExports_UseActiveStagesAndComplexNames;
     procedure ExportAllResultsToXLSX_UsesDynamicStagesAndComplexNames;
@@ -183,6 +324,8 @@ type
     procedure UpdateResults_StageAboveEightCalculatesStageSumAndThruPlaces;
     procedure UpdateResults_FromPopupPreservesMainGridRow;
     procedure SetFinish_MultipleRowsAreProcessedSequentially;
+    procedure SetFinish_BatchFailureRollsBackEveryMark;
+    procedure SetFinish_RepeatedParticipantRequiresConfirmation;
     procedure SetFinish_UsesStageCapturedWhenMarkWasReceived;
     procedure SetFinish_UsesCapturedTimeInsteadOfGridText;
     procedure SetFinish_CalculationErrorRollsBackFinishAndResults;
@@ -193,6 +336,7 @@ type
     procedure ParticipantNumberEdit_SavesNewNumber;
     procedure ParticipantPrivateFields_LogNamesWithoutValues;
     procedure ParticipantStageValueEdit_SavesAndKeepsEditedRowCurrent;
+    procedure ParticipantStageValueEdit_UpdatesOverallWithoutOtherStages;
     procedure ParticipantUnchangedStageField_CancelsEdit;
     procedure CategoryEditor_LoadsCategoriesWithoutStatisticsDataset;
     procedure CorrectionEdit_UpdatesSelectedStageOnly;
@@ -252,8 +396,16 @@ type
     procedure SerialUi_ClockTimerDoesNotEnumeratePorts;
     procedure SerialUi_PortLabelDoesNotRepeatSelectedPort;
     procedure TimingInputUi_SwitchesBetweenSerialAndBleStatus;
+    procedure TimingInputUi_UnknownSavedBleDeviceSuggestsScanAndCanRetry;
     procedure BleDeviceSelection_AcceptConnectsSelectedDevice;
     procedure BleDeviceSelection_CancelDoesNotChangeOrConnect;
+    procedure BleCloseWaitsForScanAndRepeatedRequests;
+    procedure BleCloseWaitsForConnection;
+    procedure BleCloseWaitsForNusWrite;
+    procedure BleCloseWaitsForSubscription;
+    procedure BleCloseDefersAlreadyCompletedShutdown;
+    procedure BleCloseContinuesAfterShutdownFailure;
+    procedure BleDirectDestroyDrainsShutdownBeforeReleasingOwners;
     {$IFDEF UNIX}
     procedure SerialVirtualPort_ProcessesMixedTransportStream;
     {$ENDIF}
@@ -296,16 +448,30 @@ type
 implementation
 
 uses
-  IniFiles, LCLType, LazBleDeviceControl, Math, PropertyStorage, SQLite3Conn,
-  SQLDB, StageConfig, StageFieldNames, CompetitionRefreshCoordinator,
+  IniFiles, LCLType, BleTimingUi, Math, PropertyStorage, SQLite3Conn,
+  StageConfig, StageFieldNames, CompetitionRefreshCoordinator,
   CompetitionResultsService, CompetitionLifecycleService,
-  CompetitionExportService,
+  CompetitionExportService, CompetitionImportService,
   StartMarkRepository, FinishMarkRepository, SqlQuerySortEngine,
-  CsvDocument, fpstypes,
-  fpspreadsheet, fpsallformats;
+  CsvDocument, LConvEncoding, fpstypes,
+  fpspreadsheet, fpsallformats, StageResultTabs, ProtocolBalance,
+  ProtocolBalanceFrame, StartMark, StartMarkService, ResultsImportPreview,
+  ResultsImportComparison, ParticipantCardForm, FinishProtocolPrintForm,
+  StartProtocolPrintForm, StartLabelsPrintForm, rxapputils,
+  StageFinishReportModel, StageFinishReportBackend, ParticipantCardModel;
 
 type
   TMainFormAccess = class(TMainForm);
+
+  TParticipantGridAccess = class(TMyRxDBGrid)
+  public
+    property InplaceEditor;
+  end;
+
+  TResultGridAccess = class(TRxDBGrid)
+  public
+    procedure ClickCell;
+  end;
 
   TMyRxDBGridAccess = class(TMyRxDBGrid)
   public
@@ -316,17 +482,16 @@ type
 
   TTestSettingsForm = class(TSettingsForm)
   private
-    FDeviceSelectionResult: Boolean;
+    FDeviceSelectionResult: boolean;
     FDeviceToSelect: TBleDeviceInfo;
   protected
-    function ExecuteBleDeviceSelection(
-      out ADevice: TBleDeviceInfo): Boolean; override;
+    function ExecuteBleDeviceSelection(out ADevice: TBleDeviceInfo): boolean;
+      override;
   public
     procedure ApplyTimingInputSettingsForTest;
-    property DeviceSelectionResult: Boolean read FDeviceSelectionResult
-      write FDeviceSelectionResult;
-    property DeviceToSelect: TBleDeviceInfo read FDeviceToSelect
-      write FDeviceToSelect;
+    property DeviceSelectionResult: boolean
+      read FDeviceSelectionResult write FDeviceSelectionResult;
+    property DeviceToSelect: TBleDeviceInfo read FDeviceToSelect write FDeviceToSelect;
   end;
 
   TTestStartMarksForm = class(TStartMarksForm)
@@ -369,6 +534,8 @@ var
   FakeSerialDevices: TSerialDeviceInfoArray = nil;
   FakeSerialDevicesProviderCallCount: integer = 0;
   InputDialogCallbackError: string = '';
+  ClearResultsWithoutBackupAnswer: integer = mrNo;
+  ClearResultsDialogMessages: TStringList = nil;
 
 const
   TEST_SERIAL_DEVICE = 'COM77';
@@ -414,6 +581,13 @@ begin
   Result := FakeSerialDevices;
 end;
 
+procedure TResultGridAccess.ClickCell;
+begin
+  MouseDown(mbLeft, [], 30, 40);
+  MouseUp(mbLeft, [], 30, 40);
+end;
+
+
 procedure TMyRxDBGridAccess.SelectDataRow(const ARow: integer);
 begin
   DataLink.ActiveRecord := ARow - FixedRows;
@@ -435,7 +609,7 @@ begin
 end;
 
 function TTestSettingsForm.ExecuteBleDeviceSelection(
-  out ADevice: TBleDeviceInfo): Boolean;
+  out ADevice: TBleDeviceInfo): boolean;
 begin
   ADevice := FDeviceToSelect;
   Result := FDeviceSelectionResult;
@@ -447,7 +621,7 @@ begin
 end;
 
 function IntegrationMessageDlgHandler(const Msg: string; DlgType: TMsgDlgType;
-  Buttons: TMsgDlgButtons; HelpCtx: LongInt): Integer;
+  Buttons: TMsgDlgButtons; HelpCtx: longint): integer;
 begin
   Inc(DialogCallCount);
   LastDialogMessage := Msg;
@@ -455,18 +629,30 @@ begin
     Exit(mrNo);
   if mbYes in Buttons then
     Exit(ConfirmationDialogResult);
-  Result := mrOK;
+  Result := mrOk;
 end;
 
-function IntegrationStageSelectionHandler(const ACaption,
-  APrompt: string): integer;
+function ClearResultsMessageDlgHandler(const Msg: string; DlgType: TMsgDlgType;
+  Buttons: TMsgDlgButtons; HelpCtx: longint): integer;
+begin
+  ClearResultsDialogMessages.Add(Msg);
+  if Msg = rsClearResults then
+    Result := ConfirmationDialogResult
+  else if Msg = Format(rsClearResultsWithoutBackup, [sLineBreak]) then
+    Result := ClearResultsWithoutBackupAnswer
+  else
+    Result := mrCancel;
+end;
+
+function IntegrationStageSelectionHandler(const ACaption, APrompt: string): integer;
 begin
   Inc(StageSelectionCallCount);
   Result := StageSelectionResult;
 end;
 
-function IntegrationStartMarkStageChoiceHandler(const ACaption, AMessage,
-  AReceivedStageButton, ACurrentStageButton: string): TStartMarkStageChoice;
+function IntegrationStartMarkStageChoiceHandler(
+  const ACaption, AMessage, AReceivedStageButton, ACurrentStageButton: string):
+TStartMarkStageChoice;
 begin
   Inc(StartMarkStageChoiceCallCount);
   LastStartMarkStageChoiceMessage := AMessage;
@@ -500,8 +686,7 @@ begin
     IsCompetitionDatabaseOpen);
 end;
 
-procedure TMainFlowIntegrationTests.OpenCompetitionFile(
-  const AFileName: string);
+procedure TMainFlowIntegrationTests.OpenCompetitionFile(const AFileName: string);
 begin
   MainForm.FileOpenDB.Dialog.FileName := AFileName;
   MainForm.FileOpenDBAccept(MainForm.FileOpenDB);
@@ -514,33 +699,140 @@ begin
   Outcome := TCompetitionRefreshCoordinator.RefreshAll(
     MainForm.CompetitionDb, MainForm.MainDataset1,
     [MainForm.CorrectionDataset, MainForm.DatasetStartMarks,
-    MainForm.DatasetFinishMarks,
-    MainForm.ResultDatasetStageTotal, MainForm.ResultDatasetStageSum,
-    MainForm.StatDataset1, MainForm.StatDataset2],
-    [ResultsForm.CatDataset1, ResultsForm.CatDataset2,
-    ResultsForm.CatDataset3, ResultsForm.CatDataset4,
-    ResultsForm.CatDataset5, ResultsForm.CatDataset6,
+    MainForm.DatasetFinishMarks, MainForm.ResultDatasetStageTotal,
+    MainForm.ResultDatasetStageSum, MainForm.StatDataset1, MainForm.StatDataset2],
+    [ResultsForm.CatDataset1, ResultsForm.CatDataset2, ResultsForm.CatDataset3,
+    ResultsForm.CatDataset4, ResultsForm.CatDataset5, ResultsForm.CatDataset6,
     ResultsForm.ResultDataset], @MainForm.RefreshStageResultQueries);
   AssertEquals('Unexpected dataset refresh error: ' + Outcome.Errors,
     0, Outcome.ErrorCount);
 end;
 
-procedure TMainFlowIntegrationTests.ImportParticipantsFile(
-  const AFileName: string);
+procedure TMainFlowIntegrationTests.ImportParticipantsFile(const AFileName: string);
 begin
   MainForm.FileOpenCSV.Dialog.FileName := AFileName;
   MainForm.FileOpenCSVAccept(MainForm.FileOpenCSV);
 end;
 
-procedure TMainFlowIntegrationTests.ImportStageResultsFile(
-  const AFileName: string);
+procedure TMainFlowIntegrationTests.ImportStageResultsFile(const AFileName: string);
 begin
-  MainForm.FileOpenCSVResult.Dialog.FileName := AFileName;
-  MainForm.FileOpenCSVResultAccept(MainForm.FileOpenCSVResult);
+  FPreviewError := '';
+  Application.QueueAsyncCall(@AcceptImportPreview, 0);
+  try
+    MainForm.FileOpenCSVResult.Dialog.FileName := AFileName;
+    MainForm.FileOpenCSVResultAccept(MainForm.FileOpenCSVResult);
+  finally
+    Application.RemoveAsyncCalls(Self);
+  end;
 end;
 
-procedure TMainFlowIntegrationTests.ExportStageResultsFile(
-  const AFileName: string; const AStageIndex: integer);
+procedure TMainFlowIntegrationTests.AcceptImportPreview(Data: PtrInt);
+var
+  I, J: integer;
+  Form: TResultsImportPreviewForm;
+  Gui: TGuiTestSession;
+begin
+  if Data < 0 then Exit;
+  for I := Screen.FormCount - 1 downto 0 do
+    if Screen.Forms[I] is TResultsImportPreviewForm then
+    begin
+      Form := TResultsImportPreviewForm(Screen.Forms[I]);
+      Inc(FPreviewOpened);
+      Gui := TGuiTestSession.Create;
+      try
+        if FPreviewMode in [1, 2, 3] then
+        begin
+          ApplyFinishPacketAt(EncodeTime(10, 20, 30, 123));
+          if FPreviewMode = 1 then ReceivePreviewBleFinish
+          else
+          begin
+            SetFinishMarkNumberAt(0, 101);
+            MainForm.AcApplyFinishMarksExecute(MainForm.AcApplyFinishMarks);
+          end;
+        end;
+        if FPreviewAccept then
+        begin
+          for J := 0 to Form.Comparison.Count - 1 do
+            if Form.Comparison[J].Id = 0 then Inc(FPreviewUnknownCount);
+          if (FPreviewUnknownCount > 0) and (ConfirmationDialogResult = mrYes) then
+          begin
+            Gui.SelectTab(Form.UnknownPage);
+            Gui.Click(Form.ConfirmAllButton, Form.ConfirmAllButton.ClientWidth div 2,
+              Form.ConfirmAllButton.ClientHeight div 2);
+            Gui.SelectTab(Form.ChangesPage);
+          end;
+          if FPreviewMode <> 3 then
+            Gui.Click(Form.SelectAllButton, Form.SelectAllButton.ClientWidth div 2,
+              Form.SelectAllButton.ClientHeight div 2);
+          if FPreviewMode = 3 then
+          begin
+            AssertEquals(1, Form.Comparison.SelectedFieldCount);
+            AssertTrue(ifCorrection in Form.Comparison[0].Selected);
+          end;
+          if Form.ApplyButton.Enabled then
+            Gui.Click(Form.ApplyButton, Form.ApplyButton.ClientWidth div 2,
+              Form.ApplyButton.ClientHeight div 2);
+          if FPreviewMode = 2 then
+          begin
+            AssertEquals(rsImportPreviewStale, Form.StateLabel.Caption);
+            AssertEquals(mrNone, Form.ModalResult);
+            AssertFalse(Form.Comparison.HasSelection);
+          end;
+          if (FPreviewMode = 4) and (Form.ModalResult = mrOk) then
+          begin
+            MainForm.StatDataset1.Close;
+            MainForm.StatDataset1.SQL.Text := 'SELECT * FROM missing_import_statistics';
+          end;
+          if Form.ModalResult = mrNone then
+          begin
+            if Pos(Format(rsImportPreviewError, ['']), Form.StateLabel.Caption) = 1 then
+              FPreviewError :=
+                Form.FileLabel.Caption + LineEnding + Form.StateLabel.Caption;
+            Form.ModalResult := mrCancel;
+          end;
+        end
+        else
+          Form.ModalResult := mrCancel;
+      except
+        on E: Exception do
+        begin
+          FPreviewError := E.Message;
+          Form.ModalResult := mrCancel;
+        end;
+      end;
+      Gui.Free;
+      Application.QueueAsyncCall(@AcceptImportPreview, -1);
+      Exit;
+    end;
+end;
+
+procedure TMainFlowIntegrationTests.ReceivePreviewBleFinish;
+const
+  SubscriptionId = TBleSubscriptionId(64);
+var
+  Backend: ILazBleBackend;
+  BackendObject: TFakeLazBleBackend;
+  Input: TBleTimingTransport;
+begin
+  BackendObject := TFakeLazBleBackend.Create;
+  Backend := BackendObject;
+  Input := TBleTimingTransport.Create(Backend);
+  try
+    Input.OnData := @BleTimingDataReceived;
+    Input.ConnectAsync('preview-device');
+    CompleteBleTimingConnection(BackendObject, SubscriptionId);
+    EmitBleTimingNotification(BackendObject, Input, SubscriptionId, 'F10:21:31#');
+  finally
+    Input.ShutdownAsync;
+    BackendObject.CompletePendingOperations;
+    BackendObject.CompleteShutdown;
+    Input.Free;
+    Backend := nil;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.ExportStageResultsFile(const AFileName: string;
+  const AStageIndex: integer);
 begin
   exportStageIndex := AStageIndex;
   MainForm.FileExportStageResultsSaveAs.Dialog.FileName := AFileName;
@@ -548,22 +840,19 @@ begin
     MainForm.FileExportStageResultsSaveAs);
 end;
 
-procedure TMainFlowIntegrationTests.ExportStartListFile(
-  const AFileName: string);
+procedure TMainFlowIntegrationTests.ExportStartListFile(const AFileName: string);
 begin
   MainForm.FileExportCSVStartlist.Dialog.FileName := AFileName;
   MainForm.FileExportCSVStartlistAccept(MainForm.FileExportCSVStartlist);
 end;
 
-procedure TMainFlowIntegrationTests.ExportResultsFile(
-  const AFileName: string);
+procedure TMainFlowIntegrationTests.ExportResultsFile(const AFileName: string);
 begin
   MainForm.FileExportCSVResults.Dialog.FileName := AFileName;
   MainForm.FileExportCSVResultsAccept(MainForm.FileExportCSVResults);
 end;
 
-procedure TMainFlowIntegrationTests.ExportAllResultsFile(
-  const AFileName: string);
+procedure TMainFlowIntegrationTests.ExportAllResultsFile(const AFileName: string);
 var
   Labels: TCompetitionExportLabels;
 begin
@@ -587,9 +876,8 @@ begin
     MainForm.SQLQuery1, MainForm.ResultDatasetStageTotal, stages, Labels);
 end;
 
-procedure TMainFlowIntegrationTests.ApplyStartPacketAt(
-  const ATime: TDateTime; const AHasCorrection: boolean;
-  const ACorrectionMs: integer);
+procedure TMainFlowIntegrationTests.ApplyStartPacketAt(const ATime: TDateTime;
+  const AHasCorrection: boolean; const ACorrectionMs: integer);
 var
   Packet: TTimingPacket;
 begin
@@ -602,8 +890,7 @@ begin
     TTimingMarkSource.Ble('integration-test'));
 end;
 
-procedure TMainFlowIntegrationTests.ApplyFinishPacketAt(
-  const ATime: TDateTime);
+procedure TMainFlowIntegrationTests.ApplyFinishPacketAt(const ATime: TDateTime);
 var
   Packet: TTimingPacket;
 begin
@@ -614,8 +901,7 @@ begin
     TTimingMarkSource.Serial('integration-test'));
 end;
 
-procedure TMainFlowIntegrationTests.SelectFinishMarkAt(
-  const AIndex: integer);
+procedure TMainFlowIntegrationTests.SelectFinishMarkAt(const AIndex: integer);
 var
   I: integer;
 begin
@@ -695,6 +981,82 @@ begin
   end;
 end;
 
+procedure TMainFlowIntegrationTests.WriteEncodedCsv(const ALines: array of string;
+  const ALineEnding: string; const AUseCp1251: boolean);
+var
+  content: string;
+  encodedContent: rawbytestring;
+  fileStream: TFileStream;
+  lineIndex: integer;
+begin
+  content := '';
+  for lineIndex := Low(ALines) to High(ALines) do
+  begin
+    if content <> '' then
+      content := content + ALineEnding;
+    content := content + ALines[lineIndex];
+  end;
+
+  if AUseCp1251 then
+    encodedContent := UTF8ToCP1251(content)
+  else
+    encodedContent := content;
+
+  fileStream := TFileStream.Create(FCsvFilePath, fmCreate);
+  try
+    if encodedContent <> '' then
+      fileStream.WriteBuffer(encodedContent[1], Length(encodedContent));
+  finally
+    fileStream.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.AssertRussianCsvImport(const ALineEnding: string;
+  const AUseCp1251: boolean);
+begin
+  CreateNewCompetitionFile;
+  WriteEncodedCsv(
+    ['Номер;Имя;Категория;Команда;Город;Комментарий;Пролог',
+    '7;Борис Петров;Мастера;Север;Пермь;Первый заезд;11:00:00',
+    '12;Анна Соколова;Элита;Вектор;Москва;Основной состав;11:01:30',
+    '18;Виктор Орлов;Любители;Темп;Казань;Дебютный старт;11:03:00',
+    '24;Елена Морозова;Мастера;Высота;Уфа;Повторный заезд;11:04:30',
+    '31;Дмитрий Волков;Элита;Маяк;Самара;Вне зачёта;11:06:00'
+    ], ALineEnding, AUseCp1251);
+
+  DialogCallCount := 0;
+  LastDialogMessage := '';
+  ImportParticipantsFile(FCsvFilePath);
+
+  AssertEquals('Only the category import question is expected; an extra ' +
+    'dialog usually means that the encoding was not detected',
+    1, DialogCallCount);
+  AssertTrue('Expected the category import question, got: ' +
+    LastDialogMessage, Pos(rsSetCategoryName, LastDialogMessage) > 0);
+  AssertMainRowCount(5);
+
+  MainForm.SQLQuery1.Close;
+  MainForm.SQLQuery1.SQL.Text :=
+    'SELECT name, category, city, comment, starttime1 FROM main ' +
+    'WHERE number = 7;';
+  MainForm.SQLQuery1.Open;
+  AssertFalse('Expected participant number 7', MainForm.SQLQuery1.IsEmpty);
+  AssertEquals('Борис Петров',
+    MainForm.SQLQuery1.FieldByName('name').AsString);
+  AssertEquals('Мастера',
+    MainForm.SQLQuery1.FieldByName('category').AsString);
+  AssertEquals('Пермь',
+    MainForm.SQLQuery1.FieldByName('city').AsString);
+  AssertEquals('Первый заезд',
+    MainForm.SQLQuery1.FieldByName('comment').AsString);
+  AssertEquals('11:00:00',
+    MainForm.SQLQuery1.FieldByName('starttime1').AsString);
+  MainForm.SQLQuery1.Close;
+
+  AssertEquals('Пролог', TConfigSql.GetString(MainForm.SQLQuery1,
+    'stagename1', ''));
+end;
+
 procedure TMainFlowIntegrationTests.AssertTableExists(const ATableName: string);
 begin
   MainForm.SQLQuery1.Close;
@@ -702,7 +1064,8 @@ begin
     'SELECT name FROM sqlite_master WHERE type = ''table'' AND name = :table_name;';
   MainForm.SQLQuery1.ParamByName('table_name').AsString := ATableName;
   MainForm.SQLQuery1.Open;
-  AssertFalse('Expected table "' + ATableName + '" to exist', MainForm.SQLQuery1.IsEmpty);
+  AssertFalse('Expected table "' + ATableName + '" to exist',
+    MainForm.SQLQuery1.IsEmpty);
   MainForm.SQLQuery1.Close;
 end;
 
@@ -722,7 +1085,7 @@ const
   FieldPrefixes: array[0..7] of string = (
     'starttime', 'correction', 'finishtime', 'penalty',
     'result', 'diffleader', 'place', 'status'
-  );
+    );
 var
   FieldPrefix: string;
   StageIndex: integer;
@@ -732,18 +1095,17 @@ begin
       if stages[StageIndex].isActive then
         AssertTrue(Format('Active-stage field %s%d must exist',
           [FieldPrefix, StageIndex]),
-          MainForm.MainDataset1.FindField(
-          FieldPrefix + IntToStr(StageIndex)) <> nil)
+          MainForm.MainDataset1.FindField(FieldPrefix +
+          IntToStr(StageIndex)) <> nil)
       else
         AssertTrue(Format('Inactive-stage field %s%d must stay detached',
           [FieldPrefix, StageIndex]),
-          MainForm.MainDataset1.FindField(
-          FieldPrefix + IntToStr(StageIndex)) = nil);
+          MainForm.MainDataset1.FindField(FieldPrefix +
+          IntToStr(StageIndex)) = nil);
 
   if AStageCount < MAX_SUPPORTED_STAGE_COUNT then
     AssertTrue('A field above StageCount must not remain attached',
-      MainForm.MainDataset1.FindField(
-      'status' + IntToStr(AStageCount + 1)) = nil);
+      MainForm.MainDataset1.FindField('status' + IntToStr(AStageCount + 1)) = nil);
   AssertTrue('Stage fields must no longer be persistent form components',
     MainForm.FindComponent('MainDataset1starttime1') = nil);
   AssertTrue('Stage fields must not have streamed component names',
@@ -756,12 +1118,12 @@ const
   ColumnPrefixes: array[0..6] of string = (
     'correction', 'starttime', 'finishtime', 'penalty',
     'result', 'diffleader', 'place'
-  );
+    );
   ColumnWidths: array[0..6] of integer = (67, 67, 80, 67, 80, 80, 45);
   ColumnAlignments: array[0..6] of TAlignment = (
     taRightJustify, taCenter, taCenter, taRightJustify,
     taCenter, taCenter, taCenter
-  );
+    );
 var
   BaseIndex, ColumnIndex, PrefixIndex, StageIndex: integer;
   Column: TRxColumn;
@@ -785,8 +1147,8 @@ begin
       AssertEquals(Ord(taCenter), Ord(Column.Title.Alignment));
 
       ExpectedVisible := stages[StageIndex].isActive;
-      if (stages.ActiveStagesCount = 1) and
-        (StageIndex = stages.FirstActiveIndex) and (PrefixIndex >= 4) then
+      if (stages.ActiveStagesCount = 1) and (StageIndex =
+        stages.FirstActiveIndex) and (PrefixIndex >= 4) then
         ExpectedVisible := False;
       AssertEquals(Format('Unexpected visibility of column %s%d',
         [ColumnPrefixes[PrefixIndex], StageIndex]),
@@ -813,14 +1175,14 @@ begin
     MainForm.RxDBGrid1.ColumnByFieldName('sumresult').Index + 2,
     MainForm.RxDBGrid1.ColumnByFieldName('status').Index);
   AssertEquals('Stage result columns must preserve the highlighted color',
-    9568145, MainForm.RxDBGrid1.ColumnByFieldName(
-      'result' + IntToStr(AStageCount)).Color);
+    9568145, MainForm.RxDBGrid1.ColumnByFieldName('result' +
+    IntToStr(AStageCount)).Color);
 
   if AStageCount > 1 then
   begin
     AssertEquals(stages[AStageCount].Name + '|' + rsCorrection,
-      MainForm.RxDBGrid1.ColumnByFieldName(
-      'correction' + IntToStr(AStageCount)).Title.Caption);
+      MainForm.RxDBGrid1.ColumnByFieldName('correction' +
+      IntToStr(AStageCount)).Title.Caption);
     AssertEquals(stages[AStageCount].Name + '|' + rsPlace,
       MainForm.RxDBGrid1.ColumnByFieldName(
       'place' + IntToStr(AStageCount)).Title.Caption);
@@ -838,7 +1200,7 @@ procedure TMainFlowIntegrationTests.AssertDynamicStageResultUi(
 const
   ResultFieldPrefixes: array[0..6] of string = (
     'category', 'place', 'number', 'name', 'penalty', 'result', 'diffleader'
-  );
+    );
   ResultColumnWidths: array[0..6] of integer = (100, 45, 45, 151, 64, 100, 75);
 var
   Column: TRxColumn;
@@ -854,6 +1216,10 @@ begin
     AStageCount, MainForm.SheetStageSum.PageIndex);
   AssertEquals('The through tab must remain last', AStageCount + 1,
     MainForm.SheetStageTotal.PageIndex);
+  AssertTrue('The through tab must remain available after rebuilding results',
+    MainForm.SheetStageTotal.TabVisible);
+  AssertEquals('The summary tab is available only with multiple active stages',
+    stages.ActiveStagesCount > 1, MainForm.SheetStageSum.TabVisible);
   AssertSame('The first stage tab must remain the default result page',
     MainForm.StageResultView(1).Sheet, MainForm.SheetStage.ActivePage);
 
@@ -869,8 +1235,8 @@ begin
       MainForm.StageResultView(StageIndex).Sheet.PageIndex);
 
     ExpectedCaption := stages[StageIndex].Name;
-    if (stages.ActiveStagesCount = 1) and
-      (stages.FirstActiveIndex = StageIndex) then
+    if (stages.ActiveStagesCount = 1) and (stages.FirstActiveIndex =
+      StageIndex) then
       ExpectedCaption := rsTotal;
     AssertEquals(ExpectedCaption,
       MainForm.StageResultView(StageIndex).Sheet.Caption);
@@ -895,8 +1261,8 @@ begin
       AssertSame(MainForm.SQLTransaction1,
         MainForm.StageResultView(StageIndex).Query.Transaction);
       AssertTrue(MainForm.StageResultView(StageIndex).Query.ReadOnly);
-      AssertTrue(sqoKeepOpenOnCommit in
-        MainForm.StageResultView(StageIndex).Query.Options);
+      AssertTrue(sqoKeepOpenOnCommit in MainForm.StageResultView(
+        StageIndex).Query.Options);
       AssertTrue('The selected active stage query must be open',
         MainForm.StageResultView(StageIndex).Query.Active);
       AssertEquals(Trim(TDatasetSql.ResultStage(StageIndex, AStageCount)),
@@ -969,10 +1335,8 @@ begin
   MainForm.SelectCurrentStage(AStageCount);
   AssertEquals('The selector must support the highest configured stage',
     AStageCount, MainForm.CurrentStageIndex);
-  AssertEquals(Format('%d — %s',
-    [AStageCount, stages[AStageCount].Name]),
-    MainForm.CurrentStageComboBox.Items[
-    MainForm.CurrentStageComboBox.ItemIndex]);
+  AssertEquals(Format('%d — %s', [AStageCount, stages[AStageCount].Name]),
+    MainForm.CurrentStageComboBox.Items[MainForm.CurrentStageComboBox.ItemIndex]);
 
   MainForm.SelectCurrentStage(FirstActiveStageIndex);
 end;
@@ -1012,8 +1376,7 @@ begin
     Application.ProcessMessages;
     for StageIndex := 1 to 8 do
       AssertTrue(Format('Legacy stage name edit SUEdit%d must be removed',
-        [StageIndex]), form.FindComponent(
-        'SUEdit' + IntToStr(StageIndex)) = nil);
+        [StageIndex]), form.FindComponent('SUEdit' + IntToStr(StageIndex)) = nil);
     AssertTrue('Legacy active-stage check group must be removed',
       form.FindComponent('CheckGroup1') = nil);
 
@@ -1085,8 +1448,8 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.CreateSchemaFixture(
-  const APhysicalStageCount: integer; const AStageCountValue,
-  ASchemaVersionValue: string);
+  const APhysicalStageCount: integer;
+  const AStageCountValue, ASchemaVersionValue: string);
 var
   Connection: TSQLite3Connection;
   Transaction: TSQLTransaction;
@@ -1220,6 +1583,188 @@ begin
   end;
 end;
 
+procedure TMainFlowIntegrationTests.ExerciseClearResults(
+  const AConfirmation, AWithoutBackup: integer;
+  const AFailBackup, AExpectCleared: boolean);
+const
+  ResultFields: array[0..5] of string =
+    ('finishtime', 'correction', 'penalty', 'result', 'place', 'diffleader');
+  ResultValues: array[0..5] of string =
+    ('10:01:00.000', '-1000', '00:00:02.000', '00:01:01.000', '1', '00:00:00.000');
+  TotalFields: array[0..4] of string =
+    ('sumresult', 'sumplace', 'sumdiffleader', 'thrudiff', 'status');
+  TotalValues: array[0..4] of string =
+    ('00:02:02.000', '1', '00:00:00.000', '00:00:00.000', '3');
+var
+  OriginalDbPath, TestDirectory, BackupDirectory, BackupFile: string;
+  Blocker: TFileStream;
+  I, StageIndex: integer;
+
+  procedure AssertStoredResults(const AFileName: string; const ACleared: boolean);
+  var
+    Connection: TSQLite3Connection;
+    Transaction: TSQLTransaction;
+    Query: TSQLQuery;
+    RowCount, FieldIndex, Stage: integer;
+
+    procedure AssertResultField(const AName, AValue: string);
+    begin
+      if ACleared then
+        AssertTrue(AFileName + ': ' + AName + ' must be NULL',
+          Query.FieldByName(AName).IsNull)
+      else
+        AssertEquals(AFileName + ': ' + AName + ' must be preserved',
+          AValue, Query.FieldByName(AName).AsString);
+    end;
+
+  begin
+    Connection := TSQLite3Connection.Create(nil);
+    Transaction := TSQLTransaction.Create(nil);
+    Query := TSQLQuery.Create(nil);
+    try
+      Connection.DatabaseName := AFileName;
+      Connection.Transaction := Transaction;
+      Transaction.Database := Connection;
+      Query.DataBase := Connection;
+      Query.Transaction := Transaction;
+      Connection.Open;
+      Query.SQL.Text := 'SELECT * FROM main ORDER BY number';
+      Query.Open;
+      RowCount := 0;
+      while not Query.EOF do
+      begin
+        Inc(RowCount);
+        AssertEquals(RowCount, Query.FieldByName('number').AsInteger);
+        AssertEquals('Test participant', Query.FieldByName('name').AsString);
+        AssertEquals('Open', Query.FieldByName('category').AsString);
+        for Stage := 1 to 2 do
+        begin
+          AssertEquals('10:00:00.000',
+            Query.FieldByName('starttime' + IntToStr(Stage)).AsString);
+          for FieldIndex := Low(ResultFields) to High(ResultFields) do
+            AssertResultField(ResultFields[FieldIndex] + IntToStr(Stage),
+              ResultValues[FieldIndex]);
+        end;
+        for FieldIndex := Low(TotalFields) to High(TotalFields) do
+          AssertResultField(TotalFields[FieldIndex], TotalValues[FieldIndex]);
+        Query.Next;
+      end;
+      AssertEquals('Both participants must be preserved', 2, RowCount);
+    finally
+      Query.Free;
+      Transaction.Free;
+      Connection.Free;
+    end;
+  end;
+
+begin
+  OriginalDbPath := FDbFilePath;
+  TestDirectory := ChangeFileExt(FDbFilePath, '-clear-results');
+  BackupDirectory := TestDirectory + DirectorySeparator + 'backup';
+  AssertTrue(CreateDir(TestDirectory));
+  FDbFilePath := TestDirectory + DirectorySeparator + 'competition.sqlite';
+  ClearResultsDialogMessages := TStringList.Create;
+  try
+    CreateEmptyCompetitionFixture(2);
+    InsertParticipant(1);
+    InsertParticipant(2);
+    MainForm.SQLQuery1.SQL.Text := 'UPDATE main SET category = ''Open''';
+    for StageIndex := 1 to 2 do
+    begin
+      MainForm.SQLQuery1.SQL.Add(', starttime' + IntToStr(StageIndex) +
+        ' = ''10:00:00.000''');
+      for I := Low(ResultFields) to High(ResultFields) do
+        MainForm.SQLQuery1.SQL.Add(', ' + ResultFields[I] +
+          IntToStr(StageIndex) + ' = ' + QuotedStr(ResultValues[I]));
+    end;
+    for I := Low(TotalFields) to High(TotalFields) do
+      MainForm.SQLQuery1.SQL.Add(', ' + TotalFields[I] + ' = ' +
+        QuotedStr(TotalValues[I]));
+    MainForm.SQLQuery1.ExecSQL;
+    MainForm.SQLQuery1.SQLTransaction.Commit;
+    RefreshCompetitionViews;
+    AssertStoredResults(FDbFilePath, False);
+    AssertEquals('The fixture must start without a backup', '', FindBackupFile);
+
+    if AFailBackup then
+    begin
+      // A regular file blocks directory creation regardless of user privileges.
+      Blocker := TFileStream.Create(BackupDirectory, fmCreate);
+      Blocker.Free;
+    end;
+    ConfirmationDialogResult := AConfirmation;
+    ClearResultsWithoutBackupAnswer := AWithoutBackup;
+    SetMessageDlgHandler(@ClearResultsMessageDlgHandler);
+    MainForm.RaceMode.Checked := False;
+    MainForm.AcClearResults.Update;
+    AssertTrue(MainForm.pmClearResults.Enabled);
+    MainForm.pmClearResults.Click;
+
+    AssertStoredResults(FDbFilePath, AExpectCleared);
+    AssertEquals(rsClearResults, ClearResultsDialogMessages[0]);
+    if (AConfirmation = mrYes) and AFailBackup then
+    begin
+      AssertEquals(2, ClearResultsDialogMessages.Count);
+      AssertEquals(Format(rsClearResultsWithoutBackup, [sLineBreak]),
+        ClearResultsDialogMessages[1]);
+    end
+    else
+      AssertEquals(1, ClearResultsDialogMessages.Count);
+    BackupFile := FindBackupFile;
+    if (AConfirmation = mrYes) and not AFailBackup then
+    begin
+      AssertTrue('Confirmation must create a backup', BackupFile <> '');
+      AssertStoredResults(BackupFile, False);
+    end
+    else
+      AssertEquals('Cancellation or backup failure must not create a backup',
+        '', BackupFile);
+    OpenCompetitionFile(FDbFilePath);
+    AssertStoredResults(FDbFilePath, AExpectCleared);
+  finally
+    SetMessageDlgHandler(@IntegrationMessageDlgHandler);
+    FreeAndNil(ClearResultsDialogMessages);
+    MainForm.FileCloseExecute(nil);
+    DeleteBackupFiles;
+    DeleteFile(FDbFilePath);
+    if AFailBackup then DeleteFile(BackupDirectory)
+    else
+      RemoveDir(BackupDirectory);
+    RemoveDir(TestDirectory);
+    FDbFilePath := OriginalDbPath;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.ClearResults_DeclinedPreservesDataWithoutBackup;
+begin
+  ExerciseClearResults(mrNo, mrNo, False, False);
+end;
+
+procedure TMainFlowIntegrationTests.ClearResults_DismissedPreservesDataWithoutBackup;
+begin
+  ExerciseClearResults(mrCancel, mrNo, False, False);
+end;
+
+procedure TMainFlowIntegrationTests.ClearResults_ConfirmedBacksUpBeforeClearing;
+begin
+  ExerciseClearResults(mrYes, mrNo, False, True);
+end;
+
+procedure TMainFlowIntegrationTests.ClearResults_BackupFailureDeclinedPreservesData;
+begin
+  ExerciseClearResults(mrYes, mrNo, True, False);
+end;
+
+procedure TMainFlowIntegrationTests.ClearResults_BackupFailureDismissedPreservesData;
+begin
+  ExerciseClearResults(mrYes, mrCancel, True, False);
+end;
+
+procedure TMainFlowIntegrationTests.ClearResults_BackupFailureAcceptedClearsData;
+begin
+  ExerciseClearResults(mrYes, mrYes, True, True);
+end;
+
 procedure TMainFlowIntegrationTests.CloseSettingsForm(Data: PtrInt);
 var
   i: integer;
@@ -1232,8 +1777,7 @@ begin
     end;
 end;
 
-procedure TMainFlowIntegrationTests.SelectFriendlySerialDeviceAndClose(
-  Data: PtrInt);
+procedure TMainFlowIntegrationTests.SelectFriendlySerialDeviceAndClose(Data: PtrInt);
 var
   devices: TSerialDeviceInfoArray;
   form: TSettingsForm;
@@ -1267,8 +1811,7 @@ begin
   form.ModalResult := TModalResult(Data);
 end;
 
-procedure TMainFlowIntegrationTests.EnterCustomSerialDeviceAndClose(
-  Data: PtrInt);
+procedure TMainFlowIntegrationTests.EnterCustomSerialDeviceAndClose(Data: PtrInt);
 var
   form: TSettingsForm;
   i: integer;
@@ -1309,8 +1852,7 @@ begin
         'Accepted draft stage';
       form.StageCountSpinEdit.Value := 2;
       AssertTrue('A newly added stage must be checked before accepting',
-        TStageSettingsFrame(form.FindComponent(
-          'StageSettingsFrame2')).Active);
+        TStageSettingsFrame(form.FindComponent('StageSettingsFrame2')).Active);
       AssertTrue('A newly added stage must enter the active-stage selector',
         form.ComboBoxAStage.Items.IndexOf('2') >= 0);
       form.ModalResult := TModalResult(Data);
@@ -1322,7 +1864,7 @@ procedure TMainFlowIntegrationTests.ResizeStageDraftAndClose(Data: PtrInt);
 var
   form: TSettingsForm;
   row: TStageSettingsFrame;
-  i, itemIndex: integer;
+  i, ItemIndex: integer;
 begin
   for i := Screen.FormCount - 1 downto 0 do
     if Screen.Forms[i] is TSettingsForm then
@@ -1338,10 +1880,10 @@ begin
       end;
       if SettingsDraftActiveStageIndex > 0 then
       begin
-        itemIndex := form.ComboBoxAStage.Items.IndexOf(
+        ItemIndex := form.ComboBoxAStage.Items.IndexOf(
           IntToStr(SettingsDraftActiveStageIndex));
-        if itemIndex >= 0 then
-          form.ComboBoxAStage.ItemIndex := itemIndex;
+        if ItemIndex >= 0 then
+          form.ComboBoxAStage.ItemIndex := ItemIndex;
       end;
       form.ModalResult := TModalResult(Data);
       Exit;
@@ -1351,7 +1893,7 @@ end;
 procedure TMainFlowIntegrationTests.ActivateOnlyStageAndClose(Data: PtrInt);
 var
   form: TSettingsForm;
-  formIndex, stageIndex, itemIndex: integer;
+  formIndex, stageIndex, ItemIndex: integer;
 begin
   for formIndex := Screen.FormCount - 1 downto 0 do
     if Screen.Forms[formIndex] is TSettingsForm then
@@ -1361,10 +1903,10 @@ begin
         TStageSettingsFrame(form.FindComponent('StageSettingsFrame' +
           IntToStr(stageIndex))).Active :=
           stageIndex = SettingsDraftActiveStageIndex;
-      itemIndex := form.ComboBoxAStage.Items.IndexOf(
+      ItemIndex := form.ComboBoxAStage.Items.IndexOf(
         IntToStr(SettingsDraftActiveStageIndex));
-      if itemIndex >= 0 then
-        form.ComboBoxAStage.ItemIndex := itemIndex;
+      if ItemIndex >= 0 then
+        form.ComboBoxAStage.ItemIndex := ItemIndex;
       form.ModalResult := TModalResult(Data);
       Exit;
     end;
@@ -1373,7 +1915,7 @@ end;
 procedure TMainFlowIntegrationTests.ActivateAllStagesAndClose(Data: PtrInt);
 var
   form: TSettingsForm;
-  formIndex, stageIndex, itemIndex: integer;
+  formIndex, stageIndex, ItemIndex: integer;
 begin
   for formIndex := Screen.FormCount - 1 downto 0 do
     if Screen.Forms[formIndex] is TSettingsForm then
@@ -1382,10 +1924,10 @@ begin
       for stageIndex := 1 to form.StageCountSpinEdit.Value do
         TStageSettingsFrame(form.FindComponent('StageSettingsFrame' +
           IntToStr(stageIndex))).Active := True;
-      itemIndex := form.ComboBoxAStage.Items.IndexOf(
+      ItemIndex := form.ComboBoxAStage.Items.IndexOf(
         IntToStr(SettingsDraftActiveStageIndex));
-      if itemIndex >= 0 then
-        form.ComboBoxAStage.ItemIndex := itemIndex;
+      if ItemIndex >= 0 then
+        form.ComboBoxAStage.ItemIndex := ItemIndex;
       form.ModalResult := TModalResult(Data);
       Exit;
     end;
@@ -1400,8 +1942,8 @@ begin
     if Screen.Forms[formIndex] is TSettingsForm then
     begin
       form := TSettingsForm(Screen.Forms[formIndex]);
-      TStageSettingsFrame(form.FindComponent(
-        'StageSettingsFrame1')).StageName := SettingsDraftStageName;
+      TStageSettingsFrame(form.FindComponent('StageSettingsFrame1')).StageName :=
+        SettingsDraftStageName;
       form.ModalResult := TModalResult(Data);
       Exit;
     end;
@@ -1432,8 +1974,7 @@ begin
   Inc(FStatDatasetOpenCount);
 end;
 
-procedure TMainFlowIntegrationTests.CountCorrectionDatasetOpen(
-  DataSet: TDataSet);
+procedure TMainFlowIntegrationTests.CountCorrectionDatasetOpen(DataSet: TDataSet);
 begin
   Inc(FCorrectionDatasetOpenCount);
 end;
@@ -1555,6 +2096,11 @@ begin
   DialogCallCount := 0;
   LastDialogMessage := '';
   ConfirmationDialogResult := mrYes;
+  FPreviewAccept := True;
+  FPreviewOpened := 0;
+  FPreviewMode := 0;
+  FPreviewUnknownCount := 0;
+  FPreviewError := '';
   SetMessageDlgHandler(@IntegrationMessageDlgHandler);
   // Integration tests must never start the real Codeberg update request while
   // the main form restores its persisted properties.
@@ -1636,11 +2182,11 @@ begin
     'The default serial baud rate must match entime-firmware',
     Ord(br115200),
     Ord(MainForm.Serial.BaudRate)
-  );
+    );
   AssertTrue(
     'The selected baud rate must be stored between application runs',
     Pos('Serial.BaudRate', MainForm.SessionProperties) > 0
-  );
+    );
 end;
 
 procedure TMainFlowIntegrationTests.InputDialogs_ReturnValuesAndReleaseOwnedForms;
@@ -1659,8 +2205,8 @@ begin
     items.Add('First');
     items.Add('Second');
     Application.QueueAsyncCall(@AcceptInputComboDialog, 0);
-    AssertEquals(mrOk, MyDoInputCombo('Input combo test', 'Prompt', items, 0,
-      False, selectedIndex, selectedText));
+    AssertEquals(mrOk, MyDoInputCombo('Input combo test', 'Prompt',
+      items, 0, False, selectedIndex, selectedText));
     AssertEquals('', InputDialogCallbackError);
     AssertEquals(1, selectedIndex);
     AssertEquals('Second', selectedText);
@@ -1698,7 +2244,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  MyRxDBGrid_ColumnBatchDefersSortListRefreshUntilOuterEnd;
+MyRxDBGrid_ColumnBatchDefersSortListRefreshUntilOuterEnd;
 var
   grid: TMyRxDBGrid;
   oldFixedRows, oldRowCount: integer;
@@ -1770,7 +2316,8 @@ begin
     DeleteFile(FCsvFilePath);
 end;
 
-procedure TMainFlowIntegrationTests.MainForm_SecondaryQuerySharesPrimaryConnectionAndTransaction;
+procedure TMainFlowIntegrationTests.
+MainForm_SecondaryQuerySharesPrimaryConnectionAndTransaction;
 begin
   AssertSame(MainForm.SQLite3Connection1, MainForm.SQLQuery2.Database);
   AssertSame(MainForm.SQLTransaction1, MainForm.SQLQuery2.Transaction);
@@ -1827,7 +2374,8 @@ begin
     MainForm.StatDataset1.FieldByName('catcount') is TLargeintField);
 end;
 
-procedure TMainFlowIntegrationTests.MainGrid_OptionalParticipantColumnsHaveExplicitWidths;
+procedure TMainFlowIntegrationTests.
+MainGrid_OptionalParticipantColumnsHaveExplicitWidths;
 begin
   AssertEquals(60, MainForm.RxDBGrid1.ColumnByFieldName('id').StoredWidth);
   AssertEquals(120, MainForm.RxDBGrid1.ColumnByFieldName('rfid').StoredWidth);
@@ -1880,7 +2428,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  FinishMarkPanel_NumberEditPersistsWithoutApplying;
+FinishMarkPanel_NumberEditPersistsWithoutApplying;
 begin
   CreateNewCompetitionFile;
   ApplyFinishPacketAt(EncodeTime(10, 20, 30, 123));
@@ -1889,8 +2437,7 @@ begin
 
   MainForm.SQLQuery1.Close;
   MainForm.SQLQuery1.SQL.Text :=
-    'SELECT participant_number, assignment_mode, status ' +
-    'FROM finish_marks;';
+    'SELECT participant_number, assignment_mode, status ' + 'FROM finish_marks;';
   MainForm.SQLQuery1.Open;
   AssertEquals(123,
     MainForm.SQLQuery1.FieldByName('participant_number').AsInteger);
@@ -1900,7 +2447,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  FinishMarkPanel_ZeroNumberShowsDeferredDialog;
+FinishMarkPanel_ZeroNumberShowsDeferredDialog;
 begin
   CreateNewCompetitionFile;
   ApplyFinishPacketAt(EncodeTime(10, 20, 30, 123));
@@ -1929,7 +2476,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  FinishMarkPanel_CtrlEnterWritesAndEnterRemainsForEditing;
+FinishMarkPanel_CtrlEnterWritesAndEnterRemainsForEditing;
 var
   Key: word;
   WasMainFormVisible: boolean;
@@ -2015,7 +2562,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  CompetitionFileCreateError_ReportsPathAndLeavesDatabaseClosed;
+CompetitionFileCreateError_ReportsPathAndLeavesDatabaseClosed;
 var
   blockingFile, competitionFile: string;
   content: TStringList;
@@ -2048,7 +2595,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  CompetitionFileOpenError_DoesNotPublishFailedFile;
+CompetitionFileOpenError_DoesNotPublishFailedFile;
 var
   historyBefore, invalidContent: TStringList;
   invalidFileName, previousCaption: string;
@@ -2240,7 +2787,7 @@ procedure TMainFlowIntegrationTests.DynamicStageUi_RebuildForSupportedStageCount
 const
   StageCounts: array[0..3] of integer = (
     MIN_STAGE_COUNT, 8, 12, MAX_SUPPORTED_STAGE_COUNT
-  );
+    );
 var
   StageCount: integer;
 begin
@@ -2290,8 +2837,8 @@ begin
     MainForm.RxDBGrid1.ColumnByFieldName('correction1').Index;
   MainForm.RxDBGrid1.SelectedIndex := PenaltyColumn.Index;
   AssertTrue('Selected stage must come from FieldName, not column position',
-    TryGetStageIndexFromFieldName(
-      MainForm.RxDBGrid1.SelectedColumn.FieldName, StageSelectionResult));
+    TryGetStageIndexFromFieldName(MainForm.RxDBGrid1.SelectedColumn.FieldName,
+    StageSelectionResult));
   AssertEquals(12, StageSelectionResult);
 
   AssertTrue(MainForm.MainDataset1.Locate('number', 808, []));
@@ -2307,7 +2854,8 @@ begin
     MainForm.MainDataset1.FieldByName('penalty12').AsString);
 end;
 
-procedure TMainFlowIntegrationTests.StageIndexes_RejectInvalidSelectionsAndNormalizeStoredValues;
+procedure TMainFlowIntegrationTests.
+StageIndexes_RejectInvalidSelectionsAndNormalizeStoredValues;
 begin
   CreateEmptyCompetitionFixture(2);
   ConfigureSingleActiveStage(2);
@@ -2412,6 +2960,117 @@ begin
     MainForm.MainDataset1.FieldByName('result12').AsString);
 end;
 
+procedure TMainFlowIntegrationTests.ExercisePenaltyRemoval(const AEmptyText: string);
+var
+  OldAutomaticUpdate: boolean;
+
+  procedure EditPenalty(const AText: string);
+  begin
+    AssertTrue(MainForm.MainDataset1.Locate('number', 1, []));
+    MainForm.MainDataset1.Edit;
+    // Text invokes the same OnSetText normalization as editing the grid cell.
+    MainForm.MainDataset1.FieldByName('penalty1').Text := AText;
+    MainForm.MainDataset1.Post;
+    MainForm.RxDBGrid1EditingDone(MainForm.RxDBGrid1);
+    AssertEquals('A valid penalty edit must not show a dialog: ' +
+      LastDialogMessage, 0, DialogCallCount);
+  end;
+
+  procedure AssertStandings(const APenalty, AResult, AGap: string;
+  const APlace: integer);
+  const
+    ResultFields: array[0..1] of string = ('result1', 'sumresult');
+    PlaceFields: array[0..2] of string = ('place1', 'sumplace', 'thruplace');
+    GapFields: array[0..2] of string = ('diffleader1', 'sumdiffleader', 'thrudiff');
+  var
+    I, Number, Place: integer;
+    ResultValue: string;
+  begin
+    MainForm.SQLQuery1.Close;
+    MainForm.SQLQuery1.SQL.Text := 'SELECT * FROM main ORDER BY number;';
+    MainForm.SQLQuery1.Open;
+    try
+      for Number := 1 to 2 do
+      begin
+        AssertFalse('Both participants must remain in the database',
+          MainForm.SQLQuery1.EOF);
+        AssertEquals(Number, MainForm.SQLQuery1.FieldByName('number').AsInteger);
+        if Number = 1 then
+        begin
+          Place := APlace;
+          ResultValue := AResult;
+          if APenalty = '' then
+            AssertTrue('Removing a penalty must store SQL NULL',
+              MainForm.SQLQuery1.FieldByName('penalty1').IsNull)
+          else
+            AssertEquals(APenalty,
+              MainForm.SQLQuery1.FieldByName('penalty1').AsString);
+        end
+        else
+        begin
+          Place := 3 - APlace;
+          ResultValue := '00:01:05.000';
+        end;
+        for I := Low(ResultFields) to High(ResultFields) do
+          AssertEquals(ResultFields[I], ResultValue,
+            MainForm.SQLQuery1.FieldByName(ResultFields[I]).AsString);
+        for I := Low(PlaceFields) to High(PlaceFields) do
+          AssertEquals(PlaceFields[I], Place,
+            MainForm.SQLQuery1.FieldByName(PlaceFields[I]).AsInteger);
+        for I := Low(GapFields) to High(GapFields) do
+          if Place = 1 then
+            AssertTrue(GapFields[I] + ': leader must have no gap',
+              MainForm.SQLQuery1.FieldByName(GapFields[I]).IsNull)
+          else
+            AssertEquals(GapFields[I], AGap,
+              MainForm.SQLQuery1.FieldByName(GapFields[I]).AsString);
+        MainForm.SQLQuery1.Next;
+      end;
+      AssertTrue(MainForm.SQLQuery1.EOF);
+    finally
+      MainForm.SQLQuery1.Close;
+    end;
+  end;
+
+begin
+  OldAutomaticUpdate := MainForm.CheckBoxAutomaticUpdateResutls.Checked;
+  try
+    CreateEmptyCompetitionFixture(1);
+    MainForm.SQLQuery1.SQL.Text :=
+      'INSERT INTO main (number, name, category, starttime1, finishtime1) ' +
+      'VALUES (1, ''First'', ''Open'', ''10:00:00.000'', ''10:01:00.000''), ' +
+      '(2, ''Second'', ''Open'', ''10:00:00.000'', ''10:01:05.000'');';
+    MainForm.SQLQuery1.ExecSQL;
+    MainForm.SQLTransaction1.Commit;
+    MainForm.AcUpdateResultsExecute(MainForm.AcUpdateResults);
+    MainForm.CheckBoxAutomaticUpdateResutls.Checked := True;
+    AssertStandings('', '00:01:00.000', '00:00:05.000', 1);
+
+    EditPenalty('00:00:10');
+    AssertStandings('00:00:10', '00:01:10.000', '00:00:05.000', 2);
+    EditPenalty('00:00:20');
+    AssertStandings('00:00:20', '00:01:20.000', '00:00:15.000', 2);
+    EditPenalty(AEmptyText);
+    AssertStandings('', '00:01:00.000', '00:00:05.000', 1);
+
+    MainForm.FileCloseExecute(nil);
+    OpenCompetitionFile(FDbFilePath);
+    AssertStandings('', '00:01:00.000', '00:00:05.000', 1);
+  finally
+    MainForm.CheckBoxAutomaticUpdateResutls.Checked := OldAutomaticUpdate;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.PenaltyEdit_EmptyTextRestoresResultsAndStandings;
+begin
+  ExercisePenaltyRemoval('');
+end;
+
+procedure TMainFlowIntegrationTests.PenaltyEdit_WhitespaceRestoresResultsAndStandings;
+begin
+  ExercisePenaltyRemoval('   ');
+end;
+
 procedure TMainFlowIntegrationTests.NewerSchema_IsRejectedWithoutOpeningDatasets;
 var
   UnsupportedVersion: integer;
@@ -2428,9 +3087,8 @@ begin
     MainForm.StageResultView(1).Query.Active);
   AssertEquals(1, DialogCallCount);
   AssertTrue('The unsupported version must be reported',
-    Pos(Format(rsSchemaVersionTooNew,
-      [UnsupportedVersion, CURRENT_COMPETITION_SCHEMA_VERSION]),
-      LastDialogMessage) > 0);
+    Pos(Format(rsSchemaVersionTooNew, [UnsupportedVersion,
+    CURRENT_COMPETITION_SCHEMA_VERSION]), LastDialogMessage) > 0);
   AssertEquals('An incompatible schema must not be backed up or changed', '',
     FindBackupFile);
   AssertEquals(IntToStr(UnsupportedVersion),
@@ -2472,10 +3130,9 @@ end;
 
 procedure TMainFlowIntegrationTests.LoggingIniSettings_AreAppliedToFile;
 var
-  content, iniFileName, logDirectory, logFileName, restoreLogFileName,
-    warning: string;
+  content, iniFileName, logDirectory, logFileName, restoreLogFileName, warning: string;
   ini: TIniFile;
-  lines: TStringList;
+  Lines: TStringList;
   settings: TLoggingSettings;
 begin
   iniFileName := ChangeFileExt(FDbFilePath, '.logging.ini');
@@ -2520,16 +3177,15 @@ begin
     FinalizeAppLogger;
 
     AssertTrue(Pos('ini-integration-', ExtractFileName(logFileName)) = 1);
-    lines := TStringList.Create;
+    Lines := TStringList.Create;
     try
-      lines.LoadFromFile(logFileName);
-      content := lines.Text;
+      Lines.LoadFromFile(logFileName);
+      content := Lines.Text;
     finally
-      lines.Free;
+      Lines.Free;
     end;
     AssertEquals('20', Copy(content, 1, 2));
-    AssertTrue(Pos(' [INFO] [Application] File logger initialized',
-      content) > 0);
+    AssertTrue(Pos(' [INFO] [Application] File logger initialized', content) > 0);
     AssertTrue(Pos('ini-info', content) > 0);
     AssertTrue(Pos('ini-debug', content) = 0);
   finally
@@ -2545,6 +3201,2344 @@ begin
       RemoveDir(logDirectory);
     if FileExists(iniFileName) then
       DeleteFile(iniFileName);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+StageResultTabs_VisibleGridsAcceptFocusAndMouseClicks;
+var
+  WasVisible: boolean;
+  Pass, StageIndex: integer;
+
+  procedure CheckGrid(const ASheet: TTabSheet; const AGrid: TRxDBGrid);
+  begin
+    Application.ProcessMessages;
+    AssertTrue('The results tab must be available for user selection: ' +
+      ASheet.Name, ASheet.TabVisible);
+    AssertEquals('Qt and LCL must keep the same selected results page',
+      ASheet.Name, MainForm.SheetStage.ActivePage.Name);
+    AssertTrue('The selected page must be visible to LCL', ASheet.Visible);
+    AssertTrue('The displayed results grid must accept focus', AGrid.CanFocus);
+    TResultGridAccess(AGrid).ClickCell;
+    AssertTrue('Clicking the results grid must give it focus', AGrid.Focused);
+  end;
+
+begin
+  WasVisible := MainForm.Visible;
+  try
+    // Repeat with existing widget handles, as when importing another stage list.
+    for Pass := 1 to 2 do
+    begin
+      if Pass = 1 then
+        CreateEmptyCompetitionFixture(2)
+      else
+        OpenCompetitionFile(FDbFilePath);
+      stages[2].isActive := True;
+      ApplyStageActivityToUi(1);
+      MainForm.Show;
+      MainForm.PageControl1.ActivePage := MainForm.TabSheet3;
+      for StageIndex := 1 to 2 do
+      begin
+        MainForm.ActivateStageResult(StageIndex);
+        CheckGrid(MainForm.StageResultView(StageIndex).Sheet,
+          MainForm.StageResultView(StageIndex).Grid);
+      end;
+      MainForm.SheetStage.ActivePage := MainForm.SheetStageSum;
+      CheckGrid(MainForm.SheetStageSum, MainForm.GridResultStageSum);
+      MainForm.SheetStage.ActivePage := MainForm.SheetStageTotal;
+      CheckGrid(MainForm.SheetStageTotal, MainForm.GridResultStageTotal);
+      MainForm.PageControl1.ActivePage := MainForm.TabSheet1;
+    end;
+  finally
+    MainForm.PageControl1.ActivePage := MainForm.TabSheet1;
+    if not WasVisible then MainForm.Hide;
+  end;
+end;
+
+
+procedure TMainFlowIntegrationTests.StageResultTabs_RebuildPreservesStaticTabVisibility;
+const
+  StageCounts: array[0..2] of integer = (1, 3, 1);
+var
+  Window: TForm;
+  Pages: TPageControl;
+  Summary, Through: TTabSheet;
+  Tabs: TStageResultTabs;
+  StageCount: integer;
+begin
+  Window := TForm.CreateNew(nil);
+  try
+    Pages := TPageControl.Create(Window);
+    Pages.Parent := Window;
+    Pages.Align := alClient;
+    Summary := TTabSheet.Create(Window);
+    Summary.Caption := 'Summary';
+    Summary.PageControl := Pages;
+    Summary.TabVisible := False;
+    Through := TTabSheet.Create(Window);
+    Through.Caption := 'Through';
+    Through.PageControl := Pages;
+    Tabs := TStageResultTabs.Create(Pages, MainForm.CompetitionDb);
+    try
+      Window.Show;
+      Application.ProcessMessages;
+      for StageCount in StageCounts do
+      begin
+        Tabs.Rebuild(StageCount);
+        Application.ProcessMessages;
+        AssertEquals(StageCount + 2, Pages.PageCount);
+        AssertSame(Summary, Pages.Pages[StageCount]);
+        AssertSame(Through, Pages.Pages[StageCount + 1]);
+        AssertFalse('An intentionally hidden summary tab must stay hidden',
+          Summary.TabVisible);
+        AssertTrue('The through tab must stay available after each rebuild',
+          Through.TabVisible);
+      end;
+    finally
+      Tabs.Free;
+    end;
+  finally
+    Window.Free;
+  end;
+end;
+
+
+procedure TMainFlowIntegrationTests.ExerciseSettingsAndClose(Data: PtrInt);
+var
+  Form: TSettingsForm;
+  Gui: TGuiTestSession;
+  I: integer;
+  Deadline: QWord;
+begin
+  Form := nil;
+  for I := 0 to Screen.FormCount - 1 do
+    if Screen.Forms[I] is TSettingsForm then
+      Form := TSettingsForm(Screen.Forms[I]);
+  if Form = nil then
+  begin
+    InputDialogCallbackError := 'Settings menu did not open its window';
+    Exit;
+  end;
+  Gui := TGuiTestSession.Create;
+  try
+    try
+      for I := 0 to Form.TreeView1.Items.Count - 1 do
+      begin
+        Form.TreeView1.Selected := Form.TreeView1.Items[I];
+        Deadline := GetTickCount64 + 5000;
+        repeat
+          Gui.Drain('Settings page ' + IntToStr(I));
+          if Form.Notebook1.PageIndex = I then Break;
+          AssertTrue('Settings selection did not activate its page',
+            GetTickCount64 < Deadline);
+          Sleep(1);
+        until False;
+        AssertEquals(I, Form.Notebook1.PageIndex);
+        AssertTrue(Form.Notebook1.ActivePageComponent.Showing);
+      end;
+      Form.CheckBoxTelegramRetry.Checked := not telegramRetryEnabled;
+      Gui.Drain('Toggle Telegram retry');
+      AssertEquals(Form.CheckBoxTelegramRetry.Checked,
+        Form.SpinTelegramRetryCount.Enabled);
+      AssertEquals(Form.CheckBoxTelegramRetry.Checked,
+        Form.SpinTelegramRetryDelay.Enabled);
+      Form.NameEdit.Text := 'GUI accepted race';
+      if Data = mrOk then Form.ButtonPanel1.OKButton.Click
+      else
+        Form.ButtonPanel1.CancelButton.Click;
+    except
+      on E: Exception do
+      begin
+        InputDialogCallbackError := E.Message;
+        Form.ModalResult := mrCancel;
+      end;
+    end;
+  finally
+    Gui.Free;
+  end;
+end;
+
+
+procedure TMainFlowIntegrationTests.GuiSmoke_NavigateAfterReopenAndStageResize;
+var
+  Gui: TGuiTestSession;
+  WasVisible: boolean;
+  Pass, I: integer;
+  StartJournal: TStartMarksForm;
+  FinishJournal: TFinishMarksForm;
+begin
+  CreateEmptyCompetitionFixture(3);
+  WasVisible := MainForm.Visible;
+  Gui := TGuiTestSession.Create;
+  try
+    MainForm.Show;
+    for Pass := 1 to 3 do
+    begin
+      if Pass = 2 then OpenCompetitionFile(FDbFilePath);
+      if Pass = 3 then
+      begin
+        SettingsDraftStageCount := 8;
+        Application.QueueAsyncCall(@ResizeStageDraftAndClose, mrOk);
+        MainForm.MenuItemSettings.Click;
+        AssertEquals(8, stages.Count);
+      end;
+      for I := 0 to MainForm.PageControl1.PageCount - 1 do
+        Gui.SelectTab(MainForm.PageControl1.Pages[I]);
+      for I := 1 to stages.Count do
+        if stages[I].isActive then
+        begin
+          Gui.SelectTab(MainForm.StageResultView(I).Sheet);
+          AssertTrue('Stage grid must accept focus: ' + IntToStr(I),
+            MainForm.StageResultView(I).Grid.CanFocus);
+          AssertTrue('Selected stage results query must be open: ' + IntToStr(I),
+            MainForm.StageResultView(I).Query.Active);
+          Gui.ClickAndWaitForFocus(MainForm.StageResultView(I).Grid, 30, 40);
+          AssertTrue('Clicked stage grid must receive focus: ' + IntToStr(I),
+            MainForm.StageResultView(I).Grid.Focused);
+        end;
+      if MainForm.SheetStageSum.TabVisible then
+        Gui.SelectTab(MainForm.SheetStageSum);
+      Gui.SelectTab(MainForm.SheetStageTotal);
+      Gui.ClickAndWaitForFocus(MainForm.GridResultStageTotal, 30, 40);
+      AssertTrue('Clicked through standings must receive focus',
+        MainForm.GridResultStageTotal.Focused);
+    end;
+    // Journal menu actions create a fresh modal form on every invocation.
+    for Pass := 1 to 2 do
+    begin
+      StartJournal := TStartMarksForm.Create(nil);
+      try
+        FinishJournal := TFinishMarksForm.Create(nil);
+        try
+          StartJournal.Show;
+          FinishJournal.Show;
+          Gui.Drain('Open mark journals');
+          AssertTrue('New start journal must open its query',
+            StartJournal.StartMarksDataset.Active);
+          AssertTrue('New finish journal must open its query',
+            FinishJournal.FinishMarksDataset.Active);
+          StartJournal.Close;
+          FinishJournal.Close;
+          Gui.Drain('Close mark journals');
+          AssertFalse(StartJournal.Visible);
+          AssertFalse(FinishJournal.Visible);
+        finally
+          FinishJournal.Free;
+        end;
+      finally
+        StartJournal.Free;
+      end;
+    end;
+  finally
+    MainForm.PageControl1.ActivePage := MainForm.TabSheet1;
+    if not WasVisible then MainForm.Hide;
+    Gui.Free;
+  end;
+end;
+
+
+var
+  LabelTestIniName: string;
+
+function LabelsTestIni: string;
+begin
+  Result := LabelTestIniName;
+end;
+
+procedure TMainFlowIntegrationTests.QueueLabelsPrintCheck(Sender: TObject);
+begin
+  if MainForm.StartLabelsForm <> nil then
+    Application.QueueAsyncCall(@InspectLabelsPrintAndClose, 0);
+end;
+
+procedure TMainFlowIntegrationTests.InspectLabelsPrintAndClose(Data: PtrInt);
+var
+  F: TStartLabelsPrintForm;
+  LabelGui: TGuiTestSession;
+begin
+  F := MainForm.StartLabelsForm;
+  if F = nil then Exit;
+  Inc(FPrintOpened);
+  try
+    AssertTrue(fsModal in F.FormState);
+    AssertTrue('Labels ready: ' + F.LastError, F.SaveButton.Enabled);
+    AssertEquals(3, Length(F.Cards));
+    AssertEquals(1, F.FirstSlotEdit.Value);
+    AssertTrue('Bundled formats are available', F.TemplateCombo.Items.Count >= 3);
+    MainForm.AcPrintStartLabels.Execute;
+    AssertSame(F, MainForm.StartLabelsForm);
+    if FPrintMode = 0 then
+    begin
+      LabelGui := TGuiTestSession.Create;
+      try
+        F.TemplateCombo.SetFocus;
+        LabelGui.Drain('Focus bundled label template');
+        LabelGui.PressKey(F.TemplateCombo, VK_DOWN);
+      finally
+        LabelGui.Free;
+      end;
+      AssertEquals(70000, F.Paper.Width);
+      AssertEquals(49500, F.Paper.Height);
+      F.WidthEdit.Value := 64;
+      F.BordersCheck.Checked := True;
+      F.FirstSlotEdit.Value := 24;
+      AssertTrue(F.SaveTo(FDbFilePath + '.labels.pdf'));
+    end
+    else
+    begin
+      AssertEquals(64, F.WidthEdit.Value);
+      AssertTrue(F.BordersCheck.Checked);
+    end;
+    if FPrintMode = 1 then AssertEquals('2 Bob', F.Cards[1].Title);
+    if FPrintMode = 2 then MainForm.FileCloseExecute(nil);
+    if FPrintMode = 3 then OpenCompetitionFile(FDbFilePath);
+    if FPrintMode in [2, 3] then
+    begin
+      AssertFalse(F.SaveButton.Enabled);
+      AssertFalse(F.SaveTo(FDbFilePath + '.closed-labels.pdf'));
+    end;
+  except
+    on E: Exception do FPrintError := E.Message;
+  end;
+  F.Close;
+end;
+
+procedure TMainFlowIntegrationTests.StartLabels_MenuFilterPendingAndReopen;
+var
+  OldIni: TOnGetDefaultIniName;
+begin
+  MainForm.AcPrintStartLabels.Update;
+  AssertFalse(MainForm.AcPrintStartLabels.Enabled);
+  CreateBalanceFixture;
+  MainForm.Show;
+  MainForm.AcPrintStartLabels.Update;
+  AssertTrue(MainForm.AcPrintStartLabels.Enabled);
+  LabelTestIniName := FDbFilePath + '.labels.ini';
+  OldIni := OnGetDefaultIniName;
+  OnGetDefaultIniName := @LabelsTestIni;
+  FPrintOpened := 0;
+  FPrintError := '';
+  Application.AddOnModalBeginHandler(@QueueLabelsPrintCheck);
+  try
+    MainForm.MainDataset1.Filter := 'number = 2';
+    MainForm.MainDataset1.Filtered := True;
+    FPrintMode := 0;
+    MainForm.PrintLabelsMenuItem.Click;
+    AssertEquals('', FPrintError);
+    AssertEquals(1, FPrintOpened);
+    AssertTrue(MainForm.StartLabelsForm = nil);
+    MainForm.MainDataset1.Edit;
+    MainForm.MainDataset1.FieldByName('name').AsString := 'Pending labels';
+    ConfirmationDialogResult := mrCancel;
+    MainForm.PrintLabelsMenuItem.Click;
+    AssertEquals(1, FPrintOpened);
+    AssertEquals(rsPrintPending, LastDialogMessage);
+    AssertEquals('Pending labels', MainForm.MainDataset1.FieldByName('name').AsString);
+    ConfirmationDialogResult := mrYes;
+    FPrintMode := 1;
+    MainForm.PrintLabelsMenuItem.Click;
+    AssertEquals('', FPrintError);
+    AssertEquals(2, FPrintOpened);
+    AssertEquals(Ord(dsEdit), Ord(MainForm.MainDataset1.State));
+    AssertEquals('Pending labels', MainForm.MainDataset1.FieldByName('name').AsString);
+    MainForm.MainDataset1.Cancel;
+    MainForm.MainDataset1.Filtered := False;
+  finally
+    OnGetDefaultIniName := OldIni;
+    Application.RemoveOnModalBeginHandler(@QueueLabelsPrintCheck);
+    Application.RemoveAsyncCalls(Self);
+    MainForm.Hide;
+    DeleteFile(LabelTestIniName);
+    DeleteFile(FDbFilePath + '.labels.pdf');
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.StartLabels_CloseAndSwitchEndModalSession;
+var
+  OldIni: TOnGetDefaultIniName;
+  Mode: integer;
+begin
+  CreateBalanceFixture;
+  MainForm.Show;
+  LabelTestIniName := FDbFilePath + '.labels.ini';
+  OldIni := OnGetDefaultIniName;
+  OnGetDefaultIniName := @LabelsTestIni;
+  FPrintOpened := 0;
+  FPrintError := '';
+  Application.AddOnModalBeginHandler(@QueueLabelsPrintCheck);
+  try
+    for Mode := 0 to 3 do
+    begin
+      FPrintMode := Mode;
+      MainForm.PrintLabelsMenuItem.Click;
+      AssertEquals('', FPrintError);
+      AssertEquals(Mode + 1, FPrintOpened);
+      AssertTrue(MainForm.StartLabelsForm = nil);
+      if Mode = 2 then OpenCompetitionFile(FDbFilePath);
+    end;
+  finally
+    OnGetDefaultIniName := OldIni;
+    Application.RemoveOnModalBeginHandler(@QueueLabelsPrintCheck);
+    Application.RemoveAsyncCalls(Self);
+    MainForm.Hide;
+    DeleteFile(LabelTestIniName);
+    DeleteFile(FDbFilePath + '.labels.pdf');
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.QueueStartPrintCheck(Sender: TObject);
+begin
+  if MainForm.StartPrintForm <> nil then
+    Application.QueueAsyncCall(@InspectStartPrintAndClose, 0);
+end;
+
+procedure TMainFlowIntegrationTests.InspectStartPrintAndClose(Data: PtrInt);
+var
+  F: TStartProtocolPrintForm;
+begin
+  F := MainForm.StartPrintForm;
+  if F = nil then Exit;
+  Inc(FPrintOpened);
+  try
+    AssertTrue(fsModal in F.FormState);
+    AssertTrue('Start ready: ' + F.LastError, F.SaveButton.Enabled);
+    AssertEquals(0, F.ModeCombo.ItemIndex);
+    AssertTrue(MainForm.FinishPrintForm = nil);
+    MainForm.PrintStartMenuItem.Click;
+    AssertSame(F, MainForm.StartPrintForm);
+    if FPrintMode = 1 then
+    begin
+      F.ModeCombo.ItemIndex := 1;
+      F.SourceChange(F.ModeCombo);
+      AssertEquals(MainForm.CurrentStageIndex, F.SelectedStage);
+      AssertTrue(F.SaveButton.Enabled);
+    end;
+    if FPrintMode = 2 then
+    begin
+      MainForm.FileCloseExecute(nil);
+      AssertFalse(F.SaveTo(FDbFilePath + '.pdf'));
+    end;
+    if FPrintMode = 3 then
+    begin
+      OpenCompetitionFile(FDbFilePath);
+      AssertFalse(F.SaveTo(FDbFilePath + '.pdf'));
+    end;
+  except
+    on E: Exception do FPrintError := E.Message;
+  end;
+  F.Close;
+end;
+
+procedure TMainFlowIntegrationTests.StartPrint_MenuModesPendingInputAndSessionClosure;
+var
+  Mode: integer;
+begin
+  CreateBalanceFixture;
+  MainForm.SelectCurrentStage(3);
+  MainForm.Show;
+  FPrintOpened := 0;
+  FPrintError := '';
+  Application.AddOnModalBeginHandler(@QueueStartPrintCheck);
+  try
+    AssertEquals(0, MainForm.PrintStartMenuItem.Count);
+    for Mode := 0 to 3 do
+    begin
+      FPrintMode := Mode;
+      if Mode = 1 then
+      begin
+        MainForm.MainDataset1.Edit;
+        MainForm.MainDataset1.FieldByName('name').AsString := 'Pending start';
+        ConfirmationDialogResult := mrCancel;
+        MainForm.PrintStartMenuItem.Click;
+        AssertEquals(1, FPrintOpened);
+        AssertEquals(rsPrintPending, LastDialogMessage);
+        ConfirmationDialogResult := mrYes;
+        MainForm.PrintStartMenuItem.Click;
+        AssertEquals(Ord(dsEdit), Ord(MainForm.MainDataset1.State));
+        AssertEquals('Pending start', MainForm.MainDataset1.FieldByName(
+          'name').AsString);
+        MainForm.MainDataset1.Cancel;
+      end
+      else
+        MainForm.PrintStartMenuItem.Click;
+      AssertEquals('', FPrintError);
+      AssertEquals(Mode + 1, FPrintOpened);
+      AssertTrue(MainForm.StartPrintForm = nil);
+      if Mode = 2 then OpenCompetitionFile(FDbFilePath);
+    end;
+  finally
+    Application.RemoveOnModalBeginHandler(@QueueStartPrintCheck);
+    Application.RemoveAsyncCalls(Self);
+    MainForm.Hide;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.QueuePrintCheck(Sender: TObject);
+begin
+  if MainForm.FinishPrintForm <> nil then
+    Application.QueueAsyncCall(@InspectPrintAndClose, 0);
+end;
+
+procedure TMainFlowIntegrationTests.InspectPrintAndClose(Data: PtrInt);
+var
+  F: TFinishProtocolPrintForm;
+  D: TPreparedStageReport;
+  Text, Notice: string;
+  Plan: TResultsImportPlan;
+  Request: TResultsImportRequest;
+begin
+  F := MainForm.FinishPrintForm;
+  if F = nil then Exit;
+  Inc(FPrintOpened);
+  try
+    AssertTrue(fsModal in F.FormState);
+    if FPrintMode = 4 then
+    begin
+      AssertEquals(0, F.ModeCombo.ItemIndex);
+      AssertEquals(3, MainForm.ExportProtocolsMenuItem.Count);
+      AssertTrue('Overall ready: ' + F.LastError, F.SaveButton.Enabled);
+      AssertTrue(F.Protocol <> nil);
+      MainForm.PrintFinishMenuItem.Click;
+      AssertSame(F, MainForm.FinishPrintForm);
+      F.ModeCombo.ItemIndex := 1;
+      F.SourceChange(F.ModeCombo);
+      AssertTrue(F.Snapshot <> nil);
+      AssertEquals(MainForm.CurrentStageIndex, F.SelectedStage);
+      F.ModeCombo.ItemIndex := 0;
+      F.SourceChange(F.ModeCombo);
+      AssertTrue(F.Snapshot = nil);
+      F.Close;
+      Exit;
+    end;
+    AssertEquals(0, F.ModeCombo.ItemIndex);
+    F.ModeCombo.ItemIndex := 1;
+    F.SourceChange(F.ModeCombo);
+    AssertEquals(MainForm.CurrentStageIndex, F.SelectedStage);
+    AssertTrue('A report must be ready: ' + F.LastError, F.SaveButton.Enabled);
+    AssertEquals(3, Length(F.Snapshot.Rows));
+    D := F.Document;
+    Text := D.PageText(0);
+    Notice := F.StateLabel.Caption;
+    MainForm.AcPrintFinish.Execute;
+    AssertSame(F, MainForm.FinishPrintForm);
+    if FPrintMode = 1 then
+    begin
+      ApplyFinishPacketAt(EncodeTime(10, 20, 30, 123));
+      SetFinishMarkNumberAt(0, 1);
+      MainForm.AcApplyFinishMarksExecute(MainForm.AcApplyFinishMarks);
+      ReceivePreviewBleFinish;
+      SetFinishMarkNumberAt(0, 1);
+      AssertSame(D, F.Document);
+      AssertEquals(Text, D.PageText(0));
+      AssertTrue(F.SaveButton.Enabled);
+      AssertEquals('Live arrivals do not change the report state', Notice,
+        F.StateLabel.Caption);
+      WriteCsv(['1;10:25:00']);
+      Plan := TCompetitionImportService.PrepareResultsFile(FCsvFilePath);
+      try
+        Request := Default(TResultsImportRequest);
+        Request.StageIndex := 1;
+        Request.ContinueWithoutBackup := True;
+        TCompetitionImportService.ApplyResults(Plan, MainForm.CompetitionDb,
+          stages, Request);
+      finally
+        Plan.Free;
+      end;
+      AssertSame(D, F.Document);
+      AssertEquals(Text, D.PageText(0));
+      F.PenaltyCheck.Checked := not F.PenaltyCheck.Checked;
+      AssertTrue(F.SaveButton.Enabled);
+      AssertEquals('10:25:00', F.Snapshot.Rows[0].Values[sfkFinishTime]);
+    end;
+    if FPrintMode = 2 then
+    begin
+      MainForm.FileCloseExecute(nil);
+      AssertFalse(F.SaveTo(FDbFilePath + '.pdf'));
+    end;
+    if FPrintMode = 3 then
+    begin
+      OpenCompetitionFile(FDbFilePath);
+      AssertFalse(F.SaveTo(FDbFilePath + '.pdf'));
+    end;
+  except
+    on E: Exception do FPrintError := E.Message;
+  end;
+  F.Close;
+end;
+
+procedure TMainFlowIntegrationTests.FinishPrint_MenuOpensOverallAndSwitchesStage;
+begin
+  CreateBalanceFixture;
+  MainForm.Show;
+  MainForm.AcPrintFinish.Update;
+  AssertTrue(MainForm.AcPrintFinish.Enabled);
+  FPrintMode := 4;
+  FPrintOpened := 0;
+  FPrintError := '';
+  Application.AddOnModalBeginHandler(@QueuePrintCheck);
+  try
+    MainForm.PrintFinishMenuItem.Click;
+    AssertEquals('', FPrintError);
+    AssertEquals(1, FPrintOpened);
+    AssertTrue(MainForm.FinishPrintForm = nil);
+  finally
+    Application.RemoveOnModalBeginHandler(@QueuePrintCheck);
+    Application.RemoveAsyncCalls(Self);
+    MainForm.Hide;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.FinishPrint_UsesCurrentStageAndIgnoresGridFilter;
+var
+  Gui: TGuiTestSession;
+begin
+  MainForm.AcPrintFinish.Update;
+  AssertFalse(MainForm.AcPrintFinish.Enabled);
+  CreateBalanceFixture;
+  MainForm.SelectCurrentStage(3);
+  Gui := TGuiTestSession.Create;
+  try
+    MainForm.Show;
+    MainForm.MainDataset1.Filter := 'category = ' + QuotedStr('A');
+    MainForm.MainDataset1.Filtered := True;
+    FPrintMode := 0;
+    FPrintOpened := 0;
+    FPrintError := '';
+    Application.AddOnModalBeginHandler(@QueuePrintCheck);
+    MainForm.AcPrintFinish.Update;
+    MainForm.PrintFinishMenuItem.Click;
+    AssertEquals('', FPrintError);
+    AssertEquals(1, FPrintOpened);
+    AssertEquals(3, MainForm.CurrentStageIndex);
+    AssertTrue(MainForm.MainDataset1.Filtered);
+    AssertTrue(MainForm.FinishPrintForm = nil);
+  finally
+    Application.RemoveOnModalBeginHandler(@QueuePrintCheck);
+    Application.RemoveAsyncCalls(Self);
+    MainForm.MainDataset1.Filtered := False;
+    MainForm.MainDataset1.Filter := '';
+    MainForm.Hide;
+    Gui.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+FinishPrint_NativeAndPendingEditsSurviveContinueAndCancel;
+var
+  Gui: TGuiTestSession;
+  Editor: TCustomEdit;
+  R: TRect;
+begin
+  CreateBalanceFixture;
+  Gui := TGuiTestSession.Create;
+  try
+    MainForm.Show;
+    MainForm.MainDataset1.Locate('number', 2, []);
+    MainForm.MainDataset1.Edit;
+    MainForm.MainDataset1.FieldByName('name').AsString := 'Pending Bob';
+    MainForm.MainDataset1.Post;
+    MainForm.MainDataset1.Locate('number', 1, []);
+    MainForm.RxDBGrid1.SelectedField := MainForm.MainDataset1.FieldByName('name');
+    Gui.Drain('Before native report input');
+    R := MainForm.RxDBGrid1.SelectedFieldRect;
+    Gui.ClickAndWaitForFocus(MainForm.RxDBGrid1, (R.Left + R.Right) div
+      2, (R.Top + R.Bottom) div 2);
+    Gui.PressKey(MainForm.RxDBGrid1, VK_F2);
+    Editor := TCustomEdit(TParticipantGridAccess(MainForm.RxDBGrid1).InplaceEditor);
+    Gui.Drain('Native report editor');
+    Editor.SelectAll;
+    Gui.TypeText(Editor, 'Pending Alice');
+    FPrintMode := 0;
+    FPrintOpened := 0;
+    FPrintError := '';
+    ConfirmationDialogResult := mrCancel;
+    MainForm.AcPrintFinish.Execute;
+    AssertEquals(0, FPrintOpened);
+    AssertEquals(rsPrintPending, LastDialogMessage);
+    AssertEquals(Ord(dsEdit), Ord(MainForm.MainDataset1.State));
+    AssertEquals('Pending Alice', Editor.Text);
+    ConfirmationDialogResult := mrYes;
+    Application.AddOnModalBeginHandler(@QueuePrintCheck);
+    MainForm.AcPrintFinish.Execute;
+    Gui.Drain('After modal report');
+    AssertEquals('', FPrintError);
+    AssertEquals(1, FPrintOpened);
+    AssertEquals(Ord(dsEdit), Ord(MainForm.MainDataset1.State));
+    AssertEquals('Pending Alice', MainForm.MainDataset1.FieldByName('name').AsString);
+    AssertTrue(MainForm.MainDataset1.ChangeCount > 0);
+  finally
+    Application.RemoveOnModalBeginHandler(@QueuePrintCheck);
+    Application.RemoveAsyncCalls(Self);
+    MainForm.RxDBGrid1.EditorMode := False;
+    if MainForm.MainDataset1.State in [dsEdit, dsInsert] then
+      MainForm.MainDataset1.Cancel;
+    if MainForm.MainDataset1.ChangeCount > 0 then MainForm.MainDataset1.CancelUpdates;
+    MainForm.Hide;
+    Gui.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.FinishPrint_LiveAndCsvDataKeepFrozenDocument;
+begin
+  CreateBalanceFixture;
+  MainForm.SelectCurrentStage(1);
+  ExecBalanceSql('UPDATE main SET starttime1=''10:00:00.000'' WHERE number=1');
+  RefreshCompetitionViews;
+  FPrintMode := 1;
+  FPrintOpened := 0;
+  FPrintError := '';
+  Application.AddOnModalBeginHandler(@QueuePrintCheck);
+  try
+    MainForm.AcPrintFinish.Execute;
+    AssertEquals('', FPrintError);
+    AssertEquals(1, FPrintOpened);
+  finally
+    Application.RemoveOnModalBeginHandler(@QueuePrintCheck);
+    Application.RemoveAsyncCalls(Self);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.FinishPrint_CompetitionCloseAndSwitchEndModalSession;
+var
+  I: integer;
+begin
+  CreateBalanceFixture;
+  for I := 2 to 3 do
+  begin
+    if not IsCompetitionDatabaseOpen then OpenCompetitionFile(FDbFilePath);
+    FPrintMode := I;
+    FPrintOpened := 0;
+    FPrintError := '';
+    Application.AddOnModalBeginHandler(@QueuePrintCheck);
+    try
+      MainForm.AcPrintFinish.Execute;
+      AssertEquals('', FPrintError);
+      AssertEquals(1, FPrintOpened);
+      AssertTrue(MainForm.FinishPrintForm = nil);
+    finally
+      Application.RemoveOnModalBeginHandler(@QueuePrintCheck);
+      Application.RemoveAsyncCalls(Self);
+    end;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.ParticipantCard_NativeEditorInputSurvivesOpening;
+var
+  Gui: TGuiTestSession;
+  Editor: TCustomEdit;
+  R: TRect;
+begin
+  CreateBalanceFixture;
+  Gui := TGuiTestSession.Create;
+  try
+    MainForm.Show;
+    MainForm.MainDataset1.Locate('number', 1, []);
+    MainForm.RxDBGrid1.SelectedField := MainForm.MainDataset1.FieldByName('name');
+    Gui.Drain('Select participant name');
+    R := MainForm.RxDBGrid1.SelectedFieldRect;
+    Gui.ClickAndWaitForFocus(MainForm.RxDBGrid1, (R.Left + R.Right) div
+      2, (R.Top + R.Bottom) div 2);
+    Gui.PressKey(MainForm.RxDBGrid1, VK_F2);
+    Editor := TCustomEdit(TParticipantGridAccess(MainForm.RxDBGrid1).InplaceEditor);
+    AssertTrue(Editor <> nil);
+    Gui.Drain('Open native editor');
+    AssertTrue('Native editor must have focus', Editor.Focused);
+    Editor.SelectAll;
+    Gui.TypeText(Editor, 'Native pending');
+    AssertEquals('Native pending', Editor.Text);
+    AssertEquals('Editor state before card', Ord(dsEdit),
+      Ord(MainForm.MainDataset1.State));
+    MainForm.AcParticipantCard.Execute;
+    Gui.Drain('Open card with native editor');
+    AssertEquals('Alice', MainForm.ParticipantCard.Form.Snapshot.Fields[cpfName].Text);
+    AssertEquals('After opening', Ord(dsEdit), Ord(MainForm.MainDataset1.State));
+    AssertEquals('Native pending', Editor.Text);
+    MainForm.ParticipantCard.Refresh;
+    Gui.Drain('Refresh while native input is pending');
+    AssertEquals('Alice', MainForm.ParticipantCard.Form.Snapshot.Fields[cpfName].Text);
+    AssertEquals('After refresh', Ord(dsEdit), Ord(MainForm.MainDataset1.State));
+    AssertEquals('Native pending', Editor.Text);
+    Gui.ClickAndWaitForFocus(MainForm.RxDBGrid1, (R.Left + R.Right) div
+      2, (R.Top + R.Bottom) div 2);
+    Gui.PressKey(MainForm.RxDBGrid1, VK_F2);
+    Editor := TCustomEdit(TParticipantGridAccess(MainForm.RxDBGrid1).InplaceEditor);
+    AssertEquals('Native pending', Editor.Text);
+    Editor.SelectAll;
+    Gui.TypeText(Editor, 'Still pending');
+    with MainForm.ParticipantCard.Form do
+      Gui.Click(RefreshButton, RefreshButton.ClientWidth div 2,
+        RefreshButton.ClientHeight div 2);
+    AssertEquals('Alice', MainForm.ParticipantCard.Form.Snapshot.Fields[cpfName].Text);
+    AssertEquals('After native refresh', Ord(dsEdit), Ord(MainForm.MainDataset1.State));
+    MainForm.ParticipantCard.Close;
+    Gui.Drain('Close card while native input is pending');
+    AssertEquals('After close', Ord(dsEdit), Ord(MainForm.MainDataset1.State));
+    Gui.ClickAndWaitForFocus(MainForm.RxDBGrid1, (R.Left + R.Right) div
+      2, (R.Top + R.Bottom) div 2);
+    Gui.PressKey(MainForm.RxDBGrid1, VK_F2);
+    Editor := TCustomEdit(TParticipantGridAccess(MainForm.RxDBGrid1).InplaceEditor);
+    AssertEquals('Still pending', Editor.Text);
+    Gui.PressKey(Editor, VK_RETURN);
+    AssertEquals('After explicit save', Ord(dsBrowse), Ord(MainForm.MainDataset1.State));
+    MainForm.MainDataset1.Locate('number', 1, []);
+    AssertEquals('Still pending', MainForm.MainDataset1.FieldByName('name').AsString);
+  finally
+    MainForm.ParticipantCard.Close;
+    MainForm.RxDBGrid1.EditorMode := False;
+    if MainForm.MainDataset1.State in [dsEdit, dsInsert] then
+      MainForm.MainDataset1.Cancel;
+    if MainForm.MainDataset1.ChangeCount > 0 then MainForm.MainDataset1.CancelUpdates;
+    MainForm.Hide;
+    Gui.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ParticipantCard_LanguageSwitchKeepsSelectionAndFilter;
+var
+  Gui: TGuiTestSession;
+  OriginalLanguage: string;
+begin
+  OriginalLanguage := CurrentLang;
+  MainForm.SetLang('ru');
+  CreateBalanceFixture;
+  Gui := TGuiTestSession.Create;
+  try
+    MainForm.MainDataset1.Locate('number', 1, []);
+    MainForm.ParticipantCard.Open(MainForm.MainDataset1.FieldByName('id').AsInteger, 3);
+    Gui.Drain('Open card before language switch');
+    with MainForm.ParticipantCard.Form do
+    begin
+      ScopeComboBox.ItemIndex := 1;
+      ScopeChange(ScopeComboBox);
+      Gui.SelectTab(PersonalPage);
+    end;
+    MainForm.SetLang('en');
+    Gui.Drain('Translate open card');
+    AssertEquals('Participant card', MainForm.ParticipantCard.Form.Caption);
+    AssertEquals(rsSU, MainForm.ParticipantCard.Form.StagesGrid.Columns[
+      0].Title.Caption);
+    AssertEquals(rsCardMarkKind,
+      MainForm.ParticipantCard.Form.MarksGrid.Columns[0].Title.Caption);
+    AssertEquals(3, MainForm.ParticipantCard.Form.SelectedStage);
+    AssertEquals(1, MainForm.ParticipantCard.Form.ScopeComboBox.ItemIndex);
+    AssertSame(MainForm.ParticipantCard.Form.PersonalPage,
+      MainForm.ParticipantCard.Form.Pages.ActivePage);
+  finally
+    MainForm.ParticipantCard.Close;
+    MainForm.SetLang(OriginalLanguage);
+    Gui.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.TraceCardSql(Sender: TSQLConnection;
+  EventType: TDBEventType; const Msg: string);
+begin
+  if (EventType = detActualSQL) and (Pos(' FROM MAIN WHERE ID', UpperCase(Msg)) > 0) then
+    Inc(FCardReads);
+end;
+
+procedure TMainFlowIntegrationTests.
+ParticipantCard_LiveMarksRefreshResultsAndKeepJournals;
+var
+  Gui: TGuiTestSession;
+  Journal: TFinishMarksForm;
+begin
+  CreateBalanceFixture;
+  Gui := TGuiTestSession.Create;
+  try
+    ExecBalanceSql('UPDATE main SET starttime1=''10:00:00.000'' WHERE number=1;');
+    MainForm.MainDataset1.Locate('number', 1, []);
+    MainForm.AcParticipantCard.Execute;
+    Gui.Drain('Open live card');
+    Journal := TFinishMarksForm.Create(nil);
+    try
+      Journal.Show;
+      Gui.Drain('Open existing finish journal');
+      ApplyFinishPacketAt(EncodeTime(10, 20, 30, 123));
+      SetFinishMarkNumberAt(0, 1);
+      Gui.Drain('Receive and number serial finish');
+      AssertEquals(1, Length(MainForm.ParticipantCard.Form.Snapshot.Marks));
+      AssertEquals(1, Journal.FinishMarksDataset.RecordCount);
+      MainForm.AcApplyFinishMarksExecute(MainForm.AcApplyFinishMarks);
+      Gui.Drain('Apply live finish');
+      AssertEquals('10:20:30.123',
+        MainForm.ParticipantCard.Form.Snapshot.Stages[0].Values[sfkFinishTime].Text);
+      AssertEquals('applied', MainForm.ParticipantCard.Form.Snapshot.Marks[0].Status);
+      ReceivePreviewBleFinish;
+      SetFinishMarkNumberAt(0, 1);
+      Gui.Drain('Receive and number BLE finish');
+      AssertEquals(2, Length(MainForm.ParticipantCard.Form.Snapshot.Marks));
+      AssertEquals(2, Journal.FinishMarksDataset.RecordCount);
+      AssertTrue(Assigned(MainForm.FinishMarkService.OnChanged));
+    finally
+      Journal.Free;
+    end;
+  finally
+    MainForm.ParticipantCard.Close;
+    Gui.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ParticipantCard_NotificationsCoalesceAndClosedCardDoesNotRead;
+var
+  Gui: TGuiTestSession;
+  I: integer;
+begin
+  CreateBalanceFixture;
+  Gui := TGuiTestSession.Create;
+  try
+    MainForm.AcParticipantCard.Execute;
+    Gui.Drain('Open card before coalescing');
+    MainForm.SQLite3Connection1.LogEvents := [detActualSQL];
+    MainForm.SQLite3Connection1.OnLog := @TraceCardSql;
+    FCardReads := 0;
+    for I := 1 to 20 do MainForm.ParticipantCard.InvalidateData;
+    Gui.Drain('Coalesced card updates');
+    AssertEquals(1, FCardReads);
+    MainForm.ParticipantCard.Close;
+    FCardReads := 0;
+    for I := 1 to 20 do MainForm.ParticipantCard.InvalidateData;
+    Gui.Drain('Closed card ignores updates');
+    AssertEquals(0, FCardReads);
+  finally
+    MainForm.SQLite3Connection1.OnLog := nil;
+    MainForm.SQLite3Connection1.LogEvents := [];
+    MainForm.ParticipantCard.Close;
+    Gui.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ParticipantCard_UnsavedInputRenumberingAndImportRefresh;
+var
+  Gui: TGuiTestSession;
+  ParticipantId: integer;
+begin
+  CreateBalanceFixture;
+  Gui := TGuiTestSession.Create;
+  try
+    MainForm.MainDataset1.Locate('number', 1, []);
+    ParticipantId := MainForm.MainDataset1.FieldByName('id').AsInteger;
+    MainForm.ParticipantCard.Open(ParticipantId, 3);
+    Gui.Drain('Open saved card');
+    MainForm.MainDataset1.Edit;
+    MainForm.MainDataset1.FieldByName('name').AsString := 'Saved Alice';
+    MainForm.MainDataset1.FieldByName('number').AsInteger := 11;
+    MainForm.ParticipantCard.InvalidateData;
+    Gui.Drain('Refresh ignores pending editor');
+    AssertEquals('Alice', MainForm.ParticipantCard.Form.Snapshot.Fields[cpfName].Text);
+    AssertEquals(Ord(dsEdit), Ord(MainForm.MainDataset1.State));
+    MainForm.RxDBGrid1EditingDone(MainForm.RxDBGrid1);
+    Gui.Drain('Save renumbering');
+    AssertEquals(11, MainForm.ParticipantCard.Form.Snapshot.Number);
+    AssertEquals('Saved Alice',
+      MainForm.ParticipantCard.Form.Snapshot.Fields[cpfName].Text);
+    AssertEquals(3, MainForm.ParticipantCard.Form.SelectedStage);
+    ConfigureSingleActiveStage(3);
+    WriteCsv(['11;10:07:00']);
+    ImportStageResultsFile(FCsvFilePath);
+    Gui.Drain('Import refreshes card');
+    AssertEquals('', FPreviewError);
+    AssertEquals('10:07:00', MainForm.ParticipantCard.Form.Snapshot.Stages[
+      2].Values[sfkFinishTime].Text);
+    MainForm.AcClearResults.Execute;
+    Gui.Drain('Clear refreshes card');
+    AssertTrue(MainForm.ParticipantCard.Form.Snapshot.Stages[2].Values
+      [sfkFinishTime].IsNull);
+  finally
+    if MainForm.MainDataset1.State in [dsEdit, dsInsert] then
+      MainForm.MainDataset1.Cancel;
+    MainForm.ParticipantCard.Close;
+    Gui.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ParticipantCard_BusyRollbackAndCloseDiscardQueuedRead;
+var
+  Gui: TGuiTestSession;
+  Work: TCompetitionUnitOfWork;
+  Q: TSQLQuery;
+begin
+  CreateBalanceFixture;
+  Gui := TGuiTestSession.Create;
+  try
+    MainForm.MainDataset1.Locate('number', 1, []);
+    MainForm.AcParticipantCard.Execute;
+    Gui.Drain('Open card before busy operation');
+    MainForm.SQLite3Connection1.LogEvents := [detActualSQL];
+    MainForm.SQLite3Connection1.OnLog := @TraceCardSql;
+    FCardReads := 0;
+    Work := MainForm.CompetitionDb.BeginUnitOfWork;
+    Q := MainForm.CompetitionDb.CreateQuery(nil);
+    try
+      Q.SQL.Text := 'UPDATE main SET name=''Uncommitted'' WHERE number=1';
+      Q.ExecSQL;
+      MainForm.ParticipantCard.InvalidateData;
+      Gui.Drain('Defer while busy');
+      AssertEquals(0, FCardReads);
+      AssertEquals('Alice', MainForm.ParticipantCard.Form.Snapshot.Fields[cpfName].Text);
+    finally
+      Q.Free;
+      Work.Free;
+    end;
+    MainForm.ParticipantCard.InvalidateData;
+    Gui.Drain('Read after rollback');
+    AssertEquals('Alice', MainForm.ParticipantCard.Form.Snapshot.Fields[cpfName].Text);
+    MainForm.ParticipantCard.InvalidateData;
+    MainForm.FileCloseExecute(nil);
+    Gui.Drain('Close with queued card read');
+    AssertTrue(MainForm.ParticipantCard.Form = nil);
+  finally
+    MainForm.SQLite3Connection1.OnLog := nil;
+    MainForm.SQLite3Connection1.LogEvents := [];
+    MainForm.ParticipantCard.Close;
+    Gui.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ParticipantCard_ReadErrorCanRetryAndDeletedIdDoesNotFollowNumber;
+var
+  Gui: TGuiTestSession;
+begin
+  CreateBalanceFixture;
+  Gui := TGuiTestSession.Create;
+  try
+    MainForm.MainDataset1.Locate('number', 1, []);
+    MainForm.AcParticipantCard.Execute;
+    Gui.Drain('Open card before read error');
+    ExecBalanceSql('ALTER TABLE finish_marks RENAME TO missing_card_marks;');
+    MainForm.ParticipantCard.InvalidateData;
+    Gui.Drain('Card read fails');
+    AssertFalse(MainForm.ParticipantCard.Form.ParticipantButton.Enabled);
+    AssertTrue(Pos('finish_marks',
+      LowerCase(MainForm.ParticipantCard.Form.StateLabel.Caption)) > 0);
+    ExecBalanceSql('ALTER TABLE missing_card_marks RENAME TO finish_marks;');
+    MainForm.ParticipantCard.Form.RefreshAction.Execute;
+    Gui.Drain('Retry card read');
+    AssertTrue(MainForm.ParticipantCard.Form.ParticipantButton.Enabled);
+    ExecBalanceSql('DELETE FROM main WHERE number=1;');
+    ExecBalanceSql('INSERT INTO main(number,name) VALUES(1,''Another Alice'');');
+    MainForm.ParticipantCard.InvalidateData;
+    Gui.Drain('Deleted participant stays deleted');
+    AssertTrue(MainForm.ParticipantCard.Form.Snapshot = nil);
+    AssertFalse(MainForm.ParticipantCard.Form.ParticipantButton.Enabled);
+  finally
+    MainForm.ParticipantCard.Close;
+    Gui.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.QueueCardJournalCheck(Sender: TObject);
+begin
+  Application.QueueAsyncCall(@InspectCardJournalAndClose, 0);
+end;
+
+procedure TMainFlowIntegrationTests.InspectCardJournalAndClose(Data: PtrInt);
+var
+  I: integer;
+  JournalForm: TForm;
+  Q: TSQLQuery;
+begin
+  if Data < 0 then Exit;
+  for I := 0 to Screen.FormCount - 1 do
+  begin
+    JournalForm := Screen.Forms[I];
+    Q := nil;
+    if (FCardJournalKind = tmkStart) and (JournalForm is TStartMarksForm) then
+      Q := TStartMarksForm(JournalForm).StartMarksDataset;
+    if (FCardJournalKind = tmkFinish) and (JournalForm is TFinishMarksForm) then
+      Q := TFinishMarksForm(JournalForm).FinishMarksDataset;
+    if Q = nil then Continue;
+    try
+      FCardJournalVisited := True;
+      AssertEquals(7, Q.FieldByName('id').AsInteger);
+      AssertEquals(1, Q.FieldByName('participant_number').AsInteger);
+      AssertEquals(1, Q.RecordCount);
+      if FCardJournalKind = tmkStart then
+      begin
+        AssertEquals(1, Q.FieldByName('stage_index').AsInteger);
+        AssertEquals(3, Q.FieldByName('applied_stage_index').AsInteger);
+      end;
+    except
+      on E: Exception do FCardJournalError := E.Message;
+    end;
+    JournalForm.ModalResult := mrOk;
+    Application.QueueAsyncCall(@InspectCardJournalAndClose, -1);
+    Exit;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.ParticipantCard_StartAndFinishOpenExactJournalRecord;
+var
+  Gui: TGuiTestSession;
+  Kind: TTimingMarkKind;
+  Card: TParticipantCardForm;
+  R: TRect;
+  ParticipantId: integer;
+begin
+  CreateBalanceFixture;
+  Gui := TGuiTestSession.Create;
+  try
+    MainForm.MainDataset1.Locate('number', 1, []);
+    ParticipantId := MainForm.MainDataset1.FieldByName('id').AsInteger;
+    ExecBalanceSql('INSERT INTO start_marks(id,stage_index,applied_stage_index,event_time,participant_number,'
+      + 'source_kind,source_device_id,received_at,status) VALUES(7,1,3,''10:00:00.000'',1,''serial'',''card-start'',''2026-10-30T10:00:00.000'',''applied'');');
+    ExecBalanceSql(
+      'INSERT INTO finish_marks(id,stage_index,event_time,participant_number,source_kind,received_at,status) '
+      + 'VALUES(7,3,''10:07:00.000'',1,''manual'',''2026-10-30T10:07:00.000'',''hidden''),'
+      + '(8,3,''10:08:00.000'',2,''manual'',''2026-10-30T10:08:00.000'',''applied'');');
+    MainForm.ParticipantCard.Open(ParticipantId, 3);
+    Gui.Drain('Card before journal');
+    Card := MainForm.ParticipantCard.Form;
+    for Kind := tmkStart to tmkFinish do
+    begin
+      FCardJournalKind := Kind;
+      FCardJournalVisited := False;
+      FCardJournalError := '';
+      if Kind = tmkStart then R := Card.MarksGrid.CellRect(0, 2)
+      else
+        R := Card.MarksGrid.CellRect(0, 1);
+      Gui.ClickAndWaitForFocus(Card.MarksGrid, (R.Left + R.Right) div
+        2, (R.Top + R.Bottom) div 2);
+      Application.AddOnModalBeginHandler(@QueueCardJournalCheck);
+      try
+        Gui.PressKey(Card.MarksGrid, VK_RETURN);
+      finally
+        Application.RemoveOnModalBeginHandler(@QueueCardJournalCheck);
+      end;
+      AssertTrue('Journal must open for the selected kind', FCardJournalVisited);
+      AssertEquals('', FCardJournalError);
+      AssertTrue(Card.Visible);
+    end;
+  finally
+    Application.RemoveAsyncCalls(Self);
+    MainForm.ParticipantCard.Close;
+    Gui.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.ParticipantCard_ChangedMarkRequiresNewSelection;
+var
+  Gui: TGuiTestSession;
+begin
+  CreateBalanceFixture;
+  Gui := TGuiTestSession.Create;
+  try
+    MainForm.MainDataset1.Locate('number', 1, []);
+    ExecBalanceSql('INSERT INTO finish_marks(stage_index,event_time,participant_number,source_kind,received_at,status) '
+      + 'VALUES(1,''10:07:00.000'',1,''manual'',''2026-10-30T10:07:00.000'',''pending'');');
+    MainForm.AcParticipantCard.Execute;
+    Gui.Drain('Card before changed mark');
+    ExecBalanceSql('UPDATE finish_marks SET participant_number=2;');
+    MainForm.ParticipantCard.Form.JournalAction.Execute;
+    Gui.Drain('Reject changed mark');
+    AssertEquals(0, MainForm.ParticipantCard.Form.VisibleMarkCount);
+    AssertFalse(MainForm.ParticipantCard.Form.JournalButton.Enabled);
+  finally
+    MainForm.ParticipantCard.Close;
+    Gui.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ParticipantCard_ReturnToInactiveStageDoesNotChangeWorkingStage;
+var
+  Gui: TGuiTestSession;
+  ParticipantId, WorkingStage: integer;
+begin
+  CreateBalanceFixture;
+  Gui := TGuiTestSession.Create;
+  try
+    MainForm.Show;
+    MainForm.MainDataset1.Locate('number', 1, []);
+    ParticipantId := MainForm.MainDataset1.FieldByName('id').AsInteger;
+    WorkingStage := MainForm.CurrentStageIndex;
+    MainForm.ParticipantCard.Open(ParticipantId, 2);
+    Gui.Drain('Card on inactive stage');
+    MainForm.MainDataset1.Filter := 'category = ''B''';
+    MainForm.MainDataset1.Filtered := True;
+    with MainForm.ParticipantCard.Form do Gui.Click(ParticipantButton,
+        ParticipantButton.ClientWidth div 2, ParticipantButton.ClientHeight div 2);
+    AssertEquals(ParticipantId, MainForm.MainDataset1.FieldByName('id').AsInteger);
+    AssertEquals('starttime2', MainForm.RxDBGrid1.SelectedField.FieldName);
+    AssertFalse(stages[2].isActive);
+    AssertEquals(WorkingStage, MainForm.CurrentStageIndex);
+    AssertFalse(MainForm.MainDataset1.Filtered);
+  finally
+    MainForm.MainDataset1.Filtered := False;
+    MainForm.MainDataset1.Filter := '';
+    MainForm.ParticipantCard.Close;
+    MainForm.Hide;
+    Gui.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.ParticipantCard_CancelAndFailedSavePreserveEditor;
+var
+  Gui: TGuiTestSession;
+begin
+  CreateBalanceFixture;
+  Gui := TGuiTestSession.Create;
+  try
+    MainForm.Show;
+    MainForm.MainDataset1.Locate('number', 1, []);
+    MainForm.AcParticipantCard.Execute;
+    Gui.Drain('Card before pending edit');
+    MainForm.MainDataset1.Locate('number', 2, []);
+    MainForm.MainDataset1.Edit;
+    MainForm.MainDataset1.FieldByName('name').AsString := 'Pending Bob';
+    ConfirmationDialogResult := mrCancel;
+    MainForm.ParticipantCard.Form.ParticipantAction.Execute;
+    AssertEquals(Ord(dsEdit), Ord(MainForm.MainDataset1.State));
+    AssertEquals('Pending Bob', MainForm.MainDataset1.FieldByName('name').AsString);
+    ConfirmationDialogResult := mrYes;
+    ExecBalanceSql(
+      'CREATE TRIGGER reject_card_save BEFORE UPDATE ON main BEGIN SELECT RAISE(ABORT,''forced card save failure''); END;');
+    MainForm.ParticipantCard.Form.ParticipantAction.Execute;
+    AssertEquals('Pending Bob', MainForm.MainDataset1.FieldByName('name').AsString);
+    AssertTrue(MainForm.MainDataset1.ChangeCount > 0);
+  finally
+    if MainForm.MainDataset1.State in [dsEdit, dsInsert] then
+      MainForm.MainDataset1.Cancel;
+    if MainForm.MainDataset1.ChangeCount > 0 then MainForm.MainDataset1.CancelUpdates;
+    MainForm.ParticipantCard.Close;
+    MainForm.Hide;
+    Gui.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ParticipantCard_OpeningKeepsUnsavedEditorAndReusesWindow;
+var
+  Gui: TGuiTestSession;
+  Card: TParticipantCardForm;
+begin
+  CreateBalanceFixture;
+  Gui := TGuiTestSession.Create;
+  try
+    MainForm.Show;
+    Gui.Drain('Main before card');
+    MainForm.MainDataset1.Locate('number', 1, []);
+    MainForm.MainDataset1.Edit;
+    MainForm.MainDataset1.FieldByName('name').AsString := 'Pending Alice';
+    MainForm.MainDataset1.FieldByName('number').AsInteger := 777;
+    MainForm.AcParticipantCard.Update;
+    AssertTrue(MainForm.AcParticipantCard.Enabled);
+    MainForm.AcParticipantCard.Execute;
+    Gui.Drain('Open card from main');
+    Card := MainForm.ParticipantCard.Form;
+    AssertTrue(Card <> nil);
+    AssertTrue(Card.Visible);
+    AssertEquals('Alice', Card.Snapshot.Fields[cpfName].Text);
+    AssertEquals(1, Card.Snapshot.Number);
+    AssertEquals(Ord(dsEdit), Ord(MainForm.MainDataset1.State));
+    AssertEquals('Pending Alice', MainForm.MainDataset1.FieldByName('name').AsString);
+    MainForm.AcParticipantCard.Execute;
+    Gui.Drain('Reuse card');
+    AssertSame(Card, MainForm.ParticipantCard.Form);
+    MainForm.MainDataset1.Cancel;
+    MainForm.MainDataset1.Locate('number', 2, []);
+    MainForm.AcParticipantCard.Execute;
+    Gui.Drain('Open another participant');
+    AssertSame(Card, MainForm.ParticipantCard.Form);
+    AssertEquals('Bob', Card.Snapshot.Fields[cpfName].Text);
+    Card.Close;
+    Gui.Drain('Close card');
+    AssertTrue(MainForm.ParticipantCard.Form = nil);
+  finally
+    if MainForm.MainDataset1.State in [dsEdit, dsInsert] then
+      MainForm.MainDataset1.Cancel;
+    MainForm.ParticipantCard.Close;
+    MainForm.Hide;
+    Gui.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ParticipantCard_BalanceOpensSelectedParticipantAndStage;
+var
+  Gui: TGuiTestSession;
+  CurrentStage: integer;
+begin
+  CreateBalanceFixture;
+  Gui := OpenBalance;
+  try
+    CurrentStage := MainForm.CurrentStageIndex;
+    MainForm.ProtocolBalanceView.SummaryData.Locate('stage_index', 3, []);
+    MainForm.ProtocolBalanceView.DetailsData.Locate('number', 2, []);
+    MainForm.ProtocolBalanceView.OpenCardAction.Update;
+    AssertTrue(MainForm.ProtocolBalanceView.OpenCardAction.Enabled);
+    MainForm.ProtocolBalanceView.OpenCardAction.Execute;
+    Gui.Drain('Card from balance');
+    AssertEquals(2, MainForm.ParticipantCard.Form.Snapshot.Number);
+    AssertEquals(3, MainForm.ParticipantCard.Form.SelectedStage);
+    AssertEquals(CurrentStage, MainForm.CurrentStageIndex);
+  finally
+    MainForm.ParticipantCard.Close;
+    CloseBalance(Gui);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.ParticipantCard_CompetitionCloseAndSwitchCloseWindow;
+var
+  Gui: TGuiTestSession;
+begin
+  CreateBalanceFixture;
+  Gui := TGuiTestSession.Create;
+  try
+    MainForm.MainDataset1.Locate('number', 1, []);
+    MainForm.AcParticipantCard.Execute;
+    Gui.Drain('Card before close');
+    AssertTrue(MainForm.ParticipantCard.Form <> nil);
+    MainForm.FileCloseExecute(nil);
+    Gui.Drain('Close competition with card');
+    AssertTrue(MainForm.ParticipantCard.Form = nil);
+    OpenCompetitionFile(FDbFilePath);
+    MainForm.AcParticipantCard.Execute;
+    Gui.Drain('Reopen card');
+    AssertTrue(MainForm.ParticipantCard.Form <> nil);
+    OpenCompetitionFile(FDbFilePath);
+    Gui.Drain('Switch even to same file');
+    AssertTrue(MainForm.ParticipantCard.Form = nil);
+  finally
+    MainForm.ParticipantCard.Close;
+    Gui.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.ParticipantCard_UnsavedInsertCannotOpenCard;
+begin
+  CreateBalanceFixture;
+  MainForm.MainDataset1.Append;
+  try
+    MainForm.MainDataset1.FieldByName('number').AsInteger := 999;
+    MainForm.AcParticipantCard.Update;
+    AssertFalse(MainForm.AcParticipantCard.Enabled);
+    AssertTrue(MainForm.ParticipantCard.Form = nil);
+  finally
+    MainForm.MainDataset1.Cancel;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.ExecBalanceSql(const ASql: string);
+var
+  Query: TSQLQuery;
+  Work: TCompetitionUnitOfWork;
+begin
+  Query := MainForm.CompetitionDb.CreateQuery(nil);
+  Work := MainForm.CompetitionDb.BeginUnitOfWork;
+  try
+    Query.SQL.Text := ASql;
+    Query.ExecSQL;
+    Work.Commit;
+  finally
+    Work.Free;
+    Query.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.CreateBalanceFixture;
+begin
+  CreateEmptyCompetitionFixture(3);
+  stages[3].isActive := True;
+  ApplyStageActivityToUi(1);
+  ExecBalanceSql('INSERT INTO main (number, name, category) VALUES ' +
+    '(1, ''Alice'', ''A''), (2, ''Bob'', ''B''), (3, ''Carol'', ''A'');');
+  RefreshCompetitionViews;
+end;
+
+function TMainFlowIntegrationTests.OpenBalance: TGuiTestSession;
+begin
+  FBalanceWasVisible := MainForm.Visible;
+  Result := TGuiTestSession.Create;
+  try
+    MainForm.Show;
+    Result.SelectTab(MainForm.TabSheet2);
+    Result.SelectTab(MainForm.ProtocolBalanceSheet);
+    Result.Drain('Load protocol balance');
+    AssertFalse(MainForm.ProtocolBalanceView.SummaryData.IsEmpty);
+  except
+    CloseBalance(Result);
+    raise;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.CloseBalance(const AGui: TGuiTestSession);
+begin
+  Application.RemoveAsyncCalls(Self);
+  MainForm.SQLite3Connection1.OnLog := nil;
+  MainForm.SQLite3Connection1.LogEvents := [];
+  MainForm.ProtocolBalanceView.SetViewActive(False);
+  MainForm.PageControl1.ActivePage := MainForm.TabSheet1;
+  if not FBalanceWasVisible then MainForm.Hide;
+  AGui.Free;
+end;
+
+procedure TMainFlowIntegrationTests.TraceBalanceSql(Sender: TSQLConnection;
+  EventType: TDBEventType; const Msg: string);
+begin
+  if (EventType = detActualSQL) and
+    (Pos(' FROM MAIN ORDER BY NUMBER, ID', UpperCase(Msg)) > 0) then
+    Inc(FBalanceReadCount);
+end;
+
+procedure TMainFlowIntegrationTests.AssertBalanceCounts(
+  const AParticipants, AResults, ADns, ADnf, ADsq, AUnresolved: integer);
+begin
+  with MainForm.ProtocolBalanceView.SummaryData do
+  begin
+    AssertEquals('Participants', AParticipants,
+      FieldByName('participant_count').AsInteger);
+    AssertEquals('Results', AResults, FieldByName('result_count').AsInteger);
+    AssertEquals('DNS', ADns, FieldByName('dns_count').AsInteger);
+    AssertEquals('DNF', ADnf, FieldByName('dnf_count').AsInteger);
+    AssertEquals('DSQ', ADsq, FieldByName('dsq_count').AsInteger);
+    AssertEquals('Unresolved', AUnresolved, FieldByName('unresolved_count').AsInteger);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ProtocolBalance_EnterAndDoubleClickNavigateThroughCategoryFilter;
+var
+  Gui: TGuiTestSession;
+  Key: word;
+  ParticipantId: integer;
+begin
+  CreateBalanceFixture;
+  MainForm.MainDataset1.Filter := 'category = ''A''';
+  MainForm.MainDataset1.Filtered := True;
+  Gui := OpenBalance;
+  try
+    with MainForm.ProtocolBalanceView do
+    begin
+      AssertTrue(SummaryData.Locate('stage_index', 3, []));
+      AssertTrue(DetailsData.Locate('number', 2, []));
+      ParticipantId := DetailsData.FieldByName('participant_id').AsInteger;
+      OpenParticipantAction.Update;
+      Key := VK_RETURN;
+      DetailsGridKeyDown(DetailsGrid, Key, []);
+    end;
+    AssertEquals(0, Key);
+    AssertSame(MainForm.TabSheet1, MainForm.PageControl1.ActivePage);
+    AssertFalse(MainForm.MainDataset1.Filtered);
+    AssertEquals('', MainForm.MainDataset1.Filter);
+    AssertEquals(ParticipantId, MainForm.MainDataset1.FieldByName('id').AsInteger);
+    AssertEquals('starttime3', MainForm.RxDBGrid1.SelectedField.FieldName);
+    AssertEquals('Navigation dialogs: ' + LastDialogMessage, 0, DialogCallCount);
+    Gui.SelectTab(MainForm.TabSheet2);
+    Gui.SelectTab(MainForm.ProtocolBalanceSheet);
+    with MainForm.ProtocolBalanceView do
+    begin
+      AssertTrue(DetailsData.Locate('number', 1, []));
+      OpenParticipantAction.Update;
+      DetailsGridDblClick(DetailsGrid);
+    end;
+    AssertSame(MainForm.TabSheet1, MainForm.PageControl1.ActivePage);
+    AssertEquals(1, MainForm.MainDataset1.FieldByName('number').AsInteger);
+  finally
+    CloseBalance(Gui);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.ProtocolBalance_CancelNavigationPreservesPendingEdit;
+var
+  Gui: TGuiTestSession;
+begin
+  CreateBalanceFixture;
+  Gui := OpenBalance;
+  try
+    AssertTrue(MainForm.MainDataset1.Locate('number', 1, []));
+    MainForm.MainDataset1.Edit;
+    MainForm.MainDataset1.FieldByName('name').AsString := 'Unsaved name';
+    ConfirmationDialogResult := mrCancel;
+    with MainForm.ProtocolBalanceView do
+    begin
+      AssertTrue(DetailsData.Locate('number', 2, []));
+      OpenParticipantAction.Update;
+      OpenParticipantAction.Execute;
+    end;
+    AssertEquals(rsProtocolBalanceSaveBeforeNavigation, LastDialogMessage);
+    AssertEquals(1, DialogCallCount);
+    AssertSame(MainForm.TabSheet2, MainForm.PageControl1.ActivePage);
+    AssertEquals(Ord(dsEdit), Ord(MainForm.MainDataset1.State));
+    AssertEquals(1, MainForm.MainDataset1.FieldByName('number').AsInteger);
+    AssertEquals('Unsaved name', MainForm.MainDataset1.FieldByName('name').AsString);
+    AssertEquals(0, MainForm.MainDataset1.ChangeCount);
+    MainForm.MainDataset1.Cancel;
+    AssertEquals('Alice', MainForm.MainDataset1.FieldByName('name').AsString);
+  finally
+    if MainForm.MainDataset1.State in [dsEdit, dsInsert] then
+      MainForm.MainDataset1.Cancel;
+    CloseBalance(Gui);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ProtocolBalance_MissingParticipantAndInactiveStageRefreshSelection;
+var
+  Gui: TGuiTestSession;
+begin
+  CreateBalanceFixture;
+  Gui := OpenBalance;
+  try
+    with MainForm.ProtocolBalanceView do
+    begin
+      AssertTrue(DetailsData.Locate('number', 2, []));
+      ExecBalanceSql('DELETE FROM main WHERE number = 2;');
+      OpenParticipantAction.Update;
+      OpenParticipantAction.Execute;
+      AssertEquals(rsProtocolBalanceParticipantMissing, LastDialogMessage);
+      AssertFalse(DetailsData.Locate('number', 2, []));
+      AssertBalanceCounts(2, 0, 0, 0, 0, 2);
+      AssertTrue(SummaryData.Locate('stage_index', 3, []));
+      stages[3].isActive := False;
+      OpenParticipantAction.Update;
+      OpenParticipantAction.Execute;
+      AssertEquals(rsProtocolBalanceStageUnavailable, LastDialogMessage);
+      AssertEquals(1, SummaryData.RecordCount);
+      AssertEquals(1, SummaryData.FieldByName('stage_index').AsInteger);
+    end;
+    AssertSame(MainForm.TabSheet2, MainForm.PageControl1.ActivePage);
+    AssertEquals(2, DialogCallCount);
+  finally
+    CloseBalance(Gui);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ProtocolBalance_ImportStatusCorrectionPenaltyAndClearRefreshCounts;
+var
+  Gui: TGuiTestSession;
+  OldAutomatic: boolean;
+begin
+  CreateBalanceFixture;
+  OldAutomatic := MainForm.CheckBoxAutomaticUpdateResutls.Checked;
+  MainForm.CheckBoxAutomaticUpdateResutls.Checked := True;
+  Gui := OpenBalance;
+  try
+    AssertBalanceCounts(3, 0, 0, 0, 0, 3);
+    WriteCsv(['# number;start time;correction;finish time;penalty;status',
+      '1;10:00:00;0;10:10:00;;']);
+    StageSelectionResult := 1;
+    SetStageSelectionHandler(@IntegrationStageSelectionHandler);
+    ImportStageResultsFile(FCsvFilePath);
+    Gui.Drain('Refresh balance after result import');
+    AssertBalanceCounts(3, 1, 0, 0, 0, 2);
+    with MainForm.ProtocolBalanceView do
+    begin
+      FilterComboBox.ItemIndex := Ord(pbfAll);
+      FilterComboBoxChange(FilterComboBox);
+      AssertTrue(DetailsData.Locate('number', 1, []));
+      AssertEquals('00:10:00.000', DetailsData.FieldByName('result_value').AsString);
+    end;
+    AssertTrue(MainForm.MainDataset1.Locate('number', 1, []));
+    MainForm.MainDataset1.Edit;
+    MainForm.MainDataset1.FieldByName('correction1').AsInteger := 250;
+    MainForm.MainDataset1.Post;
+    MainForm.RxDBGrid1EditingDone(MainForm.RxDBGrid1);
+    Gui.Drain('Refresh balance after correction');
+    AssertEquals('00:10:00.250',
+      MainForm.ProtocolBalanceView.DetailsData.FieldByName('result_value').AsString);
+    MainForm.MainDataset1.Edit;
+    MainForm.MainDataset1.FieldByName('penalty1').AsString := '00:00:05.000';
+    MainForm.MainDataset1.Post;
+    MainForm.RxDBGrid1EditingDone(MainForm.RxDBGrid1);
+    Gui.Drain('Refresh balance after penalty');
+    AssertEquals('00:10:05.250',
+      MainForm.ProtocolBalanceView.DetailsData.FieldByName('result_value').AsString);
+    MainForm.RxDBGrid1.SelectedField := MainForm.MainDataset1.FieldByName('starttime1');
+    MainForm.AcSetDNSExecute(MainForm.AcSetDNS);
+    Gui.Drain('Refresh balance after DNS');
+    AssertBalanceCounts(3, 0, 1, 0, 0, 2);
+    MainForm.AcClearResultsExecute(MainForm.AcClearResults);
+    Gui.Drain('Refresh balance after clearing results');
+    AssertBalanceCounts(3, 0, 0, 0, 0, 3);
+  finally
+    MainForm.CheckBoxAutomaticUpdateResutls.Checked := OldAutomatic;
+    CloseBalance(Gui);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ProtocolBalance_ParticipantImportRefreshesSummaryAndDetails;
+var
+  Gui: TGuiTestSession;
+begin
+  CreateBalanceFixture;
+  Gui := OpenBalance;
+  try
+    with MainForm.ProtocolBalanceView do
+    begin
+      AssertTrue(DetailsData.Locate('number', 2, []));
+      WriteCsv(['number;name;category', '2;Imported Bob;B', '4;New rider;B']);
+      ImportParticipantsFile(FCsvFilePath);
+      Gui.Drain('Refresh balance after participant import');
+      AssertBalanceCounts(4, 0, 0, 0, 0, 4);
+      AssertEquals(2, DetailsData.FieldByName('number').AsInteger);
+      AssertEquals('Imported Bob', DetailsData.FieldByName('name').AsString);
+      AssertTrue(DetailsData.Locate('number', 4, []));
+      AssertEquals('New rider', DetailsData.FieldByName('name').AsString);
+    end;
+  finally
+    CloseBalance(Gui);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.ProtocolBalance_SummaryFiltersMatchDisplayedCounts;
+const
+  Fields: array[0..5] of string = ('participant_count', 'result_count',
+    'dns_count', 'dnf_count', 'dsq_count', 'unresolved_count');
+  Filters: array[0..5] of TProtocolBalanceFilter = (pbfAll, pbfWithResult,
+    pbfDNS, pbfDNF, pbfDSQ, pbfUnresolved);
+var
+  Gui: TGuiTestSession;
+  I: integer;
+  Key: word;
+begin
+  CreateBalanceFixture;
+  ExecBalanceSql('UPDATE main SET finishtime1 = ''10:10:00'', result1 = ''00:10:00.000'' WHERE number = 1;');
+  ExecBalanceSql('UPDATE main SET status1 = ''1'' WHERE number = 2;');
+  ExecBalanceSql('UPDATE main SET status1 = ''2'' WHERE number = 3;');
+  ExecBalanceSql(
+    'INSERT INTO main (number, name, status1) VALUES (4, ''DSQ rider'', ''3''), (5, ''Unresolved rider'', NULL);');
+  Gui := OpenBalance;
+  try
+    AssertBalanceCounts(5, 1, 1, 1, 1, 1);
+    with MainForm.ProtocolBalanceView do
+    begin
+      for I := 0 to High(Fields) do
+      begin
+        SummaryGridCellClick(SummaryGrid.ColumnByFieldName(Fields[I]));
+        AssertEquals(Fields[I], Ord(Filters[I]), FilterComboBox.ItemIndex);
+        AssertEquals(Fields[I], SummaryData.FieldByName(Fields[I]).AsInteger,
+          DetailsData.RecordCount);
+      end;
+      SummaryGrid.SelectedField := SummaryData.FieldByName('participant_count');
+      Key := VK_RETURN;
+      SummaryGridKeyDown(SummaryGrid, Key, []);
+      AssertEquals(0, Key);
+      AssertEquals(5, DetailsData.RecordCount);
+      SummaryGrid.SelectedField := SummaryData.FieldByName('dns_count');
+      Key := VK_SPACE;
+      SummaryGridKeyDown(SummaryGrid, Key, []);
+      AssertEquals(0, Key);
+      AssertEquals(Ord(pbfDNS), FilterComboBox.ItemIndex);
+      AssertEquals(2, DetailsData.FieldByName('number').AsInteger);
+      FilterComboBox.ItemIndex := Ord(pbfFinishWithoutStart);
+      FilterComboBoxChange(FilterComboBox);
+      AssertEquals(1, DetailsData.RecordCount);
+      AssertEquals(1, DetailsData.FieldByName('number').AsInteger);
+    end;
+  finally
+    CloseBalance(Gui);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ProtocolBalance_ReceiveUpdatesCountersAndPreservesOpenJournals;
+var
+  Gui: TGuiTestSession;
+  Starts: TStartMarksForm;
+  Finishes: TFinishMarksForm;
+  StartId, FinishId: int64;
+begin
+  CreateBalanceFixture;
+  ApplyStartPacketAt(EncodeTime(10, 0, 0, 0), True, 1);
+  ApplyFinishPacketAt(EncodeTime(10, 10, 0, 0));
+  Starts := TStartMarksForm.Create(Application);
+  Finishes := TFinishMarksForm.Create(Application);
+  Starts.Show;
+  Finishes.Show;
+  Gui := OpenBalance;
+  try
+    Starts.ConfigureScope(1, smjfPendingOrConflict);
+    Finishes.ConfigureScope(1, fmjfPending);
+    StartId := Starts.StartMarksDataset.FieldByName('id').AsLargeInt;
+    FinishId := Finishes.FinishMarksDataset.FieldByName('id').AsLargeInt;
+    ApplyStartPacketAt(EncodeTime(10, 0, 1, 0), True, 2);
+    ApplyFinishPacketAt(EncodeTime(10, 10, 1, 0));
+    Gui.Drain('Update balance and scoped journals after serial/BLE marks');
+    AssertEquals(2, Starts.StartMarksDataset.RecordCount);
+    AssertEquals(2, Finishes.FinishMarksDataset.RecordCount);
+    AssertEquals(StartId, Starts.StartMarksDataset.FieldByName('id').AsLargeInt);
+    AssertEquals(FinishId, Finishes.FinishMarksDataset.FieldByName('id').AsLargeInt);
+    AssertEquals(Ord(smjfPendingOrConflict), Starts.ComboBoxJournalFilter.ItemIndex);
+    AssertEquals(Ord(fmjfPending), Finishes.ComboBoxJournalFilter.ItemIndex);
+    AssertEquals('ble', Starts.StartMarksDataset.FieldByName('source_kind').AsString);
+    AssertEquals('serial', Finishes.FinishMarksDataset.FieldByName(
+      'source_kind').AsString);
+    with MainForm.ProtocolBalanceView do
+    begin
+      AssertEquals(Format(rsProtocolBalancePendingStarts, [2]),
+        OpenPendingStartsAction.Caption);
+      AssertEquals(Format(rsProtocolBalancePendingFinishes, [2]),
+        OpenPendingFinishesAction.Caption);
+      AssertBalanceCounts(3, 0, 0, 0, 0, 3);
+    end;
+    MainForm.ResultClearClick(MainForm);
+    Gui.Drain('Hide finishes with a pending-only journal open');
+    AssertEquals(0, Finishes.FinishMarksDataset.RecordCount);
+    AssertEquals(Ord(fmjfPending), Finishes.ComboBoxJournalFilter.ItemIndex);
+    AssertEquals(Format(rsProtocolBalancePendingFinishes, [0]),
+      MainForm.ProtocolBalanceView.OpenPendingFinishesAction.Caption);
+    AssertEquals(Format(rsProtocolBalancePendingStarts, [2]),
+      MainForm.ProtocolBalanceView.OpenPendingStartsAction.Caption);
+  finally
+    Finishes.Free;
+    Starts.Free;
+    CloseBalance(Gui);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ProtocolBalance_ApplyStartAndFinishUpdatesResultAndQueues;
+var
+  Gui: TGuiTestSession;
+begin
+  CreateBalanceFixture;
+  ExecBalanceSql('UPDATE main SET starttime1 = ''10:00:00.000'' WHERE number = 1;');
+  RefreshCompetitionViews;
+  Gui := OpenBalance;
+  try
+    ApplyStartPacketAt(EncodeTime(10, 0, 0, 0), True, 15);
+    Gui.Drain('Receive pending start');
+    AssertEquals(Format(rsProtocolBalancePendingStarts, [1]),
+      MainForm.ProtocolBalanceView.OpenPendingStartsAction.Caption);
+    MainForm.AcApplyStartMarksExecute(MainForm.AcApplyStartMarks);
+    Gui.Drain('Apply start correction');
+    AssertEquals(Format(rsProtocolBalancePendingStarts, [0]),
+      MainForm.ProtocolBalanceView.OpenPendingStartsAction.Caption);
+    AssertBalanceCounts(3, 0, 0, 0, 0, 3);
+    ApplyFinishPacketAt(EncodeTime(10, 10, 0, 0));
+    SetFinishMarkNumberAt(0, 1);
+    Gui.Drain('Receive numbered finish');
+    AssertEquals(Format(rsProtocolBalancePendingFinishes, [1]),
+      MainForm.ProtocolBalanceView.OpenPendingFinishesAction.Caption);
+    MainForm.AcApplyFinishMarksExecute(MainForm.AcApplyFinishMarks);
+    Gui.Drain('Apply finish and recalculate balance');
+    AssertBalanceCounts(3, 1, 0, 0, 0, 2);
+    with MainForm.ProtocolBalanceView do
+    begin
+      AssertEquals(Format(rsProtocolBalancePendingFinishes, [0]),
+        OpenPendingFinishesAction.Caption);
+      FilterComboBox.ItemIndex := Ord(pbfWithResult);
+      FilterComboBoxChange(FilterComboBox);
+      AssertEquals(1, DetailsData.RecordCount);
+      AssertEquals(1, DetailsData.FieldByName('number').AsInteger);
+      AssertEquals('00:10:00.015', DetailsData.FieldByName('result_value').AsString);
+    end;
+  finally
+    CloseBalance(Gui);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ProtocolBalance_ConflictErrorAndHiddenMarksRefreshCounters;
+var
+  Gui: TGuiTestSession;
+  Mark: TStartMark;
+begin
+  CreateBalanceFixture;
+  ExecBalanceSql('UPDATE main SET starttime1 = ''10:00:00.000'', correction1 = 5 WHERE number = 1;');
+  RefreshCompetitionViews;
+  Gui := OpenBalance;
+  startMarkAutomaticApply := True;
+  try
+    ApplyStartPacketAt(EncodeTime(10, 0, 0, 0), True, 15);
+    Gui.Drain('Receive conflicting start');
+    AssertTrue(MainForm.StartMarkService.TryLoad(
+      MainForm.DatasetStartMarks.FieldByName('id').AsLargeInt, Mark));
+    AssertEquals(Ord(smsConflict), Ord(Mark.Status));
+    AssertEquals(Format(rsProtocolBalancePendingStarts, [1]),
+      MainForm.ProtocolBalanceView.OpenPendingStartsAction.Caption);
+    MainForm.AcClearStartMarksExecute(MainForm.AcClearStartMarks);
+    Gui.Drain('Hide conflicting start');
+    AssertEquals(Format(rsProtocolBalancePendingStarts, [0]),
+      MainForm.ProtocolBalanceView.OpenPendingStartsAction.Caption);
+    ExecBalanceSql('UPDATE main SET correction1 = NULL WHERE number = 1;');
+    ExecBalanceSql('CREATE TRIGGER reject_balance_correction BEFORE UPDATE OF correction1 ON main '
+      + 'BEGIN SELECT RAISE(ABORT, ''balance test calculation failure''); END;');
+    ApplyStartPacketAt(EncodeTime(10, 0, 1, 0), True, 16);
+    Gui.Drain('Refresh balance after persisted apply error');
+    AssertEquals(Format(rsProtocolBalanceStartErrors, [1]),
+      MainForm.ProtocolBalanceView.OpenStartErrorsAction.Caption);
+    AssertEquals(Format(rsProtocolBalancePendingStarts, [0]),
+      MainForm.ProtocolBalanceView.OpenPendingStartsAction.Caption);
+    AssertBalanceCounts(3, 0, 0, 0, 0, 3);
+  finally
+    startMarkAutomaticApply := False;
+    CloseBalance(Gui);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ProtocolBalance_NotificationsCoalesceAndHiddenViewReadsOnce;
+var
+  Gui: TGuiTestSession;
+  I: integer;
+begin
+  CreateBalanceFixture;
+  Gui := OpenBalance;
+  try
+    Gui.SelectTab(MainForm.TabSheet1);
+    MainForm.SQLite3Connection1.LogEvents := [detActualSQL];
+    MainForm.SQLite3Connection1.OnLog := @TraceBalanceSql;
+    FBalanceReadCount := 0;
+    for I := 1 to 10 do ApplyStartPacketAt(EncodeTime(10, 0, I, 0), True, I);
+    Gui.Drain('Receive marks with balance hidden');
+    AssertEquals('Hidden balance must not read', 0, FBalanceReadCount);
+    Gui.SelectTab(MainForm.TabSheet2);
+    Gui.SelectTab(MainForm.ProtocolBalanceSheet);
+    Gui.Drain('Show stale balance');
+    AssertEquals('One snapshot after showing', 1, FBalanceReadCount);
+    FBalanceReadCount := 0;
+    for I := 11 to 20 do ApplyStartPacketAt(EncodeTime(10, 0, I, 0), True, I);
+    AssertEquals('Reading must be deferred', 0, FBalanceReadCount);
+    Gui.Drain('Coalesce saved mark notifications');
+    AssertEquals('One snapshot for a burst', 1, FBalanceReadCount);
+    Gui.Drain('No redundant refresh');
+    AssertEquals(1, FBalanceReadCount);
+    AssertEquals(Format(rsProtocolBalancePendingStarts, [20]),
+      MainForm.ProtocolBalanceView.OpenPendingStartsAction.Caption);
+  finally
+    CloseBalance(Gui);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ProtocolBalance_RefreshPreservesSelectionAndHandlesRemovedRows;
+var
+  Gui: TGuiTestSession;
+begin
+  CreateBalanceFixture;
+  Gui := OpenBalance;
+  try
+    with MainForm.ProtocolBalanceView do
+    begin
+      AssertTrue(SummaryData.Locate('stage_index', 3, []));
+      FilterComboBox.ItemIndex := Ord(pbfAll);
+      FilterComboBoxChange(FilterComboBox);
+      AssertTrue(DetailsData.Locate('number', 2, []));
+      ExecBalanceSql('UPDATE main SET name = ''Updated Bob'' WHERE number = 2;');
+      MainForm.AcUpdateResultsExecute(MainForm.AcUpdateResults);
+      Gui.Drain('Preserve balance filter and selection');
+      AssertEquals(3, SummaryData.FieldByName('stage_index').AsInteger);
+      AssertEquals(Ord(pbfAll), FilterComboBox.ItemIndex);
+      AssertEquals(2, DetailsData.FieldByName('number').AsInteger);
+      AssertEquals('Updated Bob', DetailsData.FieldByName('name').AsString);
+      ExecBalanceSql('DELETE FROM main WHERE number = 2;');
+      MainForm.AcUpdateResultsExecute(MainForm.AcUpdateResults);
+      Gui.Drain('Restore closest available detail row');
+      AssertEquals(3, DetailsData.FieldByName('number').AsInteger);
+      AssertEquals(2, DetailsData.RecordCount);
+      stages[3].isActive := False;
+      ApplyStageActivityToUi(1);
+      Gui.Drain('Fallback after stage deactivation');
+      AssertEquals(1, SummaryData.RecordCount);
+      AssertEquals(1, SummaryData.FieldByName('stage_index').AsInteger);
+      AssertEquals(Ord(pbfAll), FilterComboBox.ItemIndex);
+      AssertEquals(3, DetailsData.FieldByName('number').AsInteger);
+    end;
+  finally
+    CloseBalance(Gui);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.ProtocolBalance_StageReductionUsesAvailableSelection;
+var
+  Gui: TGuiTestSession;
+begin
+  CreateBalanceFixture;
+  Gui := OpenBalance;
+  try
+    AssertTrue(MainForm.ProtocolBalanceView.SummaryData.Locate('stage_index', 3, []));
+    SettingsDraftStageCount := 1;
+    Application.QueueAsyncCall(@ResizeStageDraftAndClose, mrOk);
+    MainForm.MenuItemSettings.Click;
+    Gui.Drain('Balance after reducing stage count');
+    AssertEquals(1, stages.Count);
+    AssertEquals(1, MainForm.ProtocolBalanceView.SummaryData.RecordCount);
+    AssertEquals(1, MainForm.ProtocolBalanceView.SummaryData.FieldByName(
+      'stage_index').AsInteger);
+    AssertBalanceCounts(3, 0, 0, 0, 0, 3);
+  finally
+    CloseBalance(Gui);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.ProtocolBalance_CloseCancelsPendingRefresh;
+var
+  Gui: TGuiTestSession;
+begin
+  CreateBalanceFixture;
+  Gui := OpenBalance;
+  try
+    MainForm.SQLite3Connection1.LogEvents := [detActualSQL];
+    MainForm.SQLite3Connection1.OnLog := @TraceBalanceSql;
+    FBalanceReadCount := 0;
+    MainForm.ProtocolBalanceView.InvalidateData;
+    MainForm.FileCloseExecute(nil);
+    Gui.Drain('Discard refresh queued before closing competition');
+    AssertEquals(0, FBalanceReadCount);
+    with MainForm.ProtocolBalanceView do
+    begin
+      AssertTrue(SummaryData.IsEmpty);
+      AssertTrue(DetailsData.IsEmpty);
+      AssertEquals(rsProtocolBalanceOpenCompetition, StateLabel.Caption);
+      OpenParticipantAction.Update;
+      AssertFalse(OpenParticipantAction.Enabled);
+      AssertFalse(RefreshAction.Enabled);
+    end;
+  finally
+    CloseBalance(Gui);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.ProtocolBalance_SwitchDatabaseDiscardsQueuedOldData;
+var
+  Gui: TGuiTestSession;
+  OtherFile: string;
+  Context: TCompetitionDbContext;
+  Query: TSQLQuery;
+  Work: TCompetitionUnitOfWork;
+begin
+  CreateBalanceFixture;
+  OtherFile := FDbFilePath + '.other.db';
+  Context := TCompetitionDbContext.Create;
+  try
+    Context.OpenFile(OtherFile);
+    Query := Context.CreateQuery(nil);
+    Work := Context.BeginUnitOfWork;
+    try
+      TSchemaSql.ExecCreateTables(Context.Connection, 1, 'A', 'B',
+        'C', 'D', 'E', 'Other race');
+      Query.SQL.Text :=
+        'INSERT INTO main (number, name, category) VALUES (99, ''Other rider'', ''B'');';
+      Query.ExecSQL;
+      Work.Commit;
+    finally
+      Work.Free;
+      Query.Free;
+    end;
+  finally
+    Context.Free;
+  end;
+  Gui := OpenBalance;
+  try
+    MainForm.SQLite3Connection1.LogEvents := [detActualSQL];
+    MainForm.SQLite3Connection1.OnLog := @TraceBalanceSql;
+    FBalanceReadCount := 0;
+    MainForm.ProtocolBalanceView.InvalidateData;
+    OpenCompetitionFile(OtherFile);
+    Gui.Drain('Discard old refresh when opening another competition');
+    AssertEquals('Only the new snapshot may be loaded', 1, FBalanceReadCount);
+    with MainForm.ProtocolBalanceView do
+    begin
+      AssertEquals(1, SummaryData.RecordCount);
+      AssertBalanceCounts(1, 0, 0, 0, 0, 1);
+      AssertEquals(1, DetailsData.RecordCount);
+      AssertEquals(99, DetailsData.FieldByName('number').AsInteger);
+      AssertEquals('Other rider', DetailsData.FieldByName('name').AsString);
+    end;
+  finally
+    CloseBalance(Gui);
+    MainForm.FileCloseExecute(nil);
+    DeleteFile(OtherFile);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ProtocolBalance_RefreshPreservesUnsavedParticipantInput;
+var
+  Gui: TGuiTestSession;
+begin
+  CreateBalanceFixture;
+  Gui := OpenBalance;
+  try
+    AssertTrue(MainForm.MainDataset1.Locate('number', 1, []));
+    MainForm.MainDataset1.Edit;
+    MainForm.MainDataset1.FieldByName('name').AsString := 'Unsaved Alice';
+    ApplyStartPacketAt(EncodeTime(10, 0, 0, 0), True, 17);
+    ApplyFinishPacketAt(EncodeTime(10, 10, 0, 0));
+    Gui.Drain('Refresh saved balance while participant editor is pending');
+    with MainForm.ProtocolBalanceView do
+    begin
+      AssertTrue(DetailsData.Locate('number', 1, []));
+      AssertEquals('Alice', DetailsData.FieldByName('name').AsString);
+      AssertEquals(Format(rsProtocolBalancePendingStarts, [1]),
+        OpenPendingStartsAction.Caption);
+      AssertEquals(Format(rsProtocolBalancePendingFinishes, [1]),
+        OpenPendingFinishesAction.Caption);
+    end;
+    AssertEquals(Ord(dsEdit), Ord(MainForm.MainDataset1.State));
+    AssertEquals('Unsaved Alice', MainForm.MainDataset1.FieldByName('name').AsString);
+    AssertEquals(0, MainForm.MainDataset1.ChangeCount);
+  finally
+    if MainForm.MainDataset1.State in [dsEdit, dsInsert] then
+      MainForm.MainDataset1.Cancel;
+    CloseBalance(Gui);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ProtocolBalance_ReadErrorDisablesNavigationAndRetryRestoresSelection;
+var
+  Gui: TGuiTestSession;
+begin
+  CreateBalanceFixture;
+  Gui := OpenBalance;
+  try
+    with MainForm.ProtocolBalanceView do
+    begin
+      AssertTrue(SummaryData.Locate('stage_index', 3, []));
+      FilterComboBox.ItemIndex := Ord(pbfAll);
+      FilterComboBoxChange(FilterComboBox);
+      AssertTrue(DetailsData.Locate('number', 2, []));
+      ExecBalanceSql('ALTER TABLE finish_marks RENAME TO temporarily_unavailable_finishes;');
+      InvalidateData;
+      Gui.Drain('Display balance read error');
+      AssertTrue(SummaryData.IsEmpty);
+      AssertTrue(DetailsData.IsEmpty);
+      AssertTrue(Pos('finish_marks', StateLabel.Caption) > 0);
+      AssertEquals(rsProtocolBalancePendingFinishesUnavailable,
+        OpenPendingFinishesAction.Caption);
+      AssertTrue(RefreshAction.Enabled);
+      OpenParticipantAction.Update;
+      OpenPendingFinishesAction.Update;
+      AssertFalse(OpenParticipantAction.Enabled);
+      AssertFalse(OpenPendingFinishesAction.Enabled);
+      ExecBalanceSql('ALTER TABLE temporarily_unavailable_finishes RENAME TO finish_marks;');
+      RefreshAction.Execute;
+      Gui.Drain('Retry balance after read error');
+      AssertEquals(rsProtocolBalanceReady, StateLabel.Caption);
+      AssertEquals(3, SummaryData.FieldByName('stage_index').AsInteger);
+      AssertEquals(Ord(pbfAll), FilterComboBox.ItemIndex);
+      AssertEquals(2, DetailsData.FieldByName('number').AsInteger);
+      OpenParticipantAction.Update;
+      AssertTrue(OpenParticipantAction.Enabled);
+      AssertEquals(0, DialogCallCount);
+    end;
+  finally
+    CloseBalance(Gui);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ProtocolBalance_UncommittedChangesStayStaleUntilSaved;
+var
+  Gui: TGuiTestSession;
+  Work: TCompetitionUnitOfWork;
+  Query: TSQLQuery;
+begin
+  CreateBalanceFixture;
+  Gui := OpenBalance;
+  Query := MainForm.CompetitionDb.CreateQuery(nil);
+  Work := MainForm.CompetitionDb.BeginUnitOfWork;
+  try
+    Query.SQL.Text := 'UPDATE main SET name = ''Saved Alice'' WHERE number = 1;';
+    Query.ExecSQL;
+    with MainForm.ProtocolBalanceView do
+    begin
+      InvalidateData;
+      Gui.Drain('Defer snapshot inside an unfinished operation');
+      AssertEquals(rsProtocolBalanceStale, StateLabel.Caption);
+      AssertEquals('Alice', DetailsData.FieldByName('name').AsString);
+      OpenParticipantAction.Update;
+      AssertFalse(OpenParticipantAction.Enabled);
+      AssertFalse(Work.Completed);
+      Work.Commit;
+      InvalidateData;
+      Gui.Drain('Read snapshot after successful commit');
+      AssertEquals('Saved Alice', DetailsData.FieldByName('name').AsString);
+      AssertEquals(rsProtocolBalanceReady, StateLabel.Caption);
+    end;
+  finally
+    Work.Free;
+    Query.Free;
+    CloseBalance(Gui);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.InspectBalanceJournalAndClose(Data: PtrInt);
+var
+  I, ExpectedFilter, ExpectedRows: integer;
+  Form: TForm;
+  DataSet: TDataSet;
+begin
+  FBalanceJournalError := 'Expected journal did not open';
+  for I := Screen.FormCount - 1 downto 0 do
+  begin
+    Form := Screen.Forms[I];
+    if ((Data < 2) and (Form is TStartMarksForm)) or
+      ((Data >= 2) and (Form is TFinishMarksForm)) then
+    begin
+      try
+        if Data < 2 then
+        begin
+          if Data = 0 then ExpectedFilter := Ord(smjfPendingOrConflict)
+          else
+            ExpectedFilter := Ord(smjfError);
+          AssertEquals(ExpectedFilter,
+            TStartMarksForm(Form).ComboBoxJournalFilter.ItemIndex);
+          DataSet := TStartMarksForm(Form).StartMarksDataset;
+        end
+        else
+        begin
+          if Data = 2 then ExpectedFilter := Ord(fmjfPending)
+          else
+            ExpectedFilter := Ord(fmjfError);
+          AssertEquals(ExpectedFilter,
+            TFinishMarksForm(Form).ComboBoxJournalFilter.ItemIndex);
+          DataSet := TFinishMarksForm(Form).FinishMarksDataset;
+        end;
+        if Data = 0 then ExpectedRows := 2
+        else
+          ExpectedRows := 1;
+        AssertEquals(ExpectedRows, DataSet.RecordCount);
+        DataSet.First;
+        while not DataSet.EOF do
+        begin
+          AssertEquals(3, DataSet.FieldByName('stage_index').AsInteger);
+          if Data = 0 then
+            AssertTrue((DataSet.FieldByName('status').AsString = 'pending') or
+              (DataSet.FieldByName('status').AsString = 'conflict'))
+          else if Data = 2 then
+            AssertEquals('pending', DataSet.FieldByName('status').AsString)
+          else
+            AssertEquals('error', DataSet.FieldByName('status').AsString);
+          DataSet.Next;
+        end;
+        FBalanceJournalError := '';
+      except
+        on E: Exception do FBalanceJournalError := E.Message;
+      end;
+      Form.ModalResult := mrOk;
+      Exit;
+    end;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+ProtocolBalance_JournalActionsUseSelectedStageAndStatus;
+const
+  STATUSES: array[0..4] of string =
+    ('pending', 'conflict', 'error', 'hidden', 'applied');
+var
+  Gui: TGuiTestSession;
+  StageIndex, I: integer;
+  Status: string;
+begin
+  CreateBalanceFixture;
+  for StageIndex in [1, 3] do
+    for Status in STATUSES do
+    begin
+      ExecBalanceSql(Format(
+        'INSERT INTO start_marks (stage_index, event_time, source_kind, source_device_id, received_at, status) '
+        + 'VALUES (%d, ''10:00:00.000'', ''ble'', ''balance test'', ''2026-10-29T10:00:00.000'', %s);', [StageIndex, QuotedStr(Status)]));
+      if Status <> 'conflict' then
+        ExecBalanceSql(Format(
+          'INSERT INTO finish_marks (stage_index, event_time, source_kind, received_at, status) '
+          + 'VALUES (%d, ''10:10:00.000'', ''manual'', ''2026-10-29T10:10:00.000'', %s);',
+          [StageIndex, QuotedStr(Status)]));
+    end;
+  Gui := OpenBalance;
+  try
+    with MainForm.ProtocolBalanceView do
+    begin
+      AssertTrue(SummaryData.Locate('stage_index', 3, []));
+      for I := 0 to 3 do
+      begin
+        FBalanceJournalError := 'Journal action did not run';
+        Application.QueueAsyncCall(@InspectBalanceJournalAndClose, I);
+        case I of
+          0: begin
+            OpenPendingStartsAction.Update;
+            OpenPendingStartsAction.Execute;
+          end;
+          1: begin
+            OpenStartErrorsAction.Update;
+            OpenStartErrorsAction.Execute;
+          end;
+          2: begin
+            OpenPendingFinishesAction.Update;
+            OpenPendingFinishesAction.Execute;
+          end;
+          3: begin
+            OpenFinishErrorsAction.Update;
+            OpenFinishErrorsAction.Execute;
+          end;
+        end;
+        AssertEquals(FBalanceJournalError, '', FBalanceJournalError);
+      end;
+    end;
+  finally
+    CloseBalance(Gui);
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.GuiSmoke_SettingsPagesApplyAndCancel;
+var
+  OldName: string;
+  OldRetry: boolean;
+  Answer: integer;
+begin
+  CreateNewCompetitionFile;
+  OldName := raceName;
+  OldRetry := telegramRetryEnabled;
+  try
+    for Answer := mrCancel downto mrOk do
+    begin
+      Application.QueueAsyncCall(@ExerciseSettingsAndClose, Answer);
+      MainForm.MenuItemSettings.Click;
+      AssertEquals('Unexpected settings GUI error', '', InputDialogCallbackError);
+      if Answer = mrCancel then
+      begin
+        AssertEquals(OldName, raceName);
+        AssertEquals(OldRetry, telegramRetryEnabled);
+      end
+      else
+      begin
+        AssertEquals('GUI accepted race', raceName);
+        AssertEquals(not OldRetry, telegramRetryEnabled);
+      end;
+    end;
+  finally
+    telegramRetryEnabled := OldRetry;
+  end;
+end;
+
+
+procedure TMainFlowIntegrationTests.GuiSmoke_EditingSurvivesIncomingMarks;
+var
+  Gui: TGuiTestSession;
+  WasVisible: boolean;
+begin
+  CreateNewCompetitionFile;
+  InsertParticipant(777);
+  WasVisible := MainForm.Visible;
+  Gui := TGuiTestSession.Create;
+  try
+    MainForm.Show;
+    Gui.SelectTab(MainForm.TabSheet1);
+    MainForm.RxDBGrid1.SetFocus;
+    MainForm.MainDataset1.Edit;
+    MainForm.MainDataset1.FieldByName('name').AsString := 'Unfinished GUI edit';
+    ApplyStartPacketAt(EncodeTime(10, 0, 0, 0));
+    ApplyFinishPacketAt(EncodeTime(10, 10, 0, 0));
+    Gui.Drain('Receive marks while editing a participant');
+    AssertEquals(Ord(dsEdit), Ord(MainForm.MainDataset1.State));
+    AssertEquals('Unfinished GUI edit',
+      MainForm.MainDataset1.FieldByName('name').AsString);
+    AssertTrue(MainForm.RxDBGrid1.ContainsControl(MainForm.ActiveControl));
+    MainForm.MainDataset1.Post;
+    MainForm.RxDBGrid1EditingDone(MainForm.RxDBGrid1);
+    Gui.Drain('Save participant after incoming marks');
+    AssertEquals(777, MainForm.MainDataset1.FieldByName('number').AsInteger);
+    AssertEquals('Unfinished GUI edit',
+      MainForm.MainDataset1.FieldByName('name').AsString);
+    AssertEquals(1, MainForm.DatasetStartMarks.RecordCount);
+    AssertEquals(1, MainForm.DatasetFinishMarks.RecordCount);
+    Gui.SelectTab(MainForm.TabSheet3);
+    Gui.SelectTab(MainForm.SheetStageTotal);
+  finally
+    if MainForm.MainDataset1.State in [dsEdit, dsInsert] then
+      MainForm.MainDataset1.Cancel;
+    MainForm.PageControl1.ActivePage := MainForm.TabSheet1;
+    if not WasVisible then MainForm.Hide;
+    Gui.Free;
+  end;
+end;
+
+
+procedure TMainFlowIntegrationTests.GuiSmoke_QueuedExceptionsAreReported;
+var
+  Gui: TGuiTestSession;
+  Reported: boolean;
+begin
+  Gui := TGuiTestSession.Create;
+  try
+    Application.QueueAsyncCall(@RaiseQueuedGuiException, 0);
+    Reported := False;
+    try
+      Gui.Drain('Test exception capture');
+    except
+      on E: Exception do
+      begin
+        Reported := Pos(
+          'Test exception capture: GUI exception: Exception: queued GUI failure',
+          E.Message) > 0;
+        if not Reported then raise;
+      end;
+    end;
+    AssertTrue('Queued exceptions must fail the GUI scenario', Reported);
+  finally
+    Gui.Free;
+  end;
+end;
+
+
+procedure TMainFlowIntegrationTests.RaiseQueuedGuiException(Data: PtrInt);
+begin
+  raise Exception.Create('queued GUI failure');
+end;
+
+
+procedure TMainFlowIntegrationTests.Statistics_TimerReadsTrackOnlyWhileVisible;
+var
+  WasVisible, WasTimerEnabled: boolean;
+  PreviousPage: TTabSheet;
+  Gui: TGuiTestSession;
+  I: integer;
+begin
+  CreateNewCompetitionFile;
+  WasVisible := MainForm.Visible;
+  WasTimerEnabled := MainForm.Timer1.Enabled;
+  PreviousPage := MainForm.PageControl1.ActivePage;
+  Gui := TGuiTestSession.Create;
+  MainForm.Timer1.Enabled := False;
+  try
+    MainForm.Show;
+    Gui.SelectTab(MainForm.TabSheet1);
+    FStatDatasetOpenCount := 0;
+    MainForm.StatDataset2.AfterOpen := @CountStatDatasetOpen;
+    MainForm.Clock.Caption := 'clock must update';
+    for I := 1 to 3 do MainForm.Timer1Timer(MainForm.Timer1);
+    AssertEquals('Hidden track statistics must not execute periodic reads',
+      0, FStatDatasetOpenCount);
+    AssertTrue('The clock must keep updating with statistics hidden',
+      MainForm.Clock.Caption <> 'clock must update');
+
+    Gui.SelectTab(MainForm.TabSheet2);
+    AssertEquals('Showing statistics must immediately read fresh track data',
+      1, FStatDatasetOpenCount);
+    MainForm.Timer1Timer(MainForm.Timer1);
+    AssertEquals('The visible track table must keep updating on timer ticks',
+      2, FStatDatasetOpenCount);
+
+    MainForm.Hide;
+    Gui.Drain('Hide main window with statistics selected');
+    AssertFalse('The hidden main form must not be showing', MainForm.Showing);
+    AssertEquals('Hiding the window must not reopen track statistics',
+      2, FStatDatasetOpenCount);
+    MainForm.Timer1Timer(MainForm.Timer1);
+    AssertEquals('A hidden main window must not read track statistics',
+      2, FStatDatasetOpenCount);
+    MainForm.FileCloseExecute(nil);
+    MainForm.Timer1Timer(MainForm.Timer1);
+    AssertEquals('A closed competition must not read track statistics',
+      2, FStatDatasetOpenCount);
+  finally
+    MainForm.StatDataset2.AfterOpen := nil;
+    MainForm.PageControl1.ActivePage := PreviousPage;
+    if WasVisible then MainForm.Show
+    else
+      MainForm.Hide;
+    MainForm.Timer1.Enabled := WasTimerEnabled;
+    Gui.Free;
   end;
 end;
 
@@ -2572,7 +5566,7 @@ begin
     MainForm.MainDataset1.FieldByName('name').AsString);
 end;
 
-procedure TMainFlowIntegrationTests.CategoryEdit_RefreshesOnlyAffectedQueriesAfterCommit;
+procedure TMainFlowIntegrationTests.CategoryEdit_RefreshesCalculatedQueriesAfterCommit;
 begin
   CreateNewCompetitionFile;
   InsertParticipant(402);
@@ -2590,12 +5584,12 @@ begin
     MainForm.ComboBox1Category.Text := 'Changed category';
     MainForm.ComboBox1CategoryEditingDone(MainForm.ComboBox1Category);
 
-    AssertEquals('The editable query must stay open across commit',
-      0, FMainDatasetOpenCount);
+    AssertEquals('The editable query must reload calculated values after commit',
+      1, FMainDatasetOpenCount);
     AssertEquals('Category statistics must be refreshed once',
       1, FStatDatasetOpenCount);
-    AssertEquals('An unrelated correction query must not be refreshed',
-      0, FCorrectionDatasetOpenCount);
+    AssertEquals('RefreshAll must also refresh the correction query',
+      1, FCorrectionDatasetOpenCount);
     AssertTrue(MainForm.MainDataset1.Active);
     AssertTrue(MainForm.StatDataset1.Active);
     AssertTrue(MainForm.CorrectionDataset.Active);
@@ -2608,7 +5602,402 @@ begin
   end;
 end;
 
-procedure TMainFlowIntegrationTests.CreateNewCompetitionFile_ViaMainFormHandler_CreatesDbAndOpensDatasets;
+procedure TMainFlowIntegrationTests.CreateMutationFixture;
+begin
+  CreateEmptyCompetitionFixture(2);
+  TConfigSql.ExecUpsertByKey(MainForm.SQLQuery1, 'stage2', 'True');
+  MainForm.SQLQuery1.SQL.Text :=
+    'INSERT INTO main (number, name, category, starttime1, finishtime1, ' +
+    'starttime2, finishtime2) VALUES ' +
+    '(1, ''First'', ''A'', ''10:00:00'', ''10:01:00'', ''11:00:00'', ''11:00:20''), ' +
+    '(2, ''Last'', ''A'', ''10:00:00'', ''10:02:00'', ''11:00:00'', ''11:00:40''), ' +
+    '(3, ''Middle'', ''B'', ''10:00:00'', ''10:01:30'', ''11:00:00'', ''11:00:30'');';
+  MainForm.SQLQuery1.ExecSQL;
+  MainForm.SQLTransaction1.Commit;
+  OpenCompetitionFile(FDbFilePath);
+  MainForm.AcUpdateResultsExecute(MainForm.AcUpdateResults);
+  AssertEquals('Fixture calculation: ' + LastDialogMessage, 0, DialogCallCount);
+  AssertPlacement(1, 'A', 1, 1, '', '', '', '');
+  AssertPlacement(2, 'A', 2, 3, '00:01:00.000', '00:00:20.000',
+    '00:01:20.000', '00:01:20.000');
+  AssertPlacement(3, 'B', 1, 2, '', '', '', '00:00:40.000');
+end;
+
+function TMainFlowIntegrationTests.MutationSnapshot: string;
+var
+  I: integer;
+  Query: TSQLQuery;
+  Sql: string;
+begin
+  Result := '';
+  Query := MainForm.CompetitionDb.CreateQuery(nil);
+  try
+    for Sql in ['SELECT * FROM main ORDER BY number',
+        'SELECT * FROM config ORDER BY key'] do
+    begin
+      Query.SQL.Text := Sql;
+      Query.Open;
+      while not Query.EOF do
+      begin
+        for I := 0 to Query.FieldCount - 1 do
+          if Query.Fields[I].IsNull then Result := Result + 'NULL;'
+          else
+            Result := Result + IntToStr(Length(Query.Fields[I].AsString)) +
+              ':' + Query.Fields[I].AsString + ';';
+        Result := Result + LineEnding;
+        Query.Next;
+      end;
+      Query.Close;
+    end;
+  finally
+    Query.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.BlockMutationCalculation;
+begin
+  MainForm.SQLQuery1.SQL.Text :=
+    'CREATE TRIGGER fail_mutation_calculation BEFORE UPDATE OF thruplace ' +
+    'ON main WHEN NEW.number = 3 BEGIN ' +
+    'SELECT RAISE(ABORT, ''forced mutation calculation failure''); END;';
+  MainForm.SQLQuery1.ExecSQL;
+  MainForm.SQLTransaction1.Commit;
+end;
+
+procedure TMainFlowIntegrationTests.AssertPlacement(const ANumber: integer;
+  const ACategory: string; const APlace, AThruPlace: integer;
+  const AStageGap, AStage2Gap, ASumGap, AThruGap: string);
+var
+  Query: TSQLQuery;
+
+  procedure AssertGap(const AField, AValue: string);
+  begin
+    if AValue = '' then AssertTrue(AField + ' must be NULL',
+        Query.FieldByName(AField).IsNull)
+    else
+      AssertEquals(AField, AValue, Query.FieldByName(AField).AsString);
+  end;
+
+begin
+  Query := MainForm.CompetitionDb.CreateQuery(nil);
+  try
+    Query.SQL.Text := 'SELECT * FROM main WHERE number = :NUMBER';
+    Query.ParamByName('NUMBER').AsInteger := ANumber;
+    Query.Open;
+    AssertFalse('Missing participant ' + IntToStr(ANumber), Query.EOF);
+    AssertEquals(ACategory, Query.FieldByName('category').AsString);
+    AssertEquals('Stage 1 place', APlace, Query.FieldByName('place1').AsInteger);
+    AssertEquals('Stage 2 place', APlace, Query.FieldByName('place2').AsInteger);
+    AssertEquals('Sum place', APlace, Query.FieldByName('sumplace').AsInteger);
+    AssertEquals('Through place', AThruPlace, Query.FieldByName('thruplace').AsInteger);
+    AssertGap('diffleader1', AStageGap);
+    AssertGap('diffleader2', AStage2Gap);
+    AssertGap('sumdiffleader', ASumGap);
+    AssertGap('thrudiff', AThruGap);
+  finally
+    Query.Free;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.ExerciseCategoryMutation(
+  const AUseCombo, AEmptyCategory, AFail: boolean; const AMixedStageEdit: boolean);
+var
+  CategoryName, BeforeState, FirstGap, SumGap, LastThruGap: string;
+  OldAutomaticUpdate: boolean;
+  Pass: integer;
+
+  procedure ChangeCategory;
+  begin
+    AssertTrue(MainForm.MainDataset1.Locate('number', 1, []));
+    if AUseCombo then
+    begin
+      MainForm.ComboBox1Category.Text := CategoryName;
+      MainForm.ComboBox1CategoryEditingDone(MainForm.ComboBox1Category);
+    end
+    else
+    begin
+      MainForm.MainDataset1.Edit;
+      MainForm.MainDataset1category.AsString := CategoryName;
+      if AMixedStageEdit then
+        MainForm.MainDataset1.FieldByName('starttime1').Text := '10:00:30';
+      MainForm.MainDataset1.Post;
+      MainForm.RxDBGrid1EditingDone(MainForm.RxDBGrid1);
+    end;
+  end;
+
+begin
+  CreateMutationFixture;
+  if AEmptyCategory then CategoryName := 'Empty'
+  else
+    CategoryName := 'B';
+  OldAutomaticUpdate := MainForm.CheckBoxAutomaticUpdateResutls.Checked;
+  MainForm.CheckBoxAutomaticUpdateResutls.Checked := False;
+  try
+    if AFail then
+    begin
+      BeforeState := MutationSnapshot;
+      BlockMutationCalculation;
+      ChangeCategory;
+      AssertEquals('Calculation failure must be reported', 1, DialogCallCount);
+      AssertTrue(Pos('forced mutation calculation failure', LastDialogMessage) > 0);
+      AssertEquals('Changes and all derived results must roll back',
+        BeforeState, MutationSnapshot);
+      AssertTrue('The editable query must recover after rollback',
+        MainForm.MainDataset1.Active);
+      AssertTrue(MainForm.MainDataset1.Locate('number', 1, []));
+      AssertEquals('A', MainForm.MainDataset1category.AsString);
+      MainForm.SQLQuery1.SQL.Text := 'DROP TRIGGER fail_mutation_calculation';
+      MainForm.SQLQuery1.ExecSQL;
+      MainForm.SQLTransaction1.Commit;
+      DialogCallCount := 0;
+    end;
+    ChangeCategory;
+    AssertEquals('Category edit: ' + LastDialogMessage, 0, DialogCallCount);
+    if AMixedStageEdit then
+    begin
+      FirstGap := '00:01:00.000';
+      SumGap := '00:01:10.000';
+      LastThruGap := '00:01:50.000';
+    end
+    else
+    begin
+      FirstGap := '00:00:30.000';
+      SumGap := '00:00:40.000';
+      LastThruGap := '00:01:20.000';
+    end;
+    for Pass := 0 to 1 do
+    begin
+      if Pass = 1 then OpenCompetitionFile(FDbFilePath);
+      AssertPlacement(1, CategoryName, 1, 1, '', '', '', '');
+      AssertPlacement(2, 'A', 1, 3, '', '', '', LastThruGap);
+      if AEmptyCategory then
+        AssertPlacement(3, 'B', 1, 2, '', '', '', SumGap)
+      else
+        AssertPlacement(3, 'B', 2, 2, FirstGap, '00:00:10.000', SumGap, SumGap);
+    end;
+  finally
+    MainForm.CheckBoxAutomaticUpdateResutls.Checked := OldAutomaticUpdate;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.ExerciseParticipantDeletion(const ANumber: integer;
+  const AConfirm, AFail: boolean);
+var
+  BeforeState: string;
+  Pass: integer;
+begin
+  CreateMutationFixture;
+  BeforeState := MutationSnapshot;
+  if AFail then BlockMutationCalculation;
+  if AConfirm then ConfirmationDialogResult := mrYes
+  else
+    ConfirmationDialogResult := mrNo;
+  AssertTrue(MainForm.MainDataset1.Locate('number', ANumber, []));
+  MainForm.AcDeleteNumberExecute(MainForm.AcDeleteNumber);
+  if not AConfirm then
+  begin
+    AssertEquals(BeforeState, MutationSnapshot);
+    Exit;
+  end;
+  if AFail then
+  begin
+    AssertEquals('Confirmation and calculation failure must be reported',
+      2, DialogCallCount);
+    AssertTrue(Pos('forced mutation calculation failure', LastDialogMessage) > 0);
+    AssertEquals('Deletion and partial calculations must roll back',
+      BeforeState, MutationSnapshot);
+    AssertTrue('The participant must remain editable after rollback',
+      MainForm.MainDataset1.Active);
+    AssertTrue(MainForm.MainDataset1.Locate('number', ANumber, []));
+    MainForm.SQLQuery1.SQL.Text := 'DROP TRIGGER fail_mutation_calculation';
+    MainForm.SQLQuery1.ExecSQL;
+    MainForm.SQLTransaction1.Commit;
+    DialogCallCount := 0;
+    MainForm.AcDeleteNumberExecute(MainForm.AcDeleteNumber);
+  end;
+  AssertEquals('Only the deletion confirmation must be shown', 1, DialogCallCount);
+  for Pass := 0 to 1 do
+  begin
+    if Pass = 1 then OpenCompetitionFile(FDbFilePath);
+    AssertMainRowCount(2);
+    AssertFalse(MainForm.MainDataset1.Locate('number', ANumber, []));
+    if ANumber <> 1 then AssertPlacement(1, 'A', 1, 1, '', '', '', '');
+    if ANumber = 1 then
+    begin
+      AssertPlacement(2, 'A', 1, 2, '', '', '', '00:00:40.000');
+      AssertPlacement(3, 'B', 1, 1, '', '', '', '');
+    end
+    else if ANumber = 3 then
+      AssertPlacement(2, 'A', 2, 2, '00:01:00.000', '00:00:20.000',
+        '00:01:20.000', '00:01:20.000')
+    else
+      AssertPlacement(3, 'B', 1, 2, '', '', '', '00:00:40.000');
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.ParticipantImport_RecalculatesStartsAndCategories;
+var
+  Pass: integer;
+begin
+  CreateMutationFixture;
+  WriteCsv(['number;name;category;First;Second', '1;Imported;B;10:00:30;11:00:00']);
+  ImportParticipantsFile(FCsvFilePath);
+  AssertEquals('Only category-name confirmation is expected: ' + LastDialogMessage,
+    1, DialogCallCount);
+  for Pass := 0 to 1 do
+  begin
+    if Pass = 1 then OpenCompetitionFile(FDbFilePath);
+    AssertTrue(MainForm.MainDataset1.Locate('number', 1, []));
+    AssertEquals('00:00:30.000', MainForm.MainDataset1.FieldByName('result1').AsString);
+    AssertEquals('00:00:50.000', MainForm.MainDataset1.FieldByName(
+      'sumresult').AsString);
+    AssertPlacement(1, 'B', 1, 1, '', '', '', '');
+    AssertPlacement(2, 'A', 1, 3, '', '', '', '00:01:50.000');
+    AssertPlacement(3, 'B', 2, 2, '00:01:00.000', '00:00:10.000',
+      '00:01:10.000', '00:01:10.000');
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.ParticipantImport_WithoutStagesClearsStaleResults;
+begin
+  CreateMutationFixture;
+  WriteCsv(['number;name;category', '1;Imported;B']);
+  ImportParticipantsFile(FCsvFilePath);
+  AssertEquals('Only category-name confirmation is expected: ' + LastDialogMessage,
+    1, DialogCallCount);
+  AssertEquals(2, stages.ActiveStagesCount);
+  AssertTrue(MainForm.MainDataset1.Locate('number', 1, []));
+  AssertTrue(MainForm.MainDataset1.FieldByName('result1').IsNull);
+  AssertTrue(MainForm.MainDataset1.FieldByName('sumresult').IsNull);
+  AssertTrue(MainForm.MainDataset1.FieldByName('sumplace').IsNull);
+  AssertPlacement(2, 'A', 1, 2, '', '', '', '00:00:40.000');
+  AssertPlacement(3, 'B', 1, 1, '', '', '', '');
+end;
+
+procedure TMainFlowIntegrationTests.
+ParticipantImport_StageActivityRecalculatesStatusesAndTotals;
+begin
+  CreateMutationFixture;
+  MainForm.SQLQuery1.SQL.Text :=
+    'INSERT INTO main(number, name, category, status, status2) ' +
+    'VALUES (4, ''Inactive DNF'', ''A'', ''2'', ''2'');';
+  MainForm.SQLQuery1.ExecSQL;
+  MainForm.SQLTransaction1.Commit;
+  WriteCsv(['number;name;category;Only stage', '1;Imported;A;10:00:30']);
+  ImportParticipantsFile(FCsvFilePath);
+  AssertEquals('Only category-name confirmation is expected: ' + LastDialogMessage,
+    1, DialogCallCount);
+  AssertEquals(1, stages.ActiveStagesCount);
+  AssertTrue(MainForm.MainDataset1.Locate('number', 1, []));
+  AssertEquals('00:00:30.000', MainForm.MainDataset1.FieldByName('sumresult').AsString);
+  AssertEquals(1, MainForm.MainDataset1.FieldByName('sumstages').AsInteger);
+  MainForm.SQLQuery1.SQL.Text := 'SELECT status, status2 FROM main WHERE number = 4';
+  MainForm.SQLQuery1.Open;
+  AssertTrue('Global status must use the imported active stage set',
+    MainForm.SQLQuery1.FieldByName('status').IsNull);
+  AssertEquals('2', MainForm.SQLQuery1.FieldByName('status2').AsString);
+  MainForm.SQLQuery1.Close;
+  OpenCompetitionFile(FDbFilePath);
+  AssertTrue(MainForm.MainDataset1.Locate('number', 1, []));
+  AssertEquals('00:00:30.000', MainForm.MainDataset1.FieldByName('sumresult').AsString);
+end;
+
+procedure TMainFlowIntegrationTests.
+ParticipantImport_CalculationFailureRollsBackSchemaAndData;
+var
+  BeforeState: string;
+begin
+  CreateMutationFixture;
+  BeforeState := MutationSnapshot;
+  BlockMutationCalculation;
+  WriteCsv(['number;name;category;First;Second;New stage',
+    '1;Imported;B;10:00:30;11:00:00;12:00:00']);
+  ImportParticipantsFile(FCsvFilePath);
+  AssertEquals('Category confirmation and import failure must be reported',
+    2, DialogCallCount);
+  AssertTrue(Pos('forced mutation calculation failure', LastDialogMessage) > 0);
+  AssertEquals('Import, configuration and calculations must roll back',
+    BeforeState, MutationSnapshot);
+  AssertEquals(2, TSchemaSql.DetectStageCapacity(MainForm.SQLQuery1));
+  AssertEquals(2, stages.Count);
+  AssertTrue('Import failure must keep the database usable', IsCompetitionDatabaseOpen);
+  MainForm.SQLQuery1.SQL.Text := 'DROP TRIGGER fail_mutation_calculation';
+  MainForm.SQLQuery1.ExecSQL;
+  MainForm.SQLTransaction1.Commit;
+  DialogCallCount := 0;
+  ImportParticipantsFile(FCsvFilePath);
+  AssertEquals('Only category-name confirmation is expected: ' + LastDialogMessage,
+    1, DialogCallCount);
+  AssertEquals(3, stages.Count);
+  AssertTrue(MainForm.MainDataset1.Locate('number', 1, []));
+  AssertEquals('00:00:30.000', MainForm.MainDataset1.FieldByName('result1').AsString);
+end;
+
+procedure TMainFlowIntegrationTests.ParticipantDelete_LeaderRecalculatesStandings;
+begin
+  ExerciseParticipantDeletion(1, True);
+end;
+
+procedure TMainFlowIntegrationTests.ParticipantDelete_MiddleRecalculatesStandings;
+begin
+  ExerciseParticipantDeletion(3, True);
+end;
+
+procedure TMainFlowIntegrationTests.ParticipantDelete_LastRecalculatesStandings;
+begin
+  ExerciseParticipantDeletion(2, True);
+end;
+
+procedure TMainFlowIntegrationTests.ParticipantDelete_CancelPreservesResults;
+begin
+  ExerciseParticipantDeletion(1, False);
+end;
+
+procedure TMainFlowIntegrationTests.
+ParticipantDelete_CalculationFailureRollsBackDeletion;
+begin
+  ExerciseParticipantDeletion(1, True, True);
+end;
+
+procedure TMainFlowIntegrationTests.CategoryCombo_RecalculatesBothCategories;
+begin
+  ExerciseCategoryMutation(True, False, False);
+end;
+
+procedure TMainFlowIntegrationTests.CategoryCombo_MoveToEmptyCategoryRecalculates;
+begin
+  ExerciseCategoryMutation(True, True, False);
+end;
+
+procedure TMainFlowIntegrationTests.CategoryGrid_RecalculatesBothCategories;
+begin
+  ExerciseCategoryMutation(False, False, False);
+end;
+
+procedure TMainFlowIntegrationTests.CategoryGrid_MoveToEmptyCategoryRecalculates;
+begin
+  ExerciseCategoryMutation(False, True, False);
+end;
+
+procedure TMainFlowIntegrationTests.CategoryCombo_CalculationFailureRollsBackEdit;
+begin
+  ExerciseCategoryMutation(True, False, True);
+end;
+
+procedure TMainFlowIntegrationTests.CategoryGrid_CalculationFailureRollsBackEdit;
+begin
+  ExerciseCategoryMutation(False, False, True);
+end;
+
+procedure TMainFlowIntegrationTests.
+CategoryGrid_MixedStageEditRecalculatesWithAutomaticUpdateDisabled;
+begin
+  ExerciseCategoryMutation(False, False, False, True);
+end;
+
+
+procedure TMainFlowIntegrationTests.
+CreateNewCompetitionFile_ViaMainFormHandler_CreatesDbAndOpensDatasets;
 var
   expectedRaceName: string;
 begin
@@ -2631,7 +6020,8 @@ begin
   AssertEquals(DEFAULT_STAGE_COUNT, stages.Count);
 end;
 
-procedure TMainFlowIntegrationTests.NewCompetitionSchema_IsVersionedAndReopensWithoutMigration;
+procedure TMainFlowIntegrationTests.
+NewCompetitionSchema_IsVersionedAndReopensWithoutMigration;
 begin
   CreateNewCompetitionFile;
 
@@ -2661,7 +6051,8 @@ begin
     FindBackupFile);
 end;
 
-procedure TMainFlowIntegrationTests.CompetitionConfigModel_LoadDoesNotApplyUiUntilExplicitPhase;
+procedure TMainFlowIntegrationTests.
+CompetitionConfigModel_LoadDoesNotApplyUiUntilExplicitPhase;
 const
   UPDATED_STAGE_NAME = 'Loaded stage model';
   UI_SENTINEL = 'UI must stay unchanged';
@@ -2685,7 +6076,7 @@ begin
   end;
 
   with TCompetitionLifecycleService.LoadConfiguration(
-    MainForm.CompetitionDb, stages.Count, VISIBLECAT) do
+      MainForm.CompetitionDb, stages.Count, VISIBLECAT) do
   begin
     stages[2].Name := StageNames[1];
     stages[2].isActive := StageActive[1];
@@ -2695,8 +6086,7 @@ begin
   AssertTrue(stages[2].isActive);
   AssertEquals(UI_SENTINEL, MainForm.StageResultView(2).Sheet.Caption);
   AssertEquals(UI_SENTINEL,
-    MainForm.RxDBGrid1.ColumnByFieldName(
-      'starttime2').Title.Caption);
+    MainForm.RxDBGrid1.ColumnByFieldName('starttime2').Title.Caption);
   AssertFalse(MainForm.StageResultView(2).Sheet.TabVisible);
 
   ApplyStagePresentationToUi;
@@ -2704,8 +6094,7 @@ begin
   AssertEquals(UPDATED_STAGE_NAME,
     MainForm.StageResultView(2).Sheet.Caption);
   AssertEquals(UPDATED_STAGE_NAME + '|' + rsStarttime,
-    MainForm.RxDBGrid1.ColumnByFieldName(
-      'starttime2').Title.Caption);
+    MainForm.RxDBGrid1.ColumnByFieldName('starttime2').Title.Caption);
   AssertTrue(MainForm.StageResultView(2).Sheet.TabVisible);
 end;
 
@@ -2755,7 +6144,8 @@ begin
     MainForm.StatDataset2.Locate('number', 801, []));
 end;
 
-procedure TMainFlowIntegrationTests.CurrentStageSelector_MapsSparseStagesAndPreservesSelection;
+procedure TMainFlowIntegrationTests.
+CurrentStageSelector_MapsSparseStagesAndPreservesSelection;
 var
   i: integer;
 begin
@@ -2855,16 +6245,14 @@ begin
   AssertFalse('Stage 2 participant must not leak into the stage 12 query',
     MainForm.StatDataset2.Locate('number', OTHER_STAGE_PARTICIPANT, []));
 
-  AssertTrue(MainForm.CorrectionDataset.Locate(
-    'number', FINISH_PARTICIPANT, []));
+  AssertTrue(MainForm.CorrectionDataset.Locate('number', FINISH_PARTICIPANT, []));
   MainForm.CorrectionDataset.Edit;
   MainForm.CorrectionDataset.FieldByName('correction').AsInteger := 250;
   MainForm.CorrectionDataset.Post;
   MainForm.RxDBGridCorrectionEditingDone(MainForm.RxDBGridCorrection);
 
   AssertTrue(MainForm.MainDataset1.Locate('number', FINISH_PARTICIPANT, []));
-  AssertEquals(250, MainForm.MainDataset1.FieldByName(
-    'correction12').AsInteger);
+  AssertEquals(250, MainForm.MainDataset1.FieldByName('correction12').AsInteger);
   AssertTrue('Editing stage 12 must not change stage 2 correction',
     MainForm.MainDataset1.FieldByName('correction2').IsNull);
 
@@ -2884,8 +6272,7 @@ begin
   AssertTrue('Setting stage 12 finish must not change stage 2',
     MainForm.MainDataset1.FieldByName('finishtime2').IsNull);
 
-  AssertTrue(MainForm.CorrectionDataset.Locate(
-    'number', DNS_PARTICIPANT, []));
+  AssertTrue(MainForm.CorrectionDataset.Locate('number', DNS_PARTICIPANT, []));
   MainForm.AcSetDNSCorExecute(MainForm.AcSetDNSCor);
   AssertTrue(MainForm.MainDataset1.Locate('number', DNS_PARTICIPANT, []));
   AssertEquals(ParticipantStatusToDbValue(psDNS),
@@ -2904,7 +6291,8 @@ begin
   MainForm.ResultClearClick(MainForm);
 end;
 
-procedure TMainFlowIntegrationTests.ImportStartListCp1251_ViaMainFormHandler_LoadsUtf8DataToMainTable;
+procedure TMainFlowIntegrationTests.
+ImportStartListCp1251_ViaMainFormHandler_LoadsUtf8DataToMainTable;
 begin
   CreateNewCompetitionFile;
 
@@ -2919,7 +6307,8 @@ begin
   MainForm.SQLQuery1.Open;
   AssertFalse('Expected row for participant number 2', MainForm.SQLQuery1.IsEmpty);
   AssertEquals('Unexpected participant name after CP1251 import',
-    'Алексахина Варвара', MainForm.SQLQuery1.FieldByName('name').AsString);
+    'Алексахина Варвара',
+    MainForm.SQLQuery1.FieldByName('name').AsString);
   AssertEquals('Unexpected participant city after CP1251 import',
     'Занаду', MainForm.SQLQuery1.FieldByName('city').AsString);
   AssertEquals('Unexpected starttime1 value', '10:00:00',
@@ -2938,7 +6327,8 @@ begin
     TConfigSql.GetBool(MainForm.SQLQuery1, 'stage2', False));
 end;
 
-procedure TMainFlowIntegrationTests.ImportStartListCp1251_DoesNotRequireInteractiveDialogsInCI;
+procedure TMainFlowIntegrationTests.
+ImportStartListCp1251_DoesNotRequireInteractiveDialogsInCI;
 begin
   CreateNewCompetitionFile;
 
@@ -2946,18 +6336,45 @@ begin
   MainForm.FileOpenCSV.Dialog.FileName := FImportFilePath;
   MainForm.FileOpenCSVAccept(MainForm.FileOpenCSV);
 
-  AssertTrue('Expected at least one dialog call to be handled by the test hook',
-    DialogCallCount > 0);
+  AssertEquals('Only the category import question is expected; an extra ' +
+    'dialog usually means that the encoding was not detected',
+    1, DialogCallCount);
+  AssertTrue('Expected the category import question, got: ' +
+    LastDialogMessage, Pos(rsSetCategoryName, LastDialogMessage) > 0);
   AssertMainRowCount(FExpectedImportedRows);
 end;
 
-procedure TMainFlowIntegrationTests.LoadParticipantsList_MinimalUtf8Csv_MapsParticipantAndStage;
+procedure TMainFlowIntegrationTests.
+ImportRussianUtf8LfCsv_DetectsDecodesAndStoresText;
+begin
+  AssertRussianCsvImport(#10, False);
+end;
+
+procedure TMainFlowIntegrationTests.
+ImportRussianUtf8CrlfCsv_DetectsDecodesAndStoresText;
+begin
+  AssertRussianCsvImport(#13#10, False);
+end;
+
+procedure TMainFlowIntegrationTests.
+ImportRussianCp1251LfCsv_DetectsDecodesAndStoresText;
+begin
+  AssertRussianCsvImport(#10, True);
+end;
+
+procedure TMainFlowIntegrationTests.
+ImportRussianCp1251CrlfCsv_DetectsDecodesAndStoresText;
+begin
+  AssertRussianCsvImport(#13#10, True);
+end;
+
+procedure TMainFlowIntegrationTests.
+LoadParticipantsList_MinimalUtf8Csv_MapsParticipantAndStage;
 begin
   CreateNewCompetitionFile;
-  WriteCsv([
-    'number;name;category;nickname;birthday;team;city;phone;email;comment;Prologue',
+  WriteCsv(['number;name;category;nickname;birthday;team;city;phone;email;comment;Prologue',
     '42;Alice Rider;Elite;ali;1995;Fast Team;Perm;+79990000000;alice@example.test;Guest;09:15:00,123'
-  ]);
+    ]);
   ImportParticipantsFile(FCsvFilePath);
 
   AssertMainRowCount(1);
@@ -2987,7 +6404,8 @@ begin
     TConfigSql.GetBool(MainForm.SQLQuery1, 'stage1', False));
 end;
 
-procedure TMainFlowIntegrationTests.LoadParticipantsList_CategoryDeclinedStillAppliesDetectedStages;
+procedure TMainFlowIntegrationTests.
+LoadParticipantsList_CategoryDeclinedStillAppliesDetectedStages;
 begin
   CreateEmptyCompetitionFixture(3);
   TConfigSql.ExecUpsertByKey(MainForm.SQLQuery1, 'stage1', 'False');
@@ -3006,10 +6424,8 @@ begin
   AssertEquals(3, MainForm.CurrentStageIndex);
   AssertEquals('3', astage);
 
-  WriteCsv([
-    'number;name;category;Start A;Start B',
-    '42;Alice Rider;Elite;09:15:00;10:15:00'
-  ]);
+  WriteCsv(['number;name;category;Start A;Start B',
+    '42;Alice Rider;Elite;09:15:00;10:15:00']);
   DialogCallCount := 0;
   ConfirmationDialogResult := mrNo;
 
@@ -3054,7 +6470,8 @@ begin
   MainForm.SQLQuery1.Close;
 end;
 
-procedure TMainFlowIntegrationTests.LoadParticipantsList_WithoutStageColumnsPreservesActiveStages;
+procedure TMainFlowIntegrationTests.
+LoadParticipantsList_WithoutStageColumnsPreservesActiveStages;
 begin
   CreateEmptyCompetitionFixture(2);
   TConfigSql.ExecUpsertByKey(MainForm.SQLQuery1, 'stage1', 'False');
@@ -3063,10 +6480,7 @@ begin
     'Existing stage');
   MainForm.SQLQuery1.SQLTransaction.Commit;
   OpenCompetitionFile(FDbFilePath);
-  WriteCsv([
-    'number;name;category',
-    '42;Alice Rider;Elite'
-  ]);
+  WriteCsv(['number;name;category', '42;Alice Rider;Elite']);
   ConfirmationDialogResult := mrNo;
   ImportParticipantsFile(FCsvFilePath);
   Application.ProcessMessages;
@@ -3080,16 +6494,16 @@ begin
   AssertTrue(TConfigSql.GetBool(MainForm.SQLQuery1, 'stage2', False));
 end;
 
-procedure TMainFlowIntegrationTests.LoadParticipantsList_EqualStageCountUpdatesNamesAndActivity;
+procedure TMainFlowIntegrationTests.
+LoadParticipantsList_EqualStageCountUpdatesNamesAndActivity;
 var
   i: integer;
 begin
   CreateEmptyCompetitionFixture(8);
   DeleteBackupFiles;
-  WriteCsv([
-    'number;name;Equal 1;Equal 2;Equal 3;Equal 4;Equal 5;Equal 6;Equal 7;Equal 8',
+  WriteCsv(['number;name;Equal 1;Equal 2;Equal 3;Equal 4;Equal 5;Equal 6;Equal 7;Equal 8',
     '42;Alice;10:01:00;10:02:00;10:03:00;10:04:00;10:05:00;10:06:00;10:07:00;10:08:00'
-  ]);
+    ]);
   ConfirmationDialogResult := mrNo;
 
   ImportParticipantsFile(FCsvFilePath);
@@ -3108,37 +6522,32 @@ begin
     AssertTrue('Imported stage must be active: ' + IntToStr(i),
       stages[i].isActive);
     AssertEquals('Equal ' + IntToStr(i), stages[i].Name);
-    AssertTrue(TConfigSql.GetBool(MainForm.SQLQuery1,
-      'stage' + IntToStr(i), False));
+    AssertTrue(TConfigSql.GetBool(MainForm.SQLQuery1, 'stage' +
+      IntToStr(i), False));
     AssertEquals('Equal ' + IntToStr(i),
-      TConfigSql.GetString(MainForm.SQLQuery1,
-      'stagename' + IntToStr(i), ''));
+      TConfigSql.GetString(MainForm.SQLQuery1, 'stagename' + IntToStr(i), ''));
   end;
 end;
 
-procedure TMainFlowIntegrationTests.LoadParticipantsList_ReimportReplacesStagesAndRestoresHiddenResult;
+procedure TMainFlowIntegrationTests.
+LoadParticipantsList_ReimportReplacesStagesAndRestoresHiddenResult;
 begin
   CreateEmptyCompetitionFixture(5);
   MainForm.SQLQuery1.SQL.Text :=
-    'INSERT INTO main (number, name, result3) VALUES ' +
-    '(900, ''Existing participant'', ''00:10:00.000'');';
+    'INSERT INTO main (number, name, starttime3, finishtime3, result3) VALUES ' +
+    '(900, ''Existing participant'', ''10:00:00'', ''10:10:00'', ''00:10:00.000'');';
   MainForm.SQLQuery1.ExecSQL;
   MainForm.SQLQuery1.SQLTransaction.Commit;
   ConfirmationDialogResult := mrNo;
 
-  WriteCsv([
-    'number;name;Initial 1;Initial 2;Initial 3;Initial 4;Initial 5',
-    '42;Alice;10:01:00;10:02:00;10:03:00;10:04:00;10:05:00'
-  ]);
+  WriteCsv(['number;name;Initial 1;Initial 2;Initial 3;Initial 4;Initial 5',
+    '42;Alice;10:01:00;10:02:00;10:03:00;10:04:00;10:05:00']);
   ImportParticipantsFile(FCsvFilePath);
   Application.ProcessMessages;
   AssertEquals(5, stages.ActiveStagesCount);
   AssertTrue(stages[5].isActive);
 
-  WriteCsv([
-    'number;name;Reduced 1;Reduced 2',
-    '42;Alice;11:01:00;11:02:00'
-  ]);
+  WriteCsv(['number;name;Reduced 1;Reduced 2', '42;Alice;11:01:00;11:02:00']);
   ImportParticipantsFile(FCsvFilePath);
   Application.ProcessMessages;
   AssertEquals('A repeated import must replace, not merge, the active set',
@@ -3159,10 +6568,8 @@ begin
     '00:10:00.000', MainForm.SQLQuery1.FieldByName('result3').AsString);
   MainForm.SQLQuery1.Close;
 
-  WriteCsv([
-    'number;name;Restored 1;Restored 2;Restored 3',
-    '42;Alice;12:01:00;12:02:00;12:03:00'
-  ]);
+  WriteCsv(['number;name;Restored 1;Restored 2;Restored 3',
+    '42;Alice;12:01:00;12:02:00;12:03:00']);
   ImportParticipantsFile(FCsvFilePath);
   Application.ProcessMessages;
   AssertEquals(3, stages.ActiveStagesCount);
@@ -3199,10 +6606,9 @@ procedure TMainFlowIntegrationTests.LoadParticipantsList_MoreStages_ExpandsCompe
 begin
   CreateNewCompetitionFile;
   DeleteBackupFiles;
-  WriteCsv([
-    'number;name;S1;S2;S3;S4;S5;S6;S7;S8;S9',
+  WriteCsv(['number;name;S1;S2;S3;S4;S5;S6;S7;S8;S9',
     '42;Alice;10:00:00;10:01:00;10:02:00;10:03:00;10:04:00;10:05:00;10:06:00;10:07:00;10:08:00'
-  ]);
+    ]);
   ImportParticipantsFile(FCsvFilePath);
   Application.ProcessMessages;
 
@@ -3237,7 +6643,8 @@ begin
   AssertEquals('S9', stages[9].Name);
 end;
 
-procedure TMainFlowIntegrationTests.LoadParticipantsList_AboveSupportedStages_RejectsWithoutChanges;
+procedure TMainFlowIntegrationTests.
+LoadParticipantsList_AboveSupportedStages_RejectsWithoutChanges;
 var
   csvLines: TStringList;
   headerText, rowText: string;
@@ -3275,26 +6682,20 @@ begin
     1, DialogCallCount);
   AssertTrue('Expected the supported-stage limit in the error, got: ' +
     LastDialogMessage,
-    Pos(Format(rsTooManyParticipantStages,
-      [MAX_SUPPORTED_STAGE_COUNT + 1, MAX_SUPPORTED_STAGE_COUNT]),
-      LastDialogMessage) > 0);
+    Pos(Format(rsTooManyParticipantStages, [MAX_SUPPORTED_STAGE_COUNT +
+    1, MAX_SUPPORTED_STAGE_COUNT]), LastDialogMessage) > 0);
   AssertEquals('Rejected import must not create a backup', '',
     FindBackupFile);
 end;
 
-procedure TMainFlowIntegrationTests.LoadParticipantsList_ReimportExistingNumber_UpdatesWithoutDuplicate;
+procedure TMainFlowIntegrationTests.
+LoadParticipantsList_ReimportExistingNumber_UpdatesWithoutDuplicate;
 begin
   CreateNewCompetitionFile;
-  WriteCsv([
-    'number;name;category;Stage 1',
-    '77;First Name;Open;10:00:00'
-  ]);
+  WriteCsv(['number;name;category;Stage 1', '77;First Name;Open;10:00:00']);
   ImportParticipantsFile(FCsvFilePath);
 
-  WriteCsv([
-    'number;name;category;Stage 1',
-    '77;Updated Name;Masters;10:30:00'
-  ]);
+  WriteCsv(['number;name;category;Stage 1', '77;Updated Name;Masters;10:30:00']);
   ImportParticipantsFile(FCsvFilePath);
 
   AssertMainRowCount(1);
@@ -3313,10 +6714,8 @@ end;
 procedure TMainFlowIntegrationTests.LoadParticipantsList_HtmlEntities_AreDecoded;
 begin
   CreateNewCompetitionFile;
-  WriteCsv([
-    'category;number;name;team;comment;Stage 1',
-    'Masters;99;"O&#39;Connor";"RiderShop&amp;Service";"Text; quoted";11:30:00'
-  ]);
+  WriteCsv(['category;number;name;team;comment;Stage 1',
+    'Masters;99;"O&#39;Connor";"RiderShop&amp;Service";"Text; quoted";11:30:00']);
 
   ImportParticipantsFile(FCsvFilePath);
 
@@ -3334,7 +6733,8 @@ begin
   MainForm.SQLQuery1.Close;
 end;
 
-procedure TMainFlowIntegrationTests.LoadParticipantsList_DatabaseError_RollsBackEntireImport;
+procedure TMainFlowIntegrationTests.
+LoadParticipantsList_DatabaseError_RollsBackEntireImport;
 begin
   CreateNewCompetitionFile;
   DeleteBackupFiles;
@@ -3355,11 +6755,10 @@ begin
   MainForm.SQLQuery1.ExecSQL;
   MainForm.SQLQuery1.SQLTransaction.Commit;
 
-  WriteCsv([
-    'number;name;New 1;New 2;New 3;New 4;New 5;New 6;New 7;New 8;New 9',
+  WriteCsv(['number;name;New 1;New 2;New 3;New 4;New 5;New 6;New 7;New 8;New 9',
     '1;First participant;10:00:00;10:01:00;10:02:00;10:03:00;10:04:00;10:05:00;10:06:00;10:07:00;10:08:00',
     '2;Second participant;11:00:00;11:01:00;11:02:00;11:03:00;11:04:00;11:05:00;11:06:00;11:07:00;11:08:00'
-  ]);
+    ]);
   DialogCallCount := 0;
   LastDialogMessage := '';
   ImportParticipantsFile(FCsvFilePath);
@@ -3367,8 +6766,7 @@ begin
 
   AssertMainRowCount(1);
   AssertTrue('Expected database error dialog', DialogCallCount > 0);
-  AssertTrue('Expected participant database error context, got: ' +
-    LastDialogMessage,
+  AssertTrue('Expected participant database error context, got: ' + LastDialogMessage,
     Pos(rsWriteParticipantsDatabaseError, LastDialogMessage) > 0);
   AssertTrue('Expected forced database error, got: ' + LastDialogMessage,
     Pos('forced import failure', LastDialogMessage) > 0);
@@ -3401,37 +6799,11 @@ begin
   MainForm.SQLQuery1.Close;
 end;
 
-procedure TMainFlowIntegrationTests.LoadParticipantsList_WithoutNumberColumn_ReportsErrorAndImportsNothing;
+procedure TMainFlowIntegrationTests.
+LoadParticipantsList_WithoutNumberColumn_ReportsErrorAndImportsNothing;
 begin
   CreateNewCompetitionFile;
-  WriteCsv([
-    'name;category;Stage 1',
-    'No Number;Open;10:00:00'
-  ]);
-  DialogCallCount := 0;
-  LastDialogMessage := '';
-
-  ImportParticipantsFile(FCsvFilePath);
-
-  AssertMainRowCount(0);
-  AssertEquals('Expected exactly one import error dialog', 1, DialogCallCount);
-  AssertEquals(Format(rsParticipantsImportError,
-    [ExpandFileName(FCsvFilePath),
-    rsLoadParticipantsListError + rsNumberColumnNotFound]), LastDialogMessage);
-end;
-
-procedure TMainFlowIntegrationTests.LoadParticipantsList_InvalidStartTime_ReportsErrorAndImportsNothing;
-begin
-  CreateNewCompetitionFile;
-  TConfigSql.ExecUpsertByKey(MainForm.SQLQuery1, 'stage1', 'False');
-  TConfigSql.ExecUpsertByKey(MainForm.SQLQuery1, 'stage2', 'True');
-  TConfigSql.ExecUpsertByKey(MainForm.SQLQuery1, 'stagename2',
-    'Existing second stage');
-  MainForm.SQLQuery1.SQLTransaction.Commit;
-  WriteCsv([
-    'number;name;Stage 1',
-    '42;Alice Rider;25:00'
-  ]);
+  WriteCsv(['name;category;Stage 1', 'No Number;Open;10:00:00']);
   DialogCallCount := 0;
   LastDialogMessage := '';
 
@@ -3441,8 +6813,30 @@ begin
   AssertEquals('Expected exactly one import error dialog', 1, DialogCallCount);
   AssertEquals(Format(rsParticipantsImportError,
     [ExpandFileName(FCsvFilePath), rsLoadParticipantsListError +
-    Format(rsInvalidParticipantStartTime,
-      ['25:00', 2, 'Stage 1'])]), LastDialogMessage);
+    rsNumberColumnNotFound]), LastDialogMessage);
+end;
+
+procedure TMainFlowIntegrationTests.
+LoadParticipantsList_InvalidStartTime_ReportsErrorAndImportsNothing;
+begin
+  CreateNewCompetitionFile;
+  TConfigSql.ExecUpsertByKey(MainForm.SQLQuery1, 'stage1', 'False');
+  TConfigSql.ExecUpsertByKey(MainForm.SQLQuery1, 'stage2', 'True');
+  TConfigSql.ExecUpsertByKey(MainForm.SQLQuery1, 'stagename2',
+    'Existing second stage');
+  MainForm.SQLQuery1.SQLTransaction.Commit;
+  WriteCsv(['number;name;Stage 1', '42;Alice Rider;25:00']);
+  DialogCallCount := 0;
+  LastDialogMessage := '';
+
+  ImportParticipantsFile(FCsvFilePath);
+
+  AssertMainRowCount(0);
+  AssertEquals('Expected exactly one import error dialog', 1, DialogCallCount);
+  AssertEquals(Format(rsParticipantsImportError,
+    [ExpandFileName(FCsvFilePath), rsLoadParticipantsListError +
+    Format(rsInvalidParticipantStartTime, ['25:00', 2, 'Stage 1'])]),
+    LastDialogMessage);
   AssertFalse('Invalid rows must not change stage activity',
     TConfigSql.GetBool(MainForm.SQLQuery1, 'stage1', True));
   AssertTrue('Invalid rows must preserve existing active stages',
@@ -3455,13 +6849,8 @@ end;
 procedure TMainFlowIntegrationTests.LoadParticipantsList_DuplicateNumber_ReportsBothRows;
 begin
   CreateNewCompetitionFile;
-  WriteCsv([
-    '# participant import',
-    'number;name;Stage 1',
-    '42;Alice Rider;10:00:00',
-    '# duplicate follows',
-    '42;Bob Rider;10:01:00'
-  ]);
+  WriteCsv(['# participant import', 'number;name;Stage 1',
+    '42;Alice Rider;10:00:00', '# duplicate follows', '42;Bob Rider;10:01:00']);
   DialogCallCount := 0;
   LastDialogMessage := '';
 
@@ -3485,10 +6874,7 @@ begin
   ConfigureSingleActiveStage(STAGE_INDEX);
   stages[STAGE_INDEX].Name := 'СУ "Лесной этап"';
   InsertParticipant(PARTICIPANT_NUMBER);
-  WriteCsv([
-    '#номер;время старта;стартовая поправка;время финиша;штраф;статус',
-    '112;10:00:00;-125;11:00:00.123;00:00:05;'
-  ]);
+  WriteCsv(['#номер;время старта;стартовая поправка;время финиша;штраф;статус', '112;10:00:00;-125;11:00:00.123;00:00:05;']);
   StageSelectionResult := STAGE_INDEX;
   SetStageSelectionHandler(@IntegrationStageSelectionHandler);
   ImportStageResultsFile(FCsvFilePath);
@@ -3526,10 +6912,7 @@ begin
     stages[i].isActive := i in [1, 2];
   MainForm.RebuildCurrentStageSelector(2);
   InsertParticipant(PARTICIPANT_NUMBER);
-  WriteCsv([
-    '# number;finish time',
-    '113;11:00:00'
-  ]);
+  WriteCsv(['# number;finish time', '113;11:00:00']);
   DeleteBackupFiles;
   SetStageSelectionHandler(@IntegrationStageSelectionHandler);
   StageSelectionResult := 3;
@@ -3555,16 +6938,13 @@ begin
   MainForm.SQLQuery1.Close;
 end;
 
-procedure TMainFlowIntegrationTests.LoadStageResults_TwoColumns_ImportsFinishIntoSelectedStage;
+procedure TMainFlowIntegrationTests.
+LoadStageResults_TwoColumns_ImportsFinishIntoSelectedStage;
 begin
   CreateEmptyCompetitionFixture(2);
   ConfigureSingleActiveStage(2);
   InsertParticipant(101);
-  WriteCsv([
-    '######;',
-    '#номер;время финиша',
-    '101;11:00:00.123'
-  ]);
+  WriteCsv(['######;', '#номер;время финиша', '101;11:00:00.123']);
   ImportStageResultsFile(FCsvFilePath);
 
   AssertMainRowCount(1);
@@ -3582,16 +6962,15 @@ begin
   MainForm.SQLQuery1.Close;
 end;
 
-procedure TMainFlowIntegrationTests.LoadStageResults_ThreeColumns_ImportsStartIntoSelectedStage;
+procedure TMainFlowIntegrationTests.
+LoadStageResults_ThreeColumns_ImportsStartIntoSelectedStage;
 begin
   CreateEmptyCompetitionFixture(2);
   ConfigureSingleActiveStage(2);
   InsertParticipant(102);
-  WriteCsv([
-    '######',
+  WriteCsv(['######',
     '#номер;время старта;стартовая поправка',
-    '102;10:00:00;-250'
-  ]);
+    '102;10:00:00;-250']);
 
   ImportStageResultsFile(FCsvFilePath);
 
@@ -3618,16 +6997,15 @@ begin
     '-250', MainForm.MainDataset1.FieldByName('correction2').DisplayText);
 end;
 
-procedure TMainFlowIntegrationTests.LoadStageResults_SixColumns_ImportsFullResultIntoSelectedStage;
+procedure TMainFlowIntegrationTests.
+LoadStageResults_SixColumns_ImportsFullResultIntoSelectedStage;
 begin
   CreateEmptyCompetitionFixture(2);
   ConfigureSingleActiveStage(2);
   InsertParticipant(103);
-  WriteCsv([
-    '######',
+  WriteCsv(['######',
     '#номер;время старта;стартовая поправка;время финиша;штраф;статус',
-    '103;10:00:00;-250;11:00:00.123;00:00:05;'
-  ]);
+    '103;10:00:00;-250;11:00:00.123;00:00:05;']);
   ImportStageResultsFile(FCsvFilePath);
   AssertMainRowCount(1);
   MainForm.SQLQuery1.Close;
@@ -3667,10 +7045,8 @@ begin
   MainForm.SQLQuery1.ExecSQL;
   MainForm.SQLQuery1.SQLTransaction.Commit;
 
-  WriteCsv([
-    '# number;start time;correction;finish time;penalty;status',
-    '115;10:00:00;;11:00:00;;'
-  ]);
+  WriteCsv(['# number;start time;correction;finish time;penalty;status',
+    '115;10:00:00;;11:00:00;;']);
 
   ImportStageResultsFile(FCsvFilePath);
 
@@ -3712,23 +7088,17 @@ begin
   MainForm.SQLQuery1.ExecSQL;
   MainForm.SQLQuery1.SQLTransaction.Commit;
 
-  WriteCsv([
-    '# number;finish time',
-    '114;11:10:00',
-    '104;11:00:00'
-  ]);
+  WriteCsv(['# number;finish time', '114;11:10:00', '104;11:00:00']);
   DialogCallCount := 0;
   LastDialogMessage := '';
   ImportStageResultsFile(FCsvFilePath);
   Application.ProcessMessages;
 
-  AssertTrue('Expected database error dialog', DialogCallCount > 0);
-  AssertTrue('Expected database error context, got: ' + LastDialogMessage,
-    Pos(rsWriteResultsDatabaseError, LastDialogMessage) > 0);
-  AssertTrue('Expected forced result error, got: ' + LastDialogMessage,
-    Pos('forced result import failure', LastDialogMessage) > 0);
-  AssertTrue('Expected import file path in error, got: ' + LastDialogMessage,
-    Pos(ExpandFileName(FCsvFilePath), LastDialogMessage) > 0);
+  AssertEquals('The error remains in the preview for retry', 1, FPreviewOpened);
+  AssertTrue('Expected forced result error, got: ' + FPreviewError,
+    Pos('forced result import failure', FPreviewError) > 0);
+  AssertTrue('Expected import file path in preview, got: ' + FPreviewError,
+    Pos(ExpandFileName(FCsvFilePath), FPreviewError) > 0);
 
   MainForm.SQLQuery1.Close;
   MainForm.SQLQuery1.SQL.Text :=
@@ -3746,7 +7116,8 @@ begin
 
 end;
 
-procedure TMainFlowIntegrationTests.LoadStageResults_InvalidCsv_DoesNotChangeExistingResults;
+procedure TMainFlowIntegrationTests.
+LoadStageResults_InvalidCsv_DoesNotChangeExistingResults;
 begin
   CreateEmptyCompetitionFixture(2);
   ConfigureSingleActiveStage(2);
@@ -3757,19 +7128,15 @@ begin
   MainForm.SQLQuery1.ExecSQL;
   MainForm.SQLQuery1.SQLTransaction.Commit;
 
-  WriteCsv([
-    '# number;finish time',
-    '105;25:00'
-  ]);
+  WriteCsv(['# number;finish time', '105;25:00']);
   DialogCallCount := 0;
   LastDialogMessage := '';
 
   ImportStageResultsFile(FCsvFilePath);
 
   AssertTrue('Expected CSV validation error dialog', DialogCallCount > 0);
-  AssertEquals(Format(rsResultsImportError,
-    [ExpandFileName(FCsvFilePath), rsLoadResultsError +
-    Format(rsInvalidResultTime, ['25:00', 2, rsFinishtime])]),
+  AssertEquals(Format(rsResultsImportError, [ExpandFileName(FCsvFilePath),
+    rsLoadResultsError + Format(rsInvalidResultTime, ['25:00', 2, rsFinishtime])]),
     LastDialogMessage);
   MainForm.SQLQuery1.Close;
   MainForm.SQLQuery1.SQL.Text :=
@@ -3780,7 +7147,8 @@ begin
   MainForm.SQLQuery1.Close;
 end;
 
-procedure TMainFlowIntegrationTests.LoadStageResults_InvalidCsv_DoesNotRequestStageSelection;
+procedure TMainFlowIntegrationTests.
+LoadStageResults_InvalidCsv_DoesNotRequestStageSelection;
 begin
   CreateEmptyCompetitionFixture(2);
   ConfigureSingleActiveStage(2);
@@ -3791,10 +7159,7 @@ begin
   MainForm.SQLQuery1.ExecSQL;
   MainForm.SQLQuery1.SQLTransaction.Commit;
 
-  WriteCsv([
-    '# number;finish time',
-    '108;25:00'
-  ]);
+  WriteCsv(['# number;finish time', '108;25:00']);
   SetStageSelectionHandler(@IntegrationStageSelectionHandler);
 
   ImportStageResultsFile(FCsvFilePath);
@@ -3816,17 +7181,11 @@ begin
   ConfigureSingleActiveStage(2);
   InsertParticipant(109);
 
-  WriteCsv([
-    '# number;finish time',
-    '109;10:00:00'
-  ]);
+  WriteCsv(['# number;finish time', '109;10:00:00']);
   ImportStageResultsFile(FCsvFilePath);
 
   DeleteBackupFiles;
-  WriteCsv([
-    '# number;finish time',
-    '109;11:00:00'
-  ]);
+  WriteCsv(['# number;finish time', '109;11:00:00']);
   ImportStageResultsFile(FCsvFilePath);
 
   AssertMainRowCount(1);
@@ -3842,7 +7201,8 @@ begin
   MainForm.SQLQuery1.Close;
 end;
 
-procedure TMainFlowIntegrationTests.LoadStageResults_StageSelectionCancellation_ChangesNothing;
+procedure TMainFlowIntegrationTests.
+LoadStageResults_StageSelectionCancellation_ChangesNothing;
 begin
   CreateEmptyCompetitionFixture(2);
   ConfigureSingleActiveStage(2);
@@ -3853,10 +7213,7 @@ begin
   MainForm.SQLQuery1.ExecSQL;
   MainForm.SQLQuery1.SQLTransaction.Commit;
 
-  WriteCsv([
-    '# number;finish time',
-    '110;11:00:00'
-  ]);
+  WriteCsv(['# number;finish time', '110;11:00:00']);
   StageSelectionResult := -1;
   SetStageSelectionHandler(@IntegrationStageSelectionHandler);
   ImportStageResultsFile(FCsvFilePath);
@@ -3875,26 +7232,22 @@ begin
 
 end;
 
-procedure TMainFlowIntegrationTests.LoadStageResults_DuplicateNumber_ReportsLocalizedCsvError;
+procedure TMainFlowIntegrationTests.
+LoadStageResults_DuplicateNumber_ReportsLocalizedCsvError;
 begin
   CreateEmptyCompetitionFixture(2);
   ConfigureSingleActiveStage(2);
   InsertParticipant(107);
 
-  WriteCsv([
-    '# number;finish time',
-    '107;10:00:00',
-    '# duplicate follows',
-    '107;11:00:00'
-  ]);
+  WriteCsv(['# number;finish time', '107;10:00:00', '# duplicate follows',
+    '107;11:00:00']);
 
   ImportStageResultsFile(FCsvFilePath);
 
   AssertEquals('Expected exactly one CSV validation error dialog',
     1, DialogCallCount);
-  AssertEquals(Format(rsResultsImportError,
-    [ExpandFileName(FCsvFilePath), rsLoadResultsError +
-    Format(rsDuplicateResultParticipantNumber, [107, 2, 4])]),
+  AssertEquals(Format(rsResultsImportError, [ExpandFileName(FCsvFilePath),
+    rsLoadResultsError + Format(rsDuplicateResultParticipantNumber, [107, 2, 4])]),
     LastDialogMessage);
   AssertEquals('CSV error must not use the database prefix',
     0, Pos(rsDatabaseOpenError, LastDialogMessage));
@@ -3908,24 +7261,204 @@ begin
   MainForm.SQLQuery1.Close;
 end;
 
-procedure TMainFlowIntegrationTests.LoadStageResults_UnknownParticipant_ConfirmationCreatesParticipant;
+procedure TMainFlowIntegrationTests.LoadStageResults_PreviewKeepsLiveSerialAndBleMarks;
+var
+  OldInterval: integer;
+begin
+  CreateEmptyCompetitionFixture(2);
+  ConfigureSingleActiveStage(2);
+  InsertParticipant(101);
+  MainForm.ResultClearClick(MainForm);
+  OldInterval := MainForm.FinishDebounceInterval;
+  try
+    MainForm.FinishDebounceInterval := -1;
+    FPreviewMode := 1;
+    FPreviewAccept := False;
+    WriteCsv(['101;11:00:00']);
+    ImportStageResultsFile(FCsvFilePath);
+    AssertEquals('', FPreviewError);
+    AssertEquals(1, FPreviewOpened);
+    AssertEquals(2, MainForm.DatasetFinishMarks.RecordCount);
+    MainForm.SQLQuery1.SQL.Text :=
+      'SELECT source_kind, status FROM finish_marks ORDER BY id;';
+    MainForm.SQLQuery1.Open;
+    AssertEquals(2, MainForm.SQLQuery1.RecordCount);
+    AssertEquals('serial', MainForm.SQLQuery1.FieldByName('source_kind').AsString);
+    AssertEquals('pending', MainForm.SQLQuery1.FieldByName('status').AsString);
+    MainForm.SQLQuery1.Next;
+    AssertEquals('ble', MainForm.SQLQuery1.FieldByName('source_kind').AsString);
+    AssertEquals('pending', MainForm.SQLQuery1.FieldByName('status').AsString);
+    MainForm.SQLQuery1.Close;
+  finally
+    MainForm.FinishDebounceInterval := OldInterval;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.LoadStageResults_LiveAssignedFinishRequiresReview;
+begin
+  CreateEmptyCompetitionFixture(2);
+  ConfigureSingleActiveStage(2);
+  InsertParticipant(101);
+  MainForm.ResultClearClick(MainForm);
+  FPreviewMode := 2;
+  WriteCsv(['101;11:00:00']);
+  ImportStageResultsFile(FCsvFilePath);
+  AssertEquals('', FPreviewError);
+  MainForm.SQLQuery1.SQL.Text := 'SELECT finishtime2 FROM main WHERE number = 101;';
+  MainForm.SQLQuery1.Open;
+  AssertEquals('10:20:30.123', MainForm.SQLQuery1.Fields[0].AsString);
+  MainForm.SQLQuery1.Close;
+  AssertEquals(0, MainForm.DatasetFinishMarks.RecordCount);
+end;
+
+procedure TMainFlowIntegrationTests.LoadStageResults_UnselectedLiveFinishIsPreserved;
+begin
+  CreateEmptyCompetitionFixture(2);
+  ConfigureSingleActiveStage(2);
+  InsertParticipant(101);
+  ExecBalanceSql('UPDATE main SET starttime2 = ''10:00:00'' WHERE number = 101;');
+  MainForm.ResultClearClick(MainForm);
+  FPreviewMode := 3;
+  WriteCsv(['101;10:00:00;25']);
+  ImportStageResultsFile(FCsvFilePath);
+  AssertEquals('', FPreviewError);
+  MainForm.SQLQuery1.SQL.Text :=
+    'SELECT finishtime2, correction2, result2 FROM main WHERE number = 101;';
+  MainForm.SQLQuery1.Open;
+  AssertEquals('10:20:30.123', MainForm.SQLQuery1.FieldByName('finishtime2').AsString);
+  AssertEquals(25, MainForm.SQLQuery1.FieldByName('correction2').AsInteger);
+  AssertEquals('00:20:30.148', MainForm.SQLQuery1.FieldByName('result2').AsString);
+  MainForm.SQLQuery1.Close;
+end;
+
+procedure TMainFlowIntegrationTests.LoadStageResults_RefreshFailureReportsSavedImport;
+var
+  OldSql: string;
+begin
+  CreateEmptyCompetitionFixture(2);
+  ConfigureSingleActiveStage(2);
+  InsertParticipant(101);
+  OldSql := MainForm.StatDataset1.SQL.Text;
+  try
+    FPreviewMode := 4;
+    WriteCsv(['101;11:00:00']);
+    ImportStageResultsFile(FCsvFilePath);
+    AssertEquals('', FPreviewError);
+    AssertEquals(1, FPreviewOpened);
+    AssertEquals(1, DialogCallCount);
+    AssertTrue(Pos(Format(rsImportPreviewSavedRefreshError, ['']),
+      LastDialogMessage) = 1);
+    MainForm.SQLQuery1.SQL.Text := 'SELECT finishtime2 FROM main WHERE number = 101;';
+    MainForm.SQLQuery1.Open;
+    AssertEquals('11:00:00', MainForm.SQLQuery1.Fields[0].AsString);
+    MainForm.SQLQuery1.Close;
+  finally
+    MainForm.StatDataset1.Close;
+    MainForm.StatDataset1.SQL.Text := OldSql;
+    MainForm.StatDataset1.Open;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+LoadStageResults_PreviewCancellationPreservesDatabase;
+begin
+  CreateEmptyCompetitionFixture(2);
+  ConfigureSingleActiveStage(2);
+  InsertParticipant(106);
+  ExecBalanceSql('UPDATE main SET finishtime2 = ''10:00:00'' WHERE number = 106;');
+  DeleteBackupFiles;
+  FPreviewAccept := False;
+  WriteCsv(['106;11:00:00']);
+  ImportStageResultsFile(FCsvFilePath);
+  AssertEquals(1, FPreviewOpened);
+  MainForm.SQLQuery1.SQL.Text := 'SELECT finishtime2 FROM main WHERE number = 106';
+  MainForm.SQLQuery1.Open;
+  AssertEquals('10:00:00', MainForm.SQLQuery1.Fields[0].AsString);
+  MainForm.SQLQuery1.Close;
+  AssertEquals('', FindBackupFile);
+end;
+
+procedure TMainFlowIntegrationTests.LoadStageResults_SavesEditorBeforeOpeningPreview;
+begin
+  CreateEmptyCompetitionFixture(2);
+  ConfigureSingleActiveStage(2);
+  InsertParticipant(106);
+  MainForm.MainDataset1.Edit;
+  MainForm.MainDataset1.FieldByName('name').AsString := 'Saved before preview';
+  FPreviewAccept := False;
+  WriteCsv(['106;11:00:00']);
+  ImportStageResultsFile(FCsvFilePath);
+  AssertEquals('', FPreviewError);
+  AssertEquals(1, FPreviewOpened);
+  AssertEquals(0, MainForm.MainDataset1.ChangeCount);
+  MainForm.SQLQuery1.SQL.Text :=
+    'SELECT name, finishtime2 FROM main WHERE number = 106;';
+  MainForm.SQLQuery1.Open;
+  AssertEquals('Saved before preview', MainForm.SQLQuery1.FieldByName('name').AsString);
+  AssertTrue(MainForm.SQLQuery1.FieldByName('finishtime2').IsNull);
+  MainForm.SQLQuery1.Close;
+end;
+
+procedure TMainFlowIntegrationTests.
+LoadStageResults_FailedEditorSavePreservesInputBeforePreview;
+begin
+  CreateEmptyCompetitionFixture(2);
+  ConfigureSingleActiveStage(2);
+  InsertParticipant(106);
+  ExecBalanceSql('CREATE TRIGGER reject_editor BEFORE UPDATE ON main ' +
+    'BEGIN SELECT RAISE(ABORT, ''forced editor save failure''); END;');
+  MainForm.MainDataset1.Edit;
+  MainForm.MainDataset1.FieldByName('name').AsString := 'Pending import editor';
+  WriteCsv(['106;11:00:00']);
+  try
+    ImportStageResultsFile(FCsvFilePath);
+    AssertEquals('Failed editor save must stop before preview', 0, FPreviewOpened);
+    AssertEquals('Pending import editor',
+      MainForm.MainDataset1.FieldByName('name').AsString);
+    AssertTrue('Failed save must retain pending data',
+      MainForm.MainDataset1.ChangeCount > 0);
+  finally
+    if MainForm.MainDataset1.State in [dsEdit, dsInsert] then
+      MainForm.MainDataset1.Cancel;
+    if MainForm.MainDataset1.ChangeCount > 0 then MainForm.MainDataset1.CancelUpdates;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.LoadStageResults_PendingEditCanCancelBeforePreview;
+begin
+  CreateEmptyCompetitionFixture(2);
+  ConfigureSingleActiveStage(2);
+  InsertParticipant(106);
+  MainForm.MainDataset1.Edit;
+  MainForm.MainDataset1.FieldByName('name').AsString := 'Unsaved import editor';
+  ConfirmationDialogResult := mrCancel;
+  WriteCsv(['106;11:00:00']);
+  try
+    ImportStageResultsFile(FCsvFilePath);
+    AssertEquals(0, FPreviewOpened);
+    AssertEquals(Ord(dsEdit), Ord(MainForm.MainDataset1.State));
+    AssertEquals('Unsaved import editor',
+      MainForm.MainDataset1.FieldByName('name').AsString);
+  finally
+    if MainForm.MainDataset1.State in [dsEdit, dsInsert] then
+      MainForm.MainDataset1.Cancel;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+LoadStageResults_UnknownParticipant_ConfirmationCreatesParticipant;
 begin
   CreateEmptyCompetitionFixture(2);
   ConfigureSingleActiveStage(2);
   InsertParticipant(106);
 
-  WriteCsv([
-    '# number;finish time',
-    '999;11:00:00'
-  ]);
+  WriteCsv(['# number;finish time', '999;11:00:00']);
 
   ImportStageResultsFile(FCsvFilePath);
 
-  AssertTrue('Expected confirmation for unknown participant',
-    DialogCallCount > 0);
-  AssertTrue('Unexpected confirmation text: ' + LastDialogMessage,
-    Pos(Format(rsAddUnknownResultParticipant, [999]),
-    LastDialogMessage) > 0);
+  AssertEquals('One preview replaces per-number dialogs', 1, FPreviewOpened);
+  AssertEquals(1, FPreviewUnknownCount);
+  AssertEquals(FPreviewError, '', FPreviewError);
   AssertMainRowCount(2);
   MainForm.SQLQuery1.Close;
   MainForm.SQLQuery1.SQL.Text :=
@@ -3938,23 +7471,21 @@ begin
   MainForm.SQLQuery1.Close;
 end;
 
-procedure TMainFlowIntegrationTests.LoadStageResults_UnknownParticipant_RejectionSkipsOnlyUnknownResult;
+procedure TMainFlowIntegrationTests.
+LoadStageResults_UnknownParticipant_RejectionSkipsOnlyUnknownResult;
 begin
   CreateEmptyCompetitionFixture(2);
   ConfigureSingleActiveStage(2);
   InsertParticipant(106);
 
-  WriteCsv([
-    '# number;finish time',
-    '106;10:00:00',
-    '999;11:00:00'
-  ]);
+  WriteCsv(['# number;finish time', '106;10:00:00', '999;11:00:00']);
   ConfirmationDialogResult := mrNo;
   ImportStageResultsFile(FCsvFilePath);
   Application.ProcessMessages;
 
-  AssertTrue('Expected confirmation for unknown participant',
-    DialogCallCount > 0);
+  AssertEquals('Unknown participant remains visible in preview', 1,
+    FPreviewUnknownCount);
+  AssertEquals(FPreviewError, '', FPreviewError);
   AssertMainRowCount(1);
   MainForm.SQLQuery1.Close;
   MainForm.SQLQuery1.SQL.Text :=
@@ -3972,7 +7503,8 @@ begin
   MainForm.SQLQuery1.Close;
 end;
 
-procedure TMainFlowIntegrationTests.ExportStageResultsCsv_StageAboveEightUsesDynamicFields;
+procedure TMainFlowIntegrationTests.
+ExportStageResultsCsv_StageAboveEightUsesDynamicFields;
 const
   STAGE_INDEX = 12;
   PARTICIPANT_NUMBER = 412;
@@ -4099,7 +7631,8 @@ begin
   end;
 end;
 
-procedure TMainFlowIntegrationTests.ExportAllResultsToXLSX_UsesDynamicStagesAndComplexNames;
+procedure TMainFlowIntegrationTests.
+ExportAllResultsToXLSX_UsesDynamicStagesAndComplexNames;
 const
   STAGE_COUNT = 12;
   COMPLEX_STAGE_NAME = 'СУ "Лесной этап"';
@@ -4211,8 +7744,7 @@ begin
     AssertEquals('Through duration must remain right-aligned', Ord(haRight),
       Ord(thruWorksheet.ReadHorAlignment(thruWorksheet.FindCell(1, 4))));
     AssertTrue('Through result must remain bold',
-      fssBold in thruWorksheet.ReadCellFont(
-      thruWorksheet.FindCell(1, 4)).Style);
+      fssBold in thruWorksheet.ReadCellFont(thruWorksheet.FindCell(1, 4)).Style);
   finally
     workbook.Free;
     if FileExists(exportFileName) then
@@ -4221,7 +7753,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  ExportStageResultsCsvFailure_ReportsErrorAndWritesNoFile;
+ExportStageResultsCsvFailure_ReportsErrorAndWritesNoFile;
 var
   blockingFileName, exportFileName: string;
   content: TStringList;
@@ -4251,7 +7783,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  ExportDatasetCsvFailure_ReportsErrorAndWritesNoFile;
+ExportDatasetCsvFailure_ReportsErrorAndWritesNoFile;
 var
   blockingFileName, exportFileName: string;
   content: TStringList;
@@ -4280,7 +7812,8 @@ begin
   end;
 end;
 
-procedure TMainFlowIntegrationTests.UpdateSumResults_PreparedSecondaryQueryPreservesStatusSemantics;
+procedure TMainFlowIntegrationTests.
+UpdateSumResults_PreparedSecondaryQueryPreservesStatusSemantics;
 begin
   CreateNewCompetitionFile;
   ConfigureSingleActiveStage(1);
@@ -4361,7 +7894,8 @@ begin
     0, DialogCallCount);
 end;
 
-procedure TMainFlowIntegrationTests.UpdateResults_StageAboveEightCalculatesStageSumAndThruPlaces;
+procedure TMainFlowIntegrationTests.
+UpdateResults_StageAboveEightCalculatesStageSumAndThruPlaces;
 begin
   CreateSchemaFixture(12, '12',
     IntToStr(CURRENT_COMPETITION_SCHEMA_VERSION));
@@ -4373,8 +7907,7 @@ begin
   MainForm.SQLQuery1.ExecSQL;
   MainForm.SQLQuery1.SQL.Text :=
     'INSERT INTO main (category, number, name, starttime12, finishtime12) ' +
-    'VALUES ' +
-    '(''Open'', 1201, ''Leader'', ''10:00:00.000'', ''10:10:00.000''), ' +
+    'VALUES ' + '(''Open'', 1201, ''Leader'', ''10:00:00.000'', ''10:10:00.000''), ' +
     '(''Open'', 1202, ''Second'', ''10:00:00.000'', ''10:12:00.000'');';
   MainForm.SQLQuery1.ExecSQL;
   MainForm.SQLTransaction1.Commit;
@@ -4459,8 +7992,7 @@ begin
     selectedRow := MainForm.RxDBGrid1.GetRow;
     topNumber := TMyRxDBGridAccess(MainForm.RxDBGrid1).IntegerFieldAtRow(
       TMyRxDBGridAccess(MainForm.RxDBGrid1).FixedRows, 'number');
-    AssertTrue(Format(
-      'The test selection must leave visible rows below it ' +
+    AssertTrue(Format('The test selection must leave visible rows below it ' +
       '(row=%d, row_count=%d, visible_rows=%d, height=%d, client_height=%d)',
       [selectedRow, TMyRxDBGridAccess(MainForm.RxDBGrid1).RowCount,
       TMyRxDBGridAccess(MainForm.RxDBGrid1).VisibleRowCount,
@@ -4503,8 +8035,7 @@ begin
 
   MainForm.SQLQuery1.Close;
   MainForm.SQLQuery1.SQL.Text :=
-    'UPDATE main SET starttime1 = ''00:00:00.000'' ' +
-    'WHERE number IN (421, 422);';
+    'UPDATE main SET starttime1 = ''00:00:00.000'' ' + 'WHERE number IN (421, 422);';
   MainForm.SQLQuery1.ExecSQL;
   MainForm.SQLQuery1.SQLTransaction.Commit;
 
@@ -4516,7 +8047,21 @@ begin
   SetFinishMarkNumberAt(1, 422);
   DialogCallCount := 0;
 
+  MainForm.SQLQuery1.SQL.Text := 'CREATE TABLE calculation_count (n INTEGER);';
+  MainForm.SQLQuery1.ExecSQL;
+  MainForm.SQLQuery1.SQL.Text := 'INSERT INTO calculation_count VALUES (0);';
+  MainForm.SQLQuery1.ExecSQL;
+  MainForm.SQLQuery1.SQL.Text :=
+    'CREATE TRIGGER count_calculation AFTER UPDATE OF result1 ON main ' +
+    'BEGIN UPDATE calculation_count SET n = n + 1; END;';
+  MainForm.SQLQuery1.ExecSQL;
+  MainForm.SQLQuery1.SQLTransaction.Commit;
   MainForm.AcApplyFinishMarksExecute(MainForm.AcApplyFinishMarks);
+  MainForm.SQLQuery1.SQL.Text := 'SELECT n FROM calculation_count;';
+  MainForm.SQLQuery1.Open;
+  AssertEquals('The UI must calculate the batch once', 2,
+    MainForm.SQLQuery1.Fields[0].AsInteger);
+  MainForm.SQLQuery1.Close;
 
   AssertEquals('On-track finishes must not require confirmation',
     0, DialogCallCount);
@@ -4556,6 +8101,72 @@ begin
     MainForm.SQLQuery1.FieldByName('participant_number').AsInteger);
   AssertEquals('applied', MainForm.SQLQuery1.FieldByName('status').AsString);
   AssertFalse(MainForm.SQLQuery1.FieldByName('applied_at').IsNull);
+  MainForm.SQLQuery1.Close;
+end;
+
+procedure TMainFlowIntegrationTests.SetFinish_BatchFailureRollsBackEveryMark;
+begin
+  CreateNewCompetitionFile;
+  ConfigureSingleActiveStage(1);
+  InsertParticipant(421);
+  InsertParticipant(422);
+  MainForm.SQLQuery1.Close;
+  MainForm.SQLQuery1.SQL.Text :=
+    'UPDATE main SET starttime1 = ''00:00:00.000'';';
+  MainForm.SQLQuery1.ExecSQL;
+  MainForm.SQLQuery1.SQL.Text :=
+    'CREATE TRIGGER fail_batch BEFORE UPDATE OF result1 ON main ' +
+    'WHEN NEW.number = 422 AND NEW.finishtime1 IS NOT NULL ' +
+    'BEGIN SELECT RAISE(ABORT, ''batch calculation failure''); END;';
+  MainForm.SQLQuery1.ExecSQL;
+  MainForm.SQLQuery1.SQLTransaction.Commit;
+  MainForm.ResultClearClick(MainForm);
+  ApplyFinishPacketAt(EncodeTime(0, 10, 0, 0));
+  SetFinishMarkNumberAt(0, 421);
+  ApplyFinishPacketAt(EncodeTime(0, 15, 0, 0));
+  SetFinishMarkNumberAt(1, 422);
+  DialogCallCount := 0;
+  MainForm.AcApplyFinishMarksExecute(MainForm.AcApplyFinishMarks);
+  AssertEquals(1, DialogCallCount);
+  AssertEquals(2, MainForm.DatasetFinishMarks.RecordCount);
+  MainForm.SQLQuery1.SQL.Text :=
+    'SELECT COUNT(*) FROM main WHERE finishtime1 IS NOT NULL;';
+  MainForm.SQLQuery1.Open;
+  AssertEquals(0, MainForm.SQLQuery1.Fields[0].AsInteger);
+  MainForm.SQLQuery1.Close;
+  MainForm.SQLQuery1.SQL.Text :=
+    'SELECT COUNT(*) FROM finish_marks WHERE status <> ''pending'';';
+  MainForm.SQLQuery1.Open;
+  AssertEquals(0, MainForm.SQLQuery1.Fields[0].AsInteger);
+  MainForm.SQLQuery1.Close;
+end;
+
+procedure TMainFlowIntegrationTests.SetFinish_RepeatedParticipantRequiresConfirmation;
+begin
+  CreateNewCompetitionFile;
+  ConfigureSingleActiveStage(1);
+  InsertParticipant(421);
+  MainForm.SQLQuery1.Close;
+  MainForm.SQLQuery1.SQL.Text :=
+    'UPDATE main SET starttime1 = ''00:00:00.000'' WHERE number = 421;';
+  MainForm.SQLQuery1.ExecSQL;
+  MainForm.SQLQuery1.SQLTransaction.Commit;
+  MainForm.ResultClearClick(MainForm);
+  ApplyFinishPacketAt(EncodeTime(0, 10, 0, 0));
+  SetFinishMarkNumberAt(0, 421);
+  ApplyFinishPacketAt(EncodeTime(0, 15, 0, 0));
+  SetFinishMarkNumberAt(1, 421);
+  DialogCallCount := 0;
+  ConfirmationDialogResult := mrYes;
+  MainForm.AcApplyFinishMarksExecute(MainForm.AcApplyFinishMarks);
+  AssertEquals('Repeated finishes need both existing confirmations', 2,
+    DialogCallCount);
+  AssertEquals(0, MainForm.DatasetFinishMarks.RecordCount);
+  MainForm.SQLQuery1.SQL.Text :=
+    'SELECT finishtime1, result1 FROM main WHERE number = 421;';
+  MainForm.SQLQuery1.Open;
+  AssertEquals('00:15:00.000', MainForm.SQLQuery1.Fields[0].AsString);
+  AssertEquals('00:15:00.000', MainForm.SQLQuery1.Fields[1].AsString);
   MainForm.SQLQuery1.Close;
 end;
 
@@ -4901,7 +8512,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  ParticipantStageValueEdit_SavesAndKeepsEditedRowCurrent;
+ParticipantStageValueEdit_SavesAndKeepsEditedRowCurrent;
 begin
   CreateNewCompetitionFile;
   ConfigureSingleActiveStage(1);
@@ -4924,6 +8535,55 @@ begin
     MainForm.MainDataset1.FieldByName('number').AsInteger);
   AssertEquals('10:15:00.000',
     MainForm.MainDataset1.FieldByName('starttime1').AsString);
+end;
+
+procedure TMainFlowIntegrationTests.
+ParticipantStageValueEdit_UpdatesOverallWithoutOtherStages;
+var
+  OldAutomatic: boolean;
+begin
+  CreateEmptyCompetitionFixture(2);
+  stages[2].isActive := True;
+  ApplyStageActivityToUi(1);
+  InsertParticipant(405);
+  MainForm.SQLQuery1.Close;
+  MainForm.SQLQuery1.SQL.Text :=
+    'UPDATE main SET starttime1 = ''10:00:00'', finishtime1 = ''10:10:00'', ' +
+    'starttime2 = ''11:00:00'', finishtime2 = ''11:20:00'' WHERE number = 405;';
+  MainForm.SQLQuery1.ExecSQL;
+  MainForm.SQLQuery1.SQLTransaction.Commit;
+  MainForm.AcUpdateResultsExecute(MainForm.AcUpdateResults);
+  MainForm.SQLQuery1.SQL.Text :=
+    // SQLDB's editable-row UPDATE names every field. Permit that write when
+    // correction1 changes, but forbid a subsequent calculation of stage 2.
+    'CREATE TRIGGER forbid_other_stage BEFORE UPDATE OF result2 ON main ' +
+    'WHEN NEW.correction1 IS OLD.correction1 ' +
+    'BEGIN SELECT RAISE(ABORT, ''other stage recalculated''); END;';
+  MainForm.SQLQuery1.ExecSQL;
+  MainForm.SQLQuery1.SQLTransaction.Commit;
+  OldAutomatic := MainForm.CheckBoxAutomaticUpdateResutls.Checked;
+  MainForm.CheckBoxAutomaticUpdateResutls.Checked := True;
+  try
+    AssertTrue(MainForm.MainDataset1.Locate('number', 405, []));
+    MainForm.MainDataset1.Edit;
+    MainForm.MainDataset1.FieldByName('correction1').AsInteger := 250;
+    MainForm.MainDataset1.Post;
+    DialogCallCount := 0;
+    MainForm.RxDBGrid1EditingDone(MainForm.RxDBGrid1);
+    AssertEquals('A local edit must not recalculate another active stage', 0,
+      DialogCallCount);
+    MainForm.SQLQuery1.SQL.Text :=
+      'SELECT result1, result2, sumresult, sumplace, thruplace FROM main WHERE number = 405;';
+    MainForm.SQLQuery1.Open;
+    AssertEquals('00:10:00.250', MainForm.SQLQuery1.Fields[0].AsString);
+    AssertEquals('00:20:00.000', MainForm.SQLQuery1.Fields[1].AsString);
+    AssertEquals('00:30:00.250', MainForm.SQLQuery1.Fields[2].AsString);
+    AssertEquals(1, MainForm.SQLQuery1.Fields[3].AsInteger);
+    AssertEquals(1, MainForm.SQLQuery1.Fields[4].AsInteger);
+    MainForm.SQLQuery1.Close;
+  finally
+    MainForm.CheckBoxAutomaticUpdateResutls.Checked := OldAutomatic;
+  end;
 end;
 
 procedure TMainFlowIntegrationTests.ParticipantUnchangedStageField_CancelsEdit;
@@ -4953,7 +8613,8 @@ begin
   MainForm.SQLQuery1.Close;
 end;
 
-procedure TMainFlowIntegrationTests.CategoryEditor_LoadsCategoriesWithoutStatisticsDataset;
+procedure TMainFlowIntegrationTests.
+CategoryEditor_LoadsCategoriesWithoutStatisticsDataset;
 var
   editor: TWinControl;
 begin
@@ -5064,7 +8725,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  ParticipantDelete_RequiresConfirmationAndDeletesRow;
+ParticipantDelete_RequiresConfirmationAndDeletesRow;
 begin
   CreateNewCompetitionFile;
   InsertParticipant(403);
@@ -5085,7 +8746,8 @@ begin
   AssertMainRowCount(0);
 end;
 
-procedure TMainFlowIntegrationTests.ParticipantStatusTableEdit_NormalizesAndClearsSupportedValues;
+procedure TMainFlowIntegrationTests.
+ParticipantStatusTableEdit_NormalizesAndClearsSupportedValues;
 begin
   CreateNewCompetitionFile;
   InsertParticipant(419);
@@ -5157,7 +8819,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  TimingStart_PersistsSourceAndStage;
+TimingStart_PersistsSourceAndStage;
 begin
   CreateNewCompetitionFile;
   ConfigureSingleActiveStage(1);
@@ -5179,7 +8841,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  StartMarkPanel_ShowsEditableWorkQueueWithRestoredLayout;
+StartMarkPanel_ShowsEditableWorkQueueWithRestoredLayout;
 begin
   AssertTrue(MainForm.Splitter2.Visible);
   AssertTrue(MainForm.PanelStartMarks.Visible);
@@ -5217,8 +8879,7 @@ begin
   AssertSame(MainForm.AcApplyStartMarks,
     MainForm.ButtonApplyStartMarks.Action);
   AssertTrue(MainForm.ButtonApplyStartMarks.Left >=
-    MainForm.ButtonStartMarksClear.Left +
-    MainForm.ButtonStartMarksClear.Width);
+    MainForm.ButtonStartMarksClear.Left + MainForm.ButtonStartMarksClear.Width);
   AssertEquals(MainForm.ButtonStartMarksClear.Top,
     MainForm.ButtonApplyStartMarks.Top);
   AssertFalse(MainForm.ButtonApplyStartMarks.Enabled);
@@ -5236,7 +8897,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  StartMarkPanel_NumberEditPersistsWithoutApplying;
+StartMarkPanel_NumberEditPersistsWithoutApplying;
 const
   PARTICIPANT_NUMBER = 731;
 var
@@ -5269,7 +8930,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  StartMarkPanel_DoubleClickWithoutNumberDoesNothing;
+StartMarkPanel_DoubleClickWithoutNumberDoesNothing;
 begin
   CreateNewCompetitionFile;
   ConfigureSingleActiveStage(1);
@@ -5291,7 +8952,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  StartMarkPanel_DoubleClickAppliesToReceivedStage;
+StartMarkPanel_DoubleClickAppliesToReceivedStage;
 const
   PARTICIPANT_NUMBER = 732;
 begin
@@ -5327,7 +8988,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  StartMarkPanel_DifferentStageCanBeCancelled;
+StartMarkPanel_DifferentStageCanBeCancelled;
 const
   PARTICIPANT_NUMBER = 733;
 begin
@@ -5349,8 +9010,7 @@ begin
   MainForm.RxDBGridStartMarksDblClick(MainForm.RxDBGridStartMarks);
 
   AssertEquals(1, StartMarkStageChoiceCallCount);
-  AssertTrue(Pos(IntToStr(PARTICIPANT_NUMBER),
-    LastStartMarkStageChoiceMessage) > 0);
+  AssertTrue(Pos(IntToStr(PARTICIPANT_NUMBER), LastStartMarkStageChoiceMessage) > 0);
   AssertTrue(Pos('1', LastStartMarkStageChoiceMessage) > 0);
   AssertTrue(Pos('2', LastStartMarkStageChoiceMessage) > 0);
   AssertEquals(1, MainForm.DatasetStartMarks.RecordCount);
@@ -5365,7 +9025,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  StartMarkPanel_DifferentStageCanApplyToCurrentStage;
+StartMarkPanel_DifferentStageCanApplyToCurrentStage;
 const
   PARTICIPANT_NUMBER = 734;
 begin
@@ -5404,7 +9064,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  StartMarkPanel_DifferentStageCanApplyToReceivedStage;
+StartMarkPanel_DifferentStageCanApplyToReceivedStage;
 const
   PARTICIPANT_NUMBER = 736;
 begin
@@ -5443,7 +9103,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  StartMarkPanel_ExistingCorrectionRequiresConfirmation;
+StartMarkPanel_ExistingCorrectionRequiresConfirmation;
 const
   PARTICIPANT_NUMBER = 735;
 begin
@@ -5493,7 +9153,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  StartMarkPanel_CtrlEnterWritesOnlyWhenFocused;
+StartMarkPanel_CtrlEnterWritesOnlyWhenFocused;
 var
   Key: word;
   WasMainFormVisible: boolean;
@@ -5553,7 +9213,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  StartMarkPanel_WriteCommitsCurrentNumberEdit;
+StartMarkPanel_WriteCommitsCurrentNumberEdit;
 begin
   CreateNewCompetitionFile;
   ConfigureSingleActiveStage(1);
@@ -5575,7 +9235,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  StartMarkPanel_WriteAppliesEveryNumberedRow;
+StartMarkPanel_WriteAppliesEveryNumberedRow;
 begin
   CreateNewCompetitionFile;
   ConfigureSingleActiveStage(1);
@@ -5600,8 +9260,7 @@ begin
   MainForm.ButtonApplyStartMarks.Click;
 
   AssertEquals(1, MainForm.DatasetStartMarks.RecordCount);
-  AssertTrue(MainForm.DatasetStartMarks.FieldByName(
-    'participant_number').IsNull);
+  AssertTrue(MainForm.DatasetStartMarks.FieldByName('participant_number').IsNull);
   MainForm.SQLQuery1.SQL.Text :=
     'SELECT number, correction1 FROM main WHERE number IN (741, 742) ' +
     'ORDER BY number;';
@@ -5620,7 +9279,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  StartMarkPanel_WriteContinuesAfterStageChoiceCancellation;
+StartMarkPanel_WriteContinuesAfterStageChoiceCancellation;
 begin
   CreateEmptyCompetitionFixture(2);
   stages[1].isActive := True;
@@ -5662,7 +9321,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  StartMarkPanel_ClearSoftHidesEntireWorkQueue;
+StartMarkPanel_ClearSoftHidesEntireWorkQueue;
 begin
   CreateNewCompetitionFile;
   ConfigureSingleActiveStage(1);
@@ -5696,7 +9355,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  StartMarkJournal_ShowsAllStatusesNewestFirstAndReadOnly;
+StartMarkJournal_ShowsAllStatusesNewestFirstAndReadOnly;
 var
   Form: TStartMarksForm;
   FirstId, SecondId: int64;
@@ -5791,7 +9450,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  StartMarkJournal_FiltersAndRefreshesPreservingSelection;
+StartMarkJournal_FiltersAndRefreshesPreservingSelection;
 var
   FirstId: int64;
   Form: TStartMarksForm;
@@ -5839,7 +9498,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  StartMarkJournal_DiagnosticPreviewCopyAndViewerUseFullText;
+StartMarkJournal_DiagnosticPreviewCopyAndViewerUseFullText;
 var
   DiagnosticField: TField;
   DiagnosticText, ExpectedPreview: string;
@@ -5848,8 +9507,8 @@ begin
   CreateNewCompetitionFile;
   ConfigureSingleActiveStage(1);
   ApplyStartPacketAt(EncodeTime(10, 0, 0, 0), True, 84);
-  DiagnosticText := StringOfChar('A', 60) + LineEnding +
-    StringOfChar('B', 70) + ' complete diagnostic';
+  DiagnosticText := StringOfChar('A', 60) + LineEnding + StringOfChar('B', 70) +
+    ' complete diagnostic';
   MainForm.SQLQuery1.Close;
   MainForm.SQLQuery1.SQL.Text :=
     'UPDATE start_marks SET diagnostic = :DIAGNOSTIC;';
@@ -5862,8 +9521,7 @@ begin
   try
     DiagnosticField := Form.StartMarksDataset.FieldByName('diagnostic');
     AssertTrue(DiagnosticField is TMemoField);
-    ExpectedPreview := StringOfChar('A', 60) + ' ' +
-      StringOfChar('B', 59) + '...';
+    ExpectedPreview := StringOfChar('A', 60) + ' ' + StringOfChar('B', 59) + '...';
     AssertEquals(ExpectedPreview, DiagnosticField.DisplayText);
     AssertEquals(DiagnosticText, DiagnosticField.AsString);
 
@@ -5880,7 +9538,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  FinishMarkJournal_ShowsAllStatusesNewestFirstAndReadOnly;
+FinishMarkJournal_ShowsAllStatusesNewestFirstAndReadOnly;
 var
   FirstId, SecondId, ThirdId, FourthId, FifthId: int64;
   Form: TFinishMarksForm;
@@ -6004,7 +9662,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  FinishMarkJournal_FiltersAndRefreshesPreservingSelection;
+FinishMarkJournal_FiltersAndRefreshesPreservingSelection;
 var
   FirstId: int64;
   Form: TFinishMarksForm;
@@ -6057,7 +9715,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  FinishMarkJournal_DiagnosticPreviewCopyAndViewerUseFullText;
+FinishMarkJournal_DiagnosticPreviewCopyAndViewerUseFullText;
 var
   DiagnosticField: TField;
   DiagnosticText, ExpectedPreview: string;
@@ -6066,8 +9724,8 @@ begin
   CreateNewCompetitionFile;
   ConfigureSingleActiveStage(1);
   ApplyFinishPacketAt(EncodeTime(10, 0, 0, 0));
-  DiagnosticText := StringOfChar('A', 60) + LineEnding +
-    StringOfChar('B', 70) + ' complete diagnostic';
+  DiagnosticText := StringOfChar('A', 60) + LineEnding + StringOfChar('B', 70) +
+    ' complete diagnostic';
   MainForm.SQLQuery1.Close;
   MainForm.SQLQuery1.SQL.Text :=
     'UPDATE finish_marks SET diagnostic = :DIAGNOSTIC;';
@@ -6080,8 +9738,7 @@ begin
   try
     DiagnosticField := Form.FinishMarksDataset.FieldByName('diagnostic');
     AssertTrue(DiagnosticField is TMemoField);
-    ExpectedPreview := StringOfChar('A', 60) + ' ' +
-      StringOfChar('B', 59) + '...';
+    ExpectedPreview := StringOfChar('A', 60) + ' ' + StringOfChar('B', 59) + '...';
     AssertEquals(ExpectedPreview, DiagnosticField.DisplayText);
     AssertEquals(DiagnosticText, DiagnosticField.AsString);
 
@@ -6098,7 +9755,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  TimingStart_AutomaticSettingsApplyCorrection;
+TimingStart_AutomaticSettingsApplyCorrection;
 var
   OldAutomaticApply: boolean;
   OldMatchDeltaSeconds: integer;
@@ -6138,7 +9795,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  TimingStart_ClosedCompetitionIsIgnored;
+TimingStart_ClosedCompetitionIsIgnored;
 begin
   MainForm.FileCloseExecute(nil);
   ApplyStartPacketAt(EncodeTime(10, 0, 0, 0), True, 10);
@@ -6146,7 +9803,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  FinishMarkPanel_UsesEditableSqlQueryAndRxDbGrid;
+FinishMarkPanel_UsesEditableSqlQueryAndRxDbGrid;
 begin
   CreateNewCompetitionFile;
 
@@ -6209,7 +9866,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  FinishMarkPanel_RestoresPendingMarksFromSqlite;
+FinishMarkPanel_RestoresPendingMarksFromSqlite;
 var
   CompetitionFileName: string;
 begin
@@ -6225,12 +9882,11 @@ begin
   AssertEquals(1, MainForm.DatasetFinishMarks.RecordCount);
   AssertEquals('10:11:12.345',
     MainForm.DatasetFinishMarks.FieldByName('event_time').AsString);
-  AssertTrue(MainForm.DatasetFinishMarks.FieldByName(
-    'participant_number').IsNull);
+  AssertTrue(MainForm.DatasetFinishMarks.FieldByName('participant_number').IsNull);
 end;
 
 procedure TMainFlowIntegrationTests.
-  FinishMarkPanel_DebouncedMarkPreservesSelection;
+FinishMarkPanel_DebouncedMarkPreservesSelection;
 var
   OldDebounceInterval: integer;
   SelectedMarkId: int64;
@@ -6295,7 +9951,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  FinishMarkPanel_DoubleClickWithoutNumberDoesNothing;
+FinishMarkPanel_DoubleClickWithoutNumberDoesNothing;
 begin
   CreateNewCompetitionFile;
   ApplyFinishPacketAt(EncodeTime(10, 11, 12, 345));
@@ -6314,7 +9970,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  FinishMarkPanel_DoubleClickAppliesNumberedMark;
+FinishMarkPanel_DoubleClickAppliesNumberedMark;
 begin
   CreateNewCompetitionFile;
   ConfigureSingleActiveStage(1);
@@ -6342,7 +9998,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  FinishMarkPanel_ClearSoftHidesEntireWorkQueue;
+FinishMarkPanel_ClearSoftHidesEntireWorkQueue;
 begin
   CreateNewCompetitionFile;
   ApplyFinishPacketAt(EncodeTime(10, 0, 0, 0));
@@ -6367,7 +10023,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  SerialUi_ControlsUseMenuImagesAndPlaceIconBeforePort;
+SerialUi_ControlsUseMenuImagesAndPlaceIconBeforePort;
 begin
   ConfigureSerialUi('COM1', ['COM1']);
 
@@ -6404,7 +10060,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  SerialUi_DisconnectedAvailablePortEnablesOpenState;
+SerialUi_DisconnectedAvailablePortEnablesOpenState;
 begin
   ConfigureSerialUi('/dev/ttyUSB0', ['/dev/ttyUSB0', '/dev/ttyUSB1']);
   MainForm.COMStatus(MainForm.AcCOMOpen);
@@ -6425,7 +10081,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  SerialUi_DisconnectedUnavailablePortDisablesOpenState;
+SerialUi_DisconnectedUnavailablePortDisablesOpenState;
 begin
   ConfigureSerialUi('/dev/ttyUSB9', ['/dev/ttyUSB0', '/dev/ttyUSB1']);
   MainForm.COMStatus(MainForm.AcCOMOpen);
@@ -6444,7 +10100,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  SerialUi_OpenActionRechecksAndRejectsUnavailablePort;
+SerialUi_OpenActionRechecksAndRejectsUnavailablePort;
 const
   MissingDeviceName = '/dev/entime-missing-serial-device';
 begin
@@ -6487,7 +10143,7 @@ end;
 {$ENDIF}
 
 procedure TMainFlowIntegrationTests.
-  SerialUi_PortMenuRefreshesAndChecksCurrentDevice;
+SerialUi_PortMenuRefreshesAndChecksCurrentDevice;
 var
   currentItem: TMenuItem;
 begin
@@ -6519,7 +10175,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  SerialUi_EmptyPortMenuShowsDisabledLocalizedItem;
+SerialUi_EmptyPortMenuShowsDisabledLocalizedItem;
 var
   emptyItem: TMenuItem;
 begin
@@ -6533,7 +10189,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  SerialUi_SelectingAvailablePortUpdatesDeviceWithoutConnecting;
+SerialUi_SelectingAvailablePortUpdatesDeviceWithoutConnecting;
 var
   item: TMenuItem;
 begin
@@ -6571,7 +10227,7 @@ end;
 {$ENDIF}
 
 procedure TMainFlowIntegrationTests.
-  SerialUi_PortDisappearingBeforeClickIsNotOpened;
+SerialUi_PortDisappearingBeforeClickIsNotOpened;
 const
   MissingDeviceName = '/dev/entime-missing-serial-device';
 begin
@@ -6642,7 +10298,7 @@ end;
 {$ENDIF}
 
 procedure TMainFlowIntegrationTests.
-  SerialUi_RestoredUnavailablePortRemainsSelectedButDisabled;
+SerialUi_RestoredUnavailablePortRemainsSelectedButDisabled;
 var
   oldCheckUpdateAtStartup: boolean;
 begin
@@ -6689,7 +10345,62 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  TimingInputUi_SwitchesBetweenSerialAndBleStatus;
+TimingInputUi_UnknownSavedBleDeviceSuggestsScanAndCanRetry;
+var
+  Backend: ILazBleBackend;
+  BackendObject: TFakeLazBleBackend;
+  FakeBle, OriginalBle: TLazBleComponent;
+  Device: TBleDeviceInfo;
+  Gui: TGuiTestSession;
+begin
+  BackendObject := TFakeLazBleBackend.Create;
+  Backend := BackendObject;
+  FakeBle := TLazBleComponent.Create(nil, Backend);
+  OriginalBle := MainForm.LazBleComponent1;
+  MainForm.LazBleComponent1 := FakeBle;
+  MainForm.LazBleLclClient1.LazBle := FakeBle;
+  Gui := TGuiTestSession.Create;
+  try
+    Device := Default(TBleDeviceInfo);
+    Device.DeviceId := 'saved-device';
+    Device.DeviceName := 'ENTime saved';
+    MainForm.LazBleLclClient1.SelectDevice(Device);
+    timingInputTransport := ttkBle;
+    MainForm.RefreshTimingInputUi;
+    MainForm.Show;
+    Gui.Click(MainForm.TimingInputStateButton.Parent,
+      MainForm.TimingInputStateButton.Left + MainForm.TimingInputStateButton.Width div 2,
+      MainForm.TimingInputStateButton.Top +
+      MainForm.TimingInputStateButton.Height div 2);
+    AssertEquals(Ord(lbckConnect), Ord(BackendObject.Commands[0].Kind));
+    AssertTrue(BackendObject.CompleteOperation(BackendObject.OperationIds[0],
+      lbekOperationFailed, LazBleErrorDeviceNotKnown, 'scan before connecting'));
+    Gui.Drain('Show unknown saved BLE device');
+    AssertEquals(rsBleDeviceNeedsScan, MainForm.TimingInputStatusText.Caption);
+    AssertEquals('saved-device', MainForm.LazBleLclClient1.DeviceId);
+    AssertTrue(MainForm.TimingInputDeviceLabel.Enabled);
+    AssertTrue(Pos(rsBleDeviceNeedsScan, MainForm.TimingInputDeviceLabel.Hint) > 0);
+    TMainFormAccess(MainForm).CompleteBleTimingDeviceSelection(True, Device);
+    CompleteBleTimingConnection(BackendObject, 94);
+    Gui.Drain('Connect selected BLE device again');
+    AssertEquals(Ord(lbcstReady), Ord(MainForm.LazBleLclClient1.State));
+    AssertEquals(BleTimingStatusText(MainForm.LazBleLclClient1),
+      MainForm.TimingInputStatusText.Caption);
+  finally
+    FakeBle.ShutdownAsync;
+    BackendObject.CompletePendingOperations;
+    BackendObject.CompleteShutdown;
+    MainForm.LazBleLclClient1.LazBle := OriginalBle;
+    MainForm.LazBleComponent1 := OriginalBle;
+    FakeBle.Free;
+    MainForm.Hide;
+    Gui.Free;
+    Backend := nil;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.
+TimingInputUi_SwitchesBetweenSerialAndBleStatus;
 var
   device: TBleDeviceInfo;
   bleStatusText: string;
@@ -6711,7 +10422,7 @@ begin
   device.DeviceName := 'ENTime BLE';
   MainForm.LazBleLclClient1.SelectDevice(device);
   MainForm.RefreshTimingInputUi;
-  bleStatusText := LazBleStatusText(MainForm.LazBleLclClient1);
+  bleStatusText := BleTimingStatusText(MainForm.LazBleLclClient1);
 
   AssertEquals('ENTime BLE', MainForm.TimingInputDeviceLabel.Caption);
   AssertEquals('ble-device-id', MainForm.TimingInputDeviceLabel.Hint);
@@ -6804,15 +10515,15 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.BleTimingDataReceived(Sender: TObject;
-  const AData: RawByteString; const ASource: TTimingMarkSource);
+  const AData: rawbytestring; const ASource: TTimingMarkSource);
 begin
   AssertTrue(Sender is TBleTimingTransport);
   FBleTestProcessor.Feed(AData, ASource, Now);
 end;
 
 procedure TMainFlowIntegrationTests.CompleteBleTimingConnection(
-  const ABackend: TFakeLazBleBackend;
-  const ASubscriptionId: TBleSubscriptionId);
+  const ABackend: TFakeLazBleBackend; const ASubscriptionId: TBleSubscriptionId;
+  const AFinishSubscription: boolean);
 var
   BackendEvent: TLazBleBackendEvent;
   Command: TLazBleBackendCommand;
@@ -6828,12 +10539,14 @@ begin
   BackendEvent.DeviceId := Command.DeviceId;
   BackendEvent.Generation := Command.Generation;
   AssertTrue(ABackend.EmitProgress(BackendEvent));
+  AssertTrue(ABackend.CompleteOperation(OperationId, lbekOperationSucceeded));
 
   Command := ABackend.Commands[ABackend.CommandCount - 1];
   OperationId := ABackend.OperationIds[ABackend.CommandCount - 1];
   AssertEquals(Ord(lbckDiscoverServices), Ord(Command.Kind));
   BackendEvent := Default(TLazBleBackendEvent);
   BackendEvent.Kind := lbekServicesDiscovered;
+  BackendEvent.MaxWriteSize := 20;
   BackendEvent.OperationId := OperationId;
   BackendEvent.DeviceId := Command.DeviceId;
   BackendEvent.Generation := Command.Generation;
@@ -6842,16 +10555,17 @@ begin
   SetLength(BackendEvent.Services[0].Characteristics, 2);
   BackendEvent.Services[0].Characteristics[0].Uuid :=
     NusRxCharacteristicUuid;
-  BackendEvent.Services[0].Characteristics[0].Properties :=
-    [lbgcpWriteCommand];
+  BackendEvent.Services[0].Characteristics[0].CanWriteCommand := True;
   BackendEvent.Services[0].Characteristics[1].Uuid :=
     NusTxCharacteristicUuid;
-  BackendEvent.Services[0].Characteristics[1].Properties := [lbgcpNotify];
+  BackendEvent.Services[0].Characteristics[1].CanNotify := True;
   AssertTrue(ABackend.EmitProgress(BackendEvent));
+  AssertTrue(ABackend.CompleteOperation(OperationId, lbekOperationSucceeded));
 
   Command := ABackend.Commands[ABackend.CommandCount - 1];
   OperationId := ABackend.OperationIds[ABackend.CommandCount - 1];
   AssertEquals(Ord(lbckSubscribe), Ord(Command.Kind));
+  if not AFinishSubscription then Exit;
   BackendEvent := Default(TLazBleBackendEvent);
   BackendEvent.Kind := lbekSubscribed;
   BackendEvent.OperationId := OperationId;
@@ -6859,28 +10573,25 @@ begin
   BackendEvent.DeviceId := Command.DeviceId;
   BackendEvent.Generation := Command.Generation;
   AssertTrue(ABackend.EmitProgress(BackendEvent));
-  AssertTrue(ABackend.CompleteOperation(OperationId,
-    lbekOperationSucceeded));
+  AssertTrue(ABackend.CompleteOperation(OperationId, lbekOperationSucceeded));
 end;
 
 procedure TMainFlowIntegrationTests.EmitBleTimingNotification(
   const ABackend: TFakeLazBleBackend; const AInput: TBleTimingTransport;
-  const ASubscriptionId: TBleSubscriptionId;
-  const AValue: RawByteString);
+  const ASubscriptionId: TBleSubscriptionId; const AValue: rawbytestring);
 var
   BackendEvent: TLazBleBackendEvent;
-  Index: Integer;
+  Index: integer;
 begin
   BackendEvent := Default(TLazBleBackendEvent);
   BackendEvent.Kind := lbekNotification;
   BackendEvent.OperationId := InvalidBleOperationId;
   BackendEvent.SubscriptionId := ASubscriptionId;
   BackendEvent.DeviceId := AInput.DeviceId;
-  BackendEvent.Generation := ABackend.Commands[
-    ABackend.CommandCount - 1].Generation;
+  BackendEvent.Generation := ABackend.Commands[ABackend.CommandCount - 1].Generation;
   SetLength(BackendEvent.Value, Length(AValue));
   for Index := 1 to Length(AValue) do
-    BackendEvent.Value[Index - 1] := Byte(AValue[Index]);
+    BackendEvent.Value[Index - 1] := byte(AValue[Index]);
   AssertTrue(ABackend.EmitProgress(BackendEvent));
 end;
 
@@ -6915,6 +10626,9 @@ begin
       MainForm.SQLQuery1.FieldByName('source_device_id').AsString);
     MainForm.SQLQuery1.Close;
   finally
+    Input.ShutdownAsync;
+    BackendObject.CompletePendingOperations;
+    BackendObject.CompleteShutdown;
     Input.Free;
     Backend := nil;
     BackendObject := nil;
@@ -6928,7 +10642,7 @@ var
   Backend: ILazBleBackend;
   BackendObject: TFakeLazBleBackend;
   Input: TBleTimingTransport;
-  OldCheckInterval: Integer;
+  OldCheckInterval: integer;
 begin
   CreateNewCompetitionFile;
   MainForm.ResultClearClick(MainForm);
@@ -6960,6 +10674,9 @@ begin
     MainForm.SQLQuery1.Close;
   finally
     MainForm.FinishDebounceInterval := OldCheckInterval;
+    Input.ShutdownAsync;
+    BackendObject.CompletePendingOperations;
+    BackendObject.CompleteShutdown;
     Input.Free;
     Backend := nil;
     BackendObject := nil;
@@ -6967,7 +10684,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  LEDPanelTest_UsesDraftAddressWithoutChangingGlobal;
+LEDPanelTest_UsesDraftAddressWithoutChangingGlobal;
 var
   Form: TSettingsForm;
   OldLedPanelAddress: string;
@@ -7067,7 +10784,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  SettingsSerialSelector_ShowsFriendlyNameButAppliesDevice;
+SettingsSerialSelector_ShowsFriendlyNameButAppliesDevice;
 var
   oldDevice: string;
 begin
@@ -7089,7 +10806,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  SettingsSerialSelector_AppliesCustomDevice;
+SettingsSerialSelector_AppliesCustomDevice;
 var
   oldDevice: string;
 begin
@@ -7110,7 +10827,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  SettingsTimingInputPage_SwitchesTransportPanels;
+SettingsTimingInputPage_SwitchesTransportPanels;
 var
   form: TSettingsForm;
 begin
@@ -7136,7 +10853,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  SettingsTimingInputPage_DisablesUnavailableBleButKeepsSerial;
+SettingsTimingInputPage_DisablesUnavailableBleButKeepsSerial;
 var
   form: TSettingsForm;
   availabilityChanged, previousAvailabilityChanged: TBleAvailabilityEvent;
@@ -7164,7 +10881,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  SettingsTimingInputPage_AppliesSelectedBleDeviceOnlyAfterAccept;
+SettingsTimingInputPage_AppliesSelectedBleDeviceOnlyAfterAccept;
 var
   form: TTestSettingsForm;
   device: TBleDeviceInfo;
@@ -7203,7 +10920,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  BleDeviceSelection_AcceptConnectsSelectedDevice;
+BleDeviceSelection_AcceptConnectsSelectedDevice;
 var
   Backend: ILazBleBackend;
   BackendObject: TFakeLazBleBackend;
@@ -7237,13 +10954,16 @@ begin
   finally
     MainForm.LazBleLclClient1.LazBle := OriginalBle;
     MainForm.LazBleLclClient1.DeviceId := '';
+    FakeBle.ShutdownAsync;
+    BackendObject.CompletePendingOperations;
+    BackendObject.CompleteShutdown;
     FakeBle.Free;
     Backend := nil;
   end;
 end;
 
 procedure TMainFlowIntegrationTests.
-  BleDeviceSelection_CancelDoesNotChangeOrConnect;
+BleDeviceSelection_CancelDoesNotChangeOrConnect;
 var
   Device: TBleDeviceInfo;
 begin
@@ -7257,8 +10977,170 @@ begin
   AssertEquals(Ord(lbcstDisconnected), Ord(MainForm.LazBleLclClient1.State));
 end;
 
+procedure TMainFlowIntegrationTests.RecordBleClose(Sender: TObject;
+  var CloseAction: TCloseAction);
+begin
+  Inc(FBleCloseCount);
+  MainForm.FormClose(Sender, CloseAction);
+  { Keep Application alive so the remaining integration scenarios can run. }
+  CloseAction := Forms.caNone;
+end;
+
+procedure TMainFlowIntegrationTests.ExerciseBleClose(
+  const AKind: TLazBleBackendCommandKind; const AImmediate, AFailed: boolean);
+var
+  Backend: ILazBleBackend;
+  BackendObject: TFakeLazBleBackend;
+  FakeBle, OriginalBle: TLazBleComponent;
+  Operation: IBleOperation;
+  CanClose: boolean;
+  Gui: TGuiTestSession;
+begin
+  BackendObject := TFakeLazBleBackend.Create;
+  Backend := BackendObject;
+  FakeBle := TLazBleComponent.Create(nil, Backend);
+  OriginalBle := MainForm.LazBleComponent1;
+  MainForm.LazBleLclClient1.LazBle := FakeBle;
+  MainForm.LazBleComponent1 := FakeBle;
+  MainForm.OnClose := @RecordBleClose;
+  FBleCloseCount := 0;
+  Gui := TGuiTestSession.Create;
+  try
+    if not AImmediate then
+      case AKind of
+        lbckStartScan: FakeBle.StartScan;
+        lbckConnect, lbckWrite, lbckSubscribe:
+        begin
+          MainForm.LazBleLclClient1.DeviceId := 'close-test-device';
+          MainForm.LazBleLclClient1.Connect;
+          if AKind in [lbckWrite, lbckSubscribe] then
+          begin
+            CompleteBleTimingConnection(BackendObject, 91,
+              AKind <> lbckSubscribe);
+            if AKind = lbckWrite then
+              MainForm.BleTimingTransport.SendAsync('command');
+          end;
+        end;
+      end
+    else
+    begin
+      FakeBle.ShutdownAsync;
+      AssertTrue(BackendObject.CompleteShutdown);
+    end;
+
+    CanClose := True;
+    MainForm.FormCloseQuery(MainForm, CanClose);
+    AssertFalse('Final close must be deferred from the completion callback', CanClose);
+    AssertEquals(0, FBleCloseCount);
+    AssertFalse(MainForm.Enabled);
+    AssertFalse(MainForm.BleTimingTransport.Connected);
+    Operation := FakeBle.ShutdownAsync;
+    if not AImmediate then
+    begin
+      AssertEquals(Ord(lbopPending), Ord(Operation.State));
+      CanClose := True;
+      MainForm.FormCloseQuery(MainForm, CanClose);
+      AssertFalse('A repeated request must still await shutdown', CanClose);
+      AssertEquals(0, FBleCloseCount);
+      BackendObject.CompletePendingOperations;
+      AssertTrue(BackendObject.CompleteShutdown(0, '', AFailed));
+    end;
+    if AFailed then
+      AssertEquals(Ord(lbopFailed), Ord(Operation.State))
+    else
+      AssertEquals(Ord(lbopSucceeded), Ord(Operation.State));
+    AssertEquals('Completion must leave the callback stack before Close',
+      0, FBleCloseCount);
+    Gui.Drain('finish BLE shutdown and close the form');
+    AssertEquals(1, FBleCloseCount);
+    AssertNull('Unconfigure must clear the borrowed client',
+      MainForm.LazBleLclClient1.CoreClient);
+  finally
+    FakeBle.ShutdownAsync;
+    BackendObject.CompletePendingOperations;
+    BackendObject.CompleteShutdown;
+    Application.RemoveAsyncCalls(MainForm);
+    MainForm.LazBleLclClient1.LazBle := OriginalBle;
+    MainForm.LazBleComponent1 := OriginalBle;
+    FakeBle.Free;
+    FreeAndNil(ResultsForm);
+    FreeAndNil(MainForm);
+    EnsureFormsCreated;
+    Gui.Free;
+    Backend := nil;
+  end;
+end;
+
+procedure TMainFlowIntegrationTests.BleCloseWaitsForScanAndRepeatedRequests;
+begin
+  ExerciseBleClose(lbckStartScan, False, False);
+end;
+
+procedure TMainFlowIntegrationTests.BleCloseWaitsForConnection;
+begin
+  ExerciseBleClose(lbckConnect, False, False);
+end;
+
+procedure TMainFlowIntegrationTests.BleCloseWaitsForNusWrite;
+begin
+  ExerciseBleClose(lbckWrite, False, False);
+end;
+
+procedure TMainFlowIntegrationTests.BleCloseWaitsForSubscription;
+begin
+  ExerciseBleClose(lbckSubscribe, False, False);
+end;
+
+procedure TMainFlowIntegrationTests.BleCloseDefersAlreadyCompletedShutdown;
+begin
+  ExerciseBleClose(lbckStartScan, True, False);
+end;
+
+procedure TMainFlowIntegrationTests.BleCloseContinuesAfterShutdownFailure;
+begin
+  ExerciseBleClose(lbckStartScan, False, True);
+end;
+
+procedure TMainFlowIntegrationTests.CompleteBleShutdownOnMain;
+begin
+  FShutdownBackend.CompletePendingOperations;
+  FShutdownAcknowledged := FShutdownBackend.CompleteShutdown;
+end;
+
+procedure TMainFlowIntegrationTests.BleDirectDestroyDrainsShutdownBeforeReleasingOwners;
+var
+  Backend: ILazBleBackend;
+  FakeBle: TLazBleComponent;
+begin
+  FShutdownBackend := TFakeLazBleBackend.Create;
+  Backend := FShutdownBackend;
+  { Let the form own the injected component, just like the streamed component. }
+  FakeBle := TLazBleComponent.Create(MainForm, Backend);
+  MainForm.LazBleLclClient1.LazBle := FakeBle;
+  MainForm.LazBleComponent1 := FakeBle;
+  FakeBle.StartScan;
+  FShutdownAcknowledged := False;
+  try
+    TThread.ForceQueue(nil, @CompleteBleShutdownOnMain);
+    FreeAndNil(ResultsForm);
+    FreeAndNil(MainForm);
+    AssertTrue('Direct Free must await the backend acknowledgement',
+      FShutdownAcknowledged);
+    AssertFalse('Destroyed owners must release addressed backend recipients',
+      FShutdownBackend.HasRetainedRecipients);
+  finally
+    TThread.RemoveQueuedEvents(nil, @CompleteBleShutdownOnMain);
+    { These application globals are normally released by FormClose. }
+    FreeAndNil(startlistConfig);
+    FreeAndNil(stages);
+    EnsureFormsCreated;
+    Backend := nil;
+    FShutdownBackend := nil;
+  end;
+end;
+
 procedure TMainFlowIntegrationTests.
-  SettingsStartMarkSettings_AreDraftedAndApplied;
+SettingsStartMarkSettings_AreDraftedAndApplied;
 var
   Form: TTestSettingsForm;
   OldAutomaticApply: boolean;
@@ -7296,7 +11178,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  TimingInputIni_RoundTripsModeAndBleIdentityWithoutConnection;
+TimingInputIni_RoundTripsModeAndBleIdentityWithoutConnection;
 var
   device: TBleDeviceInfo;
   transportValue, deviceIdValue, deviceNameValue: TStoredType;
@@ -7346,7 +11228,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  TimingInputIni_InvalidTransportFallsBackToSerial;
+TimingInputIni_InvalidTransportFallsBackToSerial;
 var
   transportValue: TStoredType;
 begin
@@ -7397,10 +11279,8 @@ end;
 procedure TMainFlowIntegrationTests.MainIni_InvalidScalarValuesUseDefaults;
 var
   InvalidValue: TStoredType;
-  OldAutomaticBackup, OldZeroHour, OldShowStageName,
-    OldCheckUpdateAtStartup: boolean;
-  OldBackupPeriod, OldFinishDebounceInterval,
-    OldCheckUpdateIntervalInDays: integer;
+  OldAutomaticBackup, OldZeroHour, OldShowStageName, OldCheckUpdateAtStartup: boolean;
+  OldBackupPeriod, OldFinishDebounceInterval, OldCheckUpdateIntervalInDays: integer;
   OldLastUpdateCheckoutTime: TDateTime;
 begin
   OldAutomaticBackup := doAutomaticBackup;
@@ -7454,8 +11334,8 @@ end;
 procedure TMainFlowIntegrationTests.TelegramRetryIni_RoundTripsAndValidates;
 var
   EnabledValue, CountValue, DelayValue: TStoredType;
-  OldEnabled: Boolean;
-  OldCount, OldDelay: Integer;
+  OldEnabled: boolean;
+  OldCount, OldDelay: integer;
 begin
   OldEnabled := telegramRetryEnabled;
   OldCount := telegramRetryCount;
@@ -7505,8 +11385,8 @@ end;
 procedure TMainFlowIntegrationTests.SettingsTelegramRetry_UsesStoredDraftValues;
 var
   Form: TSettingsForm;
-  OldEnabled: Boolean;
-  OldCount, OldDelay: Integer;
+  OldEnabled: boolean;
+  OldCount, OldDelay: integer;
 begin
   OldEnabled := telegramRetryEnabled;
   OldCount := telegramRetryCount;
@@ -7567,7 +11447,7 @@ begin
 
     Policy := CurrentBackupRetentionPolicy;
     AssertEquals(45, Policy.AutomaticRetentionDays);
-    AssertEquals(Int64(3072) * 1024 * 1024,
+    AssertEquals(int64(3072) * 1024 * 1024,
       Policy.AutomaticMaxTotalBytes);
 
     DaysValue := '0';
@@ -7599,13 +11479,12 @@ begin
       AssertEquals(75, Form.SpinBackupRetentionDays.Value);
       AssertEquals(4096, Form.SpinBackupMaxSizeMb.Value);
       AssertTrue(Form.LabelBackupRetentionDays.Left +
-        Form.LabelBackupRetentionDays.Width <=
-        Form.SpinBackupRetentionDays.Left);
+        Form.LabelBackupRetentionDays.Width <= Form.SpinBackupRetentionDays.Left);
       AssertTrue(Form.SpinBackupRetentionDays.Left +
         Form.SpinBackupRetentionDays.Width <=
         Form.LabelBackupRetentionDaysUnit.Left);
-      AssertTrue(Form.PanelBackup.Height >=
-        Form.SpinBackupMaxSizeMb.Top + Form.SpinBackupMaxSizeMb.Height);
+      AssertTrue(Form.PanelBackup.Height >= Form.SpinBackupMaxSizeMb.Top +
+        Form.SpinBackupMaxSizeMb.Height);
     finally
       Form.Free;
     end;
@@ -7643,14 +11522,12 @@ begin
 
     form.StageCountSpinEdit.Value := 8;
     Application.ProcessMessages;
-    firstRow := TStageSettingsFrame(form.FindComponent(
-      'StageSettingsFrame1'));
+    firstRow := TStageSettingsFrame(form.FindComponent('StageSettingsFrame1'));
     form.StageCountSpinEdit.Value := 9;
     Application.ProcessMessages;
     AssertSame('Existing stage rows must be reused when the count grows',
       firstRow, form.FindComponent('StageSettingsFrame1'));
-    ninthRow := TStageSettingsFrame(form.FindComponent(
-      'StageSettingsFrame9'));
+    ninthRow := TStageSettingsFrame(form.FindComponent('StageSettingsFrame9'));
     AssertTrue(ninthRow.Visible);
     form.StageCountSpinEdit.Value := 8;
     Application.ProcessMessages;
@@ -7668,8 +11545,8 @@ begin
     AssertEquals('The stage list must expose every row',
       MAX_SUPPORTED_STAGE_COUNT * 34, form.StagesContentPanel.Height);
     AssertTrue('The stages section must grow with its content',
-      form.GroupBoxStages.ClientHeight >=
-      form.ActiveStagePanel.Top + form.ActiveStagePanel.Height);
+      form.GroupBoxStages.ClientHeight >= form.ActiveStagePanel.Top +
+      form.ActiveStagePanel.Height);
     AssertTrue('The expanded stage list must use the page scroll range',
       form.CompetitionScrollBox.VertScrollBar.Range >
       form.CompetitionScrollBox.ClientHeight);
@@ -7699,10 +11576,10 @@ begin
   MainForm.SetLang('ru');
   form := TSettingsForm.Create(nil);
   try
-    firstRow := TStageSettingsFrame(form.FindComponent(
-      'StageSettingsFrame1'));
+    firstRow := TStageSettingsFrame(form.FindComponent('StageSettingsFrame1'));
     AssertTrue(firstRow <> nil);
-    AssertEquals('Количество спецучастков', form.StageCountLabel.Caption);
+    AssertEquals('Количество спецучастков',
+      form.StageCountLabel.Caption);
     AssertEquals('СУ 1', firstRow.StageLabel.Caption);
 
     form.ComboBoxLanguage.Text := rsEnglish;
@@ -7754,8 +11631,7 @@ var
   storedStageOneActive: string;
 begin
   CreateNewCompetitionFile;
-  storedStageOneActive := LoadConfigValueFromFile(
-    FDbFilePath, 'stage1', '');
+  storedStageOneActive := LoadConfigValueFromFile(FDbFilePath, 'stage1', '');
   AssertTrue(stages[1].isActive);
 
   form := TSettingsForm.Create(nil);
@@ -7780,8 +11656,7 @@ begin
   AssertTrue('Rejected draft must not change the stage model',
     stages[1].isActive);
   AssertEquals('Rejected draft must not change the database',
-    storedStageOneActive, LoadConfigValueFromFile(
-    FDbFilePath, 'stage1', ''));
+    storedStageOneActive, LoadConfigValueFromFile(FDbFilePath, 'stage1', ''));
 end;
 
 procedure TMainFlowIntegrationTests.SettingsStageCount_ExpandsSchemaAndCreatesBackup;
@@ -7891,8 +11766,7 @@ begin
   AssertEquals('Saved inactive stage 11', stages[11].Name);
   AssertFalse('A restored hidden stage must keep its saved activity',
     stages[11].isActive);
-  AssertEquals('False', LoadConfigValueFromFile(
-    FDbFilePath, 'stage11', ''));
+  AssertEquals('False', LoadConfigValueFromFile(FDbFilePath, 'stage11', ''));
   AssertEquals('12', LoadConfigValueFromFile(FDbFilePath, 'stagecount', ''));
   AssertEquals('12', LoadConfigValueFromFile(FDbFilePath, 'activestage', ''));
   AssertEquals('', FindBackupFile);
@@ -7951,7 +11825,8 @@ begin
   end;
 end;
 
-procedure TMainFlowIntegrationTests.SettingsStageCount_RebuildsUiAndPreservesCurrentContext;
+procedure TMainFlowIntegrationTests.
+SettingsStageCount_RebuildsUiAndPreservesCurrentContext;
 begin
   CreateSchemaFixture(12, '12',
     IntToStr(CURRENT_COMPETITION_SCHEMA_VERSION));
@@ -7991,7 +11866,8 @@ begin
   AssertTrue(Pos('finishtime1', ResultsForm.ResultDataset.SQL.Text) > 0);
 end;
 
-procedure TMainFlowIntegrationTests.SettingsStageActivity_KeepsMainDatasetOpenForSparseStage;
+procedure TMainFlowIntegrationTests.
+SettingsStageActivity_KeepsMainDatasetOpenForSparseStage;
 const
   ACTIVE_STAGE_INDEX = 31;
 begin
@@ -8026,8 +11902,8 @@ begin
   AssertTrue(stages[ACTIVE_STAGE_INDEX].isActive);
   AssertEquals(ACTIVE_STAGE_INDEX, MainForm.CurrentStageIndex);
   AssertTrue('The active sparse stage field must be attached',
-    MainForm.MainDataset1.FindField(
-      'starttime' + IntToStr(ACTIVE_STAGE_INDEX)) <> nil);
+    MainForm.MainDataset1.FindField('starttime' +
+    IntToStr(ACTIVE_STAGE_INDEX)) <> nil);
   AssertTrue('An inactive stage field must not be attached',
     MainForm.MainDataset1.FindField('starttime1') = nil);
   AssertTrue('The sparse query must select stage 31',
@@ -8039,7 +11915,7 @@ begin
 end;
 
 procedure TMainFlowIntegrationTests.
-  SettingsStageActivity_ReactivatesAllStagesAndPreservesEditing;
+SettingsStageActivity_ReactivatesAllStagesAndPreservesEditing;
 const
   PARTICIPANT_NUMBER = 808;
   SPARSE_STAGE_INDEX = 31;
@@ -8130,7 +12006,8 @@ begin
   AssertEquals(810, MainForm.MainDataset1.FieldByName('number').AsInteger);
 end;
 
-procedure TMainFlowIntegrationTests.SettingsStageName_UpdatesUiWithoutRefreshingMainDataset;
+procedure TMainFlowIntegrationTests.
+SettingsStageName_UpdatesUiWithoutRefreshingMainDataset;
 var
   stageColumn: TRxColumn;
   stageSheet: TTabSheet;

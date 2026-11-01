@@ -47,8 +47,7 @@ end;
 procedure RequireStageCount(const AStageCount: integer);
 begin
   if not IsValidStageCount(AStageCount) then
-    raise EStageIndexError.CreateFmt(
-      rsStageCountRangeError,
+    raise EStageIndexError.CreateFmt(rsStageCountRangeError,
       [IntToStr(AStageCount), MIN_STAGE_COUNT, MAX_SUPPORTED_STAGE_COUNT]);
 end;
 

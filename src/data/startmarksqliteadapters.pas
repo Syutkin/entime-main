@@ -19,8 +19,7 @@ type
     constructor Create(const AContext: TCompetitionDbContext);
     destructor Destroy; override;
     function Insert(const AMark: TStartMark): TStartMark;
-    function TryLoadById(const AMarkId: int64;
-      out AMark: TStartMark): boolean;
+    function TryLoadById(const AMarkId: int64; out AMark: TStartMark): boolean;
     function HideWorkQueue: integer;
     procedure Update(const AMark: TStartMark);
   end;
@@ -50,8 +49,7 @@ type
     constructor Create(const AContext: TCompetitionDbContext;
       const AStages: TStages);
     function TryApply(const ARequest: TStartMarkApplyRequest;
-      out AFailure: TStartMarkApplyFailure;
-      out ADiagnostic: string): boolean;
+      out AFailure: TStartMarkApplyFailure; out ADiagnostic: string): boolean;
   end;
 
 implementation
@@ -59,8 +57,7 @@ implementation
 uses
   DB, SQLDB, DbSql, ParticipantStageData, CompetitionResultsService;
 
-function TryParseStartTime(const AText: string;
-  out AValue: TDateTime): boolean;
+function TryParseStartTime(const AText: string; out AValue: TDateTime): boolean;
 var
   Hour, Millisecond, Minute, Second: integer;
   Text: string;
@@ -68,18 +65,16 @@ begin
   AValue := 0;
   Text := Trim(AText);
   Result := ((Length(Text) = 8) or (Length(Text) = 12)) and
-    (Text[3] = ':') and (Text[6] = ':') and
-    TryStrToInt(Copy(Text, 1, 2), Hour) and
-    TryStrToInt(Copy(Text, 4, 2), Minute) and
-    TryStrToInt(Copy(Text, 7, 2), Second);
+    (Text[3] = ':') and (Text[6] = ':') and TryStrToInt(Copy(Text, 1, 2), Hour) and
+    TryStrToInt(Copy(Text, 4, 2), Minute) and TryStrToInt(Copy(Text, 7, 2), Second);
   if not Result then
     Exit;
 
   Millisecond := 0;
   if Length(Text) = 12 then
   begin
-    Result := (Text[9] in ['.', ',']) and
-      TryStrToInt(Copy(Text, 10, 3), Millisecond);
+    Result := (Text[9] in ['.', ',']) and TryStrToInt(Copy(Text, 10, 3),
+      Millisecond);
     if not Result then
       Exit;
   end;
@@ -88,8 +83,7 @@ end;
 
 { TSqliteStartMarkPersistence }
 
-constructor TSqliteStartMarkPersistence.Create(
-  const AContext: TCompetitionDbContext);
+constructor TSqliteStartMarkPersistence.Create(const AContext: TCompetitionDbContext);
 begin
   inherited Create;
   FRepository := TStartMarkRepository.Create(AContext);
@@ -101,8 +95,7 @@ begin
   inherited Destroy;
 end;
 
-function TSqliteStartMarkPersistence.Insert(
-  const AMark: TStartMark): TStartMark;
+function TSqliteStartMarkPersistence.Insert(const AMark: TStartMark): TStartMark;
 begin
   Result := FRepository.Insert(AMark);
 end;
@@ -137,8 +130,8 @@ begin
   FStages := AStages;
 end;
 
-procedure TSqliteStartMarkCandidateProvider.LoadCandidates(
-  const AStageIndex: integer; out ACandidates: TStartMarkCandidateArray);
+procedure TSqliteStartMarkCandidateProvider.LoadCandidates(const AStageIndex: integer;
+  out ACandidates: TStartMarkCandidateArray);
 var
   CandidateTime: TDateTime;
   Q: TSQLQuery;
@@ -146,13 +139,11 @@ begin
   ACandidates := nil;
   if not FStages.IsValidIndex(AStageIndex) then
     raise EArgumentOutOfRangeException.CreateFmt(
-      'Stage index %d is outside the range 1..%d.',
-      [AStageIndex, FStages.Count]);
+      'Stage index %d is outside the range 1..%d.', [AStageIndex, FStages.Count]);
 
   Q := FContext.CreateQuery(nil);
   try
-    Q.SQL.Text := Format(
-      'SELECT number, starttime%d AS start_time FROM main ' +
+    Q.SQL.Text := Format('SELECT number, starttime%d AS start_time FROM main ' +
       'WHERE number IS NOT NULL AND starttime%d IS NOT NULL ' +
       'ORDER BY number;', [AStageIndex, AStageIndex]);
     Q.Open;
@@ -162,8 +153,9 @@ begin
         CandidateTime) then
       begin
         SetLength(ACandidates, Length(ACandidates) + 1);
-        ACandidates[High(ACandidates)] := TStartMarkCandidate.Create(
-          Q.FieldByName('number').AsInteger, AStageIndex, CandidateTime);
+        ACandidates[High(ACandidates)] :=
+          TStartMarkCandidate.Create(Q.FieldByName('number').AsInteger,
+          AStageIndex, CandidateTime);
       end;
       Q.Next;
     end;
@@ -174,8 +166,8 @@ end;
 
 { TSqliteStartMarkApplyPort }
 
-constructor TSqliteStartMarkApplyPort.Create(
-  const AContext: TCompetitionDbContext; const AStages: TStages);
+constructor TSqliteStartMarkApplyPort.Create(const AContext: TCompetitionDbContext;
+  const AStages: TStages);
 begin
   inherited Create;
   if AContext = nil then
@@ -186,10 +178,8 @@ begin
   FStages := AStages;
 end;
 
-function TSqliteStartMarkApplyPort.TryApply(
-  const ARequest: TStartMarkApplyRequest;
-  out AFailure: TStartMarkApplyFailure;
-  out ADiagnostic: string): boolean;
+function TSqliteStartMarkApplyPort.TryApply(const ARequest: TStartMarkApplyRequest;
+  out AFailure: TStartMarkApplyFailure; out ADiagnostic: string): boolean;
 var
   AppliedMark: TStartMark;
   Q: TSQLQuery;
@@ -209,16 +199,14 @@ begin
           [ARequest.StageIndex, FStages.Count]);
 
       UnitOfWork := FContext.BeginUnitOfWork;
-      if not TMainSql.TryLoadParticipantStageData(Q,
-        ARequest.ParticipantNumber, ARequest.StageIndex, FStages.Count,
-        StageData) then
+      if not TMainSql.TryLoadParticipantStageData(Q, ARequest.ParticipantNumber,
+        ARequest.StageIndex, FStages.Count, StageData) then
       begin
         AFailure := smafParticipantNotFound;
         ADiagnostic := StartMarkApplyFailureCode(AFailure);
         Exit;
       end;
-      if StageData.HasCorrection and
-        not ARequest.OverwriteExistingCorrection then
+      if StageData.HasCorrection and not ARequest.OverwriteExistingCorrection then
       begin
         AFailure := smafExistingCorrection;
         ADiagnostic := StartMarkApplyFailureCode(AFailure);
@@ -243,8 +231,8 @@ begin
       AppliedMark.AppliedAt := ARequest.AppliedAt;
       TStartMarkSql.ExecUpdate(Q, AppliedMark);
 
-      TResultCalculationService.RecalculateAllInCurrentTransaction(
-        FContext, FStages);
+      TResultCalculationService.RecalculateStagesInCurrentTransaction(
+        FContext, FStages, [ARequest.StageIndex]);
       UnitOfWork.Commit;
       Result := True;
     except

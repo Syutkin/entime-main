@@ -16,8 +16,8 @@ uses
   dateutils, Controls, DBGrids, Graphics, i18n, gettext, LCLTranslator,
   translations, VersionSupport, LazUTF8, PropertyStorage, Buttons, DBCtrls,
   Types, Clipbrd, lclintf, fpDBExport, StartList, MyRxDBGrid,
-  LazBleClient, LazBleComponent, LazBleDeviceControl, LazBleLclScan,
-  LazBleLclTranslations, LazBleTypes, StageModel, StageConfig,
+  LazBleClient, LazBleComponent, LazBleFacade, BleTimingUi, LazBleLclScan,
+  LazBleLclTranslations, LazBleTypes, LazBleOperation, StageModel, StageConfig,
   StageFieldNames, StageFieldFactory, StageGridColumnFactory, StageResultTabs,
   Updater, AppLogger, DbSql, TimingProtocol, TimingMark, StartMark, FinishMark,
   FirmwareResponseProtocol, TransportStreamProcessor,
@@ -29,12 +29,20 @@ uses
   SerialDeviceProvider, BleTimingTransport, CompetitionBackupService,
   ParticipantStatus,
   CompetitionFinishService, CompetitionRefreshCoordinator, HttpTransport,
-  FpHttpTransport, TelegramNotificationCoordinator, LedPanelCoordinator;
+  FpHttpTransport, TelegramNotificationCoordinator, LedPanelCoordinator,
+  ProtocolBalanceFrame, ParticipantCardCoordinator, ParticipantCardModel,
+  FinishProtocolPrintForm, StageFinishReportModel,
+  ProtocolPrintForm, StartProtocolPrintForm, StartReportModel, StartLabelsPrintForm;
 
 type
   { TMainForm }
 
   TMainForm = class(TForm)
+    AcParticipantCard: TAction;
+    AcPrintFinish, AcPrintStartLabels: TAction;
+    PrintFinishMenuItem: TMenuItem;
+    ExportProtocolsMenuItem, PrintStartMenuItem, PrintLabelsMenuItem: TMenuItem;
+    CardMenuItem: TMenuItem;
     AcCOMSetup: TAction;
     AcCOMOpen: TAction;
     AcCOMClose: TAction;
@@ -184,7 +192,7 @@ type
     TimingInputControl: TPanel;
     TimingInputDeviceLabel: TLabel;
     TimingInputStateButton: TSpeedButton;
-    TimingInputStatusText: TStaticText;
+    TimingInputStatusText: TLabel;
     StatusBarPanel: TPanel;
     StatDataset1catcount: TLargeintField;
     StatDataset1category: TStringField;
@@ -208,6 +216,10 @@ type
     TabSheet1: TTabSheet;
     SheetStageTotal: TTabSheet;
     TabSheet2: TTabSheet;
+    StatisticsPageControl: TPageControl;
+    StatisticsOverviewSheet: TTabSheet;
+    ProtocolBalanceSheet: TTabSheet;
+    ProtocolBalanceView: TProtocolBalanceFrame;
     TabSheet3: TTabSheet;
     SheetStageSum: TTabSheet;
     pmUpdateResults: TMenuItem;
@@ -260,6 +272,10 @@ type
     Serial: TLazSerial;
     SerialPortPopupMenu: TPopupMenu;
     Timer1: TTimer;
+    procedure ParticipantCardExecute(Sender: TObject);
+    procedure PrintProtocolExecute(Sender: TObject);
+    procedure PrintStartLabelsExecute(Sender: TObject);
+    procedure ParticipantCardUpdate(Sender: TObject);
     procedure AcCheckDBOpenUpdate(Sender: TObject);
     procedure AcCheckUpdateExecute(Sender: TObject);
     procedure AcCheckUpdateUpdate(Sender: TObject);
@@ -321,19 +337,21 @@ type
     procedure FileOpenCSVAccept(Sender: TObject);
     procedure FileOpenCSVResultAccept(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure FormKeyDown(Sender: TObject; var Key: word; Shift: TShiftState);
     procedure HistoryFiles1ClickHistoryItem(Sender: TObject; Item: TMenuItem;
       const Filename: string);
     procedure LazBleLclClient1ConfigureClient(Sender: TObject);
+    procedure LazBleLclClient1UnconfigureClient(Sender: TObject);
     procedure LazBleComponent1AvailabilityChanged(Sender: TObject;
       const AAvailability: TBleAvailability);
-    procedure LazBleComponent1Error(Sender: TObject;
-      const AErrorCode: Integer; const AErrorMessage: string);
+    procedure LazBleComponent1Error(Sender: TObject; const AErrorCode: integer;
+      const AErrorMessage: string);
     procedure LazBleComponent1ScanStateChanged(Sender: TObject;
       const AState: TLazBleLclScanState);
     procedure LazBleLclClient1DeviceChanged(Sender: TObject);
-    procedure LazBleLclClient1Error(Sender: TObject;
-      const AErrorCode: Integer; const AErrorMessage: string);
+    procedure LazBleLclClient1Error(Sender: TObject; const AErrorCode: integer;
+      const AErrorMessage: string);
     procedure LazBleLclClient1StateChanged(Sender: TObject;
       const AState: TLazBleClientState);
     procedure MainDataset1AfterInsert(DataSet: TDataSet);
@@ -450,6 +468,12 @@ type
     procedure RxIniPropStorage1StoredValues9Save(Sender: TStoredValue;
       var Value: TStoredType);
     procedure TabSheet2Show(Sender: TObject);
+    procedure StatisticsPageControlChange(Sender: TObject);
+    procedure PageControl1Change(Sender: TObject);
+    procedure ProtocolBalanceOpenParticipant(Sender: TObject;
+      const AParticipantId, AStageIndex: integer);
+    procedure ProtocolBalanceOpenJournal(Sender: TObject;
+      const AStageIndex: integer; const AKind: TProtocolBalanceJournalKind);
     procedure TimerMonitorTimer(Sender: TObject);
     procedure SyncButtonClick(Sender: TObject);
     procedure FileOpenDBAccept(Sender: TObject);
@@ -468,6 +492,8 @@ type
   private
     { private declarations }
     FClosing: boolean;
+    FBleShutdownOperation: IBleOperation;
+    FBleShutdownReported: boolean;
     FAvailableSerialDevices: TSerialDeviceInfoArray;
     FBleTimingTransport: TBleTimingTransport;
     FPendingParticipantLogMessage: string;
@@ -489,6 +515,12 @@ type
     FBackupController: TCompetitionBackupController;
     FUpdateCheckController: TUpdateCheckController;
     FCompetitionDb: TCompetitionDbContext;
+    FParticipantCard: TParticipantCardCoordinator;
+    FOpeningParticipantCard: boolean;
+    FOpeningPrint: boolean;
+    FProtocolPrintForm: TProtocolPrintForm;
+    FStartLabelsForm: TStartLabelsPrintForm;
+    FReportLanguage: TReportLanguage;
     FStartupCompetitionFileName: string;
     FCurrentStageIndexes: array of integer;
     FUpdatingCurrentStageSelector: boolean;
@@ -509,12 +541,15 @@ type
     FFinishMarkService: TFinishMarkService;
     FLedPanelCoordinator: TLedPanelCoordinator;
     FTelegramCoordinator: TTelegramNotificationCoordinator;
+    function GetFinishPrintForm: TFinishProtocolPrintForm;
+    function GetStartPrintForm: TStartProtocolPrintForm;
+    procedure CloseProtocolReport;
+    function ConfirmPrintPending: boolean;
     function GetSQLite3Connection1: TSQLite3Connection;
     function GetSQLTransaction1: TSQLTransaction;
     procedure AppLogEntryReceived(const AEntry: TAppLogEntry);
     procedure ConfigureMainGridOptionalColumnWidths;
-    procedure ConfigureMainStageFields(
-      const AStageIndexes: array of integer);
+    procedure ConfigureMainStageFields(const AStageIndexes: array of integer);
     procedure ConfigureMainStageColumns(const AStageCount: integer);
     procedure ConfigureMainStage(const AStageIndex: integer;
       const ADisplayName: string; const AActive: boolean);
@@ -524,8 +559,7 @@ type
     procedure EndMainStageColumnsUpdate;
     procedure ConfigureStageResultUi(const AStageCount: integer;
       const AActiveStageIndexes: array of integer);
-    procedure ConfigureStageResultSum(
-      const AActiveStageIndexes: array of integer);
+    procedure ConfigureStageResultSum(const AActiveStageIndexes: array of integer);
     procedure ConfigureStageResult(const AStageIndex: integer;
       const ADisplayName: string; const AActive: boolean);
     procedure ApplyStoredTimingInputSettings;
@@ -538,8 +572,12 @@ type
     procedure TimingMessageRejected(Sender: TObject;
       const ARejected: TTransportStreamRejected);
     procedure TimingTransportDataReceived(Sender: TObject;
-      const AData: RawByteString; const ASource: TTimingMarkSource);
+      const AData: rawbytestring; const ASource: TTimingMarkSource);
     procedure TimingSendCompleted(Sender: TObject);
+    function BeginBleShutdown: IBleOperation;
+    procedure ReportBleShutdown;
+    procedure BleShutdownCompleted(Sender: TObject);
+    procedure CloseAfterBleShutdown(Data: PtrInt);
     procedure SelectBleTimingTransportDevice;
     function SelectedSerialPortAvailable: boolean;
     procedure UpdateSerialStatusText(const AText: string);
@@ -555,15 +593,18 @@ type
     procedure QueueFinishMarkEditDialog(const AMessage: string;
       const ADialogType: TMsgDlgType);
     procedure ShowFinishMarkEditDialog(Data: PtrInt);
-    procedure ReportRefreshOutcome(
-      const AOutcome: TCompetitionRefreshOutcome);
-    procedure RefreshAll;
+    procedure ReportRefreshOutcome(const AOutcome: TCompetitionRefreshOutcome;
+      const AImportSaved: boolean = False);
+    procedure RefreshAll(const AImportSaved: boolean = False);
+    function PrepareImportPreviewBackup(
+      out ACreated, AContinueWithoutBackup: boolean): boolean;
     procedure RefreshResults;
+    procedure InvalidateCompetitionViews;
+    procedure UpdateProtocolBalanceVisibility;
     procedure LoadCompetitionConfigModel;
-    procedure ApplyCompetitionConfigToUi(
-      const APreferredStageIndex: integer = 0);
-    procedure RebuildCompetitionStageConfiguration(const AStageCount,
-      APreferredCurrentStageIndex: integer;
+    procedure ApplyCompetitionConfigToUi(const APreferredStageIndex: integer = 0);
+    procedure RebuildCompetitionStageConfiguration(
+      const AStageCount, APreferredCurrentStageIndex: integer;
       const ARefreshQueries: boolean = True);
     procedure ReconfigureCompetitionStageActivity(
       const APreferredCurrentStageIndex: integer;
@@ -577,14 +618,12 @@ type
     procedure UpdateStartMarkPanelTranslations;
     procedure UpdateFinishMarkPanelTranslations;
     function HasNumberedStartMarks: boolean;
-    function ApplyStartMark(const AMarkId: int64;
-      const AParticipantNumber: integer;
+    function ApplyStartMark(const AMarkId: int64; const AParticipantNumber: integer;
       const ARefreshAfterApply: boolean = True): boolean;
     procedure RefreshAfterStartMarkApply;
     function PrepareCompetitionSchema(const AExistingFile: boolean): integer;
     function SelectedMainGridFieldName: string;
-    procedure SetSelectedParticipantStatus(
-      const AStatus: TParticipantStatus);
+    procedure SetSelectedParticipantStatus(const AStatus: TParticipantStatus);
     procedure SetParticipantStatus(const AStageIndex: integer;
       const AStatus: TParticipantStatus; const AParticipantNumber: string);
     procedure SetDNS;
@@ -594,6 +633,9 @@ type
     procedure ClearStatus;
     procedure InitDB(fileName: string);
     procedure SetFinish;
+    function PrepareFinishMark(const AMarkId: int64;
+      const AParticipantNumber: integer; const APrepared: array of TFinishRequest;
+      out ARequest: TFinishRequest): boolean;
     function ApplyFinishMark(const AMarkId: int64;
       const AParticipantNumber: integer): boolean;
     procedure NotifyFinish(const AResult: TFinishResult);
@@ -601,11 +643,10 @@ type
       const ADelivery: TLedPanelDeliveryResult);
     procedure TelegramCompleted(Sender: TObject;
       const ADelivery: TTelegramDeliveryResult);
-    procedure TelegramDropped(Sender: TObject;
-      const AItem: TTelegramQueueItemInfo);
-    procedure SaveStageCorrection(const StageIndex, Correction,
-      ParticipantNumber: integer);
-    procedure UpdateResults;
+    procedure TelegramDropped(Sender: TObject; const AItem: TTelegramQueueItemInfo);
+    procedure SaveStageCorrection(
+      const StageIndex, Correction, ParticipantNumber: integer);
+    procedure UpdateResults(const AStageIndex: integer = 0);
     procedure UpdateSumResults;
     procedure ClearResults(silent: boolean = False);
     procedure SetDNSFromCorrection;
@@ -627,20 +668,26 @@ type
     function BackupBD(ASuccessView: TAppLogView = alvStatus;
       AReason: TCompetitionBackupReason = cbrNone): boolean;
 
+    function CardStages: TStages;
+    procedure BalanceOpenCard(Sender: TObject; const ParticipantId, StageIndex: integer);
+    procedure CardOpenJournal(Sender: TObject; const Key: TCardMarkKey);
+    procedure CardOpenParticipant(Sender: TObject;
+      const ParticipantId, StageIndex: integer);
+    procedure NavigateToParticipant(const AParticipantId, AStageIndex: integer;
+      const AllowInactive: boolean);
   protected
     procedure CompleteBleTimingDeviceSelection(const AAccepted: boolean;
       const ADevice: TBleDeviceInfo);
   public
     { public declarations }
     destructor Destroy; override;
-    procedure TimingPacketReceived(Sender: TObject;
-      const APacket: TTimingPacket; const ASource: TTimingMarkSource);
+    procedure TimingPacketReceived(Sender: TObject; const APacket: TTimingPacket;
+      const ASource: TTimingMarkSource);
     procedure RefreshSerialPortUi;
     procedure RefreshTimingInputUi;
     procedure ActivateStageResult(const AStageIndex: integer);
     procedure ConfigureCurrentStageDatasets;
-    procedure RebuildCurrentStageSelector(
-      const APreferredStageIndex: integer = 0);
+    procedure RebuildCurrentStageSelector(const APreferredStageIndex: integer = 0);
     procedure SelectCurrentStage(const AStageIndex: integer);
     function CurrentStageIndex: integer;
     function StageResultView(const AStageIndex: integer): TStageResultView;
@@ -648,34 +695,33 @@ type
     function RefreshStageResultQueries(out AErrors: string;
       out AQueryCount: integer): integer;
     procedure ResultsFormReady;
-    procedure ApplyResultParameterChanges(const AStageCount,
-      APreviousCurrentStageIndex, APreviousParticipantId: integer;
+    procedure ApplyResultParameterChanges(
+      const AStageCount, APreviousCurrentStageIndex, APreviousParticipantId: integer;
       const AHadOpenDatabase, ARestoreCurrentParticipant,
       AStageCountChanged: boolean);
-    procedure ApplyPresentationChanges(
-      const APreviousCurrentStageIndex: integer;
-      const AHadOpenDatabase, AStageUiChanged,
-      AResultViewQueriesChanged, AStageNamesChanged,
-      AZeroHourChanged: boolean);
+    procedure ApplyPresentationChanges(const APreviousCurrentStageIndex: integer;
+      const AHadOpenDatabase, AStageUiChanged, AResultViewQueriesChanged,
+      AStageNamesChanged, AZeroHourChanged: boolean);
     procedure RecoverCompetitionAfterSettingsFailure;
     procedure QueueTelegramTest(const AEndpoint: string;
-      const AFields: THttpFormFields;
-      const ARetryPolicy: TTelegramRetryPolicy);
-    procedure QueueLedPanelTest(const AAddress, ASingleLine,
-      AUpperLine, ABottomLine: string);
+      const AFields: THttpFormFields; const ARetryPolicy: TTelegramRetryPolicy);
+    procedure QueueLedPanelTest(
+      const AAddress, ASingleLine, AUpperLine, ABottomLine: string);
     property CompetitionDb: TCompetitionDbContext read FCompetitionDb;
+    property ParticipantCard: TParticipantCardCoordinator read FParticipantCard;
+    property FinishPrintForm: TFinishProtocolPrintForm read GetFinishPrintForm;
+    property StartPrintForm: TStartProtocolPrintForm read GetStartPrintForm;
+    property StartLabelsForm: TStartLabelsPrintForm read FStartLabelsForm;
     property StartMarkService: TStartMarkService read FStartMarkService;
     property FinishMarkService: TFinishMarkService read FFinishMarkService;
     property BleTimingTransport: TBleTimingTransport read FBleTimingTransport;
     property SQLite3Connection1: TSQLite3Connection read GetSQLite3Connection1;
     property SQLTransaction1: TSQLTransaction read GetSQLTransaction1;
-    property SerialConnectionEnabled: boolean
-      read FSerialConnectionEnabled;
+    property SerialConnectionEnabled: boolean read FSerialConnectionEnabled;
     property SerialConnectionHint: string read FSerialConnectionHint;
-    property SerialConnectionImageIndex: integer
-      read FSerialConnectionImageIndex;
-    property FinishDebounceInterval: integer read TimingFinishInterval
-      write SetTimingFinishInterval;
+    property SerialConnectionImageIndex: integer read FSerialConnectionImageIndex;
+    property FinishDebounceInterval: integer
+      read TimingFinishInterval write SetTimingFinishInterval;
 
   end;
 
@@ -729,8 +775,7 @@ var
   telegrambotadress: string;
   telegramRetryEnabled: boolean = TELEGRAM_RETRY_DEFAULT_ENABLED;
   telegramRetryCount: integer = TELEGRAM_RETRY_DEFAULT_COUNT;
-  telegramRetryDelaySeconds: integer =
-    TELEGRAM_RETRY_DEFAULT_DELAY_SECONDS;
+  telegramRetryDelaySeconds: integer = TELEGRAM_RETRY_DEFAULT_DELAY_SECONDS;
 
   //Показывать название СУ если активен только один
   showStageNameForSingleStage: bool = DEFAULT_SHOW_STAGE_NAME_FOR_SINGLE_STAGE;
@@ -749,8 +794,7 @@ var
   //Backup
   doAutomaticBackup: boolean = DEFAULT_AUTOMATIC_BACKUP;
   backupPeriod: integer = DEFAULT_BACKUP_PERIOD_MS; //in milliseconds
-  automaticBackupRetentionDays: integer =
-    DEFAULT_AUTOMATIC_BACKUP_RETENTION_DAYS;
+  automaticBackupRetentionDays: integer = DEFAULT_AUTOMATIC_BACKUP_RETENTION_DAYS;
   automaticBackupMaxSizeMb: integer = DEFAULT_AUTOMATIC_BACKUP_MAX_SIZE_MB;
 
   startlistConfig: TStartlistConfig;
@@ -765,11 +809,14 @@ uses
   Result, Settings, rxapputils, StartMarks, FinishMarks,
   Validators, Variants, LazBleDeviceSelectForm,
   InputDialogs, ResultFormatting, CompetitionExportService,
-  CompetitionImportService,
+  CompetitionImportService, ResultsImportPreview, ResultsImportPreviewService,
   CompetitionResultsService, CompetitionLifecycleService, LazFileUtils,
-  StartMarkSqliteAdapters;
+  StartMarkSqliteAdapters, nsCore, nsUniversalDetector,
+  ParticipantRepository, StartMarkRepository, FinishMarkRepository;
 
 type
+  TCardGridAccess = class(TMyRxDBGrid);
+
   TStartMarkWorkItem = record
     MarkId: int64;
     ParticipantNumber: integer;
@@ -801,19 +848,16 @@ function CurrentBackupRetentionPolicy: TBackupRetentionPolicy;
 begin
   Result := DefaultBackupRetentionPolicy;
   Result.AutomaticRetentionDays := automaticBackupRetentionDays;
-  Result.AutomaticMaxTotalBytes := Int64(automaticBackupMaxSizeMb) *
-    1024 * 1024;
+  Result.AutomaticMaxTotalBytes := int64(automaticBackupMaxSizeMb) * 1024 * 1024;
 end;
 
 const
   TIMING_INPUT_TRANSPORT_SERIAL = 'serial';
   TIMING_INPUT_TRANSPORT_BLE = 'ble';
 
-procedure LogInvalidStoredSetting(const ASettingName, AValue,
-  ADefaultValue: string);
+procedure LogInvalidStoredSetting(const ASettingName, AValue, ADefaultValue: string);
 begin
-  AppLog(Format(
-    'Invalid stored setting "%s": "%s"; using default "%s"',
+  AppLog(Format('Invalid stored setting "%s": "%s"; using default "%s"',
     [ASettingName, AValue, ADefaultValue]), allWarning, alvDetails,
     alsApplication);
 end;
@@ -844,8 +888,7 @@ begin
 end;
 
 function StoredIntegerInRangeOrDefault(const ASettingName: string;
-  const AValue: TStoredType; const ADefault, AMinimum,
-  AMaximum: integer): integer;
+  const AValue: TStoredType; const ADefault, AMinimum, AMaximum: integer): integer;
 begin
   Result := StoredIntegerOrDefault(ASettingName, AValue, ADefault);
   if (Result >= AMinimum) and (Result <= AMaximum) then
@@ -875,18 +918,13 @@ begin
     Result := ADefault;
 end;
 
-function BleBackendLogContext(const AComponent: TLazBleComponent): string;
-var
-  AdapterId: string;
-  BackendInfo: TLazBleBackendInfo;
+function BleBackendLogContext(const ADiagnostic: TLazBleDiagnosticInfo): string;
 begin
-  BackendInfo := AComponent.BackendInfo;
-  AdapterId := BackendInfo.AdapterId;
-  if AdapterId = '' then
-    AdapterId := AComponent.AdapterId;
-  Result := ' backend=' + BleDiagnosticValue(BackendInfo.Name, 'unknown') +
-    ' version=' + BleDiagnosticValue(BackendInfo.Version, 'unknown') +
-    ' adapter=' + BleDiagnosticValue(AdapterId, 'default');
+  { NativeVersion is the version reported by the loaded library. An empty
+    value means it was not obtained. }
+  Result := ' backend=' + BleDiagnosticValue(ADiagnostic.BackendName, 'unknown') +
+    ' native=' + BleDiagnosticValue(ADiagnostic.NativeVersion, 'unknown') +
+    ' adapter=' + BleDiagnosticValue(ADiagnostic.AdapterId, 'unknown');
 end;
 
 function BleScanStateName(const AState: TLazBleLclScanState): string;
@@ -896,7 +934,6 @@ begin
     lblssScanning: Result := 'scanning';
     lblssSucceeded: Result := 'succeeded';
     lblssCancelled: Result := 'cancelled';
-    lblssTimedOut: Result := 'timed_out';
     lblssFailed: Result := 'failed';
   end;
 end;
@@ -914,16 +951,16 @@ begin
   end;
 end;
 
-function FieldValuesAreEqual(const OldValue, NewValue: Variant): boolean;
+function FieldValuesAreEqual(const OldValue, NewValue: variant): boolean;
 begin
   // SQLDB exposes an empty VARCHAR editor value as an empty string even when
   // the value loaded from SQLite was NULL.  For an unchanged empty cell these
   // representations are equivalent; cancelling the edit also preserves NULL.
-  if VarIsNull(OldValue) and
-    (VarIsNull(NewValue) or VarIsEmpty(NewValue) or (VarToStr(NewValue) = '')) then
+  if VarIsNull(OldValue) and (VarIsNull(NewValue) or VarIsEmpty(NewValue) or
+    (VarToStr(NewValue) = '')) then
     Exit(True);
-  if VarIsNull(NewValue) and
-    (VarIsNull(OldValue) or VarIsEmpty(OldValue) or (VarToStr(OldValue) = '')) then
+  if VarIsNull(NewValue) and (VarIsNull(OldValue) or VarIsEmpty(OldValue) or
+    (VarToStr(OldValue) = '')) then
     Exit(True);
   Result := VarSameValue(OldValue, NewValue);
 end;
@@ -939,22 +976,20 @@ begin
   if AQuery.UpdateStatus in [usInserted, usDeleted] then
     Exit(True);
 
-  if not (AQuery.State in [dsEdit, dsInsert]) and
-    (AQuery.ChangeCount = 0) then
+  if not (AQuery.State in [dsEdit, dsInsert]) and (AQuery.ChangeCount = 0) then
     Exit;
 
   try
     for field in AQuery.Fields do
-      if (field.FieldKind = fkData) and not field.ReadOnly and
-        not FieldValuesAreEqual(field.OldValue, field.Value) then
+      if (field.FieldKind = fkData) and not field.ReadOnly and not
+        FieldValuesAreEqual(field.OldValue, field.Value) then
         Exit(True);
   except
     Result := AQuery.Modified or (AQuery.ChangeCount > 0);
   end;
 end;
 
-function ParticipantFieldCaption(const AGrid: TRxDBGrid;
-  const AField: TField): string;
+function ParticipantFieldCaption(const AGrid: TRxDBGrid; const AField: TField): string;
 var
   column: TRxColumn;
 begin
@@ -969,20 +1004,15 @@ var
   stageFieldKind: TStageFieldKind;
   stageIndex: integer;
 begin
-  Result := SameText(AFieldName, 'category') or
-    SameText(AFieldName, 'rfid') or
-    SameText(AFieldName, 'sumresult') or
-    SameText(AFieldName, 'sumdiffleader') or
-    SameText(AFieldName, 'sumplace') or
-    SameText(AFieldName, 'status') or
-    SameText(AFieldName, 'sumstages') or
-    SameText(AFieldName, 'thrudiff') or
-    SameText(AFieldName, 'thruplace') or
-    TryParseStageFieldName(AFieldName, stageFieldKind, stageIndex);
+  Result := SameText(AFieldName, 'category') or SameText(AFieldName, 'rfid') or
+    SameText(AFieldName, 'sumresult') or SameText(AFieldName, 'sumdiffleader') or
+    SameText(AFieldName, 'sumplace') or SameText(AFieldName, 'status') or
+    SameText(AFieldName, 'sumstages') or SameText(AFieldName, 'thrudiff') or
+    SameText(AFieldName, 'thruplace') or TryParseStageFieldName(
+    AFieldName, stageFieldKind, stageIndex);
 end;
 
-function ParticipantLogValue(const AField: TField;
-  const AValue: Variant): string;
+function ParticipantLogValue(const AField: TField; const AValue: variant): string;
 var
   status: TParticipantStatus;
   stageFieldKind: TStageFieldKind;
@@ -994,9 +1024,8 @@ begin
   Result := VarToStr(AValue);
   if (SameText(AField.FieldName, 'status') or
     (TryParseStageFieldName(AField.FieldName, stageFieldKind, stageIndex) and
-    (stageFieldKind = sfkStatus))) and
-    TryParticipantStatusFromDbValue(Result, status) and
-    (status <> psNone) then
+    (stageFieldKind = sfkStatus))) and TryParticipantStatusFromDbValue(Result,
+    status) and (status <> psNone) then
     Result := ParticipantStatusToToken(status);
 end;
 
@@ -1017,8 +1046,8 @@ begin
 
   try
     for field in AQuery.Fields do
-      if (field.FieldKind = fkData) and not field.ReadOnly and
-        not FieldValuesAreEqual(field.OldValue, field.Value) then
+      if (field.FieldKind = fkData) and not field.ReadOnly and not
+        FieldValuesAreEqual(field.OldValue, field.Value) then
       begin
         if SameText(field.FieldName, 'id') then
           Continue
@@ -1049,9 +1078,9 @@ var
 begin
   exeDir := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0)));
   candidateExeDir := IncludeTrailingPathDelimiter(exeDir + DirectoryName);
-  candidateSourceTree := IncludeTrailingPathDelimiter(ExpandFileName(exeDir + '..' +
-    DirectorySeparator + '..' + DirectorySeparator + '..' + DirectorySeparator +
-    DirectoryName));
+  candidateSourceTree := IncludeTrailingPathDelimiter(
+    ExpandFileName(exeDir + '..' + DirectorySeparator + '..' +
+    DirectorySeparator + '..' + DirectorySeparator + DirectoryName));
   candidateCwd := IncludeTrailingPathDelimiter(ExpandFileName(DirectoryName));
 
   if DirectoryExists(candidateExeDir) then
@@ -1077,7 +1106,21 @@ end;
 destructor TMainForm.Destroy;
 var
   SendOperation: ITimingSendOperation;
+  ShutdownOperation: IBleOperation;
 begin
+  { Direct Free and startup errors may bypass OnCloseQuery. Only cleanup runs
+    here: normal GUI closing awaits the operation through the LCL event loop. }
+  CloseProtocolReport;
+  FreeAndNil(FParticipantCard);
+  ShutdownOperation := BeginBleShutdown;
+  if Assigned(ShutdownOperation) then
+  begin
+    ShutdownOperation.OnCompleted := nil;
+    while ShutdownOperation.State = lbopPending do
+      CheckSynchronize(10);
+    ReportBleShutdown;
+  end;
+  Application.RemoveAsyncCalls(Self);
   FreeAndNil(FLedPanelCoordinator);
   FreeAndNil(FTelegramCoordinator);
   FreeStartMarkService;
@@ -1107,6 +1150,8 @@ begin
   FreeAndNil(FStageGridColumnFactory);
   FreeAndNil(FStageFieldFactory);
   FreeAndNil(FBackupController);
+  if Assigned(ProtocolBalanceView) then
+    ProtocolBalanceView.Configure(nil, nil);
   FreeAndNil(FCompetitionDb);
   inherited Destroy;
 end;
@@ -1117,10 +1162,9 @@ begin
   if not CompetitionDb.Connection.Connected then
     Exit;
   FStartMarkPersistence := TSqliteStartMarkPersistence.Create(CompetitionDb);
-  FStartMarkCandidateProvider := TSqliteStartMarkCandidateProvider.Create(
-    CompetitionDb, stages);
-  FStartMarkApplyPort := TSqliteStartMarkApplyPort.Create(
-    CompetitionDb, stages);
+  FStartMarkCandidateProvider :=
+    TSqliteStartMarkCandidateProvider.Create(CompetitionDb, stages);
+  FStartMarkApplyPort := TSqliteStartMarkApplyPort.Create(CompetitionDb, stages);
   FStartMarkService := TStartMarkService.Create(FStartMarkCandidateProvider,
     FStartMarkApplyPort, FStartMarkPersistence);
 end;
@@ -1180,8 +1224,7 @@ end;
 
 function TMainForm.SelectedSerialPortAvailable: boolean;
 begin
-  Result := SerialDeviceIsAvailable(Serial.Device,
-    FAvailableSerialDevices);
+  Result := SerialDeviceIsAvailable(Serial.Device, FAvailableSerialDevices);
 end;
 
 procedure TMainForm.UpdateSerialPortControls;
@@ -1227,19 +1270,25 @@ end;
 
 procedure TMainForm.UpdateBleTimingTransportControls;
 var
-  ConnectionAction: TLazBleConnectionAction;
-  CanSelectDevice: boolean;
+  ConnectionAction: TBleTimingConnectionAction;
+  CanSelectDevice, NeedsScan: boolean;
   statusText: string;
 begin
-  ConnectionAction := LazBleConnectionAction(LazBleLclClient1);
-  CanSelectDevice := LazBleCanSelectDevice(LazBleLclClient1);
-  statusText := LazBleStatusText(LazBleLclClient1);
+  ConnectionAction := BleTimingConnectionAction(LazBleLclClient1);
+  CanSelectDevice := BleTimingCanSelectDevice(LazBleLclClient1);
+  statusText := BleTimingStatusText(LazBleLclClient1);
+  NeedsScan := (LazBleLclClient1.State = lbcstError) and
+    (LazBleLclClient1.LastErrorCode = LazBleErrorDeviceNotKnown);
+  if NeedsScan then statusText := rsBleDeviceNeedsScan;
   if CanSelectDevice then
     TimingInputDeviceLabel.Cursor := crHandPoint
   else
     TimingInputDeviceLabel.Cursor := crDefault;
-  TimingInputDeviceLabel.Caption := LazBleDeviceText(LazBleLclClient1);
+  TimingInputDeviceLabel.Caption := BleTimingDeviceText(LazBleLclClient1);
   TimingInputDeviceLabel.Hint := LazBleLclClient1.DeviceId;
+  if NeedsScan then
+    TimingInputDeviceLabel.Hint :=
+      TimingInputDeviceLabel.Hint + LineEnding + rsBleDeviceNeedsScan;
   TimingInputDeviceLabel.Enabled := CanSelectDevice;
   if LazBleLclClient1.State = lbcstReady then
     TimingInputStateButton.ImageIndex := AcCOMOpen.ImageIndex
@@ -1248,7 +1297,7 @@ begin
   TimingInputStateButton.Enabled := ConnectionAction <> lbcaNone;
   if ConnectionAction <> lbcaNone then
     TimingInputStateButton.Hint :=
-      LazBleConnectionActionText(LazBleLclClient1)
+      BleTimingConnectionActionText(LazBleLclClient1)
   else
     TimingInputStateButton.Hint := statusText;
   SetTimingInputStatusText(statusText);
@@ -1260,11 +1309,10 @@ var
   Device: TBleDeviceInfo;
   Dialog: TBleDeviceSelectForm;
 begin
-  if not LazBleCanSelectDevice(LazBleLclClient1) then
+  if not BleTimingCanSelectDevice(LazBleLclClient1) then
     Exit;
   Device := Default(TBleDeviceInfo);
-  Dialog := TBleDeviceSelectForm.Create(Self,
-    LazBleComponent1.ScanController);
+  Dialog := TBleDeviceSelectForm.Create(Self, LazBleComponent1.ScanController);
   Accepted := False;
   try
     Dialog.AdapterId := LazBleComponent1.AdapterId;
@@ -1276,13 +1324,13 @@ begin
   CompleteBleTimingDeviceSelection(Accepted, Device);
 end;
 
-procedure TMainForm.CompleteBleTimingDeviceSelection(
-  const AAccepted: boolean; const ADevice: TBleDeviceInfo);
+procedure TMainForm.CompleteBleTimingDeviceSelection(const AAccepted: boolean;
+  const ADevice: TBleDeviceInfo);
 begin
   if not AAccepted or (ADevice.DeviceId = '') then
     Exit;
   LazBleLclClient1.SelectDevice(ADevice);
-  if LazBleConnectionAction(LazBleLclClient1) = lbcaConnect then
+  if BleTimingConnectionAction(LazBleLclClient1) = lbcaConnect then
     LazBleLclClient1.Connect;
 end;
 
@@ -1305,15 +1353,12 @@ begin
     begin
       menuItem := TMenuItem.Create(SerialPortPopupMenu);
       menuItem.Caption := FormatSerialDeviceDisplayName(
-        FAvailableSerialDevices[i],
-        [sddoVendor, sddoModel, sddoErrorCode]);
+        FAvailableSerialDevices[i], [sddoVendor, sddoModel, sddoErrorCode]);
       menuItem.Hint := FAvailableSerialDevices[i].Device;
       menuItem.RadioItem := True;
       menuItem.GroupIndex := 1;
       menuItem.Checked := IndexOfSerialDevice(
-        FAvailableSerialDevices,
-        Serial.Device
-      ) = i;
+        FAvailableSerialDevices, Serial.Device) = i;
       menuItem.Enabled := not Serial.Active;
       menuItem.OnClick := @SerialPortMenuItemClick;
       SerialPortPopupMenu.Items.Add(menuItem);
@@ -1321,8 +1366,7 @@ begin
   UpdateSerialPortControls;
 end;
 
-procedure TMainForm.ConfigureMainStageFields(
-  const AStageIndexes: array of integer);
+procedure TMainForm.ConfigureMainStageFields(const AStageIndexes: array of integer);
 begin
   FStageFieldFactory.EnsureStageIndexes(AStageIndexes);
   TDatasetSql.ConfigureMainParticipants(MainDataset1, AStageIndexes);
@@ -1423,12 +1467,10 @@ begin
       Exit;
     end;
   raise EArgumentOutOfRangeException.CreateFmt(
-    'Stage %d is not available in the current stage selector.',
-    [AStageIndex]);
+    'Stage %d is not available in the current stage selector.', [AStageIndex]);
 end;
 
-procedure TMainForm.RebuildCurrentStageSelector(
-  const APreferredStageIndex: integer);
+procedure TMainForm.RebuildCurrentStageSelector(const APreferredStageIndex: integer);
 var
   PreferredStageIndex, SelectedIndex, StageIndex: integer;
 begin
@@ -1481,8 +1523,7 @@ begin
   end;
 end;
 
-function TMainForm.StageResultView(
-  const AStageIndex: integer): TStageResultView;
+function TMainForm.StageResultView(const AStageIndex: integer): TStageResultView;
 begin
   Result := FStageResultTabs[AStageIndex];
 end;
@@ -1514,10 +1555,9 @@ begin
   end;
 end;
 
-procedure TMainForm.ApplyResultParameterChanges(const AStageCount,
-  APreviousCurrentStageIndex, APreviousParticipantId: integer;
-  const AHadOpenDatabase, ARestoreCurrentParticipant,
-  AStageCountChanged: boolean);
+procedure TMainForm.ApplyResultParameterChanges(
+  const AStageCount, APreviousCurrentStageIndex, APreviousParticipantId: integer;
+  const AHadOpenDatabase, ARestoreCurrentParticipant, AStageCountChanged: boolean);
 begin
   if AHadOpenDatabase and AStageCountChanged then
     RebuildCompetitionStageConfiguration(AStageCount,
@@ -1548,11 +1588,9 @@ begin
   end;
 end;
 
-procedure TMainForm.ApplyPresentationChanges(
-  const APreviousCurrentStageIndex: integer;
-  const AHadOpenDatabase, AStageUiChanged,
-  AResultViewQueriesChanged, AStageNamesChanged,
-  AZeroHourChanged: boolean);
+procedure TMainForm.ApplyPresentationChanges(const APreviousCurrentStageIndex: integer;
+  const AHadOpenDatabase, AStageUiChanged, AResultViewQueriesChanged,
+  AStageNamesChanged, AZeroHourChanged: boolean);
 begin
   if AStageUiChanged then
     ApplyCompetitionConfigToUi(APreviousCurrentStageIndex);
@@ -1566,6 +1604,8 @@ begin
     LoadIniCategory(False);
   if AZeroHourChanged then
     RxDBGrid1.Invalidate;
+  if AStageUiChanged or AStageNamesChanged then
+    InvalidateCompetitionViews;
 end;
 
 procedure TMainForm.RecoverCompetitionAfterSettingsFailure;
@@ -1574,27 +1614,25 @@ begin
 end;
 
 procedure TMainForm.QueueTelegramTest(const AEndpoint: string;
-  const AFields: THttpFormFields;
-  const ARetryPolicy: TTelegramRetryPolicy);
+  const AFields: THttpFormFields; const ARetryPolicy: TTelegramRetryPolicy);
 begin
-  if not Assigned(FTelegramCoordinator) or
-    not FTelegramCoordinator.EnqueueFields(AFields, AEndpoint,
-      ARetryPolicy) then
+  if not Assigned(FTelegramCoordinator) or not
+    FTelegramCoordinator.EnqueueFields(AFields, AEndpoint, ARetryPolicy) then
     AppLog(Format(rsTelegramBotSendingError, [rsHTTPRequestNotStarted]),
       allError, alvStatus, alsTelegram);
 end;
 
-procedure TMainForm.QueueLedPanelTest(const AAddress, ASingleLine,
-  AUpperLine, ABottomLine: string);
+procedure TMainForm.QueueLedPanelTest(
+  const AAddress, ASingleLine, AUpperLine, ABottomLine: string);
 begin
-  if not Assigned(FLedPanelCoordinator) or
-    not FLedPanelCoordinator.EnqueueTest(AAddress, ASingleLine,
-      AUpperLine, ABottomLine) then
+  if not Assigned(FLedPanelCoordinator) or not
+    FLedPanelCoordinator.EnqueueTest(AAddress, ASingleLine, AUpperLine,
+    ABottomLine) then
     AppLog(Format(rsLEDPanelError, [rsLEDPanelInvalidAddress]), allError,
       alvStatus, alsHTTP);
 end;
 
-  { TMainForm }
+{ TMainForm }
 
 procedure TMainForm.FormCreate(Sender: TObject);
 var
@@ -1603,6 +1641,8 @@ var
   SerialTransport: ITimingTransport;
   StageFieldHandlers: TStageFieldHandlers;
 begin
+  StatisticsOverviewSheet.Caption := rsStatisticsOverview;
+  ProtocolBalanceSheet.Caption := rsProtocolBalance;
   SetAppLogEvent(@AppLogEntryReceived);
   FLedPanelCoordinator := TLedPanelCoordinator.Create(
     TFpHttpTransportFactory.Create);
@@ -1627,20 +1667,32 @@ begin
   BleTransport := FBleTimingTransport;
   FBleTransport := BleTransport;
   FBleTimingTransport.HandleDeviceChanged(LazBleLclClient1.DeviceId);
-  FTimingTransportController := TTimingTransportController.Create(
-    FSerialTransport, FBleTransport);
+  FTimingTransportController :=
+    TTimingTransportController.Create(FSerialTransport, FBleTransport);
   FTimingTransportController.ActiveKind := timingInputTransport;
   FTimingTransportController.OnData := @TimingTransportDataReceived;
   stages := TStages.Create(MIN_STAGE_COUNT);
   FCompetitionDb := TCompetitionDbContext.Create(Self);
+  FParticipantCard := TParticipantCardCoordinator.Create(Self,
+    FCompetitionDb, @CardStages);
+  AcParticipantCard.Caption := rsCardTitle;
+  AcPrintFinish.Caption := rsFinishProtocol + '…';
+  PrintStartMenuItem.Caption := rsStartPrintTitle + '…';
+  AcPrintStartLabels.Caption := rsStartLabels + '…';
+  FParticipantCard.OnOpenJournal := @CardOpenJournal;
+  FParticipantCard.OnOpenParticipant := @CardOpenParticipant;
+
+  ProtocolBalanceView.Configure(FCompetitionDb, stages);
+  ProtocolBalanceView.OnOpenParticipant := @ProtocolBalanceOpenParticipant;
+  ProtocolBalanceView.OnOpenCard := @BalanceOpenCard;
+  ProtocolBalanceView.OnOpenJournal := @ProtocolBalanceOpenJournal;
   FBackupController := TCompetitionBackupController.Create(nil,
     @AutomaticBackupCompleted);
   StageFieldHandlers.OnEditableFieldChange := @StageFieldChanged;
   StageFieldHandlers.OnCorrectionSetText := @CheckCorrectionSetText;
   StageFieldHandlers.OnPenaltySetText := @CheckPenaltySetText;
   StageFieldHandlers.OnResultGetText := @HideZeroHour;
-  FStageFieldFactory := TStageFieldFactory.Create(MainDataset1,
-    StageFieldHandlers);
+  FStageFieldFactory := TStageFieldFactory.Create(MainDataset1, StageFieldHandlers);
   FStageFieldFactory.EnsureStageIndexes(stages.ActiveIndices);
   FStageGridColumnFactory := TStageGridColumnFactory.Create(RxDBGrid1);
   FStageGridColumnFactory.Rebuild(stages.Count);
@@ -1679,6 +1731,8 @@ begin
   Memo.Lines.Add('Built for ' + GetTargetInfo);
   Memo.Lines.Add(' with ' + GetCompilerInfo + ' on ' + GetCompiledDate);
   Memo.Lines.Add(' and using ' + GetLCLVersion + ' and ' + GetWidgetset);
+  AppLog('BLE libraries lazble=' + TLazBle.Info.Version,
+    allInfo, alvDetails, alsBle);
 
   {$IFDEF DEBUG}
   NAME_VERSION := NAME_VERSION + ' debug';
@@ -1817,7 +1871,10 @@ procedure TMainForm.FileCloseExecute(Sender: TObject);
 var
   closedFileName: string;
 begin
+  CloseProtocolReport;
+  FParticipantCard.Close;
   closedFileName := fName;
+  ProtocolBalanceView.Clear;
   FreeStartMarkService;
   FreeFinishMarkService;
   FPendingParticipantLogMessage := '';
@@ -1850,11 +1907,75 @@ begin
   LoadStageResults((Sender as TFileOpen).Dialog.FileName);
 end;
 
-procedure TMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
-var
-  ClearedTelegramCount: Integer;
+function TMainForm.BeginBleShutdown: IBleOperation;
 begin
   FClosing := True;
+  CloseProtocolReport;
+  if Assigned(FParticipantCard) then FParticipantCard.Close;
+  UpdateProtocolBalanceVisibility;
+  if Assigned(FModuleSyncOperation) then
+    FModuleSyncOperation.OnCompleted := nil;
+  if Assigned(FTimingTransportController) then
+    FTimingTransportController.OnData := nil;
+  if Assigned(FBleTimingTransport) then
+    FBleTimingTransport.Detach;
+  if not Assigned(FBleShutdownOperation) and Assigned(LazBleComponent1) then
+    FBleShutdownOperation := LazBleComponent1.ShutdownAsync;
+  Result := FBleShutdownOperation;
+end;
+
+procedure TMainForm.ReportBleShutdown;
+begin
+  if FBleShutdownReported or not Assigned(FBleShutdownOperation) or
+    (FBleShutdownOperation.State = lbopPending) then Exit;
+  FBleShutdownReported := True;
+  if FBleShutdownOperation.State = lbopFailed then
+    AppLog(Format('BLE shutdown failed code=%d error=%s',
+      [FBleShutdownOperation.ErrorCode, FBleShutdownOperation.ErrorMessage]),
+      allError, alvDetails, alsBle);
+end;
+
+procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: boolean);
+var
+  Operation: IBleOperation;
+begin
+  if Assigned(FBleShutdownOperation) then
+  begin
+    CanClose := FBleShutdownOperation.State <> lbopPending;
+    Exit;
+  end;
+  CanClose := False;
+  Enabled := False;
+  Operation := BeginBleShutdown;
+  if not Assigned(Operation) then
+  begin
+    CanClose := True;
+    Exit;
+  end;
+  Operation.OnCompleted := @BleShutdownCompleted;
+end;
+
+procedure TMainForm.BleShutdownCompleted(Sender: TObject);
+begin
+  ReportBleShutdown;
+  { Destruction must leave the BLE completion callback stack first. }
+  Application.QueueAsyncCall(@CloseAfterBleShutdown, 0);
+end;
+
+procedure TMainForm.CloseAfterBleShutdown(Data: PtrInt);
+begin
+  Close;
+end;
+
+procedure TMainForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+var
+  ClearedTelegramCount: integer;
+begin
+  FClosing := True;
+  CloseProtocolReport;
+  FParticipantCard.Close;
+  if Assigned(FBleShutdownOperation) then
+    FBleShutdownOperation.OnCompleted := nil;
   FreeAndNil(FLedPanelCoordinator);
   ClearedTelegramCount := 0;
   if Assigned(FTelegramCoordinator) then
@@ -1918,12 +2039,12 @@ begin
   if CompetitionHasParticipants then
   begin
     n := MainDataset1.FieldByName('number').AsString;
-    if AskMessageDlg(Format(rsDeleteNumber, [n]), mtWarning,
-      [mbYes, mbNo], 0) <> mrYes then
+    if AskMessageDlg(Format(rsDeleteNumber, [n]), mtWarning, [mbYes, mbNo], 0) <>
+      mrYes then
       Exit;
     try
       MainDataset1.Delete;
-      CompetitionDb.ApplyUpdatesAndRefreshUi(MainDataset1);
+      TParticipantEditService.ApplyChanges(CompetitionDb, MainDataset1, stages);
       RefreshAll;
       AppLog(Format(rsParticipantDeleted, [n]),
         allInfo, alvStatus, alsResults);
@@ -1931,6 +2052,7 @@ begin
       on E: Exception do
       begin
         messageText := Format(rsParticipantSaveError, [n, E.Message]);
+        RefreshAll;
         AppLog(messageText, allError, alvStatus, alsResults);
         AskMessageDlg(messageText, mtError, [mbOK], 0);
       end;
@@ -1962,8 +2084,7 @@ procedure TMainForm.AcSyncModuleExecute(Sender: TObject);
 var
   tpress, syncTime: integer;
 begin
-  if Assigned(FModuleSyncOperation) and
-    (FModuleSyncOperation.State = tssPending) then
+  if Assigned(FModuleSyncOperation) and (FModuleSyncOperation.State = tssPending) then
     Exit;
   tpress := DateTimeToUnix(Now);
   //uses dateutils
@@ -1974,7 +2095,7 @@ begin
   FModuleSyncTime := syncTime;
   try
     FModuleSyncOperation := FTimingTransportController.SendAsync(
-      RawByteString('T' + IntToStr(syncTime)));
+      rawbytestring('T' + IntToStr(syncTime)));
     FModuleSyncOperation.OnCompleted := @TimingSendCompleted;
   except
     on E: Exception do
@@ -1999,13 +2120,13 @@ begin
   case Operation.Source.Kind of
     tmskSerial: LogSource := alsSerial;
     tmskBle: LogSource := alsBle;
-  else
-    LogSource := alsApplication;
+    else
+      LogSource := alsApplication;
   end;
 
   if Operation.State = tssSucceeded then
-    AppLog(Format(rsModuleSynchronized,
-      [Operation.Source.DeviceId, FModuleSyncTime]), allInfo, alvStatus,
+    AppLog(Format(rsModuleSynchronized, [Operation.Source.DeviceId,
+      FModuleSyncTime]), allInfo, alvStatus,
       LogSource)
   else
   begin
@@ -2174,10 +2295,8 @@ begin
     DatasetStartMarks.First;
     while not DatasetStartMarks.EOF do
     begin
-      if not DatasetStartMarks.FieldByName(
-        'participant_number').IsNull and
-        (DatasetStartMarks.FieldByName(
-        'participant_number').AsInteger > 0) then
+      if not DatasetStartMarks.FieldByName('participant_number').IsNull and
+        (DatasetStartMarks.FieldByName('participant_number').AsInteger > 0) then
       begin
         SetLength(Items, Length(Items) + 1);
         Items[High(Items)].MarkId :=
@@ -2193,8 +2312,7 @@ begin
 
   AppliedAny := False;
   for I := 0 to High(Items) do
-    if ApplyStartMark(Items[I].MarkId, Items[I].ParticipantNumber,
-      False) then
+    if ApplyStartMark(Items[I].MarkId, Items[I].ParticipantNumber, False) then
       AppliedAny := True;
   if AppliedAny then
     RefreshAfterStartMarkApply;
@@ -2222,6 +2340,7 @@ begin
 
   try
     HiddenCount := FStartMarkService.HideWorkQueue;
+    InvalidateCompetitionViews;
     if HiddenCount = 0 then
       Exit;
     AppLog(Format(rsStartMarksHidden, [HiddenCount]), allInfo,
@@ -2278,8 +2397,7 @@ end;
 
 procedure TMainForm.BackupTimerTimer(Sender: TObject);
 begin
-  if IsCompetitionDatabaseOpen and not FClosing and
-    Assigned(FBackupController) then
+  if IsCompetitionDatabaseOpen and not FClosing and Assigned(FBackupController) then
     FBackupController.Start(fName, Now, CurrentBackupRetentionPolicy);
 end;
 
@@ -2297,8 +2415,8 @@ begin
         [AResult.Cleanup.DeletedCount, AResult.Cleanup.FreedBytes]), allInfo,
         alvDetails, alsDatabase);
     if AResult.Cleanup.WarningMessage <> '' then
-      AppLog(Format(rsBackupCleanupWarning,
-        [AResult.Cleanup.WarningMessage]), allWarning, alvDetails,
+      AppLog(Format(rsBackupCleanupWarning, [AResult.Cleanup.WarningMessage]),
+        allWarning, alvDetails,
         alsDatabase);
   end
   else
@@ -2311,16 +2429,15 @@ begin
         AppLog(Format(rsBackupFileInvalid, [AResult.BackupFileName]),
           allWarning, alvDetails, alsDatabase);
       else
-        AppLog(Format(rsBackupCreateError,
-          [AResult.BackupFileName, AResult.ErrorMessage]), allWarning,
+        AppLog(Format(rsBackupCreateError, [AResult.BackupFileName,
+          AResult.ErrorMessage]), allWarning,
           alvDetails, alsDatabase);
     end;
 end;
 
 procedure TMainForm.CheckDBOpenAndRaceMode(Sender: TObject);
 begin
-   TAction(Sender).Enabled := IsCompetitionDatabaseOpen and
-     not RaceMode.Checked;
+  TAction(Sender).Enabled := IsCompetitionDatabaseOpen and not RaceMode.Checked;
 end;
 
 procedure TMainForm.ExportStageResultsExecute(Sender: TObject);
@@ -2359,8 +2476,8 @@ begin
   try
     MainDataset1.Edit;
     MainDataset1category.AsString := newCategory;
-    CompetitionDb.ApplyUpdatesAndRefreshUi(MainDataset1);
-    CompetitionDb.RefreshQuery(StatDataset1);
+    TParticipantEditService.ApplyChanges(CompetitionDb, MainDataset1, stages);
+    RefreshAll;
     AppLog(Format(rsParticipantFieldValueChanged,
       [n, ParticipantFieldCaption(RxDBGrid1, MainDataset1category),
       ParticipantLogValue(MainDataset1category, oldCategory),
@@ -2370,6 +2487,7 @@ begin
     on E: Exception do
     begin
       messageText := Format(rsParticipantSaveError, [n, E.Message]);
+      RefreshAll;
       AppLog(messageText, allError, alvStatus, alsResults);
       AskMessageDlg(messageText, mtError, [mbOK], 0);
     end;
@@ -2379,8 +2497,7 @@ end;
 procedure TMainForm.COMStatus(Sender: TObject);
 begin
   if Sender = AcCOMOpen then
-    TAction(Sender).Enabled := (not Serial.Active) and
-      SelectedSerialPortAvailable
+    TAction(Sender).Enabled := (not Serial.Active) and SelectedSerialPortAvailable
   else
     TAction(Sender).Enabled := Serial.Active;
 end;
@@ -2527,6 +2644,7 @@ begin
       BuildParticipantChangeLogMessages(MainDataset1, RxDBGrid1, changeMessages);
       try
         CompetitionDb.ApplyUpdatesAndRefreshUi(MainDataset1);
+        InvalidateCompetitionViews;
         for logMessage in changeMessages do
           AppLog(logMessage, allInfo, alvNone, alsResults);
       except
@@ -2568,8 +2686,8 @@ begin
   AcViewMemoExecute(AcViewMemo);
 
   // Start the online check only after the application event loop is running.
-  if IsAutomaticUpdateCheckDue(checkUpdateAtStartup,
-    checkUpdateIntervalInDays, lastUpdateCheckoutTime, Now) then
+  if IsAutomaticUpdateCheckDue(checkUpdateAtStartup, checkUpdateIntervalInDays,
+    lastUpdateCheckoutTime, Now) then
     Application.QueueAsyncCall(@StartAutomaticUpdateCheck, 0);
 
   // Do automatic backup
@@ -2600,8 +2718,8 @@ procedure TMainForm.RxIniPropStorage1StoredValues10Restore(Sender: TStoredValue;
   var Value: TStoredType);
 begin
   if Value <> '' then
-    doAutomaticBackup := StoredBooleanOrDefault('automatic_backup', Value,
-      DEFAULT_AUTOMATIC_BACKUP);
+    doAutomaticBackup := StoredBooleanOrDefault('automatic_backup',
+      Value, DEFAULT_AUTOMATIC_BACKUP);
 end;
 
 procedure TMainForm.RxIniPropStorage1StoredValues10Save(Sender: TStoredValue;
@@ -2703,9 +2821,9 @@ procedure TMainForm.RxIniPropStorage1StoredValues17Restore(Sender: TStoredValue;
   var Value: TStoredType);
 begin
   if Value <> '' then
-    automaticBackupRetentionDays := StoredIntegerInRangeOrDefault(
-      'automatic_backup_retention_days', Value,
-      DEFAULT_AUTOMATIC_BACKUP_RETENTION_DAYS, 1, 3650);
+    automaticBackupRetentionDays :=
+      StoredIntegerInRangeOrDefault('automatic_backup_retention_days',
+      Value, DEFAULT_AUTOMATIC_BACKUP_RETENTION_DAYS, 1, 3650);
 end;
 
 procedure TMainForm.RxIniPropStorage1StoredValues17Save(Sender: TStoredValue;
@@ -2718,9 +2836,9 @@ procedure TMainForm.RxIniPropStorage1StoredValues18Restore(Sender: TStoredValue;
   var Value: TStoredType);
 begin
   if Value <> '' then
-    automaticBackupMaxSizeMb := StoredIntegerInRangeOrDefault(
-      'automatic_backup_max_size_mb', Value,
-      DEFAULT_AUTOMATIC_BACKUP_MAX_SIZE_MB, 1, 1048576);
+    automaticBackupMaxSizeMb :=
+      StoredIntegerInRangeOrDefault('automatic_backup_max_size_mb',
+      Value, DEFAULT_AUTOMATIC_BACKUP_MAX_SIZE_MB, 1, 1048576);
 end;
 
 procedure TMainForm.RxIniPropStorage1StoredValues18Save(Sender: TStoredValue;
@@ -2762,10 +2880,9 @@ procedure TMainForm.RxIniPropStorage1StoredValues21Restore(Sender: TStoredValue;
   var Value: TStoredType);
 begin
   if Value <> '' then
-    telegramRetryDelaySeconds := StoredIntegerInRangeOrDefault(
-      'telegram_retry_delay_seconds', Value,
-      TELEGRAM_RETRY_DEFAULT_DELAY_SECONDS,
-      TELEGRAM_RETRY_MIN_DELAY_SECONDS,
+    telegramRetryDelaySeconds :=
+      StoredIntegerInRangeOrDefault('telegram_retry_delay_seconds',
+      Value, TELEGRAM_RETRY_DEFAULT_DELAY_SECONDS, TELEGRAM_RETRY_MIN_DELAY_SECONDS,
       TELEGRAM_RETRY_MAX_DELAY_SECONDS);
 end;
 
@@ -2792,8 +2909,7 @@ procedure TMainForm.RxIniPropStorage1StoredValues2Restore(Sender: TStoredValue;
 begin
   if Value <> '' then
     SetTimingFinishInterval(StoredIntegerOrDefault(
-      'finish_debounce_interval_ms', Value,
-      DEFAULT_FINISH_DEBOUNCE_INTERVAL_MS));
+      'finish_debounce_interval_ms', Value, DEFAULT_FINISH_DEBOUNCE_INTERVAL_MS));
 end;
 
 procedure TMainForm.RxIniPropStorage1StoredValues2Save(Sender: TStoredValue;
@@ -2806,8 +2922,7 @@ procedure TMainForm.RxIniPropStorage1StoredValues3Restore(Sender: TStoredValue;
   var Value: TStoredType);
 begin
   if Value <> '' then
-    zerohour := StoredBooleanOrDefault('hide_zero_hour', Value,
-      DEFAULT_ZERO_HOUR);
+    zerohour := StoredBooleanOrDefault('hide_zero_hour', Value, DEFAULT_ZERO_HOUR);
 end;
 
 procedure TMainForm.RxIniPropStorage1StoredValues3Save(Sender: TStoredValue;
@@ -2844,9 +2959,9 @@ procedure TMainForm.RxIniPropStorage1StoredValues6Restore(Sender: TStoredValue;
   var Value: TStoredType);
 begin
   if Value <> '' then
-    showStageNameForSingleStage := StoredBooleanOrDefault(
-      'show_stage_name_for_single_stage', Value,
-      DEFAULT_SHOW_STAGE_NAME_FOR_SINGLE_STAGE);
+    showStageNameForSingleStage :=
+      StoredBooleanOrDefault('show_stage_name_for_single_stage',
+      Value, DEFAULT_SHOW_STAGE_NAME_FOR_SINGLE_STAGE);
 end;
 
 procedure TMainForm.RxIniPropStorage1StoredValues6Save(Sender: TStoredValue;
@@ -2887,8 +3002,8 @@ procedure TMainForm.RxIniPropStorage1StoredValues9Restore(Sender: TStoredValue;
   var Value: TStoredType);
 begin
   if Value <> '' then
-    checkUpdateIntervalInDays := StoredIntegerOrDefault(
-      'check_update_interval_days', Value,
+    checkUpdateIntervalInDays :=
+      StoredIntegerOrDefault('check_update_interval_days', Value,
       DEFAULT_CHECK_UPDATE_INTERVAL_IN_DAYS);
 end;
 
@@ -2901,9 +3016,354 @@ end;
 procedure TMainForm.TabSheet2Show(Sender: TObject);
 begin
   if IsCompetitionDatabaseOpen then
+    CompetitionDb.RefreshQueries([StatDataset1, StatDataset2]);
+  UpdateProtocolBalanceVisibility;
+end;
+
+procedure TMainForm.StatisticsPageControlChange(Sender: TObject);
+begin
+  UpdateProtocolBalanceVisibility;
+end;
+
+procedure TMainForm.PageControl1Change(Sender: TObject);
+begin
+  UpdateProtocolBalanceVisibility;
+end;
+
+procedure TMainForm.UpdateProtocolBalanceVisibility;
+begin
+  if Assigned(ProtocolBalanceView) then
+    ProtocolBalanceView.SetViewActive(not FClosing and
+      (PageControl1.ActivePage = TabSheet2) and
+      (StatisticsPageControl.ActivePage = ProtocolBalanceSheet));
+end;
+
+function TMainForm.CardStages: TStages;
+begin
+  Result := stages;
+end;
+
+function TMainForm.GetFinishPrintForm: TFinishProtocolPrintForm;
+begin
+  Result := nil;
+  if FProtocolPrintForm is TFinishProtocolPrintForm then
+    Result := TFinishProtocolPrintForm(FProtocolPrintForm);
+end;
+
+function TMainForm.GetStartPrintForm: TStartProtocolPrintForm;
+begin
+  Result := nil;
+  if FProtocolPrintForm is TStartProtocolPrintForm then
+    Result := TStartProtocolPrintForm(FProtocolPrintForm);
+end;
+
+procedure TMainForm.CloseProtocolReport;
+begin
+  if Assigned(FProtocolPrintForm) then FProtocolPrintForm.EndSession;
+  if Assigned(FStartLabelsForm) then FStartLabelsForm.EndSession;
+end;
+
+function TMainForm.ConfirmPrintPending: boolean;
+begin
+  // Capture the native editor into its existing buffer without posting it.
+  if RxDBGrid1.EditorMode then TCardGridAccess(RxDBGrid1).UpdateData;
+  Result := True;
+  if QueryHasActualChanges(MainDataset1) or (MainDataset1.ChangeCount > 0) then
+    Result := AskMessageDlg(rsPrintPending, mtConfirmation,
+      [mbYes, mbCancel], 0) = mrYes;
+end;
+
+procedure TMainForm.PrintProtocolExecute(Sender: TObject);
+begin
+  if not IsCompetitionDatabaseOpen then Exit;
+  if FStartLabelsForm <> nil then
   begin
-    StatDataset1.Close;
-    StatDataset1.Open;
+    FStartLabelsForm.BringToFront;
+    Exit;
+  end;
+  if FProtocolPrintForm <> nil then
+  begin
+    FProtocolPrintForm.BringToFront;
+    Exit;
+  end;
+  FOpeningPrint := True;
+  try
+    if not ConfirmPrintPending then Exit;
+    if Sender = PrintStartMenuItem then
+      FProtocolPrintForm := TStartProtocolPrintForm.Create(Self)
+    else
+      FProtocolPrintForm := TFinishProtocolPrintForm.Create(Self);
+    try
+      if FProtocolPrintForm is TStartProtocolPrintForm then
+        TStartProtocolPrintForm(FProtocolPrintForm).ConfigureStart(
+          FCompetitionDb, stages, srmAllStages, CurrentStageIndex,
+          FReportLanguage, RuntimeResourceDirectory('templates/reports'))
+      else
+        TFinishProtocolPrintForm(FProtocolPrintForm).ConfigureFinish(
+          FCompetitionDb, stages, frmOverall, CurrentStageIndex,
+          FReportLanguage, RuntimeResourceDirectory('templates/reports'));
+      FProtocolPrintForm.ShowModal;
+    finally
+      FreeAndNil(FProtocolPrintForm);
+    end;
+  finally
+    FOpeningPrint := False;
+  end;
+end;
+
+procedure TMainForm.PrintStartLabelsExecute(Sender: TObject);
+begin
+  if not IsCompetitionDatabaseOpen then Exit;
+  if FProtocolPrintForm <> nil then
+  begin
+    FProtocolPrintForm.BringToFront;
+    Exit;
+  end;
+  if FStartLabelsForm <> nil then
+  begin
+    FStartLabelsForm.BringToFront;
+    Exit;
+  end;
+  FOpeningPrint := True;
+  try
+    if not ConfirmPrintPending then Exit;
+    FStartLabelsForm := TStartLabelsPrintForm.Create(Self);
+    try
+      FStartLabelsForm.Configure(FCompetitionDb, stages, GetDefaultIniName,
+        RuntimeResourceDirectory('templates/labels'));
+      FStartLabelsForm.ShowModal;
+    finally
+      FreeAndNil(FStartLabelsForm);
+    end;
+  finally
+    FOpeningPrint := False;
+  end;
+end;
+
+
+
+procedure TMainForm.ParticipantCardUpdate(Sender: TObject);
+begin
+  AcParticipantCard.Enabled :=
+    IsCompetitionDatabaseOpen and MainDataset1.Active and not
+    MainDataset1.IsEmpty and not (MainDataset1.State = dsInsert) and
+    not MainDataset1.FieldByName('id').IsNull and
+    (MainDataset1.FieldByName('id').AsInteger > 0);
+end;
+
+procedure TMainForm.ParticipantCardExecute(Sender: TObject);
+var
+  StageIndex: integer;
+begin
+  ParticipantCardUpdate(Sender);
+  if not AcParticipantCard.Enabled then Exit;
+  if not TryGetStageIndexFromFieldName(SelectedMainGridFieldName, StageIndex) then
+    StageIndex := CurrentStageIndex;
+  FOpeningParticipantCard := True;
+  try
+    // Copy native editor text into the existing edit buffer without posting it.
+    if RxDBGrid1.EditorMode then TCardGridAccess(RxDBGrid1).UpdateData;
+    FParticipantCard.Open(MainDataset1.FieldByName('id').AsInteger, StageIndex);
+  finally
+    FOpeningParticipantCard := False;
+  end;
+end;
+
+procedure TMainForm.BalanceOpenCard(Sender: TObject;
+  const ParticipantId, StageIndex: integer);
+begin
+  FOpeningParticipantCard := True;
+  try
+    if RxDBGrid1.EditorMode then TCardGridAccess(RxDBGrid1).UpdateData;
+    FParticipantCard.Open(ParticipantId, StageIndex);
+  finally
+    FOpeningParticipantCard := False;
+  end;
+end;
+
+procedure TMainForm.CardOpenJournal(Sender: TObject; const Key: TCardMarkKey);
+var
+  MarkPos: integer;
+  M: TCardMark;
+  StartJournal: TStartMarksForm;
+  FinishJournal: TFinishMarksForm;
+begin
+  if (FParticipantCard.Form = nil) or (FParticipantCard.Form.Snapshot = nil) then Exit;
+  MarkPos := FParticipantCard.Form.Snapshot.FindMark(Key);
+  if MarkPos < 0 then Exit;
+  M := FParticipantCard.Form.Snapshot.Marks[MarkPos];
+  try
+    if Key.Kind = tmkStart then
+    begin
+      StartJournal := TStartMarksForm.Create(Application);
+      try
+        StartJournal.PopupParent := FParticipantCard.Form;
+        if StartJournal.ConfigureParticipantRecord(M.Number,
+          M.ReceivedStage, Key.Id) then
+          StartJournal.ShowModal
+        else
+          FParticipantCard.Refresh;
+      finally
+        StartJournal.Free;
+      end;
+    end
+    else
+    begin
+      FinishJournal := TFinishMarksForm.Create(Application);
+      try
+        FinishJournal.PopupParent := FParticipantCard.Form;
+        if FinishJournal.ConfigureParticipantRecord(M.Number,
+          M.ReceivedStage, Key.Id) then
+          FinishJournal.ShowModal
+        else
+          FParticipantCard.Refresh;
+      finally
+        FinishJournal.Free;
+      end;
+    end;
+    if FParticipantCard.Form <> nil then FParticipantCard.Form.BringToFront;
+  except
+    on E: Exception do
+    begin
+      AppLog(E.Message, allError, alvDetails, alsDatabase);
+      if FParticipantCard.Form <> nil then
+        FParticipantCard.Form.SetUnavailable(Format(rsCardReadError,
+          [E.Message]), False);
+    end;
+  end;
+end;
+
+procedure TMainForm.CardOpenParticipant(Sender: TObject;
+  const ParticipantId, StageIndex: integer);
+begin
+  NavigateToParticipant(ParticipantId, StageIndex, True);
+end;
+
+procedure TMainForm.InvalidateCompetitionViews;
+begin
+  if FClosing then Exit;
+  if Assigned(ProtocolBalanceView) then ProtocolBalanceView.InvalidateData;
+  if Assigned(FParticipantCard) then FParticipantCard.InvalidateData;
+end;
+
+procedure TMainForm.ProtocolBalanceOpenParticipant(Sender: TObject;
+  const AParticipantId, AStageIndex: integer);
+begin
+  NavigateToParticipant(AParticipantId, AStageIndex, False);
+end;
+
+procedure TMainForm.NavigateToParticipant(const AParticipantId, AStageIndex: integer;
+  const AllowInactive: boolean);
+var
+  Query: TSQLQuery;
+  Column: TRxColumn;
+  Field: TField;
+  I: integer;
+  StageIndexes: TStageIndexArray;
+begin
+  if not IsCompetitionDatabaseOpen then Exit;
+  if not stages.IsValidIndex(AStageIndex) or (not AllowInactive and
+    not stages.IsActiveIndex(AStageIndex)) then
+  begin
+    ProtocolBalanceView.RefreshData;
+    AskMessageDlg(rsProtocolBalanceStageUnavailable, mtInformation, [mbOK], 0);
+    Exit;
+  end;
+  try
+    if (MainDataset1.State in [dsEdit, dsInsert]) or (MainDataset1.ChangeCount > 0) then
+    begin
+      if AskMessageDlg(rsProtocolBalanceSaveBeforeNavigation,
+        mtConfirmation, [mbYes, mbCancel], 0) <> mrYes then Exit;
+      TParticipantEditService.ApplyChangesKeepingInput(CompetitionDb,
+        MainDataset1, stages);
+      FPendingParticipantLogMessage := '';
+      FPendingParticipantStageIndex := 0;
+      RxDBGrid1.EditorMode := False;
+      RefreshAll;
+    end;
+    Query := CompetitionDb.CreateQuery(nil);
+    try
+      if not TParticipantRepository.OpenById(Query, AParticipantId) then
+      begin
+        ProtocolBalanceView.RefreshData;
+        AskMessageDlg(rsProtocolBalanceParticipantMissing, mtInformation, [mbOK], 0);
+        Exit;
+      end;
+    finally
+      Query.Free;
+    end;
+    if AllowInactive and (MainDataset1.FindField('starttime' +
+      IntToStr(AStageIndex)) = nil) then
+    begin
+      StageIndexes := stages.ActiveIndices;
+      SetLength(StageIndexes, Length(StageIndexes) + 1);
+      StageIndexes[High(StageIndexes)] := AStageIndex;
+      MainDataset1.Close;
+      ConfigureMainStageFields(StageIndexes);
+      MainDataset1.Open;
+    end;
+    if not MainDataset1.Locate('id', AParticipantId, []) then
+    begin
+      for I := 0 to RxDBGrid1.Columns.Count - 1 do
+      begin
+        RxDBGrid1.Columns[I].Filter.ClearFilter;
+        RxDBGrid1.Columns[I].Filter.State := rxfsAll;
+      end;
+      MainDataset1.Filtered := False;
+      MainDataset1.Filter := '';
+      if not MainDataset1.Locate('id', AParticipantId, []) then
+      begin
+        CompetitionDb.RefreshQuery(MainDataset1);
+        if not MainDataset1.Locate('id', AParticipantId, []) then
+        begin
+          ProtocolBalanceView.RefreshData;
+          AskMessageDlg(rsProtocolBalanceParticipantMissing, mtInformation, [mbOK], 0);
+          Exit;
+        end;
+      end;
+      RxDBGrid1.Invalidate;
+    end;
+    PageControl1.ActivePage := TabSheet1;
+    Field := MainDataset1.FindField('starttime' + IntToStr(AStageIndex));
+    if Field <> nil then
+    begin
+      Column := RxDBGrid1.ColumnByFieldName(Field.FieldName);
+      if Column <> nil then Column.Visible := True;
+      RxDBGrid1.SelectedField := Field;
+    end;
+    MainForm.BringToFront;
+    RxDBGrid1.SetFocus;
+  except
+    on E: Exception do
+    begin
+      AppLog(E.Message, allError, alvStatus, alsDatabase);
+      AskMessageDlg(Format(rsProtocolBalanceNavigationError, [E.Message]),
+        mtError, [mbOK], 0);
+    end;
+  end;
+end;
+
+procedure TMainForm.ProtocolBalanceOpenJournal(Sender: TObject;
+  const AStageIndex: integer; const AKind: TProtocolBalanceJournalKind);
+begin
+  if not IsCompetitionDatabaseOpen then Exit;
+  if not stages.IsActiveIndex(AStageIndex) then
+  begin
+    ProtocolBalanceView.RefreshData;
+    AskMessageDlg(rsProtocolBalanceStageUnavailable, mtInformation, [mbOK], 0);
+    Exit;
+  end;
+  try
+    case AKind of
+      pbjkPendingStarts: RunStartMarks(AStageIndex, smjfPendingOrConflict);
+      pbjkStartErrors: RunStartMarks(AStageIndex, smjfError);
+      pbjkPendingFinishes: RunFinishMarks(AStageIndex, fmjfPending);
+      pbjkFinishErrors: RunFinishMarks(AStageIndex, fmjfError);
+    end;
+  except
+    on E: Exception do
+      AskMessageDlg(Format(rsProtocolBalanceNavigationError, [E.Message]),
+        mtError, [mbOK], 0);
   end;
 end;
 
@@ -2975,6 +3435,7 @@ begin
     DatasetFinishMarks.CancelUpdates;
   try
     HiddenCount := FFinishMarkService.HideWorkQueue;
+    InvalidateCompetitionViews;
     if HiddenCount = 0 then
       Exit;
     AppLog(Format(rsFinishMarksHidden, [HiddenCount]), allInfo,
@@ -3043,7 +3504,7 @@ procedure TMainForm.TimingInputStateButtonClick(Sender: TObject);
 begin
   if timingInputTransport = ttkBle then
   begin
-    case LazBleConnectionAction(LazBleLclClient1) of
+    case BleTimingConnectionAction(LazBleLclClient1) of
       lbcaConnect: LazBleLclClient1.Connect;
       lbcaDisconnect: LazBleLclClient1.Disconnect;
     end;
@@ -3064,7 +3525,7 @@ begin
 end;
 
 procedure TMainForm.TimingTransportDataReceived(Sender: TObject;
-  const AData: RawByteString; const ASource: TTimingMarkSource);
+  const AData: rawbytestring; const ASource: TTimingMarkSource);
 begin
   FTimingStreamProcessor.Feed(AData, ASource, Now);
 end;
@@ -3077,13 +3538,12 @@ begin
   case AResponse.Source.Kind of
     tmskSerial: LogSource := alsSerial;
     tmskBle: LogSource := alsBle;
-  else
-    LogSource := alsApplication;
+    else
+      LogSource := alsApplication;
   end;
   AppLog(Format(
     'Firmware JSON response received validation=valid bytes=%d payload=%s device=%s',
-    [Length(AResponse.RawJson),
-    TimingPacketLogValue(AResponse.RawJson),
+    [Length(AResponse.RawJson), TimingPacketLogValue(AResponse.RawJson),
     TimingPacketLogValue(AResponse.Source.DeviceId)]), allDebug,
     alvDetails, LogSource);
 end;
@@ -3094,35 +3554,54 @@ begin
     FBleTimingTransport.ConfigureClient(LazBleLclClient1.CoreClient);
 end;
 
+procedure TMainForm.LazBleLclClient1UnconfigureClient(Sender: TObject);
+begin
+  if Assigned(FBleTimingTransport) then
+    FBleTimingTransport.ReleaseClient;
+end;
+
 procedure TMainForm.LazBleComponent1AvailabilityChanged(Sender: TObject;
   const AAvailability: TBleAvailability);
+var
+  Diagnostic: TLazBleDiagnosticInfo;
+  ErrorText: string;
 begin
+  Diagnostic := LazBleComponent1.DiagnosticInfo;
   case AAvailability of
     lbaChecking:
       AppLog('BLE availability check started', allDebug, alvNone, alsBle);
     lbaAvailable:
-      AppLog('BLE available' +
-        BleBackendLogContext(LazBleComponent1), allInfo, alvDetails, alsBle);
+      AppLog('BLE available' + BleBackendLogContext(Diagnostic),
+        allInfo, alvDetails, alsBle);
     lbaUnavailable:
-      if LazBleComponent1.LastErrorMessage = '' then
-        AppLog('BLE unavailable' +
-          BleBackendLogContext(LazBleComponent1), allWarning, alvNone,
-          alsBle);
+    begin
+      ErrorText := Diagnostic.AvailabilityErrorMessage;
+      if ErrorText = '' then
+        ErrorText := LazBleComponent1.LastErrorMessage;
+      AppLog('BLE unavailable' + BleBackendLogContext(Diagnostic) +
+        ' error=' + BleDiagnosticValue(ErrorText, 'unknown'), allWarning,
+        alvDetails, alsBle);
+    end;
   end;
   if timingInputTransport = ttkBle then
     RefreshTimingInputUi;
 end;
 
 procedure TMainForm.LazBleComponent1Error(Sender: TObject;
-  const AErrorCode: Integer; const AErrorMessage: string);
+  const AErrorCode: integer; const AErrorMessage: string);
 var
   ErrorText: string;
+  LogLevel: TAppLogLevel;
 begin
   ErrorText := AErrorMessage;
   if ErrorText = '' then
     ErrorText := IntToStr(AErrorCode);
+  if AErrorCode = LazBleErrorNoAdapter then
+    LogLevel := allWarning
+  else
+    LogLevel := allError;
   AppLog(Format('BLE operation failed code=%d error=%s',
-    [AErrorCode, TimingPacketLogValue(ErrorText)]), allError, alvNone,
+    [AErrorCode, TimingPacketLogValue(ErrorText)]), LogLevel, alvNone,
     alsBle);
   if timingInputTransport = ttkBle then
     RefreshTimingInputUi;
@@ -3151,7 +3630,7 @@ begin
 end;
 
 procedure TMainForm.LazBleLclClient1Error(Sender: TObject;
-  const AErrorCode: Integer; const AErrorMessage: string);
+  const AErrorCode: integer; const AErrorMessage: string);
 var
   ErrorText: string;
 begin
@@ -3170,8 +3649,8 @@ procedure TMainForm.LazBleLclClient1StateChanged(Sender: TObject;
   const AState: TLazBleClientState);
 begin
   AppLog(Format('BLE connection state=%s device=%s',
-    [BleClientStateName(AState),
-    BleDiagnosticValue(LazBleLclClient1.DeviceId, 'unknown')]),
+    [BleClientStateName(AState), BleDiagnosticValue(LazBleLclClient1.DeviceId,
+    'unknown')]),
     allDebug, alvNone, alsBle);
   if Assigned(FBleTimingTransport) then
     FBleTimingTransport.HandleStateChanged(AState);
@@ -3190,11 +3669,10 @@ var
 begin
   case ARejected.Source.Kind of
     tmskBle: LogSource := alsBle;
-  else
-    LogSource := alsSerial;
+    else
+      LogSource := alsSerial;
   end;
-  AppLog(Format(rsSerialPacketRejected,
-    [TransportStreamRejectedCode(ARejected),
+  AppLog(Format(rsSerialPacketRejected, [TransportStreamRejectedCode(ARejected),
     TimingPacketLogValue(ARejected.RawText)]),
     allDebug, alvDetails, LogSource);
 end;
@@ -3205,46 +3683,46 @@ procedure TMainForm.SerialStatus(Sender: TObject; Reason: THookSerialReason;
 begin
   case Reason of
     HR_SerialClose:
+    begin
+      if Assigned(FTimingStreamProcessor) then
+        FTimingStreamProcessor.Reset;
+      UpdateSerialStatusText(Format(rsPortClosed, [Value]));
+      if FSerialCloseRequested then
       begin
-        if Assigned(FTimingStreamProcessor) then
-          FTimingStreamProcessor.Reset;
-        UpdateSerialStatusText(Format(rsPortClosed, [Value]));
-        if FSerialCloseRequested then
-        begin
-          if not FClosing then
-            AppLog(Format(rsPortClosed, [Value]), allInfo, alvNone,
-              alsSerial);
-          FSerialConnectionLost := False;
-        end
-        else
-        begin
-          if not FClosing and not FSerialConnectionLost then
-            AppLog(Format(rsPortConnectionLost, [Value]), allWarning,
-              alvStatus, alsSerial);
-          FSerialConnectionLost := True;
-        end;
-        FSerialCloseRequested := False;
-      end;
-    HR_Connect:
-      begin
-        if Assigned(FTimingStreamProcessor) then
-          FTimingStreamProcessor.Reset;
-        if FSerialConnectionLost then
-        begin
-          UpdateSerialStatusText(
-            Format(rsPortConnectionRestored, [Value]));
-          AppLog(Format(rsPortConnectionRestored, [Value]), allInfo,
-            alvStatus, alsSerial);
-        end
-        else
-        begin
-          UpdateSerialStatusText(Format(rsPortConnected, [Value]));
-          AppLog(Format(rsPortConnected, [Value]), allInfo, alvNone,
+        if not FClosing then
+          AppLog(Format(rsPortClosed, [Value]), allInfo, alvNone,
             alsSerial);
-        end;
-        FSerialCloseRequested := False;
         FSerialConnectionLost := False;
+      end
+      else
+      begin
+        if not FClosing and not FSerialConnectionLost then
+          AppLog(Format(rsPortConnectionLost, [Value]), allWarning,
+            alvStatus, alsSerial);
+        FSerialConnectionLost := True;
       end;
+      FSerialCloseRequested := False;
+    end;
+    HR_Connect:
+    begin
+      if Assigned(FTimingStreamProcessor) then
+        FTimingStreamProcessor.Reset;
+      if FSerialConnectionLost then
+      begin
+        UpdateSerialStatusText(
+          Format(rsPortConnectionRestored, [Value]));
+        AppLog(Format(rsPortConnectionRestored, [Value]), allInfo,
+          alvStatus, alsSerial);
+      end
+      else
+      begin
+        UpdateSerialStatusText(Format(rsPortConnected, [Value]));
+        AppLog(Format(rsPortConnected, [Value]), allInfo, alvNone,
+          alsSerial);
+      end;
+      FSerialCloseRequested := False;
+      FSerialConnectionLost := False;
+    end;
     HR_CanRead: UpdateSerialStatusText(Format(rsSerialCanRead, [Value]));
     HR_CanWrite: UpdateSerialStatusText(Format(rsSerialCanWrite, [Value]));
     HR_ReadCount: UpdateSerialStatusText(Format(rsSerialReadCount, [Value]));
@@ -3263,7 +3741,7 @@ begin
   Clock.Caption := FormatDateTime('hh:nn:ss', Now);
 
   //это тикающие секунды в окне "на трассе"
-  if IsCompetitionDatabaseOpen then
+  if IsCompetitionDatabaseOpen and Showing and TabSheet2.Showing then
   begin
     //запоминает положение курсора
     pos := StatDataset2.RecNo;
@@ -3344,7 +3822,7 @@ var
   normalizedValue: string;
 begin
   if Trim(aText) = '' then
-    Sender.AsString := ''
+    Sender.Clear
   else if TryNormalizeDuration(aText, normalizedValue) then
     Sender.AsString := normalizedValue
   else
@@ -3426,8 +3904,7 @@ begin
   end;
 
   n := MainDataset1.FieldByName('number').AsString;
-  if not TryParseStageFieldName(Sender.FieldName, stageFieldKind,
-    stageIndex) then
+  if not TryParseStageFieldName(Sender.FieldName, stageFieldKind, stageIndex) then
   begin
     FPendingParticipantLogMessage := '';
     FPendingParticipantStageIndex := 0;
@@ -3438,11 +3915,13 @@ begin
     sfkFinishTime: fieldCaption := rsFinishtime;
     sfkCorrection: fieldCaption := rsCorrection;
     sfkPenalty: fieldCaption := rsPenalty;
-    else fieldCaption := Sender.FieldName;
+    else
+      fieldCaption := Sender.FieldName;
   end;
   FPendingParticipantStageIndex := stageIndex;
-  FPendingParticipantLogMessage := Format(rsParticipantStageValueChanged,
-    [n, fieldCaption, stageIndex, oldValue, newValue]);
+  FPendingParticipantLogMessage :=
+    Format(rsParticipantStageValueChanged, [n, fieldCaption, stageIndex,
+    oldValue, newValue]);
 end;
 
 procedure TMainForm.MainDataset1statusGetText(Sender: TField;
@@ -3457,7 +3936,60 @@ begin
 end;
 
 procedure TMainForm.MenuItemAboutClick(Sender: TObject);
+var
+  About: rAboutHolder;
+  Detector: TnsUniversalDetector;
+  Diagnostic: TLazBleDiagnosticInfo;
+  SQLiteVersion: string;
 begin
+  Detector := TnsUniversalDetector.Create;
+  try
+    Detector.GetAbout(About);
+  finally
+    Detector.Free;
+  end;
+
+  { Read the diagnostic snapshot without starting another BLE operation. }
+  Diagnostic := LazBleComponent1.DiagnosticInfo;
+  { GetConnectionInfo queries the native SQLite version. When no database is
+    open, FPC temporarily loads SQLite without opening a database file. }
+  try
+    SQLiteVersion := FCompetitionDb.Connection.GetConnectionInfo(
+      citServerVersionString);
+  except
+    on E: Exception do
+      SQLiteVersion := Format(rsAboutVersionNotObtainedWithReason, [E.Message]);
+  end;
+  if SQLiteVersion = '' then
+    SQLiteVersion := rsAboutNativeVersionNotObtained;
+  RxAboutDialog1.AdditionalInfo.Clear;
+  RxAboutDialog1.AdditionalInfo.Add(rsAboutLibraries);
+  RxAboutDialog1.AdditionalInfo.Add(Format(rsAboutChsdetVersion,
+    [About.MajorVersionNr, About.MinorVersionNr, About.BuildVersionNr]));
+  RxAboutDialog1.AdditionalInfo.Add(Format(rsAboutSQLiteVersion, [SQLiteVersion]));
+  RxAboutDialog1.AdditionalInfo.Add(Format(rsAboutTLazSerialVersion,
+    [LazSerialGetVersion]));
+  RxAboutDialog1.AdditionalInfo.Add('');
+  RxAboutDialog1.AdditionalInfo.Add(Format(rsAboutLazBleVersion,
+    [TLazBle.Info.Version]));
+  RxAboutDialog1.AdditionalInfo.Add(Format(rsAboutBleBackend,
+    [Diagnostic.BackendName]));
+  if Diagnostic.NativeVersion <> '' then
+    RxAboutDialog1.AdditionalInfo.Add(Format(rsAboutSimpleCbleVersion,
+      [Diagnostic.NativeVersion]))
+  else
+    RxAboutDialog1.AdditionalInfo.Add(Format(rsAboutSimpleCbleVersion,
+      [rsAboutNativeVersionNotObtained]));
+  if Diagnostic.AdapterId <> '' then
+    RxAboutDialog1.AdditionalInfo.Add(Format(rsAboutBleAdapter,
+      [Diagnostic.AdapterId]));
+  if Diagnostic.AvailabilityErrorMessage <> '' then
+    RxAboutDialog1.AdditionalInfo.Add(Format(rsAboutBleError,
+      [Diagnostic.AvailabilityErrorMessage]));
+  RxAboutDialog1.AdditionalInfo.Add('');
+  RxAboutDialog1.AdditionalInfo.Add(rsAboutIconSet);
+  RxAboutDialog1.AdditionalInfo.Add('https://p.yusukekamiyamane.com/');
+  RxAboutDialog1.Caption := rsAboutDialogCaption;
   RxAboutDialog1.Execute;
 end;
 
@@ -3488,11 +4020,22 @@ end;
 procedure TMainForm.RxDBGrid1EditingDone(Sender: TObject);
 var
   n, messageText, pendingLogMessage, logMessage: string;
-  pendingStageIndex: integer;
+  pendingStageIndex, fieldIndex, changedStageIndex: integer;
+  changedStageKind: TStageFieldKind;
   changeMessages: TStringList;
+  categoryChanged: boolean;
 begin
+  // Opening/focusing the read-only card must not commit or cancel the grid editor.
+  // Native focus-loss notifications can arrive after Open has returned.
+  if FOpeningPrint or (FProtocolPrintForm <> nil) or (FStartLabelsForm <> nil) or
+    FOpeningParticipantCard or (Assigned(FParticipantCard) and
+    (FParticipantCard.Form <> nil) and (FParticipantCard.Form.Active and
+    RxDBGrid1.EditorMode)) then Exit;
   if IsCompetitionDatabaseOpen then
   begin
+    // More than one pending row can include a category edit on another row.
+    categoryChanged := (MainDataset1.ChangeCount > 1) or not
+      FieldValuesAreEqual(MainDataset1category.OldValue, MainDataset1category.Value);
     if FPendingParticipantLogMessage <> '' then
     begin
       if not QueryHasActualChanges(MainDataset1) then
@@ -3507,14 +4050,40 @@ begin
       pendingLogMessage := FPendingParticipantLogMessage;
       pendingStageIndex := FPendingParticipantStageIndex;
       FPendingParticipantLogMessage := '';
+      // Several fields/rows can be pending even if the last edit was on one SU.
+      // Keep the full path for any change outside that captured stage.
+      if MainDataset1.ChangeCount > 1 then
+        pendingStageIndex := 0;
       try
-        CompetitionDb.ApplyUpdatesAndRefreshUi(MainDataset1);
-        if CheckBoxAutomaticUpdateResutls.Checked then
-          UpdateResults
+        for fieldIndex := 0 to MainDataset1.FieldCount - 1 do
+          if (MainDataset1.Fields[fieldIndex].FieldKind = fkData) and
+            not MainDataset1.Fields[fieldIndex].ReadOnly and not
+            FieldValuesAreEqual(MainDataset1.Fields[fieldIndex].OldValue,
+            MainDataset1.Fields[fieldIndex].Value) then
+            if not TryParseStageFieldName(MainDataset1.Fields[fieldIndex].FieldName,
+              changedStageKind, changedStageIndex) or
+              (changedStageIndex <> pendingStageIndex) then
+              pendingStageIndex := 0;
+      except
+        pendingStageIndex := 0;
+      end;
+      try
+        if categoryChanged then
+        begin
+          TParticipantEditService.ApplyChanges(CompetitionDb, MainDataset1, stages);
+          RefreshAll;
+        end
         else
         begin
-          CorrectionDataset.Close;
-          CorrectionDataset.Open;
+          CompetitionDb.ApplyUpdatesAndRefreshUi(MainDataset1);
+          InvalidateCompetitionViews;
+          if CheckBoxAutomaticUpdateResutls.Checked then
+            UpdateResults(pendingStageIndex)
+          else
+          begin
+            CorrectionDataset.Close;
+            CorrectionDataset.Open;
+          end;
         end;
         AppLog(pendingLogMessage, allInfo, alvNone, alsResults);
       except
@@ -3522,6 +4091,7 @@ begin
         begin
           messageText := Format(rsParticipantStageSaveError,
             [n, pendingStageIndex, E.Message]);
+          if categoryChanged then RefreshAll;
           AppLog(messageText, allError, alvStatus, alsResults);
           AskMessageDlg(messageText, mtError, [mbOK], 0);
         end;
@@ -3540,8 +4110,16 @@ begin
     try
       BuildParticipantChangeLogMessages(MainDataset1, RxDBGrid1, changeMessages);
       try
-        CompetitionDb.ApplyUpdatesAndRefreshUi(MainDataset1);
-        RefreshResults;
+        if categoryChanged then
+        begin
+          TParticipantEditService.ApplyChanges(CompetitionDb, MainDataset1, stages);
+          RefreshAll;
+        end
+        else
+        begin
+          CompetitionDb.ApplyUpdatesAndRefreshUi(MainDataset1);
+          RefreshResults;
+        end;
         for logMessage in changeMessages do
           AppLog(logMessage, allInfo, alvNone, alsResults);
         FPendingParticipantLogMessage := '';
@@ -3550,6 +4128,7 @@ begin
         on E: Exception do
         begin
           messageText := Format(rsParticipantSaveError, [n, E.Message]);
+          if categoryChanged then RefreshAll;
           AppLog(messageText, allError, alvStatus, alsResults);
           AskMessageDlg(messageText, mtError, [mbOK], 0);
         end;
@@ -3625,8 +4204,8 @@ begin
     Exit;
 
   MarkId := DatasetStartMarks.FieldByName('id').AsLargeInt;
-  HasParticipantNumber :=
-    not DatasetStartMarks.FieldByName('participant_number').IsNull;
+  HasParticipantNumber := not DatasetStartMarks.FieldByName(
+    'participant_number').IsNull;
   if HasParticipantNumber then
     ParticipantNumber :=
       DatasetStartMarks.FieldByName('participant_number').AsInteger
@@ -3640,6 +4219,7 @@ begin
   try
     FStartMarkService.SetParticipantNumber(MarkId, HasParticipantNumber,
       ParticipantNumber);
+    InvalidateCompetitionViews;
     CompetitionDb.RefreshQuery(DatasetStartMarks);
     DatasetStartMarks.Locate('id', MarkId, []);
   except
@@ -3691,8 +4271,8 @@ begin
     Exit;
 
   MarkId := DatasetFinishMarks.FieldByName('id').AsLargeInt;
-  HasParticipantNumber :=
-    not DatasetFinishMarks.FieldByName('participant_number').IsNull;
+  HasParticipantNumber := not DatasetFinishMarks.FieldByName(
+    'participant_number').IsNull;
   if HasParticipantNumber then
     ParticipantNumber :=
       DatasetFinishMarks.FieldByName('participant_number').AsInteger
@@ -3716,6 +4296,7 @@ begin
   try
     FFinishMarkService.SetParticipantNumber(MarkId,
       HasParticipantNumber, ParticipantNumber);
+    InvalidateCompetitionViews;
     RefreshFinishMarkWorkQueue(MarkId);
   except
     on E: Exception do
@@ -3783,10 +4364,8 @@ begin
     Exit;
   if DatasetStartMarks.State <> dsBrowse then
   begin
-    Result := not DatasetStartMarks.FieldByName(
-      'participant_number').IsNull and
-      (DatasetStartMarks.FieldByName(
-      'participant_number').AsInteger > 0);
+    Result := not DatasetStartMarks.FieldByName('participant_number').IsNull and
+      (DatasetStartMarks.FieldByName('participant_number').AsInteger > 0);
     Exit;
   end;
 
@@ -3796,10 +4375,8 @@ begin
     DatasetStartMarks.First;
     while not DatasetStartMarks.EOF do
     begin
-      if not DatasetStartMarks.FieldByName(
-        'participant_number').IsNull and
-        (DatasetStartMarks.FieldByName(
-        'participant_number').AsInteger > 0) then
+      if not DatasetStartMarks.FieldByName('participant_number').IsNull and
+        (DatasetStartMarks.FieldByName('participant_number').AsInteger > 0) then
       begin
         Result := True;
         Break;
@@ -3829,8 +4406,7 @@ begin
 end;
 
 function TMainForm.ApplyStartMark(const AMarkId: int64;
-  const AParticipantNumber: integer;
-  const ARefreshAfterApply: boolean): boolean;
+  const AParticipantNumber: integer; const ARefreshAfterApply: boolean): boolean;
 var
   ApplyResult: TStartMarkApplyResult;
   AppliedStageIndex: integer;
@@ -3850,10 +4426,9 @@ begin
     if not stages.IsValidIndex(CurrentStage) then
       Exit;
     StageChoice := AskStartMarkStageChoice(rsStartMarkStageChoiceTitle,
-      Format(rsStartMarkStageChoiceMessage,
-        [AParticipantNumber, Mark.StageIndex, stages[Mark.StageIndex].Name,
-        CurrentStage, stages[CurrentStage].Name]),
-      Format(rsApplyToReceivedStage, [Mark.StageIndex]),
+      Format(rsStartMarkStageChoiceMessage, [AParticipantNumber,
+      Mark.StageIndex, stages[Mark.StageIndex].Name, CurrentStage,
+      stages[CurrentStage].Name]), Format(rsApplyToReceivedStage, [Mark.StageIndex]),
       Format(rsApplyToCurrentStage, [CurrentStage]));
     case StageChoice of
       smscReceivedStage: AppliedStageIndex := Mark.StageIndex;
@@ -3865,21 +4440,23 @@ begin
   try
     ApplyResult := FStartMarkService.ApplyManualById(AMarkId,
       AParticipantNumber, AppliedStageIndex, False, Now);
+    InvalidateCompetitionViews;
     if ApplyResult.ApplyFailure = smafExistingCorrection then
     begin
       if AskMessageDlg(Format(rsCorrectionAlreadySet,
-        [IntToStr(AParticipantNumber)]), mtWarning,
-        [mbYes, mbNo], 0) <> mrYes then
+        [IntToStr(AParticipantNumber)]), mtWarning, [mbYes, mbNo], 0) <>
+        mrYes then
         Exit;
       ApplyResult := FStartMarkService.ApplyManualById(AMarkId,
         AParticipantNumber, AppliedStageIndex, True, Now);
+      InvalidateCompetitionViews;
     end;
 
     if ApplyResult.Applied then
     begin
-      AppLog(Format(rsStartMarkApplied,
-        [AParticipantNumber, Mark.StageIndex, AppliedStageIndex,
-        Mark.CorrectionMs]), allInfo, alvStatus, alsResults);
+      AppLog(Format(rsStartMarkApplied, [AParticipantNumber,
+        Mark.StageIndex, AppliedStageIndex, Mark.CorrectionMs]),
+        allInfo, alvStatus, alsResults);
       Result := True;
       if ARefreshAfterApply then
         RefreshAfterStartMarkApply;
@@ -3906,6 +4483,7 @@ begin
     begin
       MessageText := Format(rsStartMarkApplyError,
         [AParticipantNumber, E.Message]);
+      InvalidateCompetitionViews;
       AppLog(MessageText, allError, alvStatus, alsResults);
       AskMessageDlg(MessageText, mtError, [mbOK], 0);
       CompetitionDb.RefreshQuery(DatasetStartMarks);
@@ -3957,6 +4535,8 @@ begin
     CurrentLang := '';
   end;
 
+  FReportLanguage := rlRussian;
+  if SameText(Copy(lang, 1, 2), 'en') then FReportLanguage := rlEnglish;
   SetDefaultLang(lang);
 
   TranslateUnitResourceStrings('i18n', NormalizeDirectoryName(
@@ -3969,6 +4549,14 @@ begin
     FallbackLang);
   UpdateStartMarkPanelTranslations;
   UpdateFinishMarkPanelTranslations;
+  StatisticsOverviewSheet.Caption := rsStatisticsOverview;
+  ProtocolBalanceSheet.Caption := rsProtocolBalance;
+  ProtocolBalanceView.UpdateTranslations;
+  AcParticipantCard.Caption := rsCardTitle;
+  AcPrintFinish.Caption := rsFinishProtocol + '…';
+  PrintStartMenuItem.Caption := rsStartPrintTitle + '…';
+  AcPrintStartLabels.Caption := rsStartLabels + '…';
+  if Assigned(FParticipantCard) then FParticipantCard.UpdateTranslations;
 end;
 
 procedure TMainForm.EnsureUpdateCheckController;
@@ -3987,8 +4575,8 @@ begin
   try
     if Assigned(FUpdateCheckController) and
       FUpdateCheckController.StartAutomatic(GetFileVersion,
-        checkUpdateAtStartup, checkUpdateIntervalInDays,
-        lastUpdateCheckoutTime, Now) then
+      checkUpdateAtStartup, checkUpdateIntervalInDays,
+      lastUpdateCheckoutTime, Now) then
       AppLog(rsAutomaticUpdateCheckStarted, allDebug, alvNone, alsUpdater);
   except
     on E: Exception do
@@ -3997,8 +4585,8 @@ begin
   end;
 end;
 
-procedure TMainForm.UpdateCheckCompleted(Sender: TObject;
-  AMode: TUpdateCheckMode; const AResult: TUpdateCheckResult);
+procedure TMainForm.UpdateCheckCompleted(Sender: TObject; AMode: TUpdateCheckMode;
+  const AResult: TUpdateCheckResult);
 var
   logLevel: TAppLogLevel;
   logMessage: string;
@@ -4012,17 +4600,17 @@ begin
 
   case AResult.Status of
     ucsUpdateAvailable:
-      begin
-        updateExists := True;
-        lastVersionOnline := AResult.LastVersion;
-        lastReleaseUrlOnline := AResult.ReleaseUrl;
-      end;
+    begin
+      updateExists := True;
+      lastVersionOnline := AResult.LastVersion;
+      lastReleaseUrlOnline := AResult.ReleaseUrl;
+    end;
     ucsUpToDate:
-      begin
-        updateExists := False;
-        lastVersionOnline := AResult.LastVersion;
-        lastReleaseUrlOnline := AResult.ReleaseUrl;
-      end;
+    begin
+      updateExists := False;
+      lastVersionOnline := AResult.LastVersion;
+      lastReleaseUrlOnline := AResult.ReleaseUrl;
+    end;
   end;
 
   case AResult.Status of
@@ -4065,20 +4653,20 @@ begin
 
   case UpdateCheckNotification(AMode, AResult.Status) of
     ucnUpdateAvailable:
-      begin
-        if AskMessageDlg(Format(rsNewVersionAvailable, [AResult.LastVersion]),
-          TMsgDlgType.mtInformation, mbYesNo, 0) = mrYes then
-          OpenURL(AResult.ReleaseUrl);
-      end;
+    begin
+      if AskMessageDlg(Format(rsNewVersionAvailable, [AResult.LastVersion]),
+        TMsgDlgType.mtInformation, mbYesNo, 0) = mrYes then
+        OpenURL(AResult.ReleaseUrl);
+    end;
     ucnUpToDate:
-      begin
-        AskMessageDlg(rsUpdatesNotFound, TMsgDlgType.mtInformation, [mbOK], 0);
-      end;
+    begin
+      AskMessageDlg(rsUpdatesNotFound, TMsgDlgType.mtInformation, [mbOK], 0);
+    end;
     ucnFailure:
-      begin
-        AskMessageDlg(Format(rsUpdateCheckFailed, [AResult.ErrorMessage]),
-          TMsgDlgType.mtError, [mbOK], 0);
-      end;
+    begin
+      AskMessageDlg(Format(rsUpdateCheckFailed, [AResult.ErrorMessage]),
+        TMsgDlgType.mtError, [mbOK], 0);
+    end;
     ucnNone:
     begin
     end;
@@ -4097,8 +4685,8 @@ begin
   Result := FFinishDebounceIntervalMs;
 end;
 
-procedure TMainForm.ReportRefreshOutcome(
-  const AOutcome: TCompetitionRefreshOutcome);
+procedure TMainForm.ReportRefreshOutcome(const AOutcome: TCompetitionRefreshOutcome;
+  const AImportSaved: boolean);
 var
   MessageText: string;
 begin
@@ -4106,57 +4694,55 @@ begin
     Exit;
   MessageText := Format(rsDatabaseRefreshError,
     [AOutcome.ErrorCount, AOutcome.Errors]);
+  if AImportSaved then MessageText :=
+      Format(rsImportPreviewSavedRefreshError, [MessageText]);
   AppLog(MessageText, allError, alvStatus, alsDatabase);
   AskMessageDlg(MessageText, mtError, [mbOK], 0);
 end;
 
-procedure TMainForm.RefreshAll;
+procedure TMainForm.RefreshAll(const AImportSaved: boolean);
 var
   GridRow: integer;
   HadGridPosition: boolean;
   Outcome: TCompetitionRefreshOutcome;
 begin
+  InvalidateCompetitionViews;
   HadGridPosition := MainDataset1.Active and not MainDataset1.IsEmpty;
   if HadGridPosition then
     GridRow := RxDBGrid1.GetRow;
 
   Outcome := TCompetitionRefreshCoordinator.RefreshAll(
-    CompetitionDb, MainDataset1,
-    [CorrectionDataset, DatasetStartMarks, DatasetFinishMarks,
-    ResultDatasetStageTotal,
-    ResultDatasetStageSum, StatDataset1, StatDataset2],
-    [ResultsForm.CatDataset1, ResultsForm.CatDataset2,
-    ResultsForm.CatDataset3, ResultsForm.CatDataset4,
-    ResultsForm.CatDataset5, ResultsForm.CatDataset6,
-    ResultsForm.ResultDataset], @RefreshStageResultQueries);
+    CompetitionDb, MainDataset1, [CorrectionDataset, DatasetStartMarks,
+    DatasetFinishMarks, ResultDatasetStageTotal, ResultDatasetStageSum,
+    StatDataset1, StatDataset2], [ResultsForm.CatDataset1, ResultsForm.CatDataset2,
+    ResultsForm.CatDataset3, ResultsForm.CatDataset4, ResultsForm.CatDataset5,
+    ResultsForm.CatDataset6, ResultsForm.ResultDataset], @RefreshStageResultQueries);
 
   if HadGridPosition and Outcome.CurrentParticipantRestored and
-    Assigned(RxDBGrid1.DataSource) and
-    Assigned(RxDBGrid1.DataSource.DataSet) then
-    try
-      RxDBGrid1.RestoreCurrentRow(GridRow);
-    except
-      on E: Exception do
-      begin
-        Inc(Outcome.ErrorCount);
-        if Outcome.Errors <> '' then
-          Outcome.Errors := Outcome.Errors + LineEnding;
-        Outcome.Errors := Outcome.Errors + 'RxDBGrid1: ' + E.Message;
-      end;
+    Assigned(RxDBGrid1.DataSource) and Assigned(RxDBGrid1.DataSource.DataSet) then
+  try
+    RxDBGrid1.RestoreCurrentRow(GridRow);
+  except
+    on E: Exception do
+    begin
+      Inc(Outcome.ErrorCount);
+      if Outcome.Errors <> '' then
+        Outcome.Errors := Outcome.Errors + LineEnding;
+      Outcome.Errors := Outcome.Errors + 'RxDBGrid1: ' + E.Message;
     end;
-  ReportRefreshOutcome(Outcome);
+  end;
+  ReportRefreshOutcome(Outcome, AImportSaved);
 end;
 
 procedure TMainForm.RefreshResults;
 var
   Outcome: TCompetitionRefreshOutcome;
 begin
+  InvalidateCompetitionViews;
   Outcome := TCompetitionRefreshCoordinator.RefreshResults(
-    CompetitionDb,
-    [ResultsForm.CatDataset1, ResultsForm.CatDataset2,
-    ResultsForm.CatDataset3, ResultsForm.CatDataset4,
-    ResultsForm.CatDataset5, ResultsForm.CatDataset6,
-    ResultsForm.ResultDataset]);
+    CompetitionDb, [ResultsForm.CatDataset1, ResultsForm.CatDataset2,
+    ResultsForm.CatDataset3, ResultsForm.CatDataset4, ResultsForm.CatDataset5,
+    ResultsForm.CatDataset6, ResultsForm.ResultDataset]);
   ReportRefreshOutcome(Outcome);
 end;
 
@@ -4167,26 +4753,26 @@ var
   Configuration: TCompetitionConfiguration;
 begin
   if MainForm.CompetitionDb.Connection.Connected then
-    try
-      Configuration := TCompetitionLifecycleService.LoadConfiguration(
-        MainForm.CompetitionDb, stages.Count, VISIBLECAT);
-      raceName := Configuration.RaceName;
-      for i := 1 to VISIBLECAT do
-        cat[i] := Configuration.Categories[i - 1];
-      for i := 1 to stages.Count do
-      begin
-        stages[i].isActive := Configuration.StageActive[i - 1];
-        stages[i].Name := Configuration.StageNames[i - 1];
-      end;
-      astage := IntToStr(Configuration.ActiveStageIndex);
-    except
-      On E: Exception do
-      begin
-        messageText := Format(rsCompetitionSettingsLoadError, [E.Message]);
-        AppLog(messageText, allError, alvStatus, alsDatabase);
-        AskMessageDlg(messageText, mtError, [mbOK], 0);
-      end;
+  try
+    Configuration := TCompetitionLifecycleService.LoadConfiguration(
+      MainForm.CompetitionDb, stages.Count, VISIBLECAT);
+    raceName := Configuration.RaceName;
+    for i := 1 to VISIBLECAT do
+      cat[i] := Configuration.Categories[i - 1];
+    for i := 1 to stages.Count do
+    begin
+      stages[i].isActive := Configuration.StageActive[i - 1];
+      stages[i].Name := Configuration.StageNames[i - 1];
     end;
+    astage := IntToStr(Configuration.ActiveStageIndex);
+  except
+    On E: Exception do
+    begin
+      messageText := Format(rsCompetitionSettingsLoadError, [E.Message]);
+      AppLog(messageText, allError, alvStatus, alsDatabase);
+      AskMessageDlg(messageText, mtError, [mbOK], 0);
+    end;
+  end;
 
   for i := 1 to stages.Count do
     if stages[i].Name = '' then
@@ -4196,8 +4782,7 @@ begin
   stages.EnsureActiveStage;
 end;
 
-procedure TMainForm.ApplyCompetitionConfigToUi(
-  const APreferredStageIndex: integer);
+procedure TMainForm.ApplyCompetitionConfigToUi(const APreferredStageIndex: integer);
 var
   activeStageCount, firstActiveStageIndex, i, preferredStageIndex: integer;
   iStr: string;
@@ -4205,9 +4790,8 @@ var
 begin
   activeStageCount := stages.ActiveStagesCount;
   performanceTrace := TPerformanceTrace.Create(
-    'ui.competition_config.apply', alsApplication,
-    'stage_count=' + IntToStr(stages.Count) +
-    ' active_stage_count=' + IntToStr(activeStageCount) +
+    'ui.competition_config.apply', alsApplication, 'stage_count=' +
+    IntToStr(stages.Count) + ' active_stage_count=' + IntToStr(activeStageCount) +
     ' preferred_stage_index=' + IntToStr(APreferredStageIndex));
   Screen.Cursor := crHourGlass;
   try
@@ -4281,8 +4865,9 @@ begin
   end;
 end;
 
-procedure TMainForm.RebuildCompetitionStageConfiguration(const AStageCount,
-  APreferredCurrentStageIndex: integer; const ARefreshQueries: boolean);
+procedure TMainForm.RebuildCompetitionStageConfiguration(
+  const AStageCount, APreferredCurrentStageIndex: integer;
+  const ARefreshQueries: boolean);
 var
   currentParticipantId, resultsStageIndex: integer;
   restoreCurrentParticipant: boolean;
@@ -4290,16 +4875,17 @@ var
 begin
   if not IsValidStageCount(AStageCount) then
     raise EArgumentOutOfRangeException.CreateFmt(
-      rsStageCountRangeError,
-      [IntToStr(AStageCount), MIN_STAGE_COUNT, MAX_SUPPORTED_STAGE_COUNT]);
+      rsStageCountRangeError, [IntToStr(AStageCount), MIN_STAGE_COUNT,
+      MAX_SUPPORTED_STAGE_COUNT]);
 
   performanceTrace := TPerformanceTrace.Create('stages.rebuild',
     alsApplication, 'from_stage_count=' + IntToStr(stages.Count) +
     ' to_stage_count=' + IntToStr(AStageCount));
   try
     try
-      restoreCurrentParticipant := MainForm.MainDataset1.Active and
-        TMainSql.TryGetCurrentId(MainForm.MainDataset1, currentParticipantId);
+      restoreCurrentParticipant :=
+        MainForm.MainDataset1.Active and TMainSql.TryGetCurrentId(
+        MainForm.MainDataset1, currentParticipantId);
 
       // Persistent fields can only be rebuilt while the main dataset is closed.
       // Other affected queries are closed by their typed Configure methods.
@@ -4358,8 +4944,9 @@ begin
     ' active_stage_count=' + IntToStr(stages.ActiveStagesCount));
   try
     try
-      restoreCurrentParticipant := MainForm.MainDataset1.Active and
-        TMainSql.TryGetCurrentId(MainForm.MainDataset1, currentParticipantId);
+      restoreCurrentParticipant :=
+        MainForm.MainDataset1.Active and TMainSql.TryGetCurrentId(
+        MainForm.MainDataset1, currentParticipantId);
       MainForm.MainDataset1.Close;
       performanceTrace.Step('main_query.close');
       MainForm.ConfigureMainStageFields(stages.ActiveIndices);
@@ -4435,8 +5022,7 @@ begin
   Result := MainForm.BackupBD(alvNone, cbrBeforeMigration);
 end;
 
-function TMainForm.PrepareCompetitionSchema(
-  const AExistingFile: boolean): integer;
+function TMainForm.PrepareCompetitionSchema(const AExistingFile: boolean): integer;
 var
   databaseFileName: string;
   MessageText: string;
@@ -4451,8 +5037,8 @@ begin
     if Preparation.Migrated then
       AppLog(Format(rsSchemaMigrationCompleted,
         [databaseFileName, Preparation.SchemaVersion,
-        Preparation.RequiredStageCount,
-        Preparation.PhysicalStageCount]), allInfo, alvStatus, alsDatabase);
+        Preparation.RequiredStageCount, Preparation.PhysicalStageCount]),
+        allInfo, alvStatus, alsDatabase);
     if Preparation.Created then
       AppLog(Format(rsNewFileCreated, [databaseFileName]), allInfo, alvStatus,
         alsDatabase);
@@ -4480,17 +5066,14 @@ end;
 function IsOverallResultFieldName(const AFieldName: string): boolean;
 begin
   Result := SameText(AFieldName, 'sumresult') or
-    SameText(AFieldName, 'sumdiffleader') or
-    SameText(AFieldName, 'status');
+    SameText(AFieldName, 'sumdiffleader') or SameText(AFieldName, 'status');
 end;
 
-procedure TMainForm.SetSelectedParticipantStatus(
-  const AStatus: TParticipantStatus);
+procedure TMainForm.SetSelectedParticipantStatus(const AStatus: TParticipantStatus);
 var
   n: string;
 begin
-  if CompetitionHasParticipants and
-    TMainSql.TryGetCurrentNumber(MainDataset1, n) then
+  if CompetitionHasParticipants and TMainSql.TryGetCurrentNumber(MainDataset1, n) then
     SetParticipantStatus(GetSelectedStage, AStatus, n);
 end;
 
@@ -4522,8 +5105,7 @@ var
   status: TParticipantStatus;
 begin
   Result := LogValueOrEmpty(AValue);
-  if TryParticipantStatusFromDbValue(AValue, status) and
-    (status <> psNone) then
+  if TryParticipantStatusFromDbValue(AValue, status) and (status <> psNone) then
     Result := ParticipantStatusToToken(status);
 end;
 
@@ -4581,17 +5163,16 @@ begin
           oldStatus := ParticipantStatusToDbValue(Outcome.PreviousStatus);
           AppLog(Format(rsParticipantStageValueChanged,
             [AParticipantNumber, rsStatus, AStageIndex,
-            StatusLogValue(oldStatus),
-            ParticipantStatusToToken(AStatus)]), allInfo, alvNone,
+            StatusLogValue(oldStatus), ParticipantStatusToToken(AStatus)]),
+            allInfo, alvNone,
             alsResults);
         end;
       end;
     end
     else
     begin
-      if AskMessageDlg(Format(rsReallyDisqualifyNumber,
-        [AParticipantNumber]), mtWarning,
-        [mbYes, mbNo], 0) = mrYes then
+      if AskMessageDlg(Format(rsReallyDisqualifyNumber, [AParticipantNumber]),
+        mtWarning, [mbYes, mbNo], 0) = mrYes then
       begin
         Outcome := TParticipantStatusService.SetStatus(
           CompetitionDb, stages, StrToIntDef(AParticipantNumber, 0),
@@ -4626,10 +5207,9 @@ begin
   if not MainForm.SQLite3Connection1.Connected then
     Exit;
   try
-    Outcome := TParticipantStatusService.RecalculateAll(
-      CompetitionDb, stages);
-    AppLog(Format(rsParticipantStatusesRecalculated,
-      [Outcome.ProcessedCount]),
+    Outcome := TParticipantStatusService.RecalculateAll(CompetitionDb, stages);
+    InvalidateCompetitionViews;
+    AppLog(Format(rsParticipantStatusesRecalculated, [Outcome.ProcessedCount]),
       allDebug, alvDetails, alsResults);
   except
     on E: Exception do
@@ -4720,6 +5300,8 @@ var
   ExistingFile: boolean;
   performanceTrace: TPerformanceTrace;
 begin
+  CloseProtocolReport;
+  FParticipantCard.Close;
   candidateFileName := ExpandFileName(fileName);
   ExistingFile := FileExists(candidateFileName);
   performanceTrace := TPerformanceTrace.Create('competition.open',
@@ -4727,6 +5309,7 @@ begin
   SetfName('');
   FreeStartMarkService;
   FreeFinishMarkService;
+  ProtocolBalanceView.Clear;
   CompetitionDb.SetDatabaseFile(candidateFileName);
   try
     try
@@ -4779,12 +5362,14 @@ begin
       AppLog(Format(rsDBFileOpen, [candidateFileName]), allInfo, alvStatus,
         alsDatabase);
       SetfName(candidateFileName);
+      UpdateProtocolBalanceVisibility;
     except
       on E: Exception do
       begin
         performanceTrace.FinishError(E);
         FreeStartMarkService;
         FreeFinishMarkService;
+        ProtocolBalanceView.Clear;
         TCompetitionLifecycleService.Close(MainForm.CompetitionDb);
         messageText := Format(rsCompetitionFileOpenError,
           [candidateFileName, E.Message]);
@@ -4800,15 +5385,15 @@ end;
 procedure TMainForm.NotifyFinish(const AResult: TFinishResult);
 begin
   if AcLEDPanel.Checked then
-    if not Assigned(FLedPanelCoordinator) or
-      not FLedPanelCoordinator.EnqueueFinish(AResult, ledpaneladress) then
+    if not Assigned(FLedPanelCoordinator) or not
+      FLedPanelCoordinator.EnqueueFinish(AResult, ledpaneladress) then
       AppLog(Format(rsLEDPanelError, [rsLEDPanelInvalidAddress]), allError,
         alvStatus, alsHTTP);
   if AcTelegramBot.Checked then
-    if not Assigned(FTelegramCoordinator) or
-      not FTelegramCoordinator.EnqueueResult(AResult, telegrambotadress,
-        TTelegramRetryPolicy.Create(telegramRetryEnabled,
-          telegramRetryCount, telegramRetryDelaySeconds)) then
+    if not Assigned(FTelegramCoordinator) or not
+      FTelegramCoordinator.EnqueueResult(AResult, telegrambotadress,
+      TTelegramRetryPolicy.Create(telegramRetryEnabled, telegramRetryCount,
+      telegramRetryDelaySeconds)) then
       AppLog(Format(rsTelegramBotSendingError, [rsHTTPRequestNotStarted]),
         allError, alvStatus, alsTelegram);
 end;
@@ -4823,18 +5408,17 @@ begin
     alvDetails, alsHTTP);
   if ADelivery.Outcome.ResponseStatusCode <> 0 then
     AppLog(Format(rsHTTPResponseMetadata,
-      [ADelivery.Outcome.ResponseStatusCode,
-      ADelivery.Outcome.ResponseStatusText,
-      ADelivery.Outcome.ResponseHeaderCount,
-      ADelivery.Outcome.ResponseSize]), allDebug, alvDetails, alsHTTP);
+      [ADelivery.Outcome.ResponseStatusCode, ADelivery.Outcome.ResponseStatusText,
+      ADelivery.Outcome.ResponseHeaderCount, ADelivery.Outcome.ResponseSize]),
+      allDebug, alvDetails, alsHTTP);
   if ADelivery.Outcome.Success then
   begin
     if ADelivery.IsTest then
       AppLog(rsLEDPanelTestSucceeded, allInfo, alvStatus, alsHTTP);
   end
   else
-    AppLog(Format(rsLEDPanelError,
-      [ADelivery.Outcome.SafeErrorMessage]), allError, alvStatus, alsHTTP);
+    AppLog(Format(rsLEDPanelError, [ADelivery.Outcome.SafeErrorMessage]),
+      allError, alvStatus, alsHTTP);
 end;
 
 procedure TMainForm.TelegramCompleted(Sender: TObject;
@@ -4847,10 +5431,9 @@ begin
     alvDetails, alsTelegram);
   if ADelivery.Outcome.ResponseStatusCode <> 0 then
     AppLog(Format(rsHTTPResponseMetadata,
-      [ADelivery.Outcome.ResponseStatusCode,
-      ADelivery.Outcome.ResponseStatusText,
-      ADelivery.Outcome.ResponseHeaderCount,
-      ADelivery.Outcome.ResponseSize]), allDebug, alvDetails,
+      [ADelivery.Outcome.ResponseStatusCode, ADelivery.Outcome.ResponseStatusText,
+      ADelivery.Outcome.ResponseHeaderCount, ADelivery.Outcome.ResponseSize]),
+      allDebug, alvDetails,
       alsTelegram);
   if ADelivery.Outcome.Success then
   begin
@@ -4858,8 +5441,8 @@ begin
       AppLog(rsTelegramBotTestSucceeded, allInfo, alvStatus, alsTelegram);
   end
   else
-    AppLog(Format(rsTelegramBotSendingError,
-      [ADelivery.Outcome.SafeErrorMessage]), allError, alvStatus,
+    AppLog(Format(rsTelegramBotSendingError, [ADelivery.Outcome.SafeErrorMessage]),
+      allError, alvStatus,
       alsTelegram);
 end;
 
@@ -4868,17 +5451,20 @@ procedure TMainForm.TelegramDropped(Sender: TObject;
 begin
   if FClosing then
     Exit;
-  AppLog(Format(rsTelegramQueueItemDropped,
-    [AItem.ParticipantNumber,
+  AppLog(Format(rsTelegramQueueItemDropped, [AItem.ParticipantNumber,
     FormatDateTime('yyyy-mm-dd hh:nn:ss.zzz', AItem.EnqueuedAt)]),
     allWarning, alvDetails, alsTelegram);
 end;
 
 procedure TMainForm.SetFinish;
 var
-  AppliedAny: boolean;
   CurrentMarkId: int64;
-  I: integer;
+  I, FailedIndex: integer;
+  Failure: TFinishFailure;
+  MessageText: string;
+  Request: TFinishRequest;
+  Requests: TFinishRequests;
+  Saved: TFinishResults;
   Items: TFinishMarkWorkItems;
 begin
   if not IsCompetitionDatabaseOpen or not Assigned(FFinishMarkService) or
@@ -4897,10 +5483,8 @@ begin
     DatasetFinishMarks.First;
     while not DatasetFinishMarks.EOF do
     begin
-      if not DatasetFinishMarks.FieldByName(
-        'participant_number').IsNull and
-        (DatasetFinishMarks.FieldByName(
-        'participant_number').AsInteger > 0) then
+      if not DatasetFinishMarks.FieldByName('participant_number').IsNull and
+        (DatasetFinishMarks.FieldByName('participant_number').AsInteger > 0) then
       begin
         SetLength(Items, Length(Items) + 1);
         Items[High(Items)].MarkId :=
@@ -4916,32 +5500,56 @@ begin
     DatasetFinishMarks.EnableControls;
   end;
 
+  Requests := nil;
+  // Obtain every operator decision before starting the write transaction.
+  for I := 0 to High(Items) do
+    if PrepareFinishMark(Items[I].MarkId, Items[I].ParticipantNumber,
+      Requests, Request) then
+    begin
+      SetLength(Requests, Length(Requests) + 1);
+      Requests[High(Requests)] := Request;
+    end;
+  if Length(Requests) = 0 then
+    Exit;
+
   Screen.Cursor := crSQLWait;
-  AppliedAny := False;
   try
-    for I := 0 to High(Items) do
-      if ApplyFinishMark(Items[I].MarkId,
-        Items[I].ParticipantNumber) then
-        AppliedAny := True;
-    if AppliedAny then
-      RefreshAll;
+    if not TFinishService.TrySaveBatch(CompetitionDb, stages, Requests,
+      Saved, Failure, FailedIndex) then
+    begin
+      if FailedIndex < 0 then
+        FailedIndex := 0;
+      MessageText := Format(rsParticipantStagesSaveError,
+        [IntToStr(Requests[FailedIndex].ParticipantNumber),
+        IntToStr(Requests[FailedIndex].StageIndex), Failure.SafeMessage]);
+      AppLog(MessageText, allError, alvStatus, alsResults);
+      AskMessageDlg(MessageText, mtError, [mbOK], 0);
+      Exit;
+    end;
+    // Results and notifications are published only after the whole batch commits.
+    for I := 0 to High(Saved) do
+    begin
+      AppLog(Format(rsFinishTimeSetForStages,
+        [Saved[I].ParticipantNumber, IntToStr(Saved[I].StageIndex)]),
+        allInfo, alvNone, alsResults);
+      NotifyFinish(Saved[I]);
+    end;
+    RefreshAll;
   finally
     Screen.Cursor := crDefault;
   end;
 end;
 
-function TMainForm.ApplyFinishMark(const AMarkId: int64;
-  const AParticipantNumber: integer): boolean;
+function TMainForm.PrepareFinishMark(const AMarkId: int64;
+  const AParticipantNumber: integer; const APrepared: array of TFinishRequest;
+  out ARequest: TFinishRequest): boolean;
 var
   AppliedAt: TDateTime;
-  Failure: TFinishFailure;
   FinishMark: TFinishMark;
-  FinishResult: TFinishResult;
   Inspection: TFinishInspection;
   MessageText, StageText: string;
   OverwritePolicy: TFinishOverwritePolicy;
-  Request: TFinishRequest;
-  StageIndex: integer;
+  I, StageIndex: integer;
   TrackPolicy: TFinishTrackPolicy;
 begin
   Result := False;
@@ -4954,8 +5562,8 @@ begin
     if not stages.IsActiveIndex(StageIndex) then
       Exit;
 
-    Inspection := TFinishService.Inspect(CompetitionDb,
-      stages, AParticipantNumber, StageIndex);
+    Inspection := TFinishService.Inspect(CompetitionDb, stages,
+      AParticipantNumber, StageIndex);
     if not Inspection.ParticipantExists then
     begin
       AppLog(Format(rsFinishSkippedParticipantMissing,
@@ -4963,11 +5571,21 @@ begin
       Exit;
     end;
 
+    // Earlier approved finishes are not written yet. Confirm a repeated
+    // participant/stage explicitly before opening the batch transaction.
+    for I := 0 to High(APrepared) do
+      if (APrepared[I].ParticipantNumber = AParticipantNumber) and
+        (APrepared[I].StageIndex = StageIndex) then
+      begin
+        Inspection.IsOnTrack := False;
+        Inspection.HasExistingResult := True;
+      end;
+
     TrackPolicy := ftpRequireOnTrack;
     if not Inspection.IsOnTrack then
     begin
-      if AskMessageDlg(Format(rsDidNotStartSetFinish,
-        [AParticipantNumber]), mtWarning, [mbYes, mbNo], 0) <> mrYes then
+      if AskMessageDlg(Format(rsDidNotStartSetFinish, [AParticipantNumber]),
+        mtWarning, [mbYes, mbNo], 0) <> mrYes then
         Exit;
       TrackPolicy := ftpAllowNotOnTrack;
     end;
@@ -4975,20 +5593,47 @@ begin
     OverwritePolicy := fopRejectExisting;
     if Inspection.HasExistingResult then
     begin
-      if AskMessageDlg(Format(rsUpdateFinishTime,
-        [AParticipantNumber]), mtWarning, [mbYes, mbNo], 0) <> mrYes then
+      if AskMessageDlg(Format(rsUpdateFinishTime, [AParticipantNumber]),
+        mtWarning, [mbYes, mbNo], 0) <> mrYes then
         Exit;
       OverwritePolicy := fopOverwriteExisting;
     end;
 
     AppliedAt := Now;
-    Request := TFinishRequest.CreateForMark(AMarkId,
-      AParticipantNumber, TrackPolicy, OverwritePolicy, AppliedAt);
+    ARequest := TFinishRequest.CreateForMark(AMarkId, AParticipantNumber,
+      TrackPolicy, OverwritePolicy, AppliedAt);
+    ARequest.StageIndex := StageIndex;
+    ARequest.FinishTime := FormatDateTime('hh:nn:ss.zzz', FinishMark.EventTime);
+    Result := True;
+  except
+    on E: Exception do
+    begin
+      MessageText := Format(rsParticipantStagesSaveError,
+        [IntToStr(AParticipantNumber), StageText, E.Message]);
+      AppLog(MessageText, allError, alvStatus, alsResults);
+      AskMessageDlg(MessageText, mtError, [mbOK], 0);
+    end;
+  end;
+end;
+
+function TMainForm.ApplyFinishMark(const AMarkId: int64;
+  const AParticipantNumber: integer): boolean;
+var
+  Failure: TFinishFailure;
+  FinishResult: TFinishResult;
+  MessageText, StageText: string;
+  Request: TFinishRequest;
+begin
+  Result := False;
+  if not PrepareFinishMark(AMarkId, AParticipantNumber, [], Request) then
+    Exit;
+  StageText := IntToStr(Request.StageIndex);
+  try
     if TFinishService.TrySave(CompetitionDb, stages, Request,
       FinishResult, Failure) then
     begin
-      AppLog(Format(rsFinishTimeSetForStages,
-        [AParticipantNumber, StageText]), allInfo, alvNone, alsResults);
+      AppLog(Format(rsFinishTimeSetForStages, [AParticipantNumber, StageText]),
+        allInfo, alvNone, alsResults);
       NotifyFinish(FinishResult);
       Exit(True);
     end;
@@ -5014,15 +5659,15 @@ begin
   end;
 end;
 
-procedure TMainForm.SaveStageCorrection(const StageIndex, Correction,
-  ParticipantNumber: integer);
+procedure TMainForm.SaveStageCorrection(
+  const StageIndex, Correction, ParticipantNumber: integer);
 begin
   TParticipantStageService.SaveCorrection(MainForm.CompetitionDb, stages,
     ParticipantNumber, StageIndex, Correction);
   RefreshAll;
 end;
 
-procedure TMainForm.UpdateResults;
+procedure TMainForm.UpdateResults(const AStageIndex: integer);
 var
   calculationSucceeded: boolean;
   performanceTrace: TPerformanceTrace;
@@ -5033,7 +5678,11 @@ begin
     alsResults, 'operation=all stage_count=' + IntToStr(stages.Count));
   try
     try
-      TResultCalculationService.RecalculateAll(CompetitionDb, stages);
+      if AStageIndex > 0 then
+        TResultCalculationService.RecalculateStages(CompetitionDb, stages,
+          [AStageIndex])
+      else
+        TResultCalculationService.RecalculateAll(CompetitionDb, stages);
       calculationSucceeded := True;
       performanceTrace.Finish('ok');
     except
@@ -5057,8 +5706,7 @@ var
   performanceTrace: TPerformanceTrace;
 begin
   performanceTrace := TPerformanceTrace.Create('results.recalculate',
-    alsResults, 'operation=sum_results stage_count=' +
-    IntToStr(stages.Count));
+    alsResults, 'operation=sum_results stage_count=' + IntToStr(stages.Count));
   try
     try
       TResultCalculationService.RecalculateSumResults(CompetitionDb,
@@ -5079,27 +5727,27 @@ end;
 
 procedure TMainForm.ClearResults(silent: boolean);
 begin
-  if silent or (AskMessageDlg(rsClearResults, mtWarning, [mbYes, mbNo], 0) = mrYes) then
-    if not BackupBD(alvStatus, cbrBeforeClear) then
+  if not silent then
+    if AskMessageDlg(rsClearResults, mtWarning, [mbYes, mbNo], 0) <> mrYes then
+      Exit;
+
+  if not BackupBD(alvStatus, cbrBeforeClear) then
+    if AskMessageDlg(Format(rsClearResultsWithoutBackup, [sLineBreak]),
+      mtWarning, [mbYes, mbNo], 0) <> mrYes then
+      Exit;
+
+  try
+    TResultCalculationService.ClearResults(MainForm.CompetitionDb,
+      stages.Count);
+    RefreshAll;
+    AppLog(rsResultsCleared, allInfo, alvStatus, alsResults);
+  except
+    On E: Exception do
     begin
-      if AskMessageDlg(Format(rsClearResultsWithoutBackup, [sLineBreak]),
-        mtWarning, [mbYes, mbNo], 0) = mrNo then
-        Exit;
-    end;
-  begin
-    try
-      TResultCalculationService.ClearResults(MainForm.CompetitionDb,
-        stages.Count);
-      RefreshAll;
-      AppLog(rsResultsCleared, allInfo, alvStatus, alsResults);
-    except
-      On E: Exception do
-      begin
-        AppLog(Format(rsResultsClearError, [E.Message]), allError, alvStatus,
-          alsResults);
-        AskMessageDlg(Format(rsResultsClearError, [E.Message]), mtError,
-          [mbOK], 0);
-      end;
+      AppLog(Format(rsResultsClearError, [E.Message]), allError, alvStatus,
+        alsResults);
+      AskMessageDlg(Format(rsResultsClearError, [E.Message]), mtError,
+        [mbOK], 0);
     end;
   end;
 end;
@@ -5127,19 +5775,18 @@ var
   st: integer;
   Outcome: TParticipantStageValueOutcome;
 begin
-  if CompetitionHasParticipants and
-    TMainSql.TryGetCurrentNumber(MainForm.MainDataset1, n) then
+  if CompetitionHasParticipants and TMainSql.TryGetCurrentNumber(
+    MainForm.MainDataset1, n) then
   begin
     st := GetSelectedStage;
-    t := InputDateTime(rsTimeToStart,
-      Format(rsEnterStartTime, [n, stages[st].Name]));
+    t := InputDateTime(rsTimeToStart, Format(rsEnterStartTime,
+      [n, stages[st].Name]));
     if t > 0 then
     begin
       startTimeText := TimeToStr(t);
       try
         Outcome := TParticipantStageService.SaveStartTime(
-          MainForm.CompetitionDb, stages, StrToIntDef(n, 0), st,
-          startTimeText);
+          MainForm.CompetitionDb, stages, StrToIntDef(n, 0), st, startTimeText);
         RefreshAll;
         if Outcome.Changed then
           AppLog(Format(rsParticipantStageValueChanged,
@@ -5175,8 +5822,7 @@ end;
 
 function ConfirmUnknownImportEncoding: boolean;
 begin
-  Result := AskMessageDlg(rsUnknownFileEncoding, mtWarning,
-    [mbYes, mbNo], 0) = mrYes;
+  Result := AskMessageDlg(rsUnknownFileEncoding, mtWarning, [mbYes, mbNo], 0) = mrYes;
 end;
 
 function ConfirmParticipantCategoryImport: boolean;
@@ -5185,17 +5831,10 @@ begin
     [mbYes, mbNo], 0) = mrYes;
 end;
 
-function ConfirmUnknownResultParticipant(
-  const AParticipantNumber: integer): boolean;
-begin
-  Result := AskMessageDlg(Format(rsAddUnknownResultParticipant,
-    [AParticipantNumber]), mtConfirmation, [mbYes, mbNo], 0) = mrYes;
-end;
-
 function ConfirmResultsImportWithoutBackup: boolean;
 begin
-  Result := AskMessageDlg(Format(rsContinueLoadingResultsWithoutBackup,
-    [sLineBreak]), mtWarning, [mbYes, mbNo], 0) <> mrNo;
+  Result := AskMessageDlg(Format(rsContinueLoadingResultsWithoutBackup, [sLineBreak]),
+    mtWarning, [mbYes, mbNo], 0) = mrYes;
 end;
 
 procedure TMainForm.LoadParticipantsList(FileName: string);
@@ -5246,8 +5885,7 @@ begin
           alsImport);
       performanceTrace.Step('parse',
         'row_count=' + IntToStr(importPlan.RowCount) +
-        ' detected_stage_count=' +
-        IntToStr(importPlan.DetectedStageCount));
+        ' detected_stage_count=' + IntToStr(importPlan.DetectedStageCount));
       AppLog(Format(rsDetectedParticipantStages,
         [importPlan.DetectedStageNamesText]), allDebug, alvDetails, alsImport);
 
@@ -5257,18 +5895,23 @@ begin
       importRequest.ImportCategories := ConfirmParticipantCategoryImport;
       requiresExpansion :=
         TCompetitionImportService.RequiresStageCapacityExpansion(importPlan,
-          MainForm.CompetitionDb, stages);
+        MainForm.CompetitionDb, stages);
       importRequest.ExpansionBackupCreated := not requiresExpansion;
       if requiresExpansion then
-        importRequest.ExpansionBackupCreated := BackupBD(alvStatus,
-          cbrBeforeStageExpansion);
-      if requiresExpansion and
-        (not importRequest.ExpansionBackupCreated) then
+        importRequest.ExpansionBackupCreated :=
+          BackupBD(alvStatus, cbrBeforeStageExpansion);
+      if requiresExpansion and (not importRequest.ExpansionBackupCreated) then
         raise ECompetitionImportBackupError.Create(Format(
           rsStageCapacityExpansionBackupError, [fName]));
 
-      importOutcome := TCompetitionImportService.ApplyParticipants(importPlan,
-        MainForm.CompetitionDb, stages, importRequest);
+      try
+        importOutcome := TCompetitionImportService.ApplyParticipants(
+          importPlan, MainForm.CompetitionDb, stages, importRequest);
+      except
+        // Rollback closes SQLDB datasets; restore the previous UI model.
+        RefreshAll;
+        raise;
+      end;
       performanceTrace.Step('database_write',
         'row_count=' + IntToStr(importOutcome.RowCount) +
         ' target_stage_count=' + IntToStr(importOutcome.TargetStageCount));
@@ -5277,11 +5920,9 @@ begin
         importOutcome.CategoryNamesAccepted, True)));
       if importOutcome.CategoryNamesAccepted then
         performanceTrace.Step('categories.save',
-          'category_count=' +
-          IntToStr(importOutcome.ImportedCategoryCount));
+          'category_count=' + IntToStr(importOutcome.ImportedCategoryCount));
 
-      if importOutcome.TargetStageCount <>
-        importOutcome.PreviousStageCount then
+      if importOutcome.TargetStageCount <> importOutcome.PreviousStageCount then
       begin
         RebuildCompetitionStageConfiguration(importOutcome.TargetStageCount,
           previousCurrentStageIndex);
@@ -5313,22 +5954,21 @@ begin
         end;
       end;
 
-      if importOutcome.TargetStageCount <>
-        importOutcome.PreviousStageCount then
+      if importOutcome.TargetStageCount <> importOutcome.PreviousStageCount then
         AppLog(Format(rsParticipantStageCountExpanded,
-          [importOutcome.PreviousStageCount,
-          importOutcome.TargetStageCount]), allInfo, alvStatus, alsImport);
+          [importOutcome.PreviousStageCount, importOutcome.TargetStageCount]),
+          allInfo, alvStatus, alsImport);
       if importOutcome.StageDefinitionsApplied then
         AppLog(Format(rsParticipantStagesApplied,
           [importPlan.DetectedStageNamesText,
           importOutcome.DeactivatedStageCount]), allInfo, alvStatus,
           alsImport);
-      AppLog(Format(rsParticipantsImported,
-        [importOutcome.RowCount, canonicalFileName]), allInfo, alvStatus,
+      AppLog(Format(rsParticipantsImported, [importOutcome.RowCount,
+        canonicalFileName]), allInfo, alvStatus,
         alsImport);
       performanceTrace.Finish('ok',
-        'row_count=' + IntToStr(importOutcome.RowCount) +
-        ' stage_count=' + IntToStr(importOutcome.TargetStageCount));
+        'row_count=' + IntToStr(importOutcome.RowCount) + ' stage_count=' +
+        IntToStr(importOutcome.TargetStageCount));
     except
       on E: ECompetitionImportValidationError do
       begin
@@ -5362,6 +6002,7 @@ begin
     Screen.Cursor := crDefault;
   end;
 end;
+
 function TMainForm.InputComboSelectStage(const ACaption, APrompt: string): integer;
 var
   strlst: TStringList;
@@ -5381,8 +6022,7 @@ begin
   strlst := TStringList.Create;
   try
     activeStageIndexes := nil;
-    selectedStageIndex := stages.NormalizeActiveIndex(
-      MainForm.CurrentStageIndex);
+    selectedStageIndex := stages.NormalizeActiveIndex(MainForm.CurrentStageIndex);
 
     // Если активных СУ больше одного, то
     // получаем список активных СУ и выводим инпуткомбо
@@ -5402,8 +6042,8 @@ begin
       end;
       if MyDoInputCombo(ACaption, APrompt, strlst, k, False,
         selectedIndex, selectedText) = mrOk then
-        if (selectedIndex >= 0) and
-          (selectedIndex < Length(activeStageIndexes)) then
+        if (selectedIndex >= 0) and (selectedIndex <
+          Length(activeStageIndexes)) then
           Result := activeStageIndexes[selectedIndex];
     end
     else if stages.ActiveStagesCount = 1 then
@@ -5413,167 +6053,145 @@ begin
   end;
 end;
 
+function TMainForm.PrepareImportPreviewBackup(
+  out ACreated, AContinueWithoutBackup: boolean): boolean;
+begin
+  ACreated := BackupBD(alvStatus, cbrBeforeImport);
+  AContinueWithoutBackup := False;
+  if not ACreated then AContinueWithoutBackup := ConfirmResultsImportWithoutBackup;
+  Result := ACreated or AContinueWithoutBackup;
+end;
+
 procedure TMainForm.LoadStageResults(FileName: string);
 var
-  acceptedCount, unknownIndex: integer;
-  canonicalFileName, messageText: string;
-  importPlan: TResultsImportPlan;
-  importInspection: TResultsImportInspection;
-  importOutcome: TResultsImportOutcome;
-  importRequest: TResultsImportRequest;
-  performanceTrace: TPerformanceTrace;
+  StageIndex: integer;
+  CanonicalFileName, MessageText: string;
+  ImportPlan: TResultsImportPlan;
+  Preview: TResultsImportPreviewForm;
+  Outcome: TImportApplyOutcome;
+  PerformanceTrace: TPerformanceTrace;
+  Committed: boolean;
 
-  procedure ReportLoadError(const APrefix, ADetails: string);
+  procedure ReportLoadError(const Prefix, Details: string);
   begin
-    messageText := Format(rsResultsImportError,
-      [canonicalFileName, APrefix + ADetails]);
-    AppLog(messageText, allError, alvStatus, alsImport);
-    AskMessageDlg(messageText, mtError, [mbOK], 0);
+    MessageText := Format(rsResultsImportError, [CanonicalFileName, Prefix + Details]);
+    AppLog(MessageText, allError, alvStatus, alsImport);
+    AskMessageDlg(MessageText, mtError, [mbOK], 0);
   end;
 
 begin
-  if not IsCompetitionDatabaseOpen then
-    Exit;
-
+  if not IsCompetitionDatabaseOpen then Exit;
   Screen.Cursor := crSQLWait;
-  importPlan := nil;
-  canonicalFileName := ExpandFileName(FileName);
-  performanceTrace := TPerformanceTrace.Create('csv.results.import',
+  ImportPlan := nil;
+  Committed := False;
+  CanonicalFileName := ExpandFileName(FileName);
+  PerformanceTrace := TPerformanceTrace.Create('csv.results.import',
     alsImport, 'stage_count=' + IntToStr(stages.Count));
   try
     try
-      AppLog(Format(rsOpenResultsFile, [canonicalFileName]), allDebug,
-        alvDetails, alsImport);
-      importPlan := TCompetitionImportService.PrepareResultsFile(
-        canonicalFileName);
-      if SameText(importPlan.EncodingName, 'Unknown') and
-        (not ConfirmUnknownImportEncoding) then
+      ImportPlan := TCompetitionImportService.PrepareResultsFile(CanonicalFileName);
+      if SameText(ImportPlan.EncodingName, 'Unknown') and not
+        ConfirmUnknownImportEncoding then
       begin
-        performanceTrace.Finish('cancelled', 'step=encoding.confirm');
+        PerformanceTrace.Finish('cancelled', 'step=encoding.confirm');
         Exit;
       end;
-
-      AppLog(Format(rsCodepage, [importPlan.EncodingName]), allDebug,
+      AppLog(Format(rsCodepage, [ImportPlan.EncodingName]), allDebug,
         alvDetails, alsImport);
-      if SameText(importPlan.EncodingName, 'Unknown') then
-        AppLog(rsUnknownFileEncodingContinued, allWarning, alvDetails,
-          alsImport);
-      AppLog(Format(rsResultsImportFormat,
-        [importPlan.FormatColumnCount]), allDebug, alvDetails, alsImport);
-      performanceTrace.Step('parse',
-        'row_count=' + IntToStr(importPlan.RowCount) +
-        ' column_count=' + IntToStr(importPlan.FormatColumnCount));
-
-      importRequest := Default(TResultsImportRequest);
-      importRequest.StageIndex := InputComboSelectStage(
-        rsImportFinish, rsSetTimeToSU);
-      if not stages.IsActiveIndex(importRequest.StageIndex) then
+      if SameText(ImportPlan.EncodingName, 'Unknown') then
+        AppLog(rsUnknownFileEncodingContinued, allWarning, alvDetails, alsImport);
+      StageIndex := InputComboSelectStage(rsImportFinish, rsSetTimeToSU);
+      if not stages.IsActiveIndex(StageIndex) then
       begin
-        performanceTrace.Finish('cancelled', 'step=stage.select');
+        PerformanceTrace.Finish('cancelled', 'step=stage.select');
         Exit;
       end;
-      importInspection :=
-        TCompetitionImportService.InspectResultsParticipants(importPlan,
-          MainForm.CompetitionDb);
-      for unknownIndex := Low(importInspection.UnknownParticipantNumbers) to
-        High(importInspection.UnknownParticipantNumbers) do
-        if ConfirmUnknownResultParticipant(
-          importInspection.UnknownParticipantNumbers[unknownIndex]) then
+      if (MainDataset1.State in [dsEdit, dsInsert]) or
+        (MainDataset1.ChangeCount > 0) then
+      begin
+        if AskMessageDlg(rsImportPreviewSaveEditor, mtConfirmation,
+          [mbYes, mbCancel], 0) <> mrYes then
         begin
-          acceptedCount := Length(
-            importRequest.AcceptedUnknownParticipantNumbers);
-          SetLength(importRequest.AcceptedUnknownParticipantNumbers,
-            acceptedCount + 1);
-          importRequest.AcceptedUnknownParticipantNumbers[acceptedCount] :=
-            importInspection.UnknownParticipantNumbers[unknownIndex];
+          PerformanceTrace.Finish('cancelled', 'step=editor.save');
+          Exit;
         end;
-      acceptedCount := importInspection.KnownParticipantCount +
-        Length(importRequest.AcceptedUnknownParticipantNumbers);
-      if acceptedCount = 0 then
-      begin
-        performanceTrace.Finish('cancelled',
-          'step=participants.confirm skipped_count=' +
-          IntToStr(importPlan.RowCount));
-        Exit;
+        try
+          TParticipantEditService.ApplyChangesKeepingInput(CompetitionDb,
+            MainDataset1, stages);
+        except
+          on E: Exception do
+          begin
+            MessageText := Format(rsImportPreviewEditorSaveError, [E.Message]);
+            AppLog(MessageText, allError, alvStatus, alsImport);
+            AskMessageDlg(MessageText, mtError, [mbOK], 0);
+            PerformanceTrace.FinishError(E);
+            Exit;
+          end;
+        end;
+        FPendingParticipantLogMessage := '';
+        FPendingParticipantStageIndex := 0;
+        RxDBGrid1.EditorMode := False;
+        RefreshAll;
       end;
-      importRequest.BackupCreated := BackupBD(alvStatus, cbrBeforeImport);
-      if not importRequest.BackupCreated then
-        importRequest.ContinueWithoutBackup :=
-          ConfirmResultsImportWithoutBackup;
-      if (not importRequest.BackupCreated) and
-        (not importRequest.ContinueWithoutBackup) then
-      begin
-        performanceTrace.Finish('cancelled', 'step=backup');
-        Exit;
+      Preview := TResultsImportPreviewForm.Create(Self);
+      try
+        Preview.Configure(ImportPlan, CompetitionDb, stages, StageIndex,
+          CanonicalFileName);
+        Preview.OnPrepareBackup := @PrepareImportPreviewBackup;
+        Screen.Cursor := crDefault;
+        if Preview.ShowModal <> mrOk then
+        begin
+          if Preview.LastError <> '' then
+          begin
+            AppLog(Format(rsImportPreviewError, [Preview.LastError]),
+              allError, alvStatus, alsImport);
+            PerformanceTrace.Finish('error', 'step=preview.apply');
+          end
+          else
+          begin
+            AppLog(rsImportPreviewCancelled, allInfo, alvDetails, alsImport);
+            PerformanceTrace.Finish('cancelled', 'step=preview');
+          end;
+          Exit;
+        end;
+        Outcome := Preview.Outcome;
+      finally
+        Preview.Free;
       end;
-
-      importOutcome := TCompetitionImportService.ApplyResults(importPlan,
-        MainForm.CompetitionDb, stages, importRequest);
-
-      performanceTrace.Step('participants.prepare',
-        'row_count=' + IntToStr(importOutcome.ImportedRowCount) +
-        ' skipped_count=' + IntToStr(importOutcome.SkippedRowCount) +
-        ' stage_index=' + IntToStr(importOutcome.StageIndex));
-      performanceTrace.Step('backup',
-        'created=' + LowerCase(BoolToStr(
-        importRequest.BackupCreated, True)));
-      performanceTrace.Step('rows_write',
-        'row_count=' + IntToStr(importOutcome.ImportedRowCount) +
-        ' stage_index=' + IntToStr(importOutcome.StageIndex));
-      performanceTrace.Step('statuses',
-        'applied=' + LowerCase(BoolToStr(
-        importPlan.ImportFormat = crifFullStage, True)) +
-        ' processed_count=' +
-        IntToStr(importOutcome.StatusProcessedCount) +
-        ' changed_count=' + IntToStr(importOutcome.StatusChangedCount));
-      performanceTrace.Step('recalculate',
-        'stage_count=' + IntToStr(stages.Count) +
-        ' active_stage_count=' + IntToStr(stages.ActiveStagesCount));
-      performanceTrace.Step('commit',
-        'stage_index=' + IntToStr(importOutcome.StageIndex));
-
-      RefreshAll;
-      AppLog(Format(rsResultsImported,
-        [importOutcome.StageIndex, stages[importOutcome.StageIndex].Name,
-        importOutcome.ImportedRowCount, canonicalFileName]), allInfo,
+      if Outcome.State <> iasApplied then Exit;
+      Committed := True;
+      AppLog(Format(rsImportPreviewApplied, [StageIndex, Outcome.WrittenFields,
+        Outcome.ChangedParticipants, Outcome.CreatedParticipants,
+        ImportPlan.ItemCount - Outcome.ChangedParticipants]), allInfo,
         alvStatus, alsImport);
-      if importOutcome.SkippedRowCount > 0 then
-        AppLog(Format(rsResultsImportPartial,
-          [importOutcome.StageIndex, stages[importOutcome.StageIndex].Name,
-          importOutcome.ImportedRowCount, importOutcome.TotalRowCount,
-          canonicalFileName]), allWarning, alvStatus, alsImport);
-      performanceTrace.Finish('ok',
-        'row_count=' + IntToStr(importOutcome.ImportedRowCount) +
-        ' skipped_count=' + IntToStr(importOutcome.SkippedRowCount) +
-        ' stage_index=' + IntToStr(importOutcome.StageIndex));
+      PerformanceTrace.Finish('ok', 'field_count=' + IntToStr(Outcome.WrittenFields));
+      RefreshAll(True);
     except
-      on E: ECompetitionImportValidationError do
-      begin
-        performanceTrace.FinishError(E);
-        ReportLoadError(rsLoadResultsError, E.Message);
-      end;
-      on E: EDatabaseError do
-      begin
-        performanceTrace.FinishError(E);
-        ReportLoadError(rsWriteResultsDatabaseError, E.Message);
-      end;
-      on E: EStreamError do
-      begin
-        performanceTrace.FinishError(E);
-        ReportLoadError(rsLoadResultsError, E.Message);
-      end;
       on E: Exception do
       begin
-        performanceTrace.FinishError(E);
-        ReportLoadError(rsLoadResultsError, E.Message);
+        if Committed then
+        begin
+          MessageText := Format(rsImportPreviewSavedRefreshError, [E.Message]);
+          AppLog(MessageText, allError, alvStatus, alsDatabase);
+          AskMessageDlg(MessageText, mtError, [mbOK], 0);
+        end
+        else
+        begin
+          PerformanceTrace.FinishError(E);
+          if E is EDatabaseError then
+            ReportLoadError(rsWriteResultsDatabaseError, E.Message)
+          else
+            ReportLoadError(rsLoadResultsError, E.Message);
+        end;
       end;
     end;
   finally
-    importPlan.Free;
-    performanceTrace.Free;
+    ImportPlan.Free;
+    PerformanceTrace.Free;
     Screen.Cursor := crDefault;
   end;
 end;
+
 function CreateCompetitionExportLabels: TCompetitionExportLabels;
 begin
   Result := Default(TCompetitionExportLabels);
@@ -5601,8 +6219,8 @@ var
 begin
   canonicalFileName := ExpandFileName(FileName);
   performanceTrace := TPerformanceTrace.Create('csv.stage_results.export',
-    alsExport, 'stage_index=' + IntToStr(stageIndex) +
-    ' stage_count=' + IntToStr(stages.Count));
+    alsExport, 'stage_index=' + IntToStr(stageIndex) + ' stage_count=' +
+    IntToStr(stages.Count));
   try
     try
       if IsCompetitionDatabaseOpen then
@@ -5610,8 +6228,8 @@ begin
           MainForm.SQLQuery1, stages, stageIndex);
       performanceTrace.Finish('ok',
         'stage_index=' + IntToStr(stageIndex));
-      AppLog(Format(rsStageResultsExported,
-        [stageIndex, stages[stageIndex].Name, canonicalFileName]), allInfo,
+      AppLog(Format(rsStageResultsExported, [stageIndex,
+        stages[stageIndex].Name, canonicalFileName]), allInfo,
         alvStatus, alsExport);
     except
       on E: Exception do
@@ -5627,6 +6245,7 @@ begin
     performanceTrace.Free;
   end;
 end;
+
 function TMainForm.ExportAllResultsToXLSX(FileName: string): boolean;
 var
   canonicalFileName, messageText: string;
@@ -5641,8 +6260,7 @@ begin
   try
     try
       if FileExists(canonicalFileName) and
-        (AskMessageDlg(rsFileExists, mtWarning,
-        [mbOK, mbCancel], 0) <> mrOk) then
+        (AskMessageDlg(rsFileExists, mtWarning, [mbOK, mbCancel], 0) <> mrOk) then
       begin
         performanceTrace.Finish('cancelled', 'step=overwrite.confirm');
         Exit;
@@ -5665,8 +6283,8 @@ begin
         end;
       end;
 
-      AppLog(Format(rsExportReportParameters,
-        [exportOutcome.PenaltyGroupCount]), allDebug, alvDetails, alsExport);
+      AppLog(Format(rsExportReportParameters, [exportOutcome.PenaltyGroupCount]),
+        allDebug, alvDetails, alsExport);
       performanceTrace.Finish('ok',
         'category_count=' + IntToStr(exportOutcome.CategoryCount) +
         ' finish_row_count=' + IntToStr(exportOutcome.FinishRowCount) +
@@ -5716,8 +6334,8 @@ begin
     ' active_stage_count=' + IntToStr(stages.ActiveStagesCount));
   try
     if FileExists(canonicalFileName) and
-      (AskMessageDlg(rsStartListFileExists, mtWarning,
-      [mbYes, mbNo], 0) <> mrYes) then
+      (AskMessageDlg(rsStartListFileExists, mtWarning, [mbYes, mbNo], 0) <>
+      mrYes) then
     begin
       performanceTrace.Finish('cancelled', 'step=overwrite.confirm');
       Exit;
@@ -5746,6 +6364,7 @@ begin
     performanceTrace.Free;
   end;
 end;
+
 procedure TMainForm.ExportCSVResults(FileName: string);
 const
   BASE_EXPORT_FIELD_COUNT = 8;
@@ -5760,8 +6379,8 @@ begin
     ' active_stage_count=' + IntToStr(stages.ActiveStagesCount));
   try
     if FileExists(canonicalFileName) and
-      (AskMessageDlg(rsCSVResultsFileExists, mtWarning,
-      [mbYes, mbNo], 0) <> mrYes) then
+      (AskMessageDlg(rsCSVResultsFileExists, mtWarning, [mbYes, mbNo], 0) <>
+      mrYes) then
     begin
       performanceTrace.Finish('cancelled', 'step=overwrite.confirm');
       Exit;
@@ -5791,8 +6410,8 @@ begin
     performanceTrace.Free;
   end;
 end;
-procedure TMainForm.StartMarkReceived(Sender: TObject;
-  const AMark: TStartMark);
+
+procedure TMainForm.StartMarkReceived(Sender: TObject; const AMark: TStartMark);
 var
   correctionText, timeText: string;
   logSource: TAppLogSource;
@@ -5803,12 +6422,12 @@ begin
     tmskBle: logSource := alsBle;
     tmskManual: logSource := alsApplication;
   end;
-  if not Assigned(FStartMarkService) or
-    not CompetitionDb.Connection.Connected then
+  if not Assigned(FStartMarkService) or not CompetitionDb.Connection.Connected then
     Exit;
   try
-    ReceiveResult := FStartMarkService.Receive(AMark,
-      startMarkMatchDeltaSeconds, startMarkAutomaticApply, Now);
+    ReceiveResult := FStartMarkService.Receive(AMark, startMarkMatchDeltaSeconds,
+      startMarkAutomaticApply, Now);
+    InvalidateCompetitionViews;
     if ReceiveResult.Mark.Status = smsApplied then
       RefreshAll;
     if DatasetStartMarks.Active then
@@ -5819,6 +6438,8 @@ begin
   except
     on E: Exception do
     begin
+      // Receiving may persist the mark before candidate matching fails.
+      InvalidateCompetitionViews;
       AppLog(E.Message, allError, alvStatus, alsDatabase);
       Exit;
     end;
@@ -5832,8 +6453,7 @@ begin
     alvDetails, logSource);
 end;
 
-procedure TMainForm.FinishMarkReceived(Sender: TObject;
-  const AMark: TFinishMark);
+procedure TMainForm.FinishMarkReceived(Sender: TObject; const AMark: TFinishMark);
 var
   Mark: TFinishMark;
   logSource: TAppLogSource;
@@ -5843,12 +6463,12 @@ begin
     tmskBle: logSource := alsBle;
     tmskManual: logSource := alsApplication;
   end;
-  if not Assigned(FFinishMarkService) or
-    not CompetitionDb.Connection.Connected then
+  if not Assigned(FFinishMarkService) or not CompetitionDb.Connection.Connected then
     Exit;
   try
-    Mark := FFinishMarkService.Handle(AMark,
-      not DatasetFinishMarks.Active or DatasetFinishMarks.IsEmpty);
+    Mark := FFinishMarkService.Handle(AMark, not DatasetFinishMarks.Active or
+      DatasetFinishMarks.IsEmpty);
+    InvalidateCompetitionViews;
     RefreshFinishMarkWorkQueue(Mark.Id);
   except
     on E: Exception do
@@ -5857,8 +6477,8 @@ begin
       Exit;
     end;
   end;
-  AppLog(Format(rsTimingFinish,
-    [FormatDateTime('hh:nn:ss.zzz', Mark.EventTime)]), allDebug,
+  AppLog(Format(rsTimingFinish, [FormatDateTime('hh:nn:ss.zzz', Mark.EventTime)]),
+    allDebug,
     alvDetails, logSource);
 end;
 
@@ -5908,11 +6528,12 @@ begin
       allInfo, ASuccessView, alsDatabase);
     if BackupResult.Cleanup.DeletedCount > 0 then
       AppLog(Format(rsBackupCleanupCompleted,
-        [BackupResult.Cleanup.DeletedCount,
-        BackupResult.Cleanup.FreedBytes]), allInfo, alvDetails, alsDatabase);
+        [BackupResult.Cleanup.DeletedCount, BackupResult.Cleanup.FreedBytes]),
+        allInfo, alvDetails, alsDatabase);
     if BackupResult.Cleanup.WarningMessage <> '' then
       AppLog(Format(rsBackupCleanupWarning,
-        [BackupResult.Cleanup.WarningMessage]), allWarning, alvDetails,
+        [BackupResult.Cleanup.WarningMessage]),
+        allWarning, alvDetails,
         alsDatabase);
   end
   else
@@ -5922,8 +6543,8 @@ begin
           [ExtractFilePath(BackupResult.BackupFileName)]), allWarning,
           alvDetails, alsDatabase);
       cbfInvalidFile:
-        AppLog(Format(rsBackupFileInvalid,
-          [BackupResult.BackupFileName]), allWarning, alvDetails,
+        AppLog(Format(rsBackupFileInvalid, [BackupResult.BackupFileName]),
+          allWarning, alvDetails,
           alsDatabase);
       else
         AppLog(Format(rsBackupCreateError,

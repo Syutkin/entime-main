@@ -29,38 +29,35 @@ type
     class procedure ConfigureQuery(Q: TSQLQuery; const SqlText: string;
       const IsReadOnly: boolean); static;
   public
-    class function MainParticipants(
-      const StageIndexes: array of integer): string; static;
+    class function MainParticipants(const StageIndexes: array of integer): string;
+      static;
     class function CategoryStatistics: string; static;
     class function CorrectionPending(const StageIndex: integer;
-      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT): string;
-      static;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT): string; static;
     class function TrackStatus(const StageIndex: integer;
       const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT): string; static;
     class function ResultStage(const StageIndex: integer;
       const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT): string; static;
     class function ResultStageTotal: string; static;
-    class function ResultStageSum(
-      const StageIndexes: array of integer): string; static;
+    class function ResultStageSum(const StageIndexes: array of integer): string;
+      static;
     class function CategoryStageResults(const StageIndex: integer;
-      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT): string;
-      static;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT): string; static;
     class function LatestStageResults(const StageIndex: integer;
-      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT): string;
-      static;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT): string; static;
 
     class procedure ConfigureMainParticipants(Q: TSQLQuery;
       const StageIndexes: array of integer); static;
     class procedure ConfigureCategoryStatistics(Q: TSQLQuery); static;
     class procedure ConfigureCorrectionPending(Q: TSQLQuery;
-      const StageIndex: integer; const StageCount: integer =
-      MAX_SUPPORTED_STAGE_COUNT); static;
+      const StageIndex: integer;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT); static;
     class procedure ConfigureTrackStatus(Q: TSQLQuery;
-      const StageIndex: integer; const StageCount: integer =
-      MAX_SUPPORTED_STAGE_COUNT); static;
+      const StageIndex: integer;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT); static;
     class procedure ConfigureResultStage(Q: TSQLQuery;
-      const StageIndex: integer; const StageCount: integer =
-      MAX_SUPPORTED_STAGE_COUNT); static;
+      const StageIndex: integer;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT); static;
     class procedure ConfigureResultStageTotal(Q: TSQLQuery); static;
     class procedure ConfigureResultStageSum(Q: TSQLQuery;
       const StageIndexes: array of integer); static;
@@ -68,19 +65,17 @@ type
       const StageIndex: integer; const Category: string;
       const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT); static;
     class procedure ConfigureLatestStageResults(Q: TSQLQuery;
-      const StageIndex: integer; const StageCount: integer =
-      MAX_SUPPORTED_STAGE_COUNT); static;
+      const StageIndex: integer;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT); static;
     class procedure ConfigureStartMarkWorkQueue(Q: TSQLQuery); static;
     class procedure ConfigureFinishMarkWorkQueue(Q: TSQLQuery); static;
     class procedure ConfigureStartMarkJournal(Q: TSQLQuery); static; overload;
     class procedure ConfigureStartMarkJournal(Q: TSQLQuery;
-      const AFilter: TStartMarkJournalFilter;
-      const AReceivedSince: TDateTime;
+      const AFilter: TStartMarkJournalFilter; const AReceivedSince: TDateTime;
       const AStageIndex: integer); static; overload;
     class procedure ConfigureFinishMarkJournal(Q: TSQLQuery); static; overload;
     class procedure ConfigureFinishMarkJournal(Q: TSQLQuery;
-      const AFilter: TFinishMarkJournalFilter;
-      const AReceivedSince: TDateTime;
+      const AFilter: TFinishMarkJournalFilter; const AReceivedSince: TDateTime;
       const AStageIndex: integer); static; overload;
     class function Capture(Q: TSQLQuery; const Reopen: boolean;
       const CloseAfter: boolean = False): TQuerySnapshot; static;
@@ -107,8 +102,8 @@ const
     '"sumresult", "sumdiffleader", "status", "sumstages", "thrudiff", ' +
     '"thruplace"';
 
-class procedure TDatasetSql.ConfigureQuery(Q: TSQLQuery;
-  const SqlText: string; const IsReadOnly: boolean);
+class procedure TDatasetSql.ConfigureQuery(Q: TSQLQuery; const SqlText: string;
+  const IsReadOnly: boolean);
 begin
   if Q = nil then
     Exit;
@@ -170,8 +165,8 @@ begin
     StageIndex := StageIndexes[ArrayIndex];
     RequireSupportedStageIndex(StageIndex);
     if Seen[StageIndex] then
-      raise EStageIndexError.CreateFmt(
-        'Duplicate stage index: %d.', [StageIndex]);
+      raise EStageIndexError.CreateFmt('Duplicate stage index: %d.',
+        [StageIndex]);
     Seen[StageIndex] := True;
     for FieldKind := Succ(sfkUnknown) to High(TStageFieldKind) do
       Columns := Columns + ', ' + SqlIdentifier(
@@ -193,24 +188,23 @@ begin
   Result := 'SELECT number, correction' + IntToStr(StageIndex) +
     ' AS correction, id from main where correction' + IntToStr(StageIndex) +
     ' ISNULL AND status' + IntToStr(StageIndex) + ' ISNULL AND starttime' +
-    IntToStr(StageIndex) + ' NOTNULL ORDER BY starttime' +
-    IntToStr(StageIndex) + ';';
+    IntToStr(StageIndex) + ' NOTNULL ORDER BY starttime' + IntToStr(StageIndex) + ';';
 end;
 
-class function TDatasetSql.TrackStatus(
-  const StageIndex, StageCount: integer): string;
+class function TDatasetSql.TrackStatus(const StageIndex, StageCount: integer): string;
 begin
   RequireStageIndex(StageIndex, StageCount);
   Result := 'SELECT number, name, starttime' + IntToStr(StageIndex) +
-    ' as starttime, strftime(''%H:%M:%S'',julianday(time(''now'', ''localtime'')) - julianday(time(starttime' +
-    IntToStr(StageIndex) + ')) + 0.5) as timeontrack from main where julianday(time(''now'', ''localtime'')) > julianday(time(starttime' +
+    ' as starttime, strftime(''%H:%M:%S'',julianday(time(''now'', ''localtime'')) - julianday(time(starttime'
+    +
+    IntToStr(StageIndex) +
+    ')) + 0.5) as timeontrack from main where julianday(time(''now'', ''localtime'')) > julianday(time(starttime'
+    +
     IntToStr(StageIndex) + ')) AND finishtime' + IntToStr(StageIndex) +
-    ' ISNULL AND status' + IntToStr(StageIndex) +
-    ' ISNULL ORDER BY starttime;';
+    ' ISNULL AND status' + IntToStr(StageIndex) + ' ISNULL ORDER BY starttime;';
 end;
 
-class function TDatasetSql.ResultStage(
-  const StageIndex, StageCount: integer): string;
+class function TDatasetSql.ResultStage(const StageIndex, StageCount: integer): string;
 begin
   RequireStageIndex(StageIndex, StageCount);
   Result := 'SELECT category, place' + IntToStr(StageIndex) +
@@ -245,13 +239,12 @@ begin
     StageIndex := StageIndexes[ArrayIndex];
     RequireSupportedStageIndex(StageIndex);
     if Seen[StageIndex] then
-      raise EStageIndexError.CreateFmt(
-        'Duplicate stage index: %d.', [StageIndex]);
+      raise EStageIndexError.CreateFmt('Duplicate stage index: %d.',
+        [StageIndex]);
     Seen[StageIndex] := True;
     Result := Result + ', result' + IntToStr(StageIndex);
   end;
-  Result := Result +
-    ', sumresult, sumdiffleader from main WHERE sumresult NOTNULL ' +
+  Result := Result + ', sumresult, sumdiffleader from main WHERE sumresult NOTNULL ' +
     'ORDER BY category, status, sumstages DESC, IFNULL(sumplace,''toend'');';
 end;
 
@@ -260,9 +253,8 @@ class function TDatasetSql.CategoryStageResults(
 begin
   RequireStageIndex(StageIndex, StageCount);
   Result := 'SELECT number, name, result' + IntToStr(StageIndex) +
-    ' AS result, diffleader' + IntToStr(StageIndex) +
-    ' AS diffleader, place' + IntToStr(StageIndex) +
-    ' AS place FROM main WHERE category = :CATEGORY AND result' +
+    ' AS result, diffleader' + IntToStr(StageIndex) + ' AS diffleader, place' +
+    IntToStr(StageIndex) + ' AS place FROM main WHERE category = :CATEGORY AND result' +
     IntToStr(StageIndex) + ' > 0 ORDER BY status ASC, result' +
     IntToStr(StageIndex) + ' ASC;';
 end;
@@ -274,8 +266,7 @@ begin
   Result := 'SELECT number, name, category, result' + IntToStr(StageIndex) +
     ' AS result, place' + IntToStr(StageIndex) +
     ' AS place FROM main WHERE finishtime' + IntToStr(StageIndex) +
-    ' > 0 AND status ISNULL ORDER BY finishtime' + IntToStr(StageIndex) +
-    ' DESC;';
+    ' > 0 AND status ISNULL ORDER BY finishtime' + IntToStr(StageIndex) + ' DESC;';
 end;
 
 class procedure TDatasetSql.ConfigureMainParticipants(Q: TSQLQuery;
@@ -319,8 +310,7 @@ begin
 end;
 
 class procedure TDatasetSql.ConfigureCategoryStageResults(Q: TSQLQuery;
-  const StageIndex: integer; const Category: string;
-  const StageCount: integer);
+  const StageIndex: integer; const Category: string; const StageCount: integer);
 begin
   ConfigureQuery(Q, CategoryStageResults(StageIndex, StageCount), True);
   Q.ParamByName('CATEGORY').AsString := Category;
@@ -351,7 +341,7 @@ class procedure TDatasetSql.ConfigureStartMarkJournal(Q: TSQLQuery;
   const AFilter: TStartMarkJournalFilter; const AReceivedSince: TDateTime;
   const AStageIndex: integer);
 begin
-  ConfigureQuery(Q, TStartMarkSql.SelectJournal(AFilter), True);
+  ConfigureQuery(Q, TStartMarkSql.SelectJournal(AFilter, AStageIndex), True);
   TStartMarkSql.BindJournalParameters(Q, AFilter, AReceivedSince,
     AStageIndex);
 end;
@@ -365,7 +355,7 @@ class procedure TDatasetSql.ConfigureFinishMarkJournal(Q: TSQLQuery;
   const AFilter: TFinishMarkJournalFilter; const AReceivedSince: TDateTime;
   const AStageIndex: integer);
 begin
-  ConfigureQuery(Q, TFinishMarkSql.SelectJournal(AFilter), True);
+  ConfigureQuery(Q, TFinishMarkSql.SelectJournal(AFilter, AStageIndex), True);
   TFinishMarkSql.BindJournalParameters(Q, AFilter, AReceivedSince,
     AStageIndex);
 end;
@@ -386,24 +376,24 @@ begin
   Result := 'SELECT number FROM main WHERE category IS :CATEGORY ';
   case SortBy of
     STARTLIST_SORT_BY_RESULT:
+    begin
+      ExcludedStatuses := '';
+      if not IncludeDNS then
+        ExcludeStatus(psDNS);
+      if not IncludeDNF then
+        ExcludeStatus(psDNF);
+      if not IncludeDSQ then
+        ExcludeStatus(psDSQ);
+      if ExcludedStatuses <> '' then
       begin
-        ExcludedStatuses := '';
-        if not IncludeDNS then
-          ExcludeStatus(psDNS);
-        if not IncludeDNF then
-          ExcludeStatus(psDNF);
-        if not IncludeDSQ then
-          ExcludeStatus(psDSQ);
-        if ExcludedStatuses <> '' then
-        begin
-          Result := Result + 'AND (';
-          if IncludeDNS or IncludeDNF or IncludeDSQ then
-            Result := Result + 'sumresult IS NULL OR ';
-          Result := Result + 'sumresult NOT IN (' + ExcludedStatuses + ')) ';
-        end;
-        Result := Result +
-          'ORDER BY sumstages DESC NULLS FIRST, sumresult DESC NULLS FIRST;';
+        Result := Result + 'AND (';
+        if IncludeDNS or IncludeDNF or IncludeDSQ then
+          Result := Result + 'sumresult IS NULL OR ';
+        Result := Result + 'sumresult NOT IN (' + ExcludedStatuses + ')) ';
       end;
+      Result := Result +
+        'ORDER BY sumstages DESC NULLS FIRST, sumresult DESC NULLS FIRST;';
+    end;
     STARTLIST_SORT_BY_NUMBER_ASC:
       Result := Result + 'ORDER BY number ASC;';
     STARTLIST_SORT_BY_NUMBER_DESC:
@@ -412,8 +402,8 @@ begin
       Result := Result + 'ORDER BY name ASC;';
     STARTLIST_SORT_BY_NAME_DESC:
       Result := Result + 'ORDER BY name DESC;';
-  else
-    Result := Result + ';';
+    else
+      Result := Result + ';';
   end;
 end;
 
@@ -425,8 +415,7 @@ begin
     Exit;
   Q.Close;
   Q.ReadOnly := True;
-  Q.SQL.Text := SelectNumbersForCategory(SortBy, IncludeDNS, IncludeDNF,
-    IncludeDSQ);
+  Q.SQL.Text := SelectNumbersForCategory(SortBy, IncludeDNS, IncludeDNF, IncludeDSQ);
   Q.ParamByName('CATEGORY').AsString := Category;
 end;
 

@@ -6,11 +6,11 @@ unit FpHttpTransportTests;
 { This regression test is relevant only to the compatibility shim. Other
   platforms and newer FPC versions use their native OpenSSL lookup tables. }
 {$IF FPC_FULLVERSION = 30202}
-  {$IFDEF LINUX}
+{$IFDEF LINUX}
     {$IFDEF CPUX86_64}
       {$DEFINE TEST_OPENSSL3_LINUX_LOADER}
     {$ENDIF}
-  {$ENDIF}
+{$ENDIF}
 {$ENDIF}
 
 interface
@@ -68,8 +68,8 @@ type
     property Response: THttpResponse read FResponse;
   end;
 
-function TInspectableFpHttpTransport.MapException(
-  const AException: Exception; const ARequest: THttpRequest): THttpResponse;
+function TInspectableFpHttpTransport.MapException(const AException: Exception;
+  const ARequest: THttpRequest): THttpResponse;
 begin
   Result := ExceptionResponse(AException, ARequest, 0);
 end;
@@ -100,8 +100,8 @@ begin
   inherited TearDown;
 end;
 
-function TFpHttpTransportTests.ExecuteRequest(
-  const ARequest: THttpRequest): THttpResponse;
+function TFpHttpTransportTests.ExecuteRequest(const ARequest: THttpRequest):
+THttpResponse;
 var
   Transport: IHttpTransport;
 begin
@@ -109,8 +109,8 @@ begin
   Result := Transport.Execute(ARequest);
 end;
 
-function TFpHttpTransportTests.ResponseHeader(
-  const AResponse: THttpResponse; const AName: string): string;
+function TFpHttpTransportTests.ResponseHeader(const AResponse: THttpResponse;
+  const AName: string): string;
 var
   Header: THttpHeader;
 begin
@@ -125,8 +125,7 @@ var
   Request: THttpRequest;
   Response: THttpResponse;
 begin
-  Request := BuildHttpGetRequest(FServer.BaseUrl + '/get?name=test', [],
-    500, 500);
+  Request := BuildHttpGetRequest(FServer.BaseUrl + '/get?name=test', [], 500, 500);
   SetLength(Request.Headers, 1);
   Request.Headers[0] := HttpHeader('X-Request', 'from-test');
 
@@ -196,8 +195,7 @@ var
   Request: THttpRequest;
   Response: THttpResponse;
 begin
-  Request := BuildHttpGetRequest(FServer.BaseUrl + '/redirect', [],
-    500, 500, False);
+  Request := BuildHttpGetRequest(FServer.BaseUrl + '/redirect', [], 500, 500, False);
   Response := ExecuteRequest(Request);
   AssertTrue(Response.Completed);
   AssertEquals(302, Response.StatusCode);
@@ -213,7 +211,7 @@ procedure TFpHttpTransportTests.ConnectionRefused_ReturnsSafeTransportError;
 var
   Request: THttpRequest;
   Response: THttpResponse;
-  ClosedPort: Word;
+  ClosedPort: word;
 begin
   ClosedPort := FServer.Port;
   FreeAndNil(FServer);
@@ -239,7 +237,7 @@ var
   Transport: TInspectableFpHttpTransport;
 
   procedure AssertSocketErrorKind(const ACode: TSocketErrorType;
-    const AExpectedKind: THttpErrorKind);
+  const AExpectedKind: THttpErrorKind);
   begin
     SocketException := ESocketError.Create('test socket error');
     SocketException.Code := ACode;
@@ -270,8 +268,8 @@ var
   Response: THttpResponse;
 begin
   FServer.DelayMs := 250;
-  Request := BuildHttpGetRequest(FServer.BaseUrl +
-    '/slow?token=timeout-secret', [], 500, 50);
+  Request := BuildHttpGetRequest(FServer.BaseUrl + '/slow?token=timeout-secret',
+    [], 500, 50);
 
   Response := ExecuteRequest(Request);
 

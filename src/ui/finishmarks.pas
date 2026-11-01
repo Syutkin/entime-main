@@ -19,6 +19,7 @@ type
     DataSourceFinishMarks: TDataSource;
     FinishMarksDataset: TSQLQuery;
     LabelJournalFilter: TLabel;
+    LabelStageScope: TLabel;
     MenuItemCopy: TMenuItem;
     PanelJournalFilter: TPanel;
     PopupMenu1: TPopupMenu;
@@ -29,6 +30,8 @@ type
     procedure FormCreate(Sender: TObject);
     procedure RxDBGridFinishMarksDblClick(Sender: TObject);
   private
+    FStageScope: integer;
+    FParticipantNumber: integer;
     procedure ConfigureDiagnosticField;
     procedure ConfigureJournalDataset;
     function CurrentFilter: TFinishMarkJournalFilter;
@@ -39,10 +42,16 @@ type
   protected
     procedure ShowDiagnostic(const AText: string); virtual;
   public
+    function ConfigureParticipantRecord(const ANumber, AReceivedStage: integer;
+      const AMarkId: int64): boolean;
+    procedure ConfigureScope(const AStageIndex: integer;
+      const AFilter: TFinishMarkJournalFilter);
     destructor Destroy; override;
   end;
 
-procedure RunFinishMarks;
+procedure RunFinishMarks; overload;
+procedure RunFinishMarks(const AStageIndex: integer;
+  const AFilter: TFinishMarkJournalFilter); overload;
 
 implementation
 
@@ -50,17 +59,24 @@ uses
   Main, InputDialogs, AppLogger, CompetitionQueryProvider,
   TimingMarkJournalUi;
 
-{$R *.lfm}
+  {$R *.lfm}
 
 procedure RunFinishMarks;
 begin
-  with TFinishMarksForm.Create(Application) do
-  begin
-    try
-      ShowModal;
-    finally
-      Free;
-    end;
+  RunFinishMarks(0, fmjfAll);
+end;
+
+procedure RunFinishMarks(const AStageIndex: integer;
+  const AFilter: TFinishMarkJournalFilter);
+var
+  Journal: TFinishMarksForm;
+begin
+  Journal := TFinishMarksForm.Create(Application);
+  try
+    Journal.ConfigureScope(AStageIndex, AFilter);
+    Journal.ShowModal;
+  finally
+    Journal.Free;
   end;
 end;
 
@@ -147,23 +163,67 @@ begin
   Result := TFinishMarkJournalFilter(ComboBoxJournalFilter.ItemIndex);
 end;
 
+procedure TFinishMarksForm.ConfigureScope(const AStageIndex: integer;
+  const AFilter: TFinishMarkJournalFilter);
+begin
+  if AStageIndex < 0 then
+    raise EArgumentOutOfRangeException.Create('Invalid stage scope.');
+  if (FStageScope = AStageIndex) and (CurrentFilter = AFilter) then Exit;
+  FParticipantNumber := 0;
+  FStageScope := AStageIndex;
+  LabelStageScope.Caption := Format(rsSUFormat, [AStageIndex]);
+  LabelStageScope.Visible := AStageIndex > 0;
+  if AStageIndex > 0 then
+    ComboBoxJournalFilter.Items[Ord(fmjfCurrentStage)] := LabelStageScope.Caption
+  else
+    ComboBoxJournalFilter.Items[Ord(fmjfCurrentStage)] :=
+      rsFinishMarkJournalFilterCurrentStage;
+  ComboBoxJournalFilter.ItemIndex := Ord(AFilter);
+  RefreshJournal(False);
+end;
+
+function TFinishMarksForm.ConfigureParticipantRecord(
+  const ANumber, AReceivedStage: integer; const AMarkId: int64): boolean;
+begin
+  if (ANumber <= 0) or (AReceivedStage <= 0) or (AMarkId <= 0) then
+    raise EArgumentOutOfRangeException.Create('Invalid participant journal scope');
+  FParticipantNumber := ANumber;
+  FStageScope := AReceivedStage;
+  ComboBoxJournalFilter.ItemIndex := 0;
+  LabelStageScope.Caption := Format(rsSUFormat, [AReceivedStage]) +
+    ' · ' + rsNumber + ': ' + IntToStr(ANumber);
+  LabelStageScope.Visible := True;
+  RefreshJournal(False);
+  Result := FinishMarksDataset.Locate('id', AMarkId, []);
+end;
+
 procedure TFinishMarksForm.ConfigureJournalDataset;
 var
   ReceivedSince: TDateTime;
-  StageIndex: integer;
+  StageIndex, OrderPos: integer;
+  Sql: string;
 begin
   ReceivedSince := 0;
-  StageIndex := 0;
+  StageIndex := FStageScope;
   if CurrentFilter = fmjfLast15Minutes then
-    ReceivedSince := IncMinute(Now, -15)
-  else if CurrentFilter = fmjfCurrentStage then
+    ReceivedSince := IncMinute(Now, -15);
+  if (CurrentFilter = fmjfCurrentStage) and (StageIndex = 0) then
     StageIndex := MainForm.CurrentStageIndex;
   TDatasetSql.ConfigureFinishMarkJournal(FinishMarksDataset, CurrentFilter,
     ReceivedSince, StageIndex);
+  if FParticipantNumber > 0 then
+  begin
+    Sql := FinishMarksDataset.SQL.Text;
+    OrderPos := Pos(' ORDER BY ', UpperCase(Sql));
+    Insert(' AND participant_number = :CARD_NUMBER', Sql, OrderPos);
+    FinishMarksDataset.SQL.Text := Sql;
+    TFinishMarkSql.BindJournalParameters(FinishMarksDataset, CurrentFilter,
+      ReceivedSince, StageIndex);
+    FinishMarksDataset.ParamByName('CARD_NUMBER').AsInteger := FParticipantNumber;
+  end;
 end;
 
-procedure TFinishMarksForm.RefreshJournal(
-  const APreserveSelection: boolean);
+procedure TFinishMarksForm.RefreshJournal(const APreserveSelection: boolean);
 var
   HasSelectedId: boolean;
   SelectedId: int64;
@@ -184,8 +244,7 @@ begin
   end;
 end;
 
-procedure TFinishMarksForm.FinishMarkChanged(Sender: TObject;
-  const AMarkId: int64);
+procedure TFinishMarksForm.FinishMarkChanged(Sender: TObject; const AMarkId: int64);
 begin
   try
     RefreshJournal(True);
@@ -207,8 +266,7 @@ begin
   end;
 end;
 
-procedure TFinishMarksForm.FormClose(Sender: TObject;
-  var CloseAction: TCloseAction);
+procedure TFinishMarksForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   FinishMarksDataset.Close;
 end;

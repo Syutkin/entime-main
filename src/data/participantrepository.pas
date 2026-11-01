@@ -35,11 +35,13 @@ type
     class function SelectCategoryResults(const ColumnsCsv: string): string; static;
     class function SelectStatusAll: string; static;
 
-    class function OpenByNumber(Q: TSQLQuery;
-      const Number: integer): boolean; static;
+    class function OpenByNumber(Q: TSQLQuery; const Number: integer): boolean;
+      static;
+    class function OpenById(Q: TSQLQuery; const ParticipantId: integer): boolean;
+      static;
     class function TryGetCurrentId(Q: TSQLQuery; out Id: integer): boolean; static;
-    class function TryGetCurrentNumber(Q: TSQLQuery;
-      out Number: string): boolean; static;
+    class function TryGetCurrentNumber(Q: TSQLQuery; out Number: string): boolean;
+      static;
     class function TryLoadIdentity(Q: TSQLQuery; const Number: integer;
       out ParticipantName, Category: string): boolean; static;
     class function LoadStatuses(Q: TSQLQuery; const Number, StageCount: integer;
@@ -81,8 +83,7 @@ begin
 end;
 
 class function TParticipantRepository.SelectStatuses(const StageCount: integer;
-  const ActiveStageIndexes: array of integer;
-  const FilterByNumber: boolean): string;
+  const ActiveStageIndexes: array of integer; const FilterByNumber: boolean): string;
 var
   ActiveIndex, StageIndex: integer;
 begin
@@ -151,6 +152,16 @@ begin
   Q.Close;
   Q.SQL.Text := SelectByNumber;
   Q.ParamByName('NUMBER').AsInteger := Number;
+  Q.Open;
+  Result := not Q.EOF;
+end;
+
+class function TParticipantRepository.OpenById(Q: TSQLQuery;
+  const ParticipantId: integer): boolean;
+begin
+  Q.Close;
+  Q.SQL.Text := 'SELECT * FROM main WHERE id = :ID;';
+  Q.ParamByName('ID').AsInteger := ParticipantId;
   Q.Open;
   Result := not Q.EOF;
 end;
@@ -330,8 +341,7 @@ begin
   end;
 end;
 
-class procedure TParticipantRepository.LoadNumbers(Q: TSQLQuery;
-  Numbers: TStrings);
+class procedure TParticipantRepository.LoadNumbers(Q: TSQLQuery; Numbers: TStrings);
 begin
   if Q = nil then
     raise EArgumentNilException.Create('Q');
@@ -408,8 +418,8 @@ begin
   Q.ParamByName('CATEGORY').AsString := Category;
 end;
 
-class procedure TParticipantRepository.ExecUpdateOnlyGlobalStatusDsq(
-  Q: TSQLQuery; const Number: string);
+class procedure TParticipantRepository.ExecUpdateOnlyGlobalStatusDsq(Q: TSQLQuery;
+  const Number: string);
 begin
   ExecUpdateGlobalStatus(Q, psDSQ, Number);
 end;
@@ -436,8 +446,8 @@ begin
   Q.Prepare;
 end;
 
-class procedure TParticipantRepository.ExecPreparedGlobalStatusUpdate(
-  Q: TSQLQuery; const Status: TParticipantStatus; const Number: integer);
+class procedure TParticipantRepository.ExecPreparedGlobalStatusUpdate(Q: TSQLQuery;
+  const Status: TParticipantStatus; const Number: integer);
 begin
   if Q = nil then
     raise EArgumentNilException.Create('Q');
@@ -449,8 +459,7 @@ begin
   Q.ExecSQL;
 end;
 
-class procedure TParticipantRepository.FinishPreparedGlobalStatusUpdates(
-  Q: TSQLQuery);
+class procedure TParticipantRepository.FinishPreparedGlobalStatusUpdates(Q: TSQLQuery);
 begin
   if Q = nil then
     Exit;

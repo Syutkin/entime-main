@@ -63,8 +63,7 @@ var
   Input: TTimingMark;
 begin
   Input := TTimingMark.Start(EncodeTime(10, 0, 0, 1), True, -3,
-    TTimingMarkSource.Serial('COM2'),
-    EncodeDateTime(2026, 8, 13, 10, 0, 1, 2));
+    TTimingMarkSource.Serial('COM2'), EncodeDateTime(2026, 8, 13, 10, 0, 1, 2));
 
   FRouter.Route(Input, 3);
 
@@ -79,8 +78,7 @@ var
   Input: TTimingMark;
 begin
   Input := TTimingMark.Finish(EncodeTime(11, 0, 0, 1),
-    TTimingMarkSource.Ble('ENTime-4'),
-    EncodeDateTime(2026, 8, 13, 11, 0, 1, 2));
+    TTimingMarkSource.Ble('ENTime-4'), EncodeDateTime(2026, 8, 13, 11, 0, 1, 2));
 
   FRouter.Route(Input, 5);
 

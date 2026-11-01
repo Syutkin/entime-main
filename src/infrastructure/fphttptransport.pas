@@ -7,15 +7,15 @@ unit FpHttpTransport;
   x86_64. Enable the compatibility shim only for that compiler version and
   those validated targets. Newer FPC versions provide this lookup themselves. }
 {$IF FPC_FULLVERSION = 30202}
-  {$IFDEF WIN64}
+{$IFDEF WIN64}
     {$DEFINE CONFIGURE_OPENSSL3_RUNTIME}
-  {$ENDIF}
-  {$IFDEF LINUX}
+{$ENDIF}
+{$IFDEF LINUX}
     {$IFDEF CPUX86_64}
       {$DEFINE CONFIGURE_OPENSSL3_RUNTIME}
       {$DEFINE CONFIGURE_OPENSSL3_LINUX}
     {$ENDIF}
-  {$ENDIF}
+{$ENDIF}
 {$ENDIF}
 
 interface
@@ -28,12 +28,12 @@ type
   private
     FClient: TFPHTTPClient;
     FStateLock: TRTLCriticalSection;
-    FUsed: Boolean;
-    FCancelled: Boolean;
-    function IsCancelled: Boolean;
-    function TryBeginExecute(out AResponse: THttpResponse): Boolean;
+    FUsed: boolean;
+    FCancelled: boolean;
+    function IsCancelled: boolean;
+    function TryBeginExecute(out AResponse: THttpResponse): boolean;
     function ValidateRequest(const ARequest: THttpRequest;
-      out AResponse: THttpResponse): Boolean;
+      out AResponse: THttpResponse): boolean;
     procedure ConfigureClient(const ARequest: THttpRequest);
     procedure CopyResponseHeaders(out AHeaders: THttpHeaders);
   protected
@@ -134,7 +134,7 @@ begin
   inherited Destroy;
 end;
 
-function TFpHttpTransport.IsCancelled: Boolean;
+function TFpHttpTransport.IsCancelled: boolean;
 begin
   EnterCriticalSection(FStateLock);
   try
@@ -144,8 +144,7 @@ begin
   end;
 end;
 
-function TFpHttpTransport.TryBeginExecute(
-  out AResponse: THttpResponse): Boolean;
+function TFpHttpTransport.TryBeginExecute(out AResponse: THttpResponse): boolean;
 begin
   EnterCriticalSection(FStateLock);
   try
@@ -168,7 +167,7 @@ begin
 end;
 
 function TFpHttpTransport.ValidateRequest(const ARequest: THttpRequest;
-  out AResponse: THttpResponse): Boolean;
+  out AResponse: THttpResponse): boolean;
 var
   LowerUrl: string;
 begin
@@ -180,8 +179,7 @@ begin
     Exit;
   end;
   LowerUrl := LowerCase(ARequest.Url);
-  if (Copy(LowerUrl, 1, 7) <> 'http://') and
-    (Copy(LowerUrl, 1, 8) <> 'https://') then
+  if (Copy(LowerUrl, 1, 7) <> 'http://') and (Copy(LowerUrl, 1, 8) <> 'https://') then
   begin
     AResponse := ErrorResponse(hekProtocol, 'Unsupported HTTP protocol');
     Exit;
@@ -204,7 +202,7 @@ end;
 procedure TFpHttpTransport.CopyResponseHeaders(out AHeaders: THttpHeaders);
 var
   HeaderLine: string;
-  HeaderIndex: Integer;
+  HeaderIndex: integer;
   SeparatorPosition: SizeInt;
 begin
   AHeaders := nil;
@@ -215,8 +213,8 @@ begin
     if SeparatorPosition <= 0 then
       Continue;
     SetLength(AHeaders, Length(AHeaders) + 1);
-    AHeaders[High(AHeaders)] := HttpHeader(
-      Trim(Copy(HeaderLine, 1, SeparatorPosition - 1)),
+    AHeaders[High(AHeaders)] :=
+      HttpHeader(Trim(Copy(HeaderLine, 1, SeparatorPosition - 1)),
       Trim(Copy(HeaderLine, SeparatorPosition + 1, MaxInt)));
   end;
 end;
@@ -249,8 +247,7 @@ begin
   Result := ErrorResponse(hekProtocol, 'HTTP protocol operation failed');
 end;
 
-function TFpHttpTransport.Execute(
-  const ARequest: THttpRequest): THttpResponse;
+function TFpHttpTransport.Execute(const ARequest: THttpRequest): THttpResponse;
 var
   BodyStream: TRawByteStringStream;
   ResponseStream: TMemoryStream;

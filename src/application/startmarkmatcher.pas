@@ -46,8 +46,7 @@ type
       const AToleranceSeconds: integer): TStartMarkMatch; static;
   end;
 
-function StartMarkMatchStatusCode(
-  const AStatus: TStartMarkMatchStatus): string;
+function StartMarkMatchStatusCode(const AStatus: TStartMarkMatchStatus): string;
 
 implementation
 
@@ -73,20 +72,17 @@ begin
     Result := 0;
 end;
 
-function CircularDeltaMilliseconds(const AFirst,
-  ASecond: TDateTime): integer;
+function CircularDeltaMilliseconds(const AFirst, ASecond: TDateTime): integer;
 var
   Delta: int64;
 begin
-  Delta := Abs(TimeOfDayMilliseconds(AFirst) -
-    TimeOfDayMilliseconds(ASecond));
+  Delta := Abs(TimeOfDayMilliseconds(AFirst) - TimeOfDayMilliseconds(ASecond));
   if Delta > MILLISECONDS_PER_DAY div 2 then
     Delta := MILLISECONDS_PER_DAY - Delta;
   Result := Delta;
 end;
 
-function StartMarkMatchStatusCode(
-  const AStatus: TStartMarkMatchStatus): string;
+function StartMarkMatchStatusCode(const AStatus: TStartMarkMatchStatus): string;
 begin
   case AStatus of
     smmMatched: Result := 'matched';
@@ -95,8 +91,9 @@ begin
   end;
 end;
 
-class function TStartMarkCandidate.Create(const AParticipantNumber,
-  AStageIndex: integer; const AStartTime: TDateTime): TStartMarkCandidate;
+class function TStartMarkCandidate.Create(
+  const AParticipantNumber, AStageIndex: integer;
+  const AStartTime: TDateTime): TStartMarkCandidate;
 begin
   RequirePositive(AParticipantNumber, 'Participant number');
   RequirePositive(AStageIndex, 'Stage index');
@@ -115,8 +112,8 @@ var
   HasNearest, IsAmbiguous: boolean;
   NearestParticipantNumber: integer;
 begin
-  if (AToleranceSeconds < 0) or
-    (AToleranceSeconds > MAX_START_MARK_MATCH_TOLERANCE_SECONDS) then
+  if (AToleranceSeconds < 0) or (AToleranceSeconds >
+    MAX_START_MARK_MATCH_TOLERANCE_SECONDS) then
     raise EArgumentOutOfRangeException.CreateFmt(
       'Match tolerance %d seconds must be in the range 0..%d.',
       [AToleranceSeconds, MAX_START_MARK_MATCH_TOLERANCE_SECONDS]);
@@ -131,8 +128,7 @@ begin
   begin
     if Candidate.StageIndex <> AMark.StageIndex then
       Continue;
-    DeltaMs := CircularDeltaMilliseconds(AMark.EventTime,
-      Candidate.StartTime);
+    DeltaMs := CircularDeltaMilliseconds(AMark.EventTime, Candidate.StartTime);
     if DeltaMs > ToleranceMs then
       Continue;
 

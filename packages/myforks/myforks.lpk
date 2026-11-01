@@ -13,12 +13,20 @@
     </CompilerOptions>
     <Files>
       <Item>
+        <Filename Value="MySpinEdit.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="MySpinEdit"/>
+      </Item>
+      <Item>
         <Filename Value="MyRxDBGrid.pas"/>
         <HasRegisterProc Value="True"/>
         <UnitName Value="MyRxDBGrid"/>
       </Item>
     </Files>
     <RequiredPkgs>
+      <Item>
+        <PackageName Value="LCL"/>
+      </Item>
       <Item>
         <PackageName Value="FCL"/>
       </Item>

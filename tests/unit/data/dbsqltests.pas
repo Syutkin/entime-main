@@ -21,8 +21,8 @@ type
     procedure AssertConfigValue(const AKey, AExpectedValue: string);
     procedure AssertColumnExists(const ATableName, AColumnName: string;
       const AExpected: boolean);
-    procedure AssertColumnType(const ATableName, AColumnName,
-      AExpectedType: string);
+    procedure AssertColumnType(
+      const ATableName, AColumnName, AExpectedType: string);
   protected
     procedure SetUp; override;
     procedure TearDown; override;
@@ -61,6 +61,7 @@ type
     procedure SetUp; override;
     procedure TearDown; override;
   published
+    procedure PreparedUpsert_ReusesQueryAndRollsBackTogether;
     procedure ExecUpsertByKey_InsertsNewKey;
     procedure ExecUpsertByKey_UpdatesExistingKey;
     procedure UpsertByKey_ReturnsExecutableSqlForInsertAndUpdate;
@@ -105,8 +106,11 @@ type
     procedure TearDown; override;
   published
     procedure OpenByNumber_ReturnsTrueForExistingAndFalseForMissing;
+    procedure OpenById_KeepsIdentityWhenParticipantNumberChanges;
+    procedure OpenById_ReadsSavedNumberWithoutPostingAnotherQuery;
     procedure OpenByCategoryLeader_ReturnsLeaderAndReturnsFalseWhenMissing;
     procedure TryGetNumberByStartTimeBetween_ReturnsMatchAndNoMatch;
+    procedure CountQueries_ReturnSingleScalarForEmptyAndPopulatedTables;
     procedure GetFinishCount_CountsOnlyNonEmptyFinishTimes;
     procedure GetPenaltyGroupsCount_CountsDistinctPenaltyCombinations;
     procedure LoadCategories_ReturnsSortedDistinctNonEmptyValues;
@@ -214,6 +218,9 @@ type
     FConnection: TSQLite3Connection;
     FTransaction: TSQLTransaction;
     FQuery: TSQLQuery;
+    FStatementCount: integer;
+    procedure CountStatement(Sender: TSQLConnection; EventType: TDBEventType;
+      const Msg: string);
 
     procedure CreateSchema;
     procedure ExecSql(const ASql: string);
@@ -226,8 +233,10 @@ type
     procedure SetUp; override;
     procedure TearDown; override;
   published
+    procedure CombinedStandings_MatchLegacyQueriesAndReduceStatements;
     procedure SelectForSumCalculation_ReturnsOnlyRequestedStageResults;
     procedure UpdateStageResult_HandlesStatusesAndTimeCalculations;
+    procedure PreparedSumUpdate_WritesOnlyChangedRowsAndHandlesNulls;
     procedure UpdateSumResult_UpdatesValuesAndPreservesStatusConditionally;
     procedure ResetStagePlaceAndDiff_AndUpsertStagePlace_AssignsPlaces;
     procedure ResetStageDiffLeader_AndUpsertStageDiffLeader_SetsLeaderDiff;
@@ -299,7 +308,8 @@ end;
 procedure TDbSqlTests.AssertTableExists(const ATableName: string);
 begin
   FQuery.Close;
-  FQuery.SQL.Text := 'SELECT name FROM sqlite_master WHERE type = ''table'' AND name = :NAME;';
+  FQuery.SQL.Text :=
+    'SELECT name FROM sqlite_master WHERE type = ''table'' AND name = :NAME;';
   FQuery.ParamByName('NAME').AsString := ATableName;
   FQuery.Open;
   AssertFalse(Format('Table "%s" was not created.', [ATableName]), FQuery.EOF);
@@ -322,19 +332,22 @@ procedure TDbSqlTests.AssertColumnExists(const ATableName, AColumnName: string;
   const AExpected: boolean);
 begin
   FQuery.Close;
-  FQuery.SQL.Text := 'SELECT 1 FROM pragma_table_info(:TABLE_NAME) WHERE name = :COLUMN_NAME;';
+  FQuery.SQL.Text :=
+    'SELECT 1 FROM pragma_table_info(:TABLE_NAME) WHERE name = :COLUMN_NAME;';
   FQuery.ParamByName('TABLE_NAME').AsString := ATableName;
   FQuery.ParamByName('COLUMN_NAME').AsString := AColumnName;
   FQuery.Open;
   if AExpected then
-    AssertFalse(Format('Column "%s.%s" was not created.', [ATableName, AColumnName]), FQuery.EOF)
+    AssertFalse(Format('Column "%s.%s" was not created.', [ATableName, AColumnName]),
+      FQuery.EOF)
   else
-    AssertTrue(Format('Column "%s.%s" should not exist.', [ATableName, AColumnName]), FQuery.EOF);
+    AssertTrue(Format('Column "%s.%s" should not exist.', [ATableName, AColumnName]),
+      FQuery.EOF);
   FQuery.Close;
 end;
 
-procedure TDbSqlTests.AssertColumnType(const ATableName, AColumnName,
-  AExpectedType: string);
+procedure TDbSqlTests.AssertColumnType(
+  const ATableName, AColumnName, AExpectedType: string);
 begin
   FQuery.Close;
   FQuery.SQL.Text :=
@@ -342,8 +355,8 @@ begin
   FQuery.ParamByName('TABLE_NAME').AsString := ATableName;
   FQuery.ParamByName('COLUMN_NAME').AsString := AColumnName;
   FQuery.Open;
-  AssertFalse(Format('Column "%s.%s" was not found.',
-    [ATableName, AColumnName]), FQuery.EOF);
+  AssertFalse(Format('Column "%s.%s" was not found.', [ATableName, AColumnName]),
+    FQuery.EOF);
   AssertEquals(AExpectedType, UpperCase(FQuery.FieldByName('type').AsString));
   FQuery.Close;
 end;
@@ -460,8 +473,7 @@ begin
   FQuery.SQL.Text :=
     'INSERT INTO start_marks ' +
     '(stage_index, event_time, source_kind, source_device_id, ' +
-    'received_at, status) VALUES ' +
-    '(2, ''10:00:00.000'', ''serial'', ''COM7'', ' +
+    'received_at, status) VALUES ' + '(2, ''10:00:00.000'', ''serial'', ''COM7'', ' +
     '''2026-08-13T10:00:01.000'', ''pending'');';
   FQuery.ExecSQL;
 
@@ -501,8 +513,7 @@ begin
   FQuery.SQL.Text :=
     'INSERT INTO finish_marks ' +
     '(stage_index, event_time, source_kind, source_device_id, ' +
-    'received_at, status) VALUES ' +
-    '(2, ''10:00:00.000'', ''ble'', ''ENTime-7'', ' +
+    'received_at, status) VALUES ' + '(2, ''10:00:00.000'', ''ble'', ''ENTime-7'', ' +
     '''2026-08-15T10:00:01.000'', ''pending'');';
   FQuery.ExecSQL;
 
@@ -521,7 +532,7 @@ const
     8,
     12,
     MAX_SUPPORTED_STAGE_COUNT
-  );
+    );
 var
   StageCount: integer;
   Connection: TSQLite3Connection;
@@ -662,13 +673,12 @@ procedure TDbSqlTests.DetectStageCapacity_RejectsMalformedSchemas;
 
   function CompleteStageColumns(const StageIndex: integer): string;
   begin
-    Result := Format(
-      '"starttime%d" VARCHAR, "correction%d" INTEGER, ' +
+    Result := Format('"starttime%d" VARCHAR, "correction%d" INTEGER, ' +
       '"finishtime%d" VARCHAR, "penalty%d" VARCHAR, ' +
       '"result%d" VARCHAR, "diffleader%d" VARCHAR, ' +
-      '"place%d" INTEGER, "status%d" VARCHAR',
-      [StageIndex, StageIndex, StageIndex, StageIndex,
-      StageIndex, StageIndex, StageIndex, StageIndex]);
+      '"place%d" INTEGER, "status%d" VARCHAR', [StageIndex,
+      StageIndex, StageIndex, StageIndex, StageIndex, StageIndex,
+      StageIndex, StageIndex]);
   end;
 
   procedure RecreateMain(const ColumnsSql: string);
@@ -919,6 +929,28 @@ begin
   FreeAndNil(FConnection);
 end;
 
+procedure TConfigSqlTests.PreparedUpsert_ReusesQueryAndRollsBackTogether;
+begin
+  FTransaction.Commit;
+  FTransaction.StartTransaction;
+  TConfigSql.PrepareUpsert(FQuery);
+  try
+    TConfigSql.ExecPreparedUpsert(FQuery, 'batch-a', 'first');
+    AssertTrue(FQuery.Prepared);
+    TConfigSql.ExecPreparedUpsert(FQuery, 'batch-b', 'second');
+    TConfigSql.ExecPreparedUpsert(FQuery, 'batch-a', 'updated');
+    AssertTrue(FQuery.Prepared);
+  finally
+    TConfigSql.FinishPreparedUpsert(FQuery);
+  end;
+  AssertFalse(FQuery.Prepared);
+  AssertEquals('updated', TConfigSql.GetString(FQuery, 'batch-a', 'missing'));
+  AssertEquals('second', TConfigSql.GetString(FQuery, 'batch-b', 'missing'));
+  FTransaction.Rollback;
+  AssertEquals('missing', TConfigSql.GetString(FQuery, 'batch-a', 'missing'));
+  AssertEquals('missing', TConfigSql.GetString(FQuery, 'batch-b', 'missing'));
+end;
+
 procedure TConfigSqlTests.ExecUpsertByKey_InsertsNewKey;
 begin
   UpsertConfig('test_key_insert', 'value_1');
@@ -1089,21 +1121,22 @@ begin
   FQuery.Close;
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.ExecSqlFmt(const AFormat: string;
-  const AArgs: array of const);
+procedure TParticipantAndStageResultRepositoryTests.ExecSqlFmt(
+  const AFormat: string; const AArgs: array of const);
 begin
   ExecSql(Format(AFormat, AArgs));
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.InsertMainRow(const ANumber: integer;
-  const ACategory: string; const AName: string);
+procedure TParticipantAndStageResultRepositoryTests.InsertMainRow(
+  const ANumber: integer; const ACategory: string; const AName: string);
 begin
   ExecSqlFmt(
     'INSERT INTO main (category, number, name) VALUES (%s, %d, %s);',
     [QuotedStr(ACategory), ANumber, QuotedStr(AName)]);
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.OpenMainByNumber(const ANumber: integer);
+procedure TParticipantAndStageResultRepositoryTests.OpenMainByNumber(
+  const ANumber: integer);
 begin
   FQuery.Close;
   FQuery.SQL.Text := 'SELECT * FROM main WHERE number = :NUMBER;';
@@ -1112,18 +1145,20 @@ begin
   AssertFalse(Format('Row with number %d was not found.', [ANumber]), FQuery.EOF);
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.AssertFieldEquals(const AFieldName, AExpected: string);
+procedure TParticipantAndStageResultRepositoryTests.AssertFieldEquals(
+  const AFieldName, AExpected: string);
 begin
   AssertEquals(AExpected, FQuery.FieldByName(AFieldName).AsString);
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.AssertFieldEqualsInt(const AFieldName: string;
-  const AExpected: integer);
+procedure TParticipantAndStageResultRepositoryTests.AssertFieldEqualsInt(
+  const AFieldName: string; const AExpected: integer);
 begin
   AssertEquals(AExpected, FQuery.FieldByName(AFieldName).AsInteger);
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.AssertFieldNull(const AFieldName: string);
+procedure TParticipantAndStageResultRepositoryTests.AssertFieldNull(
+  const AFieldName: string);
 begin
   AssertTrue(
     Format('Field "%s" must be NULL.', [AFieldName]),
@@ -1153,7 +1188,8 @@ begin
   FreeAndNil(FConnection);
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.OpenByNumber_ReturnsTrueForExistingAndFalseForMissing;
+procedure TParticipantAndStageResultRepositoryTests.
+OpenByNumber_ReturnsTrueForExistingAndFalseForMissing;
 begin
   InsertMainRow(101);
 
@@ -1162,7 +1198,54 @@ begin
   AssertFalse(TParticipantRepository.OpenByNumber(FQuery, 999));
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.OpenByCategoryLeader_ReturnsLeaderAndReturnsFalseWhenMissing;
+procedure TParticipantAndStageResultRepositoryTests.
+OpenById_ReadsSavedNumberWithoutPostingAnotherQuery;
+var
+  Saved: TSQLQuery;
+  ParticipantId: integer;
+begin
+  InsertMainRow(101);
+  FQuery.SQL.Text := 'SELECT * FROM main;';
+  FQuery.Open;
+  ParticipantId := FQuery.FieldByName('id').AsInteger;
+  FQuery.Edit;
+  FQuery.FieldByName('number').AsInteger := 777;
+  FQuery.FieldByName('name').AsString := 'Pending name';
+  Saved := TSQLQuery.Create(nil);
+  try
+    Saved.DataBase := FConnection;
+    Saved.Transaction := FTransaction;
+    AssertTrue(TParticipantRepository.OpenById(Saved, ParticipantId));
+    AssertEquals(101, Saved.FieldByName('number').AsInteger);
+    AssertEquals('Rider', Saved.FieldByName('name').AsString);
+    AssertEquals(Ord(dsEdit), Ord(FQuery.State));
+    AssertEquals(777, FQuery.FieldByName('number').AsInteger);
+    AssertEquals('Pending name', FQuery.FieldByName('name').AsString);
+    AssertTrue(FTransaction.Active);
+  finally
+    Saved.Free;
+    FQuery.Cancel;
+  end;
+end;
+
+procedure TParticipantAndStageResultRepositoryTests.
+OpenById_KeepsIdentityWhenParticipantNumberChanges;
+var
+  ParticipantId: integer;
+begin
+  InsertMainRow(101, 'elite', 'Alice');
+  OpenMainByNumber(101);
+  ParticipantId := FQuery.FieldByName('id').AsInteger;
+  ExecSql('UPDATE main SET number = 123 WHERE number = 101;');
+  AssertTrue(TParticipantRepository.OpenById(FQuery, ParticipantId));
+  AssertEquals(123, FQuery.FieldByName('number').AsInteger);
+  AssertEquals('Alice', FQuery.FieldByName('name').AsString);
+  ExecSql('DELETE FROM main WHERE number = 123;');
+  AssertFalse(TParticipantRepository.OpenById(FQuery, ParticipantId));
+end;
+
+procedure TParticipantAndStageResultRepositoryTests.
+OpenByCategoryLeader_ReturnsLeaderAndReturnsFalseWhenMissing;
 begin
   InsertMainRow(101, 'elite', 'Leader');
   InsertMainRow(102, 'elite', 'Rider');
@@ -1174,7 +1257,8 @@ begin
   AssertFalse(TStageResultRepository.OpenByCategoryLeader(FQuery, 1, 'missing'));
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.TryGetNumberByStartTimeBetween_ReturnsMatchAndNoMatch;
+procedure TParticipantAndStageResultRepositoryTests.
+TryGetNumberByStartTimeBetween_ReturnsMatchAndNoMatch;
 var
   Number: integer;
 begin
@@ -1192,7 +1276,42 @@ begin
   AssertEquals(0, Number);
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.GetFinishCount_CountsOnlyNonEmptyFinishTimes;
+procedure TParticipantAndStageResultRepositoryTests.
+CountQueries_ReturnSingleScalarForEmptyAndPopulatedTables;
+var
+  Pass: integer;
+
+  procedure AssertScalar(const ASql: string; const AExpected: integer);
+  begin
+    FQuery.Close;
+    FQuery.SQL.Text := ASql;
+    FQuery.Open;
+    AssertFalse('COUNT must return a row for an empty table', FQuery.EOF);
+    AssertEquals(1, FQuery.FieldCount);
+    AssertEquals(AExpected, FQuery.Fields[0].AsInteger);
+    FQuery.Next;
+    AssertTrue('Only one scalar row may be materialized', FQuery.EOF);
+    FQuery.Close;
+  end;
+
+begin
+  TStageResultRepository.GetFinishCount(FQuery, 1);
+  AssertScalar(FQuery.SQL.Text, 0);
+  TStageResultRepository.GetPenaltyGroupsCount(FQuery, 2);
+  AssertScalar(FQuery.SQL.Text, 0);
+  for Pass := 1 to 4 do
+    InsertMainRow(Pass);
+  ExecSql('UPDATE main SET finishtime1 = ''10:03:12.123'' WHERE number <= 3;');
+  ExecSql('UPDATE main SET penalty1 = ''10'' WHERE number <= 2;');
+  TStageResultRepository.GetFinishCount(FQuery, 1);
+  AssertScalar(FQuery.SQL.Text, 3);
+  TStageResultRepository.GetPenaltyGroupsCount(FQuery, 2);
+  AssertScalar(FQuery.SQL.Text, 2);
+  AssertEquals(3, TStageResultRepository.GetFinishCount(FQuery, 1));
+end;
+
+procedure TParticipantAndStageResultRepositoryTests.
+GetFinishCount_CountsOnlyNonEmptyFinishTimes;
 begin
   InsertMainRow(101);
   InsertMainRow(102);
@@ -1204,7 +1323,8 @@ begin
   AssertEquals(1, TStageResultRepository.GetFinishCount(FQuery, 1));
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.GetPenaltyGroupsCount_CountsDistinctPenaltyCombinations;
+procedure TParticipantAndStageResultRepositoryTests.
+GetPenaltyGroupsCount_CountsDistinctPenaltyCombinations;
 begin
   InsertMainRow(101);
   InsertMainRow(102);
@@ -1215,7 +1335,8 @@ begin
   AssertEquals(2, TStageResultRepository.GetPenaltyGroupsCount(FQuery, 2));
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.LoadCategories_ReturnsSortedDistinctNonEmptyValues;
+procedure TParticipantAndStageResultRepositoryTests.
+LoadCategories_ReturnsSortedDistinctNonEmptyValues;
 var
   categories: TStringList;
 begin
@@ -1239,7 +1360,8 @@ begin
   end;
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.ExecUpdateStartTimeForNumber_SetsStartAndClearsStageStatus;
+procedure TParticipantAndStageResultRepositoryTests.
+ExecUpdateStartTimeForNumber_SetsStartAndClearsStageStatus;
 begin
   InsertMainRow(101);
   ExecSql('UPDATE main SET status1 = ''1'' WHERE number = 101;');
@@ -1251,7 +1373,8 @@ begin
   AssertFieldNull('status1');
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.ExecUpdateCorrection_SetsCorrectionValue;
+procedure TParticipantAndStageResultRepositoryTests.
+ExecUpdateCorrection_SetsCorrectionValue;
 begin
   InsertMainRow(101);
 
@@ -1261,7 +1384,8 @@ begin
   AssertFieldEqualsInt('correction1', -456);
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.ExecUpdateCorrection_DoesNotCommitTransaction;
+procedure TParticipantAndStageResultRepositoryTests.
+ExecUpdateCorrection_DoesNotCommitTransaction;
 begin
   InsertMainRow(101);
 
@@ -1274,14 +1398,16 @@ begin
   AssertFieldNull('correction1');
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.ExecUpdateFinishForCheckedStages_UpdatesSpecifiedStages;
+procedure TParticipantAndStageResultRepositoryTests.
+ExecUpdateFinishForCheckedStages_UpdatesSpecifiedStages;
 const
   Stages: array[0..1] of integer = (1, 2);
 begin
   InsertMainRow(101);
   ExecSql('UPDATE main SET status1 = ''1'', status2 = ''1'' WHERE number = 101;');
 
-  TStageResultRepository.ExecUpdateFinishForCheckedStages(FQuery, Stages, '11:11:11.111', 101);
+  TStageResultRepository.ExecUpdateFinishForCheckedStages(FQuery,
+    Stages, '11:11:11.111', 101);
 
   OpenMainByNumber(101);
   AssertFieldEquals('finishtime1', '11:11:11.111');
@@ -1290,7 +1416,8 @@ begin
   AssertFieldNull('status2');
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.ExecUpdateFinishForCheckedStages_EmptyStages_NoChanges;
+procedure TParticipantAndStageResultRepositoryTests.
+ExecUpdateFinishForCheckedStages_EmptyStages_NoChanges;
 var
   EmptyStages: array of integer;
 begin
@@ -1298,13 +1425,15 @@ begin
   ExecSql('UPDATE main SET finishtime1 = ''x'' WHERE number = 101;');
   SetLength(EmptyStages, 0);
 
-  TStageResultRepository.ExecUpdateFinishForCheckedStages(FQuery, EmptyStages, '11:11:11.111', 101);
+  TStageResultRepository.ExecUpdateFinishForCheckedStages(FQuery,
+    EmptyStages, '11:11:11.111', 101);
 
   OpenMainByNumber(101);
   AssertFieldEquals('finishtime1', 'x');
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.ExecUpdateStageStatus_SetsStageResultAndClearsPlaceDiff;
+procedure TParticipantAndStageResultRepositoryTests.
+ExecUpdateStageStatus_SetsStageResultAndClearsPlaceDiff;
 begin
   InsertMainRow(101);
   ExecSql(
@@ -1319,7 +1448,8 @@ begin
   AssertFieldNull('diffleader1');
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.ExecUpdateOnlyGlobalStatusDsq_SetsStatusTo3;
+procedure TParticipantAndStageResultRepositoryTests.
+ExecUpdateOnlyGlobalStatusDsq_SetsStatusTo3;
 begin
   InsertMainRow(101);
 
@@ -1329,7 +1459,8 @@ begin
   AssertFieldEquals('status', '3');
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.ExecUpdateGlobalStatus_SetsTypedValueAndClearsNone;
+procedure TParticipantAndStageResultRepositoryTests.
+ExecUpdateGlobalStatus_SetsTypedValueAndClearsNone;
 begin
   InsertMainRow(101);
 
@@ -1342,7 +1473,8 @@ begin
   AssertFieldNull('status');
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.ExecClearOnlyGlobalStatus_ClearsGlobalStatus;
+procedure TParticipantAndStageResultRepositoryTests.
+ExecClearOnlyGlobalStatus_ClearsGlobalStatus;
 begin
   InsertMainRow(101);
   ExecSql('UPDATE main SET status = ''2'' WHERE number = 101;');
@@ -1353,7 +1485,8 @@ begin
   AssertFieldNull('status');
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.ExecClearStageStatus_ClearsOnlyStageFields;
+procedure TParticipantAndStageResultRepositoryTests.
+ExecClearStageStatus_ClearsOnlyStageFields;
 begin
   InsertMainRow(101);
   ExecSql(
@@ -1370,7 +1503,8 @@ begin
   AssertFieldEquals('status', '2');
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.ExecClearStatusAllForStage_ClearsStageAndGlobalStatus;
+procedure TParticipantAndStageResultRepositoryTests.
+ExecClearStatusAllForStage_ClearsStageAndGlobalStatus;
 begin
   InsertMainRow(101);
   ExecSql(
@@ -1414,7 +1548,8 @@ begin
   AssertTrue(Seen102);
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.SelectNumbers_ReturnsOnlyParticipantNumbers;
+procedure TParticipantAndStageResultRepositoryTests.
+SelectNumbers_ReturnsOnlyParticipantNumbers;
 var
   rowCount: integer;
   seen101, seen102: boolean;
@@ -1448,7 +1583,8 @@ begin
   AssertTrue(seen102);
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.ResetStartTime_ClearsStageStartTimeForAllRows;
+procedure TParticipantAndStageResultRepositoryTests.
+ResetStartTime_ClearsStageStartTimeForAllRows;
 begin
   InsertMainRow(101);
   InsertMainRow(102);
@@ -1464,7 +1600,8 @@ begin
   AssertFieldNull('starttime1');
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.UpdateStartTime_SetsStageStartTimeForSpecificNumber;
+procedure TParticipantAndStageResultRepositoryTests.
+UpdateStartTime_SetsStageStartTimeForSpecificNumber;
 begin
   InsertMainRow(101);
   InsertMainRow(102);
@@ -1478,7 +1615,8 @@ begin
   AssertFieldEquals('starttime1', '11:11:11.111');
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.SelectMinStartTime_ReturnsEarliestNonNullStartTime;
+procedure TParticipantAndStageResultRepositoryTests.
+SelectMinStartTime_ReturnsEarliestNonNullStartTime;
 begin
   InsertMainRow(101);
   InsertMainRow(102);
@@ -1500,7 +1638,8 @@ begin
   AssertEquals(99, TParticipantRepository.GetMaxNumber(FQuery));
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.IsParticipantOnTrack_ReturnsCurrentStageState;
+procedure TParticipantAndStageResultRepositoryTests.
+IsParticipantOnTrack_ReturnsCurrentStageState;
 begin
   InsertMainRow(101);
   InsertMainRow(102);
@@ -1513,7 +1652,8 @@ begin
   AssertFalse(TStageResultRepository.IsParticipantOnTrack(FQuery, 1, 999));
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.SelectCategoryGrouped_ReturnsDistinctCategories;
+procedure TParticipantAndStageResultRepositoryTests.
+SelectCategoryGrouped_ReturnsDistinctCategories;
 var
   Count: integer;
 begin
@@ -1535,7 +1675,8 @@ begin
   AssertEquals(2, Count);
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.SelectCategoryGroupedOrderedByStartTime_OrdersByStageStartTime;
+procedure TParticipantAndStageResultRepositoryTests.
+SelectCategoryGroupedOrderedByStartTime_OrdersByStageStartTime;
 begin
   InsertMainRow(101, 'elite');
   InsertMainRow(201, 'sport');
@@ -1551,7 +1692,8 @@ begin
   FQuery.Close;
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.SelectCategoryResults_FiltersByCategoryAndSorts;
+procedure TParticipantAndStageResultRepositoryTests.
+SelectCategoryResults_FiltersByCategoryAndSorts;
 begin
   InsertMainRow(101, 'elite');
   InsertMainRow(102, 'elite');
@@ -1567,7 +1709,8 @@ begin
     'UPDATE main SET sumplace = 1, sumresult = ''00:05:00.000'' WHERE number = 201;');
 
   FQuery.Close;
-  FQuery.SQL.Text := TParticipantRepository.SelectCategoryResults('number, sumplace, sumresult');
+  FQuery.SQL.Text := TParticipantRepository.SelectCategoryResults(
+    'number, sumplace, sumresult');
   FQuery.ParamByName('CATEGORY').AsString := 'elite';
   FQuery.Open;
   AssertEquals(102, FQuery.FieldByName('number').AsInteger);
@@ -1580,7 +1723,8 @@ begin
   FQuery.Close;
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.SelectCategoryResults_RejectsSqlFragments;
+procedure TParticipantAndStageResultRepositoryTests.
+SelectCategoryResults_RejectsSqlFragments;
 var
   Rejected: boolean;
 begin
@@ -1596,7 +1740,8 @@ begin
     Rejected);
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.StageWriteError_IncludesOperationParticipantAndStageOnly;
+procedure TParticipantAndStageResultRepositoryTests.
+StageWriteError_IncludesOperationParticipantAndStageOnly;
 var
   ErrorText: string;
 begin
@@ -1615,7 +1760,8 @@ begin
     Pos('777', ErrorText));
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.SelectStatusAll_ReturnsOnlyRowsWithGlobalStatus;
+procedure TParticipantAndStageResultRepositoryTests.
+SelectStatusAll_ReturnsOnlyRowsWithGlobalStatus;
 var
   Count: integer;
 begin
@@ -1643,7 +1789,8 @@ begin
   AssertEquals(2, Count);
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.SelectStatusByStage_ReturnsOnlyRowsWithStageStatus;
+procedure TParticipantAndStageResultRepositoryTests.
+SelectStatusByStage_ReturnsOnlyRowsWithStageStatus;
 var
   Count: integer;
 begin
@@ -1671,7 +1818,8 @@ begin
   AssertEquals(2, Count);
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.ExportFinishTime_ReturnsRequestedStageColumns;
+procedure TParticipantAndStageResultRepositoryTests.
+ExportFinishTime_ReturnsRequestedStageColumns;
 begin
   InsertMainRow(101);
   ExecSql(
@@ -1691,7 +1839,8 @@ begin
   FQuery.Close;
 end;
 
-procedure TParticipantAndStageResultRepositoryTests.TryLoadParticipantStageData_MapsFieldsToTypedModel;
+procedure TParticipantAndStageResultRepositoryTests.
+TryLoadParticipantStageData_MapsFieldsToTypedModel;
 var
   StageData: TParticipantStageData;
 begin
@@ -1796,7 +1945,8 @@ begin
   FreeAndNil(FConnection);
 end;
 
-procedure TDatasetSqlTests.CorrectionPending_ReturnsOnlyRowsWithStartAndWithoutCorrectionOrStageStatus;
+procedure TDatasetSqlTests.
+CorrectionPending_ReturnsOnlyRowsWithStartAndWithoutCorrectionOrStageStatus;
 begin
   InsertMainRow(101);
   InsertMainRow(102);
@@ -1882,7 +2032,8 @@ begin
   AssertEquals('1', StatusFor302);
 end;
 
-procedure TDatasetSqlTests.ResultStageTotal_ReturnsOnlyRowsWithSumResultOrderedByStatusThenThruPlace;
+procedure TDatasetSqlTests.
+ResultStageTotal_ReturnsOnlyRowsWithSumResultOrderedByStatusThenThruPlace;
 begin
   InsertMainRow(401, 'elite', 'A');
   InsertMainRow(402, 'elite', 'B');
@@ -1903,7 +2054,8 @@ begin
   AssertEquals(1, FQuery.FieldByName('sumplace').AsInteger);
 end;
 
-procedure TDatasetSqlTests.ResultStageSum_ReturnsOnlyRowsWithSumResultOrderedByCategoryStatusStagesAndPlace;
+procedure TDatasetSqlTests.
+ResultStageSum_ReturnsOnlyRowsWithSumResultOrderedByCategoryStatusStagesAndPlace;
 begin
   InsertMainRow(501, 'elite', 'E1');
   InsertMainRow(502, 'elite', 'E2');
@@ -1924,8 +2076,7 @@ begin
 
   OpenBySql(TDatasetSql.ResultStageSum([1]));
   AssertEquals(6 + DEFAULT_STAGE_COUNT, FQuery.Fields.Count);
-  AssertTrue(Assigned(FQuery.FindField(
-    'result' + IntToStr(DEFAULT_STAGE_COUNT))));
+  AssertTrue(Assigned(FQuery.FindField('result' + IntToStr(DEFAULT_STAGE_COUNT))));
   AssertFalse(Assigned(FQuery.FindField(
     'result' + IntToStr(DEFAULT_STAGE_COUNT + 1))));
   AssertFalse(Assigned(FQuery.FindField('status')));
@@ -1990,7 +2141,7 @@ begin
 end;
 
 procedure TSchemaSqlStatementTests.
-  CreateBackup_CreatesUsableCopyAndAppliesBusyTimeout;
+CreateBackup_CreatesUsableCopyAndAppliesBusyTimeout;
 var
   BackupPath: string;
   BackupConnection: TSQLite3Connection;
@@ -2222,7 +2373,8 @@ begin
   FQuery.Close;
 end;
 
-procedure TStartlistSqlTests.SelectNumbersForCategory_ResultMode_ExcludesNullResultFromOtherCategory;
+procedure TStartlistSqlTests.
+SelectNumbersForCategory_ResultMode_ExcludesNullResultFromOtherCategory;
 begin
   InsertMainRow(201, 'elite', 'Elite rider');
   InsertMainRow(202, 'sport', 'Sport rider');
@@ -2241,6 +2393,152 @@ begin
   AssertTrue('A participant from another category must not be selected',
     FQuery.EOF);
   FQuery.Close;
+end;
+
+procedure TResultCalculationRepositoryTests.CountStatement(Sender: TSQLConnection;
+  EventType: TDBEventType; const Msg: string);
+begin
+  if EventType = detExecute then
+    Inc(FStatementCount);
+end;
+
+procedure TResultCalculationRepositoryTests.
+PreparedSumUpdate_WritesOnlyChangedRowsAndHandlesNulls;
+var
+  Probe: TSQLQuery;
+
+  procedure AssertChanged(const Expected: integer);
+  begin
+    Probe.Close;
+    Probe.SQL.Text := 'SELECT changes();';
+    Probe.Open;
+    AssertEquals(Expected, Probe.Fields[0].AsInteger);
+    Probe.Close;
+  end;
+
+begin
+  InsertMainRow(1);
+  InsertMainRow(2);
+  ExecSql('UPDATE main SET sumresult = ''00:10:00.000'', sumstages = 1 WHERE number = 1;');
+  ExecSql('UPDATE main SET status = ''2'' WHERE number = 2;');
+  Probe := TSQLQuery.Create(nil);
+  Probe.DataBase := FConnection;
+  Probe.Transaction := FTransaction;
+  try
+    TResultCalculationRepository.PrepareSumResultUpdate(FQuery);
+    try
+      TResultCalculationRepository.ExecPreparedSumResult(FQuery, '1',
+        '00:10:00.000', 1, True);
+      AssertChanged(0);
+      TResultCalculationRepository.ExecPreparedSumResult(FQuery, '2',
+        '00:11:00.000', 1, True);
+      AssertChanged(1);
+      TResultCalculationRepository.ExecPreparedSumResult(FQuery, '2',
+        '00:11:00.000', 1, True);
+      AssertChanged(0);
+      TResultCalculationRepository.ExecPreparedSumResult(FQuery, '2', '', 0, False);
+      AssertChanged(1);
+      TResultCalculationRepository.ExecPreparedSumResult(FQuery, '2', '', 0, False);
+      AssertChanged(0);
+    finally
+      TResultCalculationRepository.FinishPreparedSumResultUpdate(FQuery);
+    end;
+    OpenMainByNumber(2);
+    AssertTrue(FQuery.FieldByName('sumresult').IsNull);
+    AssertTrue(FQuery.FieldByName('sumstages').IsNull);
+    AssertTrue(FQuery.FieldByName('status').IsNull);
+  finally
+    Probe.Free;
+  end;
+end;
+
+procedure TResultCalculationRepositoryTests.
+CombinedStandings_MatchLegacyQueriesAndReduceStatements;
+var
+  Legacy, Current: TStringList;
+  I, Stage: integer;
+
+  procedure Snapshot(const Values: TStrings);
+  var
+    J: integer;
+  begin
+    FQuery.Close;
+    FQuery.SQL.Text := 'SELECT * FROM main ORDER BY id;';
+    FQuery.Open;
+    while not FQuery.EOF do
+    begin
+      for J := 0 to FQuery.FieldCount - 1 do
+        if FQuery.Fields[J].IsNull then
+          Values.Add('<NULL>')
+        else
+          Values.Add(FQuery.Fields[J].AsString);
+      FQuery.Next;
+    end;
+    FQuery.Close;
+  end;
+
+begin
+  // Retain the previous individual statements as the behavioural reference.
+  // Include ties, incomplete stages, NULL/empty categories and all statuses.
+  for I := 1 to 120 do
+    InsertMainRow(I);
+  ExecSql('UPDATE main SET category = CASE WHEN number % 6 = 0 THEN NULL ' +
+    'WHEN number % 6 = 1 THEN '''' ELSE ''Category '' || (number % 3) END, ' +
+    'starttime1 = ''10:00:00'', starttime2 = ''11:00:00'', ' +
+    'finishtime1 = ''10:10:00'', finishtime2 = CASE WHEN number % 5 = 0 THEN NULL ELSE ''11:12:00'' END, '
+    +
+    'status1 = CASE WHEN number % 11 = 0 THEN ''1'' WHEN number % 13 = 0 THEN ''2'' END, '
+    + 'status = CASE WHEN number % 17 = 0 THEN ''3'' WHEN number % 19 = 0 THEN ''2'' END, '
+    + 'sumresult = CASE WHEN number % 23 = 0 THEN NULL ELSE ''00:22:00.000'' END, ' +
+    'sumstages = CASE WHEN number % 5 = 0 THEN 1 ELSE 2 END, ' +
+    'place1 = 999, diffleader1 = ''stale'', sumplace = 999, sumdiffleader = ''stale'', '
+    +
+    'thruplace = 999, thrudiff = ''stale'';');
+  ExecSql('INSERT INTO main (number, category, place1, sumplace, thruplace) ' +
+    'VALUES (NULL, ''unassigned'', 999, 999, 999);');
+  ExecSql('CREATE TABLE original_main AS SELECT * FROM main;');
+  Legacy := TStringList.Create;
+  Current := TStringList.Create;
+  try
+    for Stage := 1 to 2 do
+    begin
+      ExecSql(TResultCalculationRepository.UpdateStageResult(Stage, 2));
+      ExecSql(TResultCalculationRepository.ResetStagePlaceAndDiff(Stage, 2));
+      ExecSql(TResultCalculationRepository.UpsertStagePlace(Stage, 2));
+      ExecSql(TResultCalculationRepository.ResetStageDiffLeader(Stage, 2));
+      ExecSql(TResultCalculationRepository.UpsertStageDiffLeader(Stage, 2));
+    end;
+    ExecSql(TResultCalculationRepository.ResetSumPlaceAndDiff);
+    ExecSql(TResultCalculationRepository.UpsertSumPlaceOnlyFullStages([1, 2], 2));
+    ExecSql(TResultCalculationRepository.ResetSumDiffLeader);
+    ExecSql(TResultCalculationRepository.UpsertSumDiffLeader);
+    ExecSqlWithStageCaption(TResultCalculationRepository.UpsertSumDiffByStages, 'SU');
+    ExecSql(TResultCalculationRepository.ResetThru);
+    ExecSql(TResultCalculationRepository.UpsertThruPlace);
+    ExecSql(TResultCalculationRepository.UpsertThruDiff);
+    ExecSqlWithStageCaption(TResultCalculationRepository.UpsertThruDiffByStages, 'SU');
+    Snapshot(Legacy);
+    ExecSql('DELETE FROM main;');
+    ExecSql('INSERT INTO main SELECT * FROM original_main;');
+    FStatementCount := 0;
+    FConnection.OnLog := @CountStatement;
+    try
+      for Stage := 1 to 2 do
+        TResultCalculationRepository.ExecCalculateStage(FQuery, Stage, 2);
+      TResultCalculationRepository.FinishSumCalculation(FQuery, [1, 2], 2, 'SU');
+      TResultCalculationRepository.ExecCalculateThru(FQuery, 'SU');
+    finally
+      FConnection.OnLog := nil;
+    end;
+    Snapshot(Current);
+    AssertEquals('Every field must match the previous calculation',
+      Legacy.Text, Current.Text);
+    AssertEquals('Fewer statements for two stages and overall standings',
+      12, FStatementCount);
+  finally
+    Current.Free;
+    Legacy.Free;
+  end;
 end;
 
 procedure TResultCalculationRepositoryTests.CreateSchema;
@@ -2304,7 +2602,8 @@ begin
   FreeAndNil(FConnection);
 end;
 
-procedure TResultCalculationRepositoryTests.UpdateStageResult_HandlesStatusesAndTimeCalculations;
+procedure TResultCalculationRepositoryTests.
+UpdateStageResult_HandlesStatusesAndTimeCalculations;
 begin
   InsertMainRow(101);
   InsertMainRow(102);
@@ -2336,7 +2635,8 @@ begin
   AssertTrue(FQuery.FieldByName('result1').AsString <> '');
 end;
 
-procedure TResultCalculationRepositoryTests.SelectForSumCalculation_ReturnsOnlyRequestedStageResults;
+procedure TResultCalculationRepositoryTests.
+SelectForSumCalculation_ReturnsOnlyRequestedStageResults;
 begin
   InsertMainRow(110);
   ExecSql(
@@ -2355,7 +2655,8 @@ begin
   AssertFalse(Assigned(FQuery.FindField('result2')));
 end;
 
-procedure TResultCalculationRepositoryTests.UpdateSumResult_UpdatesValuesAndPreservesStatusConditionally;
+procedure TResultCalculationRepositoryTests.
+UpdateSumResult_UpdatesValuesAndPreservesStatusConditionally;
 begin
   InsertMainRow(111);
   InsertMainRow(112);
@@ -2393,7 +2694,8 @@ begin
   AssertEquals('3', FQuery.FieldByName('status').AsString);
 end;
 
-procedure TResultCalculationRepositoryTests.ResetStagePlaceAndDiff_AndUpsertStagePlace_AssignsPlaces;
+procedure TResultCalculationRepositoryTests.
+ResetStagePlaceAndDiff_AndUpsertStagePlace_AssignsPlaces;
 begin
   InsertMainRow(201, 'elite');
   InsertMainRow(202, 'elite');
@@ -2416,7 +2718,8 @@ begin
   AssertEquals(1, FQuery.FieldByName('place1').AsInteger);
 end;
 
-procedure TResultCalculationRepositoryTests.ResetStageDiffLeader_AndUpsertStageDiffLeader_SetsLeaderDiff;
+procedure TResultCalculationRepositoryTests.
+ResetStageDiffLeader_AndUpsertStageDiffLeader_SetsLeaderDiff;
 begin
   InsertMainRow(301, 'elite');
   InsertMainRow(302, 'elite');
@@ -2434,7 +2737,8 @@ begin
   AssertTrue(FQuery.FieldByName('diffleader1').AsString <> '');
 end;
 
-procedure TResultCalculationRepositoryTests.ResetSumPlaceAndDiff_AndUpsertSumPlaceOnlyFullStages_AssignsSumPlace;
+procedure TResultCalculationRepositoryTests.
+ResetSumPlaceAndDiff_AndUpsertSumPlaceOnlyFullStages_AssignsSumPlace;
 const
   ActiveStages: array[0..1] of integer = (1, 2);
 begin
@@ -2462,7 +2766,8 @@ begin
   AssertTrue(FQuery.FieldByName('sumplace').IsNull);
 end;
 
-procedure TResultCalculationRepositoryTests.ResetSumDiffLeader_AndUpsertSumDiffLeader_SetsSumDiff;
+procedure TResultCalculationRepositoryTests.
+ResetSumDiffLeader_AndUpsertSumDiffLeader_SetsSumDiff;
 begin
   InsertMainRow(501, 'elite');
   InsertMainRow(502, 'elite');
@@ -2508,7 +2813,8 @@ begin
   AssertTrue(Pos('stages', FQuery.FieldByName('sumdiffleader').AsString) > 0);
 end;
 
-procedure TResultCalculationRepositoryTests.ResetThru_AndUpsertThruPlace_AssignsThruPlace;
+procedure TResultCalculationRepositoryTests.
+ResetThru_AndUpsertThruPlace_AssignsThruPlace;
 begin
   InsertMainRow(701, 'elite');
   InsertMainRow(702, 'elite');
@@ -2534,7 +2840,8 @@ begin
   AssertEquals(3, FQuery.FieldByName('thruplace').AsInteger);
 end;
 
-procedure TResultCalculationRepositoryTests.UpsertThruDiff_AndUpsertThruDiffByStages_SetsThruDiff;
+procedure TResultCalculationRepositoryTests.
+UpsertThruDiff_AndUpsertThruDiffByStages_SetsThruDiff;
 begin
   InsertMainRow(801, 'elite');
   InsertMainRow(802, 'elite');
@@ -2560,7 +2867,8 @@ begin
   AssertTrue(Pos('stages', FQuery.FieldByName('thrudiff').AsString) > 0);
 end;
 
-procedure TResultCalculationRepositoryTests.UpsertThruDiffByStages_UnfinishedRaceWithEqualStages_PreservesTimeDiff;
+procedure TResultCalculationRepositoryTests.
+UpsertThruDiffByStages_UnfinishedRaceWithEqualStages_PreservesTimeDiff;
 begin
   InsertMainRow(811, 'elite');
   InsertMainRow(812, 'elite');
@@ -2582,15 +2890,16 @@ begin
     Pos('+0 stages', FQuery.FieldByName('thrudiff').AsString) = 0);
 end;
 
-procedure TResultCalculationRepositoryTests.ClearResultsPrefixStageSuffix_ClearsResultsColumns;
+procedure TResultCalculationRepositoryTests.
+ClearResultsPrefixStageSuffix_ClearsResultsColumns;
 begin
   InsertMainRow(901);
   ExecSql(
-    'UPDATE main SET correction1 = 10, finishtime1 = ''10:10:10.100'', penalty1 = ''5'', ' +
-    'result1 = ''00:01:00.000'', diffleader1 = ''00:00:05.000'', place1 = 1, status1 = ''1'', ' +
-    'correction2 = 11, finishtime2 = ''10:11:10.100'', penalty2 = ''6'', result2 = ''00:02:00.000'', ' +
-    'diffleader2 = ''00:00:06.000'', place2 = 2, status2 = ''2'', sumplace = 3, sumresult = ''00:20:00.000'', ' +
-    'sumdiffleader = ''00:00:10.000'', thrudiff = ''00:00:15.000'', status = ''3'' WHERE number = 901;');
+    'UPDATE main SET correction1 = 10, finishtime1 = ''10:10:10.100'', penalty1 = ''5'', '
+    + 'result1 = ''00:01:00.000'', diffleader1 = ''00:00:05.000'', place1 = 1, status1 = ''1'', '
+    + 'correction2 = 11, finishtime2 = ''10:11:10.100'', penalty2 = ''6'', result2 = ''00:02:00.000'', '
+    + 'diffleader2 = ''00:00:06.000'', place2 = 2, status2 = ''2'', sumplace = 3, sumresult = ''00:20:00.000'', '
+    + 'sumdiffleader = ''00:00:10.000'', thrudiff = ''00:00:15.000'', status = ''3'' WHERE number = 901;');
 
   FQuery.Close;
   FQuery.SQL.Clear;
@@ -2713,7 +3022,8 @@ begin
   AssertEquals('10:10:00.000', FQuery.FieldByName('starttime2').AsString);
 end;
 
-procedure TCompetitionImportRepositoryTests.ParticipantUpsert_ParametersPreserveSqlSensitiveCharacters;
+procedure TCompetitionImportRepositoryTests.
+ParticipantUpsert_ParametersPreserveSqlSensitiveCharacters;
 var
   StartItem: TStartItemModel;
 begin
@@ -2750,7 +3060,8 @@ begin
   FQuery.Close;
 end;
 
-procedure TCompetitionImportRepositoryTests.BindParticipantRowParameters_MapsModelToQueryParams;
+procedure TCompetitionImportRepositoryTests.
+BindParticipantRowParameters_MapsModelToQueryParams;
 var
   StartItem: TStartItemModel;
 begin
@@ -2795,7 +3106,8 @@ begin
   end;
 end;
 
-procedure TCompetitionImportRepositoryTests.ApplyStageDefinitions_ReplacesActiveSetAndPreservesHiddenNames;
+procedure TCompetitionImportRepositoryTests.
+ApplyStageDefinitions_ReplacesActiveSetAndPreservesHiddenNames;
 var
   StageNames: TStringList;
 begin
@@ -2822,7 +3134,8 @@ begin
   AssertEquals(8, TConfigSql.GetInteger(FQuery, 'stagecount', 0));
 end;
 
-procedure TCompetitionImportRepositoryTests.ApplyStageDefinitions_EmptyListPreservesConfiguration;
+procedure TCompetitionImportRepositoryTests.
+ApplyStageDefinitions_EmptyListPreservesConfiguration;
 var
   StageNames: TStringList;
 begin
@@ -2841,7 +3154,8 @@ begin
     TConfigSql.GetString(FQuery, 'stagename3', ''));
 end;
 
-procedure TCompetitionImportRepositoryTests.PreparedFullStageResultRows_ImportAndUpsertValues;
+procedure TCompetitionImportRepositoryTests.
+PreparedFullStageResultRows_ImportAndUpsertValues;
 var
   ImportRow: TStageResultImportRow;
 begin
@@ -2875,7 +3189,8 @@ begin
     FQuery.FieldByName('status2').AsString);
 end;
 
-procedure TCompetitionImportRepositoryTests.PreparedStartResultRows_PreserveNullsAndSelectedStage;
+procedure TCompetitionImportRepositoryTests.
+PreparedStartResultRows_PreserveNullsAndSelectedStage;
 var
   ImportRow: TStageResultImportRow;
 begin
@@ -2902,7 +3217,8 @@ begin
     FQuery.FieldByName('status2').AsString);
 end;
 
-procedure TCompetitionImportRepositoryTests.PreparedFinishResultRows_PreserveNullStatusAndSelectedStage;
+procedure TCompetitionImportRepositoryTests.
+PreparedFinishResultRows_PreserveNullStatusAndSelectedStage;
 var
   ImportRow: TStageResultImportRow;
 begin

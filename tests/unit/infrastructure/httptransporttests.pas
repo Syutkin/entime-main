@@ -40,9 +40,8 @@ begin
   Fields[0] := HttpFormField('name', 'Alice & Bob');
   Fields[1] := HttpFormField('empty', '');
 
-  Request := BuildHttpGetRequest(
-    'https://example.test/path?existing=yes#details', Fields, 3000, 5000,
-    False);
+  Request := BuildHttpGetRequest('https://example.test/path?existing=yes#details',
+    Fields, 3000, 5000, False);
 
   AssertEquals(Ord(hmGet), Ord(Request.Method));
   AssertEquals(
@@ -64,8 +63,8 @@ begin
   Fields[0] := HttpFormField('chat_id', '-100 42');
   Fields[1] := HttpFormField('text', 'Готово!');
 
-  Request := BuildHttpFormPostRequest(
-    'https://example.test/send', Fields, 1000, 2000);
+  Request := BuildHttpFormPostRequest('https://example.test/send',
+    Fields, 1000, 2000);
 
   AssertEquals(Ord(hmPost), Ord(Request.Method));
   AssertEquals('https://example.test/send', Request.Url);

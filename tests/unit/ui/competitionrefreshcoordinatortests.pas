@@ -72,7 +72,7 @@ begin
 end;
 
 procedure TCompetitionRefreshCoordinatorTests.
-  RefreshAll_ContinuesAfterQueryErrorAndRestoresParticipant;
+RefreshAll_ContinuesAfterQueryErrorAndRestoresParticipant;
 var
   Outcome: TCompetitionRefreshOutcome;
 begin

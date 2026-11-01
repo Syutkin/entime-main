@@ -31,8 +31,7 @@ var
   Mark: TStartMark;
 begin
   Input := TTimingMark.Start(EncodeTime(8, 1, 2, 3), True, 21,
-    TTimingMarkSource.Ble('ENTime-3'),
-    EncodeDateTime(2026, 8, 13, 8, 1, 3, 4));
+    TTimingMarkSource.Ble('ENTime-3'), EncodeDateTime(2026, 8, 13, 8, 1, 3, 4));
 
   Mark := TStartMark.FromTimingMark(Input, 4);
 
@@ -60,8 +59,8 @@ var
 begin
   AppliedAt := EncodeDateTime(2026, 8, 13, 10, 2, 3, 4);
   Mark := TStartMark.FromTimingMark(TTimingMark.Start(
-    EncodeTime(10, 2, 1, 0), True, 125,
-    TTimingMarkSource.Serial('COM1'), AppliedAt - OneSecond), 2);
+    EncodeTime(10, 2, 1, 0), True, 125, TTimingMarkSource.Serial('COM1'),
+    AppliedAt - OneSecond), 2);
 
   AssertTrue(Mark.TryApply(17, 3, smamManual, AppliedAt));
 
@@ -83,8 +82,7 @@ var
   Mark: TStartMark;
 begin
   Mark := TStartMark.FromTimingMark(TTimingMark.Start(
-    EncodeTime(10, 2, 1, 0), True, 125,
-    TTimingMarkSource.Ble('device'), Now), 2);
+    EncodeTime(10, 2, 1, 0), True, 125, TTimingMarkSource.Ble('device'), Now), 2);
   Mark.MarkConflict('ambiguous');
 
   AssertTrue(Mark.TryApply(17, 2, smamManual, Now));
@@ -97,8 +95,7 @@ var
   Mark: TStartMark;
 begin
   Mark := TStartMark.FromTimingMark(TTimingMark.Start(
-    EncodeTime(10, 2, 1, 0), True, 125,
-    TTimingMarkSource.Ble('device'), Now), 2);
+    EncodeTime(10, 2, 1, 0), True, 125, TTimingMarkSource.Ble('device'), Now), 2);
 
   try
     Mark.TryApply(17, 3, smamAutomatic, Now);
@@ -120,8 +117,8 @@ var
 begin
   FirstAppliedAt := EncodeDateTime(2026, 8, 13, 10, 2, 3, 4);
   Mark := TStartMark.FromTimingMark(TTimingMark.Start(
-    EncodeTime(10, 2, 1, 0), True, 125,
-    TTimingMarkSource.Serial('COM1'), FirstAppliedAt - OneSecond), 2);
+    EncodeTime(10, 2, 1, 0), True, 125, TTimingMarkSource.Serial('COM1'),
+    FirstAppliedAt - OneSecond), 2);
   AssertTrue(Mark.TryApply(17, 2, smamAutomatic, FirstAppliedAt));
 
   AssertFalse(Mark.TryApply(99, 4, smamManual, FirstAppliedAt + OneHour));
@@ -137,8 +134,7 @@ var
   Mark: TStartMark;
 begin
   Mark := TStartMark.FromTimingMark(TTimingMark.Start(
-    EncodeTime(10, 2, 1, 0), True, 125,
-    TTimingMarkSource.Serial('COM1'), Now), 2);
+    EncodeTime(10, 2, 1, 0), True, 125, TTimingMarkSource.Serial('COM1'), Now), 2);
 
   Mark.HasMatchDeltaMs := True;
   Mark.MatchDeltaMs := 1250;
@@ -159,8 +155,7 @@ var
   Mark: TStartMark;
 begin
   Mark := TStartMark.FromTimingMark(TTimingMark.Start(
-    EncodeTime(10, 2, 1, 0), True, 125,
-    TTimingMarkSource.Serial('COM1'), Now), 2);
+    EncodeTime(10, 2, 1, 0), True, 125, TTimingMarkSource.Serial('COM1'), Now), 2);
   Mark.MarkConflict('ambiguous');
 
   Mark.SetParticipantNumber(True, 23);
@@ -184,8 +179,7 @@ var
   Applied, Conflict, Pending: TStartMark;
 begin
   Pending := TStartMark.FromTimingMark(TTimingMark.Start(
-    EncodeTime(10, 2, 1, 0), True, 125,
-    TTimingMarkSource.Serial('COM1'), Now), 2);
+    EncodeTime(10, 2, 1, 0), True, 125, TTimingMarkSource.Serial('COM1'), Now), 2);
   Conflict := Pending;
   Conflict.MarkConflict('ambiguous');
   Applied := Pending;
@@ -211,8 +205,7 @@ var
   Mark: TStartMark;
 begin
   Mark := TStartMark.FromTimingMark(TTimingMark.Start(
-    EncodeTime(10, 2, 1, 0), False, 0,
-    TTimingMarkSource.Serial('COM1'), Now), 2);
+    EncodeTime(10, 2, 1, 0), False, 0, TTimingMarkSource.Serial('COM1'), Now), 2);
   Mark.Hide;
   AssertEquals(Ord(smsHidden), Ord(Mark.Status));
   try

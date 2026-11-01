@@ -73,8 +73,8 @@ begin
   Result.Status := fmsPending;
 end;
 
-procedure TFinishMark.SetParticipantNumber(
-  const AHasParticipantNumber: boolean; const AParticipantNumber: integer);
+procedure TFinishMark.SetParticipantNumber(const AHasParticipantNumber: boolean;
+  const AParticipantNumber: integer);
 begin
   if Status <> fmsPending then
     raise EInvalidOp.CreateFmt(
@@ -82,8 +82,7 @@ begin
       [FinishMarkStatusCode(Status)]);
   if AHasParticipantNumber and (AParticipantNumber < 1) then
     raise EArgumentOutOfRangeException.CreateFmt(
-      'Participant number %d must be greater than zero.',
-      [AParticipantNumber]);
+      'Participant number %d must be greater than zero.', [AParticipantNumber]);
   HasParticipantNumber := AHasParticipantNumber;
   if AHasParticipantNumber then
     ParticipantNumber := AParticipantNumber
@@ -97,13 +96,11 @@ begin
   if Status = fmsApplied then
     Exit(False);
   if Status <> fmsPending then
-    raise EInvalidOp.CreateFmt(
-      'A finish mark in status %s cannot be applied.',
+    raise EInvalidOp.CreateFmt('A finish mark in status %s cannot be applied.',
       [FinishMarkStatusCode(Status)]);
   if AParticipantNumber < 1 then
     raise EArgumentOutOfRangeException.CreateFmt(
-      'Participant number %d must be greater than zero.',
-      [AParticipantNumber]);
+      'Participant number %d must be greater than zero.', [AParticipantNumber]);
   if AAppliedAt <= 0 then
     raise EArgumentOutOfRangeException.Create(
       'AppliedAt must be a valid date and time.');

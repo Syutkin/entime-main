@@ -8,12 +8,13 @@ unit MyForks;
 interface
 
 uses
-  MyRxDBGrid, LazarusPackageIntf;
+  MySpinEdit, MyRxDBGrid, LazarusPackageIntf;
 
 implementation
 
 procedure Register;
 begin
+  RegisterUnit('MySpinEdit', @MySpinEdit.Register);
   RegisterUnit('MyRxDBGrid', @MyRxDBGrid.Register);
 end;
 

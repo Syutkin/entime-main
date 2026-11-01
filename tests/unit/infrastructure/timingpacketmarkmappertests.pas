@@ -31,8 +31,8 @@ begin
   Packet.CorrectionMs := -9;
   ReceivedAt := EncodeDateTime(2026, 8, 13, 12, 1, 3, 4);
 
-  Mark := TimingMarkFromTimingPacket(Packet,
-    TTimingMarkSource.Serial('COM4'), ReceivedAt);
+  Mark := TimingMarkFromTimingPacket(Packet, TTimingMarkSource.Serial('COM4'),
+    ReceivedAt);
 
   AssertEquals(Ord(tmkStart), Ord(Mark.Kind));
   AssertEquals(Packet.EventTime, Mark.EventTime);
@@ -53,8 +53,7 @@ begin
   Packet.HasCorrection := True;
   Packet.CorrectionMs := 99;
 
-  Mark := TimingMarkFromTimingPacket(Packet,
-    TTimingMarkSource.Ble('device-5'),
+  Mark := TimingMarkFromTimingPacket(Packet, TTimingMarkSource.Ble('device-5'),
     EncodeDateTime(2026, 8, 13, 13, 2, 4, 5));
 
   AssertEquals(Ord(tmkFinish), Ord(Mark.Kind));
@@ -63,7 +62,7 @@ begin
 end;
 
 procedure TTimingPacketMarkMapperTests.
-  Map_SamePacketPreservesDomainFieldsAndDistinguishesSource;
+Map_SamePacketPreservesDomainFieldsAndDistinguishesSource;
 var
   BleMark, SerialMark: TTimingMark;
   Packet: TTimingPacket;
@@ -76,10 +75,10 @@ begin
   Packet.CorrectionMs := 17;
   ReceivedAt := EncodeDateTime(2026, 8, 13, 14, 3, 5, 6);
 
-  SerialMark := TimingMarkFromTimingPacket(Packet,
-    TTimingMarkSource.Serial('COM8'), ReceivedAt);
-  BleMark := TimingMarkFromTimingPacket(Packet,
-    TTimingMarkSource.Ble('device-8'), ReceivedAt);
+  SerialMark := TimingMarkFromTimingPacket(Packet, TTimingMarkSource.Serial('COM8'),
+    ReceivedAt);
+  BleMark := TimingMarkFromTimingPacket(Packet, TTimingMarkSource.Ble('device-8'),
+    ReceivedAt);
 
   AssertEquals(Ord(SerialMark.Kind), Ord(BleMark.Kind));
   AssertEquals(SerialMark.EventTime, BleMark.EventTime);

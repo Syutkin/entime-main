@@ -1,0 +1,140 @@
+inherited StartProtocolPrintForm: TStartProtocolPrintForm
+  Height = 840
+  Constraints.MinHeight = 700
+  Caption = 'Стартовый протокол'
+  OnCreate = StartCreate
+  inherited ParametersPanel: TPanel
+    inherited StageLabel: TLabel
+      Visible = False
+    end
+    inherited StageCombo: TComboBox
+      Visible = False
+      TabStop = False
+    end
+    inherited IncompleteCheck: TCheckBox
+      AnchorSideTop.Control = SourcePanel
+      AnchorSideTop.Side = asrBottom
+    end
+    object SourcePanel: TPanel
+      AnchorSideLeft.Control = ParametersPanel
+      AnchorSideTop.Control = TemplatePanel
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = ParametersPanel
+      AnchorSideRight.Side = asrBottom
+      Anchors = [akTop, akLeft, akRight]
+      AutoSize = True
+      BorderSpacing.Top = 8
+      BevelOuter = bvNone
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 1
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      TabOrder = 2
+      object ModePanel: TPanel
+        AutoSize = True
+        BevelOuter = bvNone
+        BorderSpacing.Bottom = 6
+        TabOrder = 0
+        object ModeLabel: TLabel
+          AnchorSideLeft.Control = ModePanel
+          AnchorSideTop.Control = ModePanel
+          Caption = 'Протокол'
+        end
+        object ModeCombo: TComboBox
+          AnchorSideLeft.Control = ModePanel
+          AnchorSideTop.Control = ModeLabel
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = ModePanel
+          AnchorSideRight.Side = asrBottom
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Top = 4
+          Style = csDropDownList
+          TabOrder = 0
+          OnChange = SourceChange
+        end
+      end
+      object FitWidthCheck: TCheckBox
+        AutoSize = True
+        Caption = 'Вместить по горизонтали'
+        TabOrder = 1
+        OnChange = SourceChange
+      end
+      object SingleStagePanel: TPanel
+        AutoSize = True
+        BevelOuter = bvNone
+        BorderSpacing.Bottom = 6
+        TabOrder = 2
+        object StartStageLabel: TLabel
+          AnchorSideLeft.Control = SingleStagePanel
+          AnchorSideTop.Control = SingleStagePanel
+          Caption = 'СУ'
+        end
+        object StartStageCombo: TComboBox
+          AnchorSideLeft.Control = SingleStagePanel
+          AnchorSideTop.Control = StartStageLabel
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = SingleStagePanel
+          AnchorSideRight.Side = asrBottom
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Top = 4
+          Style = csDropDownList
+          TabOrder = 0
+          OnChange = SourceChange
+        end
+      end
+      object OrderPanel: TPanel
+        AutoSize = True
+        BevelOuter = bvNone
+        BorderSpacing.Bottom = 6
+        TabOrder = 3
+        object OrderLabel: TLabel
+          AnchorSideLeft.Control = OrderPanel
+          AnchorSideTop.Control = OrderPanel
+          Caption = 'Порядок'
+        end
+        object OrderCombo: TComboBox
+          AnchorSideLeft.Control = OrderPanel
+          AnchorSideTop.Control = OrderLabel
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = OrderPanel
+          AnchorSideRight.Side = asrBottom
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Top = 4
+          Style = csDropDownList
+          TabOrder = 0
+          OnChange = SourceChange
+        end
+      end
+      object SortPanel: TPanel
+        AutoSize = True
+        BevelOuter = bvNone
+        BorderSpacing.Bottom = 6
+        TabOrder = 4
+        object SortStageLabel: TLabel
+          AnchorSideLeft.Control = SortPanel
+          AnchorSideTop.Control = SortPanel
+          Caption = 'Сортировать по старту СУ'
+        end
+        object SortStageCombo: TComboBox
+          AnchorSideLeft.Control = SortPanel
+          AnchorSideTop.Control = SortStageLabel
+          AnchorSideTop.Side = asrBottom
+          AnchorSideRight.Control = SortPanel
+          AnchorSideRight.Side = asrBottom
+          Anchors = [akTop, akLeft, akRight]
+          BorderSpacing.Top = 4
+          Style = csDropDownList
+          TabOrder = 0
+          OnChange = SourceChange
+        end
+      end
+      object TeamCheck: TCheckBox
+        AutoSize = True
+        Caption = 'Команда'
+        Checked = True
+        State = cbChecked
+        TabOrder = 5
+        OnChange = SourceChange
+      end
+    end
+  end
+end

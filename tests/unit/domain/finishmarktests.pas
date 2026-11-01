@@ -45,8 +45,7 @@ var
   Mark: TFinishMark;
 begin
   Input := TTimingMark.Finish(EncodeTime(9, 2, 3, 4),
-    TTimingMarkSource.Serial('COM9'),
-    EncodeDateTime(2026, 8, 13, 9, 2, 4, 5));
+    TTimingMarkSource.Serial('COM9'), EncodeDateTime(2026, 8, 13, 9, 2, 4, 5));
 
   Mark := TFinishMark.FromTimingMark(Input, 2);
 

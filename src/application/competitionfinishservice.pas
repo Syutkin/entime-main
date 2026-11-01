@@ -35,11 +35,9 @@ type
     AppliedAt: TDateTime;
     class function Create(const AParticipantNumber, AStageIndex: integer;
       const AFinishTime: string; const ATrackPolicy: TFinishTrackPolicy;
-      const AOverwritePolicy: TFinishOverwritePolicy): TFinishRequest;
-      static;
+      const AOverwritePolicy: TFinishOverwritePolicy): TFinishRequest; static;
     class function CreateForMark(const AMarkId: int64;
-      const AParticipantNumber: integer;
-      const ATrackPolicy: TFinishTrackPolicy;
+      const AParticipantNumber: integer; const ATrackPolicy: TFinishTrackPolicy;
       const AOverwritePolicy: TFinishOverwritePolicy;
       const AAppliedAt: TDateTime): TFinishRequest; static;
   end;
@@ -56,6 +54,9 @@ type
     PreviousLeaderNumber: integer;
     PreviousLeaderResult: string;
   end;
+
+  TFinishRequests = array of TFinishRequest;
+  TFinishResults = array of TFinishResult;
 
   TFinishFailure = record
     Kind: TFinishFailureKind;
@@ -81,29 +82,31 @@ type
       const AKind: TFinishFailureKind; const AMessage: string); static;
   public
     class function Inspect(const AContext: TCompetitionDbContext;
-      const AStages: TStages; const AParticipantNumber,
-      AStageIndex: integer): TFinishInspection; static;
+      const AStages: TStages; const AParticipantNumber, AStageIndex: integer):
+      TFinishInspection; static;
+    // All approved requests commit together; results describe the final batch state.
+    class function TrySaveBatch(const AContext: TCompetitionDbContext;
+      const AStages: TStages; const ARequests: array of TFinishRequest;
+      out AResults: TFinishResults; out AFailure: TFinishFailure;
+      out AFailedIndex: integer): boolean; static;
     class function TrySave(const AContext: TCompetitionDbContext;
       const AStages: TStages; const ARequest: TFinishRequest;
-      out AResult: TFinishResult; out AFailure: TFinishFailure): boolean;
-      static;
+      out AResult: TFinishResult; out AFailure: TFinishFailure): boolean; static;
   end;
 
   TTelegramResultNotifier = record
   private
-    class function RedactError(const AMessage, AUrl,
-      AEndpoint: string): string; static;
+    class function RedactError(const AMessage, AUrl, AEndpoint: string): string;
+      static;
   public
     class function BuildRequest(const AResult: TFinishResult;
       const AEndpoint: string): THttpRequest; static;
     class function BuildRequest(const AEndpoint: string;
       const AFields: THttpFormFields): THttpRequest; static;
-    class function Send(const ARequest: THttpRequest;
-      const AEndpoint: string; const ATransport: IHttpTransport):
-      TFinishNotificationOutcome; static;
-    class function Notify(const AResult: TFinishResult;
-      const AEndpoint: string; const ATransport: IHttpTransport):
-      TFinishNotificationOutcome; static;
+    class function Send(const ARequest: THttpRequest; const AEndpoint: string;
+      const ATransport: IHttpTransport): TFinishNotificationOutcome; static;
+    class function Notify(const AResult: TFinishResult; const AEndpoint: string;
+      const ATransport: IHttpTransport): TFinishNotificationOutcome; static;
   end;
 
 implementation
@@ -111,8 +114,7 @@ implementation
 uses
   i18n, CompetitionResultsService, ResultFormatting;
 
-procedure InitializeNotificationOutcome(
-  out AOutcome: TFinishNotificationOutcome);
+procedure InitializeNotificationOutcome(out AOutcome: TFinishNotificationOutcome);
 begin
   AOutcome.Success := False;
   AOutcome.SafeErrorMessage := '';
@@ -124,9 +126,8 @@ begin
   AOutcome.TransportErrorKind := hekNone;
 end;
 
-class function TFinishRequest.Create(const AParticipantNumber,
-  AStageIndex: integer; const AFinishTime: string;
-  const ATrackPolicy: TFinishTrackPolicy;
+class function TFinishRequest.Create(const AParticipantNumber, AStageIndex: integer;
+  const AFinishTime: string; const ATrackPolicy: TFinishTrackPolicy;
   const AOverwritePolicy: TFinishOverwritePolicy): TFinishRequest;
 begin
   Result := Default(TFinishRequest);
@@ -143,8 +144,7 @@ class function TFinishRequest.CreateForMark(const AMarkId: int64;
   const AAppliedAt: TDateTime): TFinishRequest;
 begin
   if AMarkId < 1 then
-    raise EArgumentOutOfRangeException.Create(
-      'Finish mark ID must be positive.');
+    raise EArgumentOutOfRangeException.Create('Finish mark ID must be positive.');
   if AParticipantNumber < 1 then
     raise EArgumentOutOfRangeException.Create(
       'Participant number must be positive.');
@@ -187,8 +187,8 @@ begin
 end;
 
 class function TFinishService.Inspect(const AContext: TCompetitionDbContext;
-  const AStages: TStages; const AParticipantNumber,
-  AStageIndex: integer): TFinishInspection;
+  const AStages: TStages; const AParticipantNumber, AStageIndex: integer):
+TFinishInspection;
 var
   ParticipantCategory, ParticipantName: string;
   Query: TSQLQuery;
@@ -209,8 +209,9 @@ begin
   ParticipantCategory := '';
   Query := AContext.CreateQuery(nil);
   try
-    Result.ParticipantExists := TMainSql.TryLoadIdentity(Query,
-      AParticipantNumber, ParticipantName, ParticipantCategory);
+    Result.ParticipantExists :=
+      TMainSql.TryLoadIdentity(Query, AParticipantNumber, ParticipantName,
+      ParticipantCategory);
     if not Result.ParticipantExists then
       Exit;
     Result.IsOnTrack := TMainSql.IsParticipantOnTrack(Query, AStageIndex,
@@ -227,153 +228,206 @@ class function TFinishService.TrySave(const AContext: TCompetitionDbContext;
   const AStages: TStages; const ARequest: TFinishRequest;
   out AResult: TFinishResult; out AFailure: TFinishFailure): boolean;
 var
+  Results: TFinishResults;
+  FailedIndex: integer;
+begin
+  InitializeResult(AResult);
+  Result := TrySaveBatch(AContext, AStages, [ARequest], Results,
+    AFailure, FailedIndex);
+  if Result then
+    AResult := Results[0];
+end;
+
+class function TFinishService.TrySaveBatch(const AContext: TCompetitionDbContext;
+  const AStages: TStages; const ARequests: array of TFinishRequest;
+  out AResults: TFinishResults; out AFailure: TFinishFailure;
+  out AFailedIndex: integer): boolean;
+var
   AppliedMark, StoredMark: TFinishMark;
-  CheckedStages: array of integer;
+  CheckedStages, ChangedStages: TStageIndexArray;
   CurrentStageData, LeaderStageData: TParticipantStageData;
-  EffectiveRequest: TFinishRequest;
+  ARequest, EffectiveRequest: TFinishRequest;
   HasStoredMark: boolean;
+  I, J: integer;
   ParticipantCategory, ParticipantName: string;
   PendingResult: TFinishResult;
+  PendingResults: TFinishResults;
   Query: TSQLQuery;
   UnitOfWork: TCompetitionUnitOfWork;
 begin
   Result := False;
-  InitializeResult(AResult);
-  InitializeResult(PendingResult);
+  AResults := nil;
+  AFailedIndex := -1;
   InitializeFailure(AFailure);
   if AContext = nil then
     raise EArgumentNilException.Create('AContext');
   if AStages = nil then
     raise EArgumentNilException.Create('AStages');
-  if (ARequest.MarkId = 0) and
-    not AStages.IsActiveIndex(ARequest.StageIndex) then
-    raise EArgumentOutOfRangeException.CreateFmt(
-      'Stage %d is not an active competition stage.', [ARequest.StageIndex]);
+  if Length(ARequests) = 0 then
+    Exit(True);
+  for I := 0 to High(ARequests) do
+    if (ARequests[I].MarkId = 0) and not AStages.IsActiveIndex(
+      ARequests[I].StageIndex) then
+      raise EArgumentOutOfRangeException.CreateFmt(
+        'Stage %d is not an active competition stage.', [ARequests[I].StageIndex]);
 
-  EffectiveRequest := ARequest;
-  HasStoredMark := ARequest.MarkId > 0;
   Query := AContext.CreateQuery(nil);
   UnitOfWork := nil;
   CheckedStages := nil;
+  SetLength(PendingResults, Length(ARequests));
+  SetLength(ChangedStages, Length(ARequests));
   try
     try
       UnitOfWork := AContext.BeginUnitOfWork;
-      if HasStoredMark then
+      for I := 0 to High(ARequests) do
       begin
-        Query.SQL.Text := 'SELECT * FROM finish_marks WHERE id = :ID;';
-        Query.ParamByName('ID').AsLargeInt := ARequest.MarkId;
-        Query.Open;
-        if not TFinishMarkSql.TryReadCurrent(Query, StoredMark) then
+        AFailedIndex := I;
+        ARequest := ARequests[I];
+        EffectiveRequest := ARequest;
+        HasStoredMark := ARequest.MarkId > 0;
+        InitializeResult(PendingResult);
+        if HasStoredMark then
         begin
+          Query.SQL.Text := 'SELECT * FROM finish_marks WHERE id = :ID;';
+          Query.ParamByName('ID').AsLargeInt := ARequest.MarkId;
+          Query.Open;
+          if not TFinishMarkSql.TryReadCurrent(Query, StoredMark) then
+          begin
+            Query.Close;
+            SetFailure(AFailure, ffkFinishMarkMissing,
+              Format('Finish mark %d was not found.', [ARequest.MarkId]));
+            Exit;
+          end;
           Query.Close;
-          SetFailure(AFailure, ffkFinishMarkMissing,
-            Format('Finish mark %d was not found.', [ARequest.MarkId]));
-          Exit;
+          if StoredMark.Status <> fmsPending then
+          begin
+            SetFailure(AFailure, ffkFinishMarkNotPending,
+              Format('Finish mark %d is not pending.', [ARequest.MarkId]));
+            Exit;
+          end;
+          if (ARequest.StageIndex > 0) and
+            ((ARequest.StageIndex <> StoredMark.StageIndex) or
+            (ARequest.FinishTime <> FormatDateTime('hh:nn:ss.zzz',
+            StoredMark.EventTime))) then
+            raise EDatabaseError.CreateFmt('Finish mark %d changed after confirmation.',
+              [StoredMark.Id]);
+          EffectiveRequest.StageIndex := StoredMark.StageIndex;
+          EffectiveRequest.FinishTime :=
+            FormatDateTime('hh:nn:ss.zzz', StoredMark.EventTime);
         end;
-        Query.Close;
-        if StoredMark.Status <> fmsPending then
+
+        if not AStages.IsActiveIndex(EffectiveRequest.StageIndex) then
+          raise EArgumentOutOfRangeException.CreateFmt(
+            'Stage %d is not an active competition stage.',
+            [EffectiveRequest.StageIndex]);
+
+        if not TMainSql.TryLoadIdentity(Query,
+          EffectiveRequest.ParticipantNumber, ParticipantName,
+          ParticipantCategory) then
         begin
-          SetFailure(AFailure, ffkFinishMarkNotPending,
-            Format('Finish mark %d is not pending.', [ARequest.MarkId]));
+          SetFailure(AFailure, ffkParticipantMissing,
+            Format('Participant %d was not found.',
+            [EffectiveRequest.ParticipantNumber]));
           Exit;
         end;
-        EffectiveRequest.StageIndex := StoredMark.StageIndex;
-        EffectiveRequest.FinishTime :=
-          FormatDateTime('hh:nn:ss.zzz', StoredMark.EventTime);
-      end;
 
-      if not AStages.IsActiveIndex(EffectiveRequest.StageIndex) then
-        raise EArgumentOutOfRangeException.CreateFmt(
-          'Stage %d is not an active competition stage.',
-          [EffectiveRequest.StageIndex]);
+        if (EffectiveRequest.TrackPolicy = ftpRequireOnTrack) and
+          (not TMainSql.IsParticipantOnTrack(Query,
+          EffectiveRequest.StageIndex, EffectiveRequest.ParticipantNumber,
+          AStages.Count)) then
+        begin
+          SetFailure(AFailure, ffkNotOnTrack,
+            Format('Participant %d is not on stage %d.',
+            [EffectiveRequest.ParticipantNumber,
+            EffectiveRequest.StageIndex]));
+          Exit;
+        end;
 
-      if not TMainSql.TryLoadIdentity(Query,
-        EffectiveRequest.ParticipantNumber,
-        ParticipantName, ParticipantCategory) then
-      begin
-        SetFailure(AFailure, ffkParticipantMissing,
-          Format('Participant %d was not found.',
-          [EffectiveRequest.ParticipantNumber]));
-        Exit;
-      end;
-
-      if (EffectiveRequest.TrackPolicy = ftpRequireOnTrack) and
-        (not TMainSql.IsParticipantOnTrack(Query,
-        EffectiveRequest.StageIndex,
-        EffectiveRequest.ParticipantNumber, AStages.Count)) then
-      begin
-        SetFailure(AFailure, ffkNotOnTrack,
-          Format('Participant %d is not on stage %d.',
-          [EffectiveRequest.ParticipantNumber,
-          EffectiveRequest.StageIndex]));
-        Exit;
-      end;
-
-      if TMainSql.TryLoadParticipantStageData(Query,
-        EffectiveRequest.ParticipantNumber, EffectiveRequest.StageIndex,
-        AStages.Count,
-        CurrentStageData) and (CurrentStageData.ResultValue <> '') and
-        (EffectiveRequest.OverwritePolicy = fopRejectExisting) then
-      begin
-        SetFailure(AFailure, ffkExistingResult,
-          Format('Participant %d already has a result on stage %d.',
-          [EffectiveRequest.ParticipantNumber,
-          EffectiveRequest.StageIndex]));
-        Exit;
-      end;
-
-      PendingResult.ParticipantNumber := EffectiveRequest.ParticipantNumber;
-      PendingResult.ParticipantName := ParticipantName;
-      PendingResult.Category := ParticipantCategory;
-      PendingResult.StageIndex := EffectiveRequest.StageIndex;
-      PendingResult.FinishTime := EffectiveRequest.FinishTime;
-      if TMainSql.TryLoadCategoryLeaderStageData(Query,
-        EffectiveRequest.StageIndex, ParticipantCategory,
-        PendingResult.PreviousLeaderNumber, LeaderStageData,
-        AStages.Count) then
-        PendingResult.PreviousLeaderResult := LeaderStageData.ResultValue;
-
-      SetLength(CheckedStages, 1);
-      CheckedStages[0] := EffectiveRequest.StageIndex;
-      TMainSql.ExecUpdateFinishForCheckedStages(Query, CheckedStages,
-        EffectiveRequest.FinishTime, EffectiveRequest.ParticipantNumber,
-        AStages.Count);
-      TResultCalculationService.RecalculateAllInCurrentTransaction(
-        AContext, AStages);
-
-      if not TMainSql.TryLoadParticipantStageData(Query,
-        EffectiveRequest.ParticipantNumber, EffectiveRequest.StageIndex,
-        AStages.Count,
-        CurrentStageData) then
-        raise EDatabaseError.CreateFmt(
-          'Saved participant %d could not be loaded.',
-          [EffectiveRequest.ParticipantNumber]);
-      PendingResult.ResultValue := CurrentStageData.ResultValue;
-      if CurrentStageData.HasPlace then
-        PendingResult.Place := CurrentStageData.Place;
-      if (PendingResult.Place = 1) and
-        (PendingResult.PreviousLeaderNumber > 0) then
-      begin
         if TMainSql.TryLoadParticipantStageData(Query,
-          PendingResult.PreviousLeaderNumber, EffectiveRequest.StageIndex,
-          AStages.Count, LeaderStageData) then
-          PendingResult.Difference := LeaderStageData.DiffLeader;
-      end
-      else
-        PendingResult.Difference := CurrentStageData.DiffLeader;
+          EffectiveRequest.ParticipantNumber, EffectiveRequest.StageIndex,
+          AStages.Count, CurrentStageData) and
+          (CurrentStageData.ResultValue <> '') and
+          (EffectiveRequest.OverwritePolicy = fopRejectExisting) then
+        begin
+          SetFailure(AFailure, ffkExistingResult,
+            Format('Participant %d already has a result on stage %d.',
+            [EffectiveRequest.ParticipantNumber,
+            EffectiveRequest.StageIndex]));
+          Exit;
+        end;
 
-      if HasStoredMark then
-      begin
-        AppliedMark := StoredMark;
-        if not AppliedMark.TryApply(EffectiveRequest.ParticipantNumber,
-          EffectiveRequest.AppliedAt) then
-          raise EDatabaseError.CreateFmt(
-            'Finish mark %d could not be applied.', [StoredMark.Id]);
-        TFinishMarkSql.ExecUpdate(Query, AppliedMark);
+        // A previous request in this batch may have filled the same result.
+        if EffectiveRequest.OverwritePolicy = fopRejectExisting then
+          for J := 0 to I - 1 do
+            if (PendingResults[J].ParticipantNumber =
+              EffectiveRequest.ParticipantNumber) and
+              (PendingResults[J].StageIndex = EffectiveRequest.StageIndex) then
+            begin
+              SetFailure(AFailure, ffkExistingResult,
+                Format('Participant %d already has a finish in this batch.',
+                [EffectiveRequest.ParticipantNumber]));
+              Exit;
+            end;
+
+        PendingResult.ParticipantNumber := EffectiveRequest.ParticipantNumber;
+        PendingResult.ParticipantName := ParticipantName;
+        PendingResult.Category := ParticipantCategory;
+        PendingResult.StageIndex := EffectiveRequest.StageIndex;
+        PendingResult.FinishTime := EffectiveRequest.FinishTime;
+        if TMainSql.TryLoadCategoryLeaderStageData(Query,
+          EffectiveRequest.StageIndex, ParticipantCategory,
+          PendingResult.PreviousLeaderNumber, LeaderStageData,
+          AStages.Count) then
+          PendingResult.PreviousLeaderResult := LeaderStageData.ResultValue;
+
+        SetLength(CheckedStages, 1);
+        CheckedStages[0] := EffectiveRequest.StageIndex;
+        ChangedStages[I] := EffectiveRequest.StageIndex;
+        TMainSql.ExecUpdateFinishForCheckedStages(Query, CheckedStages,
+          EffectiveRequest.FinishTime, EffectiveRequest.ParticipantNumber,
+          AStages.Count);
+        if HasStoredMark then
+        begin
+          AppliedMark := StoredMark;
+          if not AppliedMark.TryApply(EffectiveRequest.ParticipantNumber,
+            EffectiveRequest.AppliedAt) then
+            raise EDatabaseError.CreateFmt(
+              'Finish mark %d could not be applied.', [StoredMark.Id]);
+          TFinishMarkSql.ExecUpdate(Query, AppliedMark);
+        end;
+        PendingResults[I] := PendingResult;
       end;
 
+      // Dialogs and external notifications belong outside this transaction.
+      AFailedIndex := -1;
+      TResultCalculationService.RecalculateStagesInCurrentTransaction(
+        AContext, AStages, ChangedStages);
+      for I := 0 to High(PendingResults) do
+      begin
+        PendingResult := PendingResults[I];
+        if not TMainSql.TryLoadParticipantStageData(Query,
+          PendingResult.ParticipantNumber, PendingResult.StageIndex,
+          AStages.Count, CurrentStageData) then
+          raise EDatabaseError.CreateFmt(
+            'Saved participant %d could not be loaded.',
+            [PendingResult.ParticipantNumber]);
+        PendingResult.ResultValue := CurrentStageData.ResultValue;
+        if CurrentStageData.HasPlace then
+          PendingResult.Place := CurrentStageData.Place;
+        if (PendingResult.Place = 1) and
+          (PendingResult.PreviousLeaderNumber > 0) then
+        begin
+          if TMainSql.TryLoadParticipantStageData(Query,
+            PendingResult.PreviousLeaderNumber, PendingResult.StageIndex,
+            AStages.Count, LeaderStageData) then
+            PendingResult.Difference := LeaderStageData.DiffLeader;
+        end
+        else
+          PendingResult.Difference := CurrentStageData.DiffLeader;
+        PendingResults[I] := PendingResult;
+      end;
       UnitOfWork.Commit;
-      AResult := PendingResult;
+      AResults := PendingResults;
       Result := True;
     except
       on E: Exception do
@@ -385,8 +439,8 @@ begin
   end;
 end;
 
-class function TTelegramResultNotifier.RedactError(const AMessage, AUrl,
-  AEndpoint: string): string;
+class function TTelegramResultNotifier.RedactError(
+  const AMessage, AUrl, AEndpoint: string): string;
 begin
   Result := AMessage;
   if AUrl <> '' then
@@ -397,8 +451,8 @@ begin
       [rfReplaceAll, rfIgnoreCase]);
 end;
 
-class function TTelegramResultNotifier.BuildRequest(
-  const AResult: TFinishResult; const AEndpoint: string): THttpRequest;
+class function TTelegramResultNotifier.BuildRequest(const AResult: TFinishResult;
+  const AEndpoint: string): THttpRequest;
 var
   Difference: string;
   Fields: THttpFormFields;
@@ -433,18 +487,18 @@ begin
   Result := BuildRequest(AEndpoint, Fields);
 end;
 
-class function TTelegramResultNotifier.BuildRequest(
-  const AEndpoint: string; const AFields: THttpFormFields): THttpRequest;
+class function TTelegramResultNotifier.BuildRequest(const AEndpoint: string;
+  const AFields: THttpFormFields): THttpRequest;
 begin
-  Result := BuildHttpGetRequest(AEndpoint, AFields,
-    TELEGRAM_CONNECT_TIMEOUT_MS, TELEGRAM_READ_TIMEOUT_MS);
+  Result := BuildHttpGetRequest(AEndpoint, AFields, TELEGRAM_CONNECT_TIMEOUT_MS,
+    TELEGRAM_READ_TIMEOUT_MS);
 end;
 
 class function TTelegramResultNotifier.Send(const ARequest: THttpRequest;
   const AEndpoint: string; const ATransport: IHttpTransport):
-  TFinishNotificationOutcome;
+TFinishNotificationOutcome;
 var
-  Index: Integer;
+  Index: integer;
   QuerySuffix: string;
   Response: THttpResponse;
 begin
@@ -475,29 +529,27 @@ begin
     Result.ResponseHeaderCount := Length(Response.Headers);
     Result.ResponseSize := Length(Response.Body);
     Result.TransportErrorKind := Response.ErrorKind;
-    Result.Success := Response.Completed and
-      (Response.ErrorKind = hekNone) and
+    Result.Success := Response.Completed and (Response.ErrorKind = hekNone) and
       IsHttpSuccessStatus(Response.StatusCode);
     if Result.Success then
       Exit;
     if Response.ErrorKind <> hekNone then
-      Result.SafeErrorMessage := RedactError(Response.ErrorMessage,
-        ARequest.Url, AEndpoint)
+      Result.SafeErrorMessage :=
+        RedactError(Response.ErrorMessage, ARequest.Url, AEndpoint)
     else
-      Result.SafeErrorMessage := IntToStr(Response.StatusCode) + ' ' +
-        Response.StatusText;
+      Result.SafeErrorMessage :=
+        IntToStr(Response.StatusCode) + ' ' + Response.StatusText;
     if Result.SafeErrorMessage = '' then
       Result.SafeErrorMessage := rsHTTPRequestNotStarted;
   except
     on E: Exception do
-      Result.SafeErrorMessage := RedactError(E.Message, ARequest.Url,
-        AEndpoint);
+      Result.SafeErrorMessage := RedactError(E.Message, ARequest.Url, AEndpoint);
   end;
 end;
 
 class function TTelegramResultNotifier.Notify(const AResult: TFinishResult;
   const AEndpoint: string; const ATransport: IHttpTransport):
-  TFinishNotificationOutcome;
+TFinishNotificationOutcome;
 begin
   Result := Send(BuildRequest(AResult, AEndpoint), AEndpoint, ATransport);
 end;

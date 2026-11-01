@@ -182,8 +182,7 @@ begin
   end;
 end;
 
-procedure TAppLoggerTests.AssertDefaultSettings(
-  const ASettings: TLoggingSettings);
+procedure TAppLoggerTests.AssertDefaultSettings(const ASettings: TLoggingSettings);
 begin
   AssertEquals(DEFAULT_LOG_FILE_NAME_PREFIX, ASettings.FileNamePrefix);
   AssertEquals(Ord(allDebug), Ord(ASettings.FileMinimumLevel));
@@ -570,7 +569,7 @@ end;
 procedure TAppLoggerTests.AppLog_WritesTimestampLevelSourceAndMessage;
 var
   line, logFileName, timestamp: string;
-  lines: TStringList;
+  Lines: TStringList;
   i: integer;
 begin
   InitializeAppLogger(DefaultLoggingSettings, FTempDirectory, '');
@@ -580,17 +579,17 @@ begin
   FinalizeAppLogger;
 
   line := '';
-  lines := TStringList.Create;
+  Lines := TStringList.Create;
   try
-    lines.LoadFromFile(logFileName);
-    for i := 0 to lines.Count - 1 do
-      if Pos('format-check', lines[i]) > 0 then
+    Lines.LoadFromFile(logFileName);
+    for i := 0 to Lines.Count - 1 do
+      if Pos('format-check', Lines[i]) > 0 then
       begin
-        line := lines[i];
+        line := Lines[i];
         Break;
       end;
   finally
-    lines.Free;
+    Lines.Free;
   end;
   AssertTrue('The timestamp test entry must be present', line <> '');
   timestamp := Copy(line, 1, 23);
@@ -598,8 +597,8 @@ begin
   AssertEquals('Timestamp must use yyyy-mm-dd hh:nn:ss.zzz', 23,
     Length(timestamp));
   AssertTrue((timestamp[5] = '-') and (timestamp[8] = '-') and
-    (timestamp[11] = ' ') and (timestamp[14] = ':') and
-    (timestamp[17] = ':') and (timestamp[20] = '.'));
+    (timestamp[11] = ' ') and (timestamp[14] = ':') and (timestamp[17] = ':') and
+    (timestamp[20] = '.'));
   AssertEquals(' [ERROR] [Import] format-check',
     Copy(line, 24, MaxInt));
 end;
@@ -780,7 +779,7 @@ procedure TAppLoggerTests.Initialize_RemovesOnlyExpiredMatchingLogs;
 var
   settings: TLoggingSettings;
   fallbackDirectory, oldFallbackLog, oldLog, oldOtherLog, newLog,
-    unrelatedFile: string;
+  unrelatedFile: string;
   fileStream: TFileStream;
   oldAge: TDateTime;
 begin

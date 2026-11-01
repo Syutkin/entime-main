@@ -29,7 +29,7 @@
       <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MinorVersionNr Value="9"/>
-      <BuildNr Value="242"/>
+      <BuildNr Value="271"/>
       <Language Value="0419"/>
       <CharSet Value="04B0"/>
       <StringTable CompanyName="Spot" FileDescription="Time tracking for sport events" InternalName="Entime" OriginalFilename="Entime" ProductName="Entime"/>
@@ -160,27 +160,26 @@
         <Mode0 Name="default"/>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="17">
+    <RequiredPackages Count="19">
       <Item1>
-        <PackageName Value="FCL"/>
+        <PackageName Value="SimpleDelphiBLEPackage"/>
       </Item1>
       <Item2>
-        <PackageName Value="LCL"/>
+        <PackageName Value="FCL"/>
       </Item2>
       <Item3>
-        <PackageName Value="LazControls"/>
+        <PackageName Value="LCL"/>
       </Item3>
       <Item4>
-        <PackageName Value="SimpleBlePascal"/>
-        <MinVersion Major="1" Minor="1" Valid="True"/>
+        <PackageName Value="LazControls"/>
       </Item4>
       <Item5>
         <PackageName Value="LazBle"/>
-        <MinVersion Major="1" Valid="True"/>
+        <MinVersion Major="2" Valid="True"/>
       </Item5>
       <Item6>
         <PackageName Value="LazBleLCL"/>
-        <MinVersion Major="1" Valid="True"/>
+        <MinVersion Major="2" Valid="True"/>
       </Item6>
       <Item7>
         <PackageName Value="DateTimeCtrls"/>
@@ -193,7 +192,7 @@
       </Item9>
       <Item10>
         <PackageName Value="LazSerialPort"/>
-        <MinVersion Minor="8" Valid="True"/>
+        <MinVersion Minor="8" Release="1" Valid="True"/>
       </Item10>
       <Item11>
         <PackageName Value="laz_fpspreadsheet"/>
@@ -212,15 +211,23 @@
       </Item15>
       <Item16>
         <PackageName Value="chsdet"/>
+        <MinVersion Minor="2" Release="9" Valid="True"/>
       </Item16>
       <Item17>
         <PackageName Value="MyForks"/>
       </Item17>
+      <Item18>
+        <PackageName Value="lclfpreport"/>
+      </Item18>
+      <Item19>
+        <PackageName Value="fpvectorialpkg"/>
+      </Item19>
     </RequiredPackages>
-    <Units Count="71">
+    <Units Count="117">
       <Unit0>
         <Filename Value="entime.lpr"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="Entime"/>
       </Unit0>
       <Unit1>
         <Filename Value="src\ui\main.pas"/>
@@ -586,6 +593,257 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="TimingMarkJournalUi"/>
       </Unit70>
+      <Unit71>
+        <Filename Value="src\application\competitionchanges.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CompetitionChanges"/>
+      </Unit71>
+      <Unit72>
+        <Filename Value="src\ui\competitionuichangedispatcher.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CompetitionUiChangeDispatcher"/>
+      </Unit72>
+      <Unit73>
+        <Filename Value="src\ui\competitionlclchangedispatcher.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CompetitionLclChangeDispatcher"/>
+      </Unit73>
+      <Unit74>
+        <Filename Value="src\ui\competitionqueryrefreshregistry.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CompetitionQueryRefreshRegistry"/>
+      </Unit74>
+      <Unit75>
+        <Filename Value="src\ui\protocolbalanceframe.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ProtocolBalanceFrame"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <UnitName Value="ProtocolBalanceFrame"/>
+      </Unit75>
+      <Unit76>
+        <Filename Value="src\domain\protocolbalance.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ProtocolBalance"/>
+      </Unit76>
+      <Unit77>
+        <Filename Value="src\data\protocolbalancerepository.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ProtocolBalanceRepository"/>
+      </Unit77>
+      <Unit78>
+        <Filename Value="src\domain\resultsimportcomparison.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ResultsImportComparison"/>
+      </Unit78>
+      <Unit79>
+        <Filename Value="src\application\resultsimportpreviewservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ResultsImportPreviewService"/>
+      </Unit79>
+      <Unit80>
+        <Filename Value="src\ui\resultsimportpreview.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ResultsImportPreviewForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ResultsImportPreview"/>
+      </Unit80>
+      <Unit81>
+        <Filename Value="src\domain\participantcardmodel.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ParticipantCardModel"/>
+      </Unit81>
+      <Unit82>
+        <Filename Value="src\data\participantcardrepository.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ParticipantCardRepository"/>
+      </Unit82>
+      <Unit83>
+        <Filename Value="src\application\participantcardservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ParticipantCardService"/>
+      </Unit83>
+      <Unit84>
+        <Filename Value="src\ui\participantcardform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ParticipantCardForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ParticipantCardForm"/>
+      </Unit84>
+      <Unit85>
+        <Filename Value="src\ui\participantcardcoordinator.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ParticipantCardCoordinator"/>
+      </Unit85>
+      <Unit86>
+        <Filename Value="src\infrastructure\stagefinishreportbackend.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageFinishReportBackend"/>
+      </Unit86>
+      <Unit87>
+        <Filename Value="src\ui\bletimingui.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="BleTimingUi"/>
+      </Unit87>
+      <Unit88>
+        <Filename Value="src\domain\stagefinishreportmodel.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageFinishReportModel"/>
+      </Unit88>
+      <Unit89>
+        <Filename Value="src\data\stagefinishreportrepository.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageFinishReportRepository"/>
+      </Unit89>
+      <Unit90>
+        <Filename Value="src\application\stagefinishreportservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageFinishReportService"/>
+      </Unit90>
+      <Unit91>
+        <Filename Value="src\infrastructure\stagefinishreportbuilder.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageFinishReportBuilder"/>
+      </Unit91>
+      <Unit92>
+        <Filename Value="src\infrastructure\stagefinishpdfwriter.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageFinishPdfWriter"/>
+      </Unit92>
+      <Unit93>
+        <Filename Value="src\infrastructure\stagefinishdocxwriter.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageFinishDocxWriter"/>
+      </Unit93>
+      <Unit94>
+        <Filename Value="src\infrastructure\stagefinishreportfiles.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageFinishReportFiles"/>
+      </Unit94>
+      <Unit95>
+        <Filename Value="src\infrastructure\stagefinishxlsxwriter.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StageFinishXlsxWriter"/>
+      </Unit95>
+      <Unit96>
+        <Filename Value="src\domain\reporttemplatemodel.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ReportTemplateModel"/>
+      </Unit96>
+      <Unit97>
+        <Filename Value="src\infrastructure\htmlreporttemplatereader.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="HtmlReportTemplateReader"/>
+      </Unit97>
+      <Unit98>
+        <Filename Value="src\infrastructure\reporttemplatefiles.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ReportTemplateFiles"/>
+      </Unit98>
+      <Unit99>
+        <Filename Value="src\infrastructure\reporttextmetrics.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ReportTextMetrics"/>
+      </Unit99>
+      <Unit100>
+        <Filename Value="src\domain\protocoldocumentmodel.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ProtocolDocumentModel"/>
+      </Unit100>
+      <Unit101>
+        <Filename Value="src\domain\overallfinishreportmodel.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OverallFinishReportModel"/>
+      </Unit101>
+      <Unit102>
+        <Filename Value="src\data\overallfinishreportrepository.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OverallFinishReportRepository"/>
+      </Unit102>
+      <Unit103>
+        <Filename Value="src\application\overallfinishreportservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="OverallFinishReportService"/>
+      </Unit103>
+      <Unit104>
+        <Filename Value="src\infrastructure\protocoltablelayout.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ProtocolTableLayout"/>
+      </Unit104>
+      <Unit105>
+        <Filename Value="src\ui\protocolprintform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ProtocolPrintForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ProtocolPrintForm"/>
+      </Unit105>
+      <Unit106>
+        <Filename Value="src\domain\startreportmodel.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StartReportModel"/>
+      </Unit106>
+      <Unit107>
+        <Filename Value="src\data\startreportrepository.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StartReportRepository"/>
+      </Unit107>
+      <Unit108>
+        <Filename Value="src\application\startreportservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StartReportService"/>
+      </Unit108>
+      <Unit109>
+        <Filename Value="src\ui\startprotocolprintform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="StartProtocolPrintForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="StartProtocolPrintForm"/>
+      </Unit109>
+      <Unit110>
+        <Filename Value="src\ui\finishprotocolprintform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FinishProtocolPrintForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="FinishProtocolPrintForm"/>
+      </Unit110>
+      <Unit111>
+        <Filename Value="src\domain\startlabelmodel.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StartLabelModel"/>
+      </Unit111>
+      <Unit112>
+        <Filename Value="src\application\startlabelservice.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StartLabelService"/>
+      </Unit112>
+      <Unit113>
+        <Filename Value="src\infrastructure\startlabelsettings.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StartLabelSettings"/>
+      </Unit113>
+      <Unit114>
+        <Filename Value="src\infrastructure\startlabelreportbuilder.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="StartLabelReportBuilder"/>
+      </Unit114>
+      <Unit115>
+        <Filename Value="src\ui\reportpreview.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="ReportPreview"/>
+      </Unit115>
+      <Unit116>
+        <Filename Value="src\ui\startlabelsprintform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="StartLabelsPrintForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="StartLabelsPrintForm"/>
+      </Unit116>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

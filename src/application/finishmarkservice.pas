@@ -16,8 +16,7 @@ type
   IFinishMarkPersistence = interface
     ['{F2895487-0FA7-41BB-A753-824EE3DFD07B}']
     function Insert(const AMark: TFinishMark): TFinishMark;
-    function TryLoadById(const AMarkId: int64;
-      out AMark: TFinishMark): boolean;
+    function TryLoadById(const AMarkId: int64; out AMark: TFinishMark): boolean;
     function HideWorkQueue: integer;
     procedure Update(const AMark: TFinishMark);
   end;
@@ -45,8 +44,7 @@ type
     procedure ResetSequence;
     property DebounceIntervalMs: integer read FDebounceIntervalMs
       write FDebounceIntervalMs;
-    property OnChanged: TFinishMarkChangedEvent read FOnChanged
-      write FOnChanged;
+    property OnChanged: TFinishMarkChangedEvent read FOnChanged write FOnChanged;
   end;
 
 implementation
@@ -54,8 +52,7 @@ implementation
 uses
   DateUtils, SysUtils;
 
-constructor TFinishMarkService.Create(
-  const APersistence: IFinishMarkPersistence;
+constructor TFinishMarkService.Create(const APersistence: IFinishMarkPersistence;
   const ADebounceIntervalMs: integer);
 begin
   inherited Create;
@@ -98,8 +95,7 @@ begin
     ElapsedMs := 0;
 
   if not AcceptedAsBoundary then
-    Result.MarkIgnoredDebounce(Format(
-      'debounce_interval_ms=%d; elapsed_ms=%d',
+    Result.MarkIgnoredDebounce(Format('debounce_interval_ms=%d; elapsed_ms=%d',
       [FDebounceIntervalMs, ElapsedMs]));
 
   Result := FPersistence.Insert(Result);
@@ -112,12 +108,10 @@ begin
 end;
 
 function TFinishMarkService.SetParticipantNumber(const AMarkId: int64;
-  const AHasParticipantNumber: boolean;
-  const AParticipantNumber: integer): TFinishMark;
+  const AHasParticipantNumber: boolean; const AParticipantNumber: integer): TFinishMark;
 begin
   if not FPersistence.TryLoadById(AMarkId, Result) then
-    raise EArgumentException.CreateFmt(
-      'Finish mark %d was not found.', [AMarkId]);
+    raise EArgumentException.CreateFmt('Finish mark %d was not found.', [AMarkId]);
   Result.SetParticipantNumber(AHasParticipantNumber, AParticipantNumber);
   FPersistence.Update(Result);
   NotifyChanged(Result.Id);

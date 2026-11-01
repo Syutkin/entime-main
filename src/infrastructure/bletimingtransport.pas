@@ -7,6 +7,7 @@ interface
 uses
   Classes,
   SysUtils,
+  LazBleTypes,
   LazBleBackend,
   LazBleOperation,
   LazBleClient,
@@ -22,27 +23,15 @@ type
 
   TBleTimingTransport = class;
 
-  IBleTimingDeliveryTarget = interface
-    ['{65307D01-0FC7-4815-87E8-D23273CC39CD}']
-    function CaptureGeneration: QWord;
-    function NextGeneration: QWord;
-    procedure Detach;
-    procedure DeliverData(const AGeneration: QWord;
-      const ADeviceId: string; const AValue: TBytes);
-    procedure DeliverState(const AGeneration: QWord;
-      const AState: TLazBleClientState);
-  end;
-
   TBleTimingTransport = class(TInterfacedObject, ITimingTransport)
   private
     FBle: TLazBle;
     FClient: TBleClient;
     FProfile: TNusProfile;
-    FDeliveryTarget: IBleTimingDeliveryTarget;
     FShutdownOperation: IBleOperation;
     FDeviceId: string;
     FState: TLazBleClientState;
-    FShuttingDown: Boolean;
+    FShuttingDown: boolean;
     FOnStateChanged: TBleTimingStateChangedEvent;
     FOnData: TTimingTransportDataEvent;
     function GetConnected: boolean;
@@ -53,12 +42,9 @@ type
     function GetState: TLazBleClientState;
     procedure Initialize;
     procedure EnsureOwnedFacade;
-    procedure ProfileDataReceived(Sender: TObject;
-      const ADeviceId: string; const AValue: TBytes);
-    procedure ClientStateChanged(Sender: TObject;
-      const AState: TLazBleClientState);
-    procedure QueueData(const ADeviceId: string; const AValue: TBytes);
-    procedure QueueState(const AState: TLazBleClientState);
+    procedure ProfileDataReceived(Sender: TObject; const ADeviceId: string;
+      const AValue: TBytes);
+    procedure ClientStateChanged(Sender: TObject; const AState: TLazBleClientState);
     procedure DeliverData(const ADeviceId: string; const AValue: TBytes);
     procedure DeliverState(const AState: TLazBleClientState);
     procedure DetachClientCallbacks;
@@ -69,13 +55,16 @@ type
     constructor Create(const ABackend: ILazBleBackend); overload;
     destructor Destroy; override;
     procedure ConfigureClient(const AClient: TBleClient);
+    { The client and its profiles remain owned by LazBle. }
+    procedure ReleaseClient;
+    procedure Detach;
     procedure HandleDeviceChanged(const ADeviceId: string);
     procedure HandleStateChanged(const AState: TLazBleClientState);
     function ScanAsync(const AAdapterId: string;
-      const ATimeoutMs: Cardinal): IBleScanOperation;
+      const ATimeoutMs: cardinal): IBleScanOperation;
     function ConnectAsync(const ADeviceId: string): IBleOperation;
     function DisconnectAsync: IBleOperation;
-    function SendAsync(const AData: RawByteString): ITimingSendOperation;
+    function SendAsync(const AData: rawbytestring): ITimingSendOperation;
     function ShutdownAsync: IBleOperation;
     property DeviceId: string read FDeviceId;
     property State: TLazBleClientState read GetState;
@@ -112,48 +101,6 @@ type
     constructor Create(const AOperation: IBleOperation;
       const ASource: TTimingMarkSource);
     destructor Destroy; override;
-  end;
-
-  TBleTimingDeliveryTarget = class(TInterfacedObject,
-    IBleTimingDeliveryTarget)
-  private
-    FLock: TRTLCriticalSection;
-    FOwner: TBleTimingTransport;
-    FGeneration: QWord;
-  public
-    constructor Create(const AOwner: TBleTimingTransport);
-    destructor Destroy; override;
-    function CaptureGeneration: QWord;
-    function NextGeneration: QWord;
-    procedure Detach;
-    procedure DeliverData(const AGeneration: QWord;
-      const ADeviceId: string; const AValue: TBytes);
-    procedure DeliverState(const AGeneration: QWord;
-      const AState: TLazBleClientState);
-  end;
-
-  TQueuedBleDataDelivery = class
-  private
-    FTarget: IBleTimingDeliveryTarget;
-    FGeneration: QWord;
-    FDeviceId: string;
-    FValue: TBytes;
-  public
-    constructor Create(const ATarget: IBleTimingDeliveryTarget;
-      const AGeneration: QWord; const ADeviceId: string;
-      const AValue: TBytes);
-    procedure Deliver;
-  end;
-
-  TQueuedBleStateDelivery = class
-  private
-    FTarget: IBleTimingDeliveryTarget;
-    FGeneration: QWord;
-    FState: TLazBleClientState;
-  public
-    constructor Create(const ATarget: IBleTimingDeliveryTarget;
-      const AGeneration: QWord; const AState: TLazBleClientState);
-    procedure Deliver;
   end;
 
 constructor TBleTimingSendOperation.Create(const AOperation: IBleOperation;
@@ -212,8 +159,8 @@ begin
   case FBleOperation.State of
     lbopPending: Result := tssPending;
     lbopSucceeded: Result := tssSucceeded;
-  else
-    Result := tssFailed;
+    else
+      Result := tssFailed;
   end;
 end;
 
@@ -225,133 +172,6 @@ begin
     FOnCompleted(Self);
 end;
 
-constructor TBleTimingDeliveryTarget.Create(const AOwner: TBleTimingTransport);
-begin
-  inherited Create;
-  InitCriticalSection(FLock);
-  FOwner := AOwner;
-  FGeneration := 1;
-end;
-
-destructor TBleTimingDeliveryTarget.Destroy;
-begin
-  EnterCriticalSection(FLock);
-  try
-    FOwner := nil;
-  finally
-    LeaveCriticalSection(FLock);
-  end;
-  DoneCriticalSection(FLock);
-  inherited Destroy;
-end;
-
-function TBleTimingDeliveryTarget.CaptureGeneration: QWord;
-begin
-  EnterCriticalSection(FLock);
-  try
-    Result := FGeneration;
-  finally
-    LeaveCriticalSection(FLock);
-  end;
-end;
-
-function TBleTimingDeliveryTarget.NextGeneration: QWord;
-begin
-  EnterCriticalSection(FLock);
-  try
-    Inc(FGeneration);
-    Result := FGeneration;
-  finally
-    LeaveCriticalSection(FLock);
-  end;
-end;
-
-procedure TBleTimingDeliveryTarget.Detach;
-begin
-  EnterCriticalSection(FLock);
-  try
-    Inc(FGeneration);
-    FOwner := nil;
-  finally
-    LeaveCriticalSection(FLock);
-  end;
-end;
-
-procedure TBleTimingDeliveryTarget.DeliverData(const AGeneration: QWord;
-  const ADeviceId: string; const AValue: TBytes);
-var
-  Owner: TBleTimingTransport;
-begin
-  EnterCriticalSection(FLock);
-  try
-    if AGeneration = FGeneration then
-      Owner := FOwner
-    else
-      Owner := nil;
-  finally
-    LeaveCriticalSection(FLock);
-  end;
-  if Assigned(Owner) then
-    Owner.DeliverData(ADeviceId, AValue);
-end;
-
-procedure TBleTimingDeliveryTarget.DeliverState(const AGeneration: QWord;
-  const AState: TLazBleClientState);
-var
-  Owner: TBleTimingTransport;
-begin
-  EnterCriticalSection(FLock);
-  try
-    if AGeneration = FGeneration then
-      Owner := FOwner
-    else
-      Owner := nil;
-  finally
-    LeaveCriticalSection(FLock);
-  end;
-  if Assigned(Owner) then
-    Owner.DeliverState(AState);
-end;
-
-constructor TQueuedBleDataDelivery.Create(
-  const ATarget: IBleTimingDeliveryTarget; const AGeneration: QWord;
-  const ADeviceId: string; const AValue: TBytes);
-begin
-  inherited Create;
-  FTarget := ATarget;
-  FGeneration := AGeneration;
-  FDeviceId := ADeviceId;
-  FValue := Copy(AValue);
-end;
-
-procedure TQueuedBleDataDelivery.Deliver;
-begin
-  try
-    FTarget.DeliverData(FGeneration, FDeviceId, FValue);
-  finally
-    Free;
-  end;
-end;
-
-constructor TQueuedBleStateDelivery.Create(
-  const ATarget: IBleTimingDeliveryTarget; const AGeneration: QWord;
-  const AState: TLazBleClientState);
-begin
-  inherited Create;
-  FTarget := ATarget;
-  FGeneration := AGeneration;
-  FState := AState;
-end;
-
-procedure TQueuedBleStateDelivery.Deliver;
-begin
-  try
-    FTarget.DeliverState(FGeneration, FState);
-  finally
-    Free;
-  end;
-end;
-
 constructor TBleTimingTransport.Create;
 begin
   inherited Create;
@@ -361,7 +181,6 @@ end;
 procedure TBleTimingTransport.Initialize;
 begin
   FState := lbcstDisconnected;
-  FDeliveryTarget := TBleTimingDeliveryTarget.Create(Self);
 end;
 
 constructor TBleTimingTransport.Create(const ABackend: ILazBleBackend);
@@ -375,20 +194,23 @@ end;
 
 destructor TBleTimingTransport.Destroy;
 begin
-  if Assigned(FDeliveryTarget) then
-    FDeliveryTarget.Detach;
-  DetachClientCallbacks;
+  Detach;
   if Assigned(FBle) then
   begin
-    if not FShuttingDown then
-      FShutdownOperation := FBle.ShutdownAsync;
+    { This facade exists only for an injected backend. Normal GUI ownership is
+      external and is shut down asynchronously before releasing the transport. }
+    ShutdownAsync;
+    while FShutdownOperation.State = lbopPending do
+      CheckSynchronize(10);
+    ReleaseClient;
     FBle.Free;
-  end;
+  end
+  else
+    ReleaseClient;
   FShutdownOperation := nil;
   FProfile := nil;
   FClient := nil;
   FBle := nil;
-  FDeliveryTarget := nil;
   FOnStateChanged := nil;
   FOnData := nil;
   inherited Destroy;
@@ -396,7 +218,7 @@ end;
 
 function TBleTimingTransport.GetConnected: boolean;
 begin
-  Result := FState = lbcstReady;
+  Result := not FShuttingDown and (FState = lbcstReady);
 end;
 
 function TBleTimingTransport.GetKind: TTimingTransportKind;
@@ -422,13 +244,12 @@ begin
     lbcstReady: Result := ttsConnected;
     lbcstDisconnecting: Result := ttsDisconnecting;
     lbcstError: Result := ttsError;
-  else
-    Result := ttsDisconnected;
+    else
+      Result := ttsDisconnected;
   end;
 end;
 
-procedure TBleTimingTransport.SetOnData(
-  const AHandler: TTimingTransportDataEvent);
+procedure TBleTimingTransport.SetOnData(const AHandler: TTimingTransportDataEvent);
 begin
   FOnData := AHandler;
 end;
@@ -449,8 +270,14 @@ procedure TBleTimingTransport.ConfigureClient(const AClient: TBleClient);
 var
   Profile: TNusProfile;
 begin
+  LazBleRequireMainThread;
   if not Assigned(AClient) then
     raise EArgumentNilException.Create('AClient');
+  if FShuttingDown then
+    raise EInvalidOperation.Create('BLE timing input is shutting down');
+  if FClient = AClient then Exit;
+  if Assigned(FClient) then
+    raise EInvalidOperation.Create('ReleaseClient must precede client replacement');
 
   Profile := TNusProfile.Create;
   try
@@ -471,15 +298,14 @@ procedure TBleTimingTransport.HandleDeviceChanged(const ADeviceId: string);
 begin
   if SameText(FDeviceId, ADeviceId) then
     Exit;
-  FDeliveryTarget.NextGeneration;
-  FClient := nil;
+  if Assigned(FClient) then
+    raise EInvalidOperation.Create('ReleaseClient must precede a device change');
   FProfile := nil;
   FDeviceId := ADeviceId;
   FState := lbcstDisconnected;
 end;
 
-procedure TBleTimingTransport.HandleStateChanged(
-  const AState: TLazBleClientState);
+procedure TBleTimingTransport.HandleStateChanged(const AState: TLazBleClientState);
 begin
   DeliverState(AState);
 end;
@@ -487,56 +313,30 @@ end;
 procedure TBleTimingTransport.ProfileDataReceived(Sender: TObject;
   const ADeviceId: string; const AValue: TBytes);
 begin
-  QueueData(ADeviceId, AValue);
+  if Sender <> FProfile then Exit;
+  DeliverData(ADeviceId, AValue);
 end;
 
 procedure TBleTimingTransport.ClientStateChanged(Sender: TObject;
   const AState: TLazBleClientState);
 begin
-  QueueState(AState);
-end;
-
-procedure TBleTimingTransport.QueueData(const ADeviceId: string;
-  const AValue: TBytes);
-var
-  Delivery: TQueuedBleDataDelivery;
-  Generation: QWord;
-begin
-  if not Assigned(FDeliveryTarget) then
-    Exit;
-  Generation := FDeliveryTarget.CaptureGeneration;
-  Delivery := TQueuedBleDataDelivery.Create(FDeliveryTarget, Generation,
-    ADeviceId, AValue);
-  TThread.Queue(nil, @Delivery.Deliver);
-end;
-
-procedure TBleTimingTransport.QueueState(const AState: TLazBleClientState);
-var
-  Delivery: TQueuedBleStateDelivery;
-  Generation: QWord;
-begin
-  if not Assigned(FDeliveryTarget) then
-    Exit;
-  Generation := FDeliveryTarget.CaptureGeneration;
-  Delivery := TQueuedBleStateDelivery.Create(FDeliveryTarget, Generation,
-    AState);
-  TThread.Queue(nil, @Delivery.Deliver);
+  if Sender <> FClient then Exit;
+  DeliverState(AState);
 end;
 
 procedure TBleTimingTransport.DeliverData(const ADeviceId: string;
   const AValue: TBytes);
 var
-  Chunk: RawByteString;
+  Chunk: rawbytestring;
   Handler: TTimingTransportDataEvent;
 begin
-  if FShuttingDown or (ADeviceId <> FDeviceId) or
-    (Length(AValue) = 0) then
+  LazBleRequireMainThread;
+  if FShuttingDown or (ADeviceId <> FDeviceId) or (Length(AValue) = 0) then
     Exit;
   Chunk := '';
   SetLength(Chunk, Length(AValue));
   Move(AValue[0], Chunk[1], Length(AValue));
-  AppLog(Format(
-    'BLE NUS notification received bytes=%d payload=%s',
+  AppLog(Format('BLE NUS notification received bytes=%d payload=%s',
     [Length(AValue), TimingPacketLogValue(string(Chunk))]), allTrace,
     alvNone, alsBle);
   Handler := FOnData;
@@ -548,6 +348,7 @@ procedure TBleTimingTransport.DeliverState(const AState: TLazBleClientState);
 var
   Handler: TBleTimingStateChangedEvent;
 begin
+  LazBleRequireMainThread;
   if FShuttingDown then
     Exit;
   FState := AState;
@@ -562,6 +363,24 @@ begin
     FProfile.OnData := nil;
   if Assigned(FBle) and Assigned(FClient) then
     FClient.OnStateChanged := nil;
+end;
+
+procedure TBleTimingTransport.ReleaseClient;
+begin
+  LazBleRequireMainThread;
+  DetachClientCallbacks;
+  FProfile := nil;
+  FClient := nil;
+  FState := lbcstDisconnected;
+end;
+
+procedure TBleTimingTransport.Detach;
+begin
+  LazBleRequireMainThread;
+  FShuttingDown := True;
+  DetachClientCallbacks;
+  FOnData := nil;
+  FOnStateChanged := nil;
 end;
 
 procedure TBleTimingTransport.ReleaseDisconnectedClient;
@@ -580,7 +399,7 @@ begin
 end;
 
 function TBleTimingTransport.ScanAsync(const AAdapterId: string;
-  const ATimeoutMs: Cardinal): IBleScanOperation;
+  const ATimeoutMs: cardinal): IBleScanOperation;
 begin
   EnsureOwnedFacade;
   if FShuttingDown then
@@ -600,7 +419,6 @@ begin
 
   if Assigned(FClient) and not SameText(FDeviceId, ADeviceId) then
     ReleaseDisconnectedClient;
-  FDeliveryTarget.NextGeneration;
 
   if not Assigned(FClient) then
   begin
@@ -631,8 +449,8 @@ begin
   Result := FClient.DisconnectAsync;
 end;
 
-function TBleTimingTransport.SendAsync(
-  const AData: RawByteString): ITimingSendOperation;
+function TBleTimingTransport.SendAsync(const AData: rawbytestring):
+ITimingSendOperation;
 var
   BleOperation: IBleOperation;
   Bytes: TBytes;
@@ -640,13 +458,13 @@ var
   TransportSource: TTimingMarkSource;
 begin
   TransportSource := GetSource;
-  if not GetConnected or not Assigned(FProfile) then
+  if not GetConnected or not Assigned(FProfile) or not FProfile.Ready then
     Exit(TTimingSendOperation.Failed(TransportSource,
       'BLE timing transport is not connected'));
   Bytes := nil;
   SetLength(Bytes, Length(AData));
   for Index := 1 to Length(AData) do
-    Bytes[Index - 1] := Byte(AData[Index]);
+    Bytes[Index - 1] := byte(AData[Index]);
   BleOperation := FProfile.SendAsync(Bytes);
   Result := TBleTimingSendOperation.Create(BleOperation, TransportSource);
 end;
@@ -656,9 +474,7 @@ begin
   EnsureOwnedFacade;
   if Assigned(FShutdownOperation) then
     Exit(FShutdownOperation);
-  FShuttingDown := True;
-  FDeliveryTarget.NextGeneration;
-  DetachClientCallbacks;
+  Detach;
   FShutdownOperation := FBle.ShutdownAsync;
   Result := FShutdownOperation;
 end;

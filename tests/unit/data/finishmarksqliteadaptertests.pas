@@ -55,16 +55,14 @@ begin
   inherited TearDown;
 end;
 
-function TFinishMarkSqliteAdapterTests.MarkAt(
-  const ATime: TDateTime): TFinishMark;
+function TFinishMarkSqliteAdapterTests.MarkAt(const ATime: TDateTime): TFinishMark;
 begin
   Result := TFinishMark.FromTimingMark(TTimingMark.Finish(ATime,
-    TTimingMarkSource.Serial('COM7'),
-    EncodeDateTime(2026, 8, 15, 10, 0, 0, 0)), 2);
+    TTimingMarkSource.Serial('COM7'), EncodeDateTime(2026, 8, 15, 10, 0, 0, 0)), 2);
 end;
 
 procedure TFinishMarkSqliteAdapterTests.
-  Handle_PersistsPendingAndDebouncedMarks;
+Handle_PersistsPendingAndDebouncedMarks;
 var
   BaseTime: TDateTime;
 begin

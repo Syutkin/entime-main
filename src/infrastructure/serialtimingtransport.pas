@@ -16,8 +16,8 @@ type
     function GetLastErrorMessage: string;
     function GetOnDataAvailable: TNotifyEvent;
     procedure SetOnDataAvailable(const AHandler: TNotifyEvent);
-    function ReadData: RawByteString;
-    function WriteData(const AData: RawByteString): integer;
+    function ReadData: rawbytestring;
+    function WriteData(const AData: rawbytestring): integer;
     property Active: boolean read GetActive;
     property DeviceId: string read GetDeviceId;
     property LastErrorCode: integer read GetLastErrorCode;
@@ -42,7 +42,7 @@ type
   public
     constructor Create(const AConnection: ISerialTimingConnection);
     destructor Destroy; override;
-    function SendAsync(const AData: RawByteString): ITimingSendOperation;
+    function SendAsync(const AData: rawbytestring): ITimingSendOperation;
     property Connected: boolean read GetConnected;
     property Kind: TTimingTransportKind read GetKind;
     property OnData: TTimingTransportDataEvent read GetOnData write SetOnData;
@@ -52,8 +52,7 @@ type
 
 implementation
 
-constructor TSerialTimingTransport.Create(
-  const AConnection: ISerialTimingConnection);
+constructor TSerialTimingTransport.Create(const AConnection: ISerialTimingConnection);
 begin
   inherited Create;
   if not Assigned(AConnection) then
@@ -99,15 +98,14 @@ begin
     Result := ttsDisconnected;
 end;
 
-procedure TSerialTimingTransport.SetOnData(
-  const AHandler: TTimingTransportDataEvent);
+procedure TSerialTimingTransport.SetOnData(const AHandler: TTimingTransportDataEvent);
 begin
   FOnData := AHandler;
 end;
 
 procedure TSerialTimingTransport.ConnectionDataAvailable(Sender: TObject);
 var
-  Data: RawByteString;
+  Data: rawbytestring;
   Handler: TTimingTransportDataEvent;
 begin
   Data := FConnection.ReadData;
@@ -118,8 +116,8 @@ begin
     Handler(Self, Data, GetSource);
 end;
 
-function TSerialTimingTransport.SendAsync(
-  const AData: RawByteString): ITimingSendOperation;
+function TSerialTimingTransport.SendAsync(const AData: rawbytestring):
+ITimingSendOperation;
 var
   ErrorCode: integer;
   ErrorMessage: string;
@@ -137,8 +135,7 @@ begin
     ErrorMessage := FConnection.LastErrorMessage;
     if ErrorMessage = '' then
       ErrorMessage := 'Serial write failed';
-    Result := TTimingSendOperation.Failed(TransportSource, ErrorMessage,
-      ErrorCode);
+    Result := TTimingSendOperation.Failed(TransportSource, ErrorMessage, ErrorCode);
   except
     on E: Exception do
       Result := TTimingSendOperation.Failed(TransportSource, E.Message);

@@ -12,7 +12,7 @@ type
   TFakeTimingTransport = class(TInterfacedObject, ITimingTransport)
   private
     FConnected: boolean;
-    FLastData: RawByteString;
+    FLastData: rawbytestring;
     FOnData: TTimingTransportDataEvent;
     FSendCount: integer;
     FSource: TTimingMarkSource;
@@ -24,10 +24,10 @@ type
     procedure SetOnData(const AHandler: TTimingTransportDataEvent);
   public
     constructor Create(const ASource: TTimingMarkSource);
-    procedure Emit(const AData: RawByteString);
-    function SendAsync(const AData: RawByteString): ITimingSendOperation;
+    procedure Emit(const AData: rawbytestring);
+    function SendAsync(const AData: rawbytestring): ITimingSendOperation;
     property Connected: boolean read FConnected write FConnected;
-    property LastData: RawByteString read FLastData;
+    property LastData: rawbytestring read FLastData;
     property SendCount: integer read FSendCount;
   end;
 
@@ -38,10 +38,10 @@ type
     FBle: TFakeTimingTransport;
     FController: TTimingTransportController;
     FDataCount: integer;
-    FLastData: RawByteString;
+    FLastData: rawbytestring;
     FLastSource: TTimingMarkSource;
     FSerial: TFakeTimingTransport;
-    procedure DataReceived(Sender: TObject; const AData: RawByteString;
+    procedure DataReceived(Sender: TObject; const AData: rawbytestring;
       const ASource: TTimingMarkSource);
   protected
     procedure SetUp; override;
@@ -92,20 +92,19 @@ begin
     Result := ttsDisconnected;
 end;
 
-procedure TFakeTimingTransport.SetOnData(
-  const AHandler: TTimingTransportDataEvent);
+procedure TFakeTimingTransport.SetOnData(const AHandler: TTimingTransportDataEvent);
 begin
   FOnData := AHandler;
 end;
 
-procedure TFakeTimingTransport.Emit(const AData: RawByteString);
+procedure TFakeTimingTransport.Emit(const AData: rawbytestring);
 begin
   if Assigned(FOnData) then
     FOnData(Self, AData, FSource);
 end;
 
-function TFakeTimingTransport.SendAsync(
-  const AData: RawByteString): ITimingSendOperation;
+function TFakeTimingTransport.SendAsync(const AData: rawbytestring):
+ITimingSendOperation;
 begin
   Inc(FSendCount);
   FLastData := AData;
@@ -117,13 +116,11 @@ var
   BleInterface, SerialInterface: ITimingTransport;
 begin
   inherited SetUp;
-  FSerial := TFakeTimingTransport.Create(
-    TTimingMarkSource.Serial('COM7'));
+  FSerial := TFakeTimingTransport.Create(TTimingMarkSource.Serial('COM7'));
   FBle := TFakeTimingTransport.Create(TTimingMarkSource.Ble('device-7'));
   SerialInterface := FSerial;
   BleInterface := FBle;
-  FController := TTimingTransportController.Create(SerialInterface,
-    BleInterface);
+  FController := TTimingTransportController.Create(SerialInterface, BleInterface);
   FController.OnData := @DataReceived;
 end;
 
@@ -137,7 +134,7 @@ begin
 end;
 
 procedure TTimingTransportControllerTests.DataReceived(Sender: TObject;
-  const AData: RawByteString; const ASource: TTimingMarkSource);
+  const AData: rawbytestring; const ASource: TTimingMarkSource);
 begin
   AssertSame(FController, Sender);
   Inc(FDataCount);
@@ -146,7 +143,7 @@ begin
 end;
 
 procedure TTimingTransportControllerTests.
-  SendAsync_UsesOnlySelectedConnectedTransport;
+SendAsync_UsesOnlySelectedConnectedTransport;
 var
   Operation: ITimingSendOperation;
 begin
@@ -166,7 +163,7 @@ begin
 end;
 
 procedure TTimingTransportControllerTests.
-  SendAsync_DoesNotFallbackWhenSelectedTransportDisconnected;
+SendAsync_DoesNotFallbackWhenSelectedTransportDisconnected;
 var
   Operation: ITimingSendOperation;
 begin
@@ -182,7 +179,7 @@ begin
 end;
 
 procedure TTimingTransportControllerTests.
-  IncomingData_ForwardsOnlySelectedTransport;
+IncomingData_ForwardsOnlySelectedTransport;
 begin
   FController.ActiveKind := ttkSerial;
   FBle.Emit('ignored-ble');

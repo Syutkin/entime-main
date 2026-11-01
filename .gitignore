@@ -46,9 +46,10 @@ backup/
 /win32/
 /build/
 /var/
-**/simpleble_pascal/
+**/simpledelphible/
 **/lazble/
 **/TLazSerial/
+**/chsdet/
 /tests/.test_build/
 /tests/integration/.test_build/
 
@@ -70,3 +71,6 @@ installer/*
 *.sqlite-journal
 *.bat
 *.ods
+*.xlsx
+*.docx
+*.pdf

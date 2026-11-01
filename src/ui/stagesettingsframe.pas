@@ -38,9 +38,9 @@ implementation
 uses
   i18n;
 
-{$R *.lfm}
+  {$R *.lfm}
 
-{ TStageSettingsFrame }
+  { TStageSettingsFrame }
 
 procedure TStageSettingsFrame.ControlChange(Sender: TObject);
 begin

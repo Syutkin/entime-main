@@ -30,17 +30,16 @@ type
       const AQueries: array of TSQLQuery;
       var AOutcome: TCompetitionRefreshOutcome); static;
     class procedure RefreshMainQuery(const AContext: TCompetitionDbContext;
-      const AMainQuery: TSQLQuery;
-      var AOutcome: TCompetitionRefreshOutcome); static;
+      const AMainQuery: TSQLQuery; var AOutcome: TCompetitionRefreshOutcome);
+      static;
   public
     class function RefreshAll(const AContext: TCompetitionDbContext;
       const AMainQuery: TSQLQuery;
       const ABaseQueries, AResultQueries: array of TSQLQuery;
-      const ARefreshStageQueries: TRefreshStageQueries):
-      TCompetitionRefreshOutcome; static;
+      const ARefreshStageQueries: TRefreshStageQueries): TCompetitionRefreshOutcome;
+      static;
     class function RefreshResults(const AContext: TCompetitionDbContext;
-      const AResultQueries: array of TSQLQuery):
-      TCompetitionRefreshOutcome; static;
+      const AResultQueries: array of TSQLQuery): TCompetitionRefreshOutcome; static;
   end;
 
 implementation
@@ -61,8 +60,7 @@ begin
 end;
 
 class procedure TCompetitionRefreshCoordinator.RefreshQueryGroup(
-  const AContext: TCompetitionDbContext;
-  const AQueries: array of TSQLQuery;
+  const AContext: TCompetitionDbContext; const AQueries: array of TSQLQuery;
   var AOutcome: TCompetitionRefreshOutcome);
 var
   ErrorCount: integer;
@@ -88,8 +86,9 @@ begin
   QueryLabel := AMainQuery.Name;
   if QueryLabel = '' then
     QueryLabel := 'TSQLQuery';
-  AOutcome.HadCurrentParticipant := AMainQuery.Active and
-    TMainSql.TryGetCurrentId(AMainQuery, AOutcome.CurrentParticipantId);
+  AOutcome.HadCurrentParticipant :=
+    AMainQuery.Active and TMainSql.TryGetCurrentId(AMainQuery,
+    AOutcome.CurrentParticipantId);
   ControlsDisabled := False;
   try
     try
@@ -128,8 +127,7 @@ end;
 class function TCompetitionRefreshCoordinator.RefreshAll(
   const AContext: TCompetitionDbContext; const AMainQuery: TSQLQuery;
   const ABaseQueries, AResultQueries: array of TSQLQuery;
-  const ARefreshStageQueries: TRefreshStageQueries):
-  TCompetitionRefreshOutcome;
+  const ARefreshStageQueries: TRefreshStageQueries): TCompetitionRefreshOutcome;
 var
   ErrorCount, QueryCount: integer;
   Errors: string;
@@ -138,8 +136,7 @@ begin
   if AContext = nil then
     raise EArgumentNilException.Create('AContext');
   Result := Default(TCompetitionRefreshOutcome);
-  PerformanceTrace := TPerformanceTrace.Create('ui.refresh_all',
-    alsDatabase);
+  PerformanceTrace := TPerformanceTrace.Create('ui.refresh_all', alsDatabase);
   try
     RefreshMainQuery(AContext, AMainQuery, Result);
     PerformanceTrace.Step('main_query');
@@ -168,13 +165,13 @@ begin
     PerformanceTrace.Step('result_queries',
       'query_count=' + IntToStr(Length(AResultQueries)));
     if Result.HadCurrentParticipant and AMainQuery.Active then
-      try
-        Result.CurrentParticipantRestored := AMainQuery.Locate('id',
-          Result.CurrentParticipantId, []);
-      except
-        on E: Exception do
-          AppendErrors(Result, 1, AMainQuery.Name + ': ' + E.Message);
-      end;
+    try
+      Result.CurrentParticipantRestored :=
+        AMainQuery.Locate('id', Result.CurrentParticipantId, []);
+    except
+      on E: Exception do
+        AppendErrors(Result, 1, AMainQuery.Name + ': ' + E.Message);
+    end;
     if Result.ErrorCount = 0 then
       PerformanceTrace.Finish('ok')
     else

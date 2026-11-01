@@ -56,11 +56,9 @@ begin
     UnitOfWork.Free;
   end;
   FPersistence := TSqliteStartMarkPersistence.Create(FContext);
-  FCandidateProvider := TSqliteStartMarkCandidateProvider.Create(
-    FContext, FStages);
+  FCandidateProvider := TSqliteStartMarkCandidateProvider.Create(FContext, FStages);
   FApplyPort := TSqliteStartMarkApplyPort.Create(FContext, FStages);
-  FService := TStartMarkService.Create(FCandidateProvider, FApplyPort,
-    FPersistence);
+  FService := TStartMarkService.Create(FCandidateProvider, FApplyPort, FPersistence);
 end;
 
 procedure TStartMarkSqliteAdapterTests.TearDown;
@@ -94,13 +92,13 @@ end;
 function TStartMarkSqliteAdapterTests.MarkAt(const ATime: TDateTime;
   const AStageIndex: integer): TStartMark;
 begin
-  Result := TStartMark.FromTimingMark(TTimingMark.Start(ATime, True, 15,
-    TTimingMarkSource.Serial('COM7'),
-    EncodeDateTime(2026, 8, 13, 10, 0, 1, 123)), AStageIndex);
+  Result := TStartMark.FromTimingMark(TTimingMark.Start(ATime, True,
+    15, TTimingMarkSource.Serial('COM7'), EncodeDateTime(2026, 8, 13, 10, 0, 1, 123)),
+    AStageIndex);
 end;
 
 procedure TStartMarkSqliteAdapterTests.
-  Receive_ManualModePersistsMatchedProposal;
+Receive_ManualModePersistsMatchedProposal;
 var
   Result: TStartMarkReceiveResult;
 begin
@@ -122,7 +120,7 @@ begin
 end;
 
 procedure TStartMarkSqliteAdapterTests.
-  Receive_AutomaticModeAtomicallyAppliesAndRecalculates;
+Receive_AutomaticModeAtomicallyAppliesAndRecalculates;
 var
   AppliedAt: TDateTime;
   Result: TStartMarkReceiveResult;
@@ -132,8 +130,7 @@ begin
     '(102, ''A'', ''10:00:00.000'', ''10:10:00.000'');');
   AppliedAt := EncodeDateTime(2026, 8, 13, 10, 0, 3, 456);
 
-  Result := FService.Receive(MarkAt(EncodeTime(10, 0, 1, 0)), 3,
-    True, AppliedAt);
+  Result := FService.Receive(MarkAt(EncodeTime(10, 0, 1, 0)), 3, True, AppliedAt);
 
   AssertEquals(Ord(smsApplied), Ord(Result.Mark.Status));
   FQuery.SQL.Text :=
@@ -153,7 +150,7 @@ begin
 end;
 
 procedure TStartMarkSqliteAdapterTests.
-  Receive_AutomaticModePreservesExistingCorrectionAsConflict;
+Receive_AutomaticModePreservesExistingCorrectionAsConflict;
 var
   Result: TStartMarkReceiveResult;
 begin
@@ -167,8 +164,7 @@ begin
   AssertEquals(Ord(smsConflict), Ord(Result.Mark.Status));
   FQuery.SQL.Text :=
     'SELECT m.correction1, s.status, s.diagnostic ' +
-    'FROM main m JOIN start_marks s ON s.id = :ID ' +
-    'WHERE m.number = 103;';
+    'FROM main m JOIN start_marks s ON s.id = :ID ' + 'WHERE m.number = 103;';
   FQuery.ParamByName('ID').AsLargeInt := Result.Mark.Id;
   FQuery.Open;
   AssertEquals(5, FQuery.FieldByName('correction1').AsInteger);
@@ -178,15 +174,14 @@ begin
 end;
 
 procedure TStartMarkSqliteAdapterTests.
-  ApplyManual_CanAtomicallyApplyToDifferentStage;
+ApplyManual_CanAtomicallyApplyToDifferentStage;
 var
   Applied: TStartMarkApplyResult;
   Received: TStartMarkReceiveResult;
 begin
   ExecSql('INSERT INTO main ' +
     '(number, category, starttime1, starttime2, finishtime2) VALUES ' +
-    '(104, ''A'', ''10:00:00.000'', ''11:00:00.000'', ' +
-    '''11:10:00.000'');');
+    '(104, ''A'', ''10:00:00.000'', ''11:00:00.000'', ' + '''11:10:00.000'');');
   Received := FService.Receive(MarkAt(EncodeTime(10, 0, 1, 0)), 3,
     False, EncodeDateTime(2026, 8, 13, 10, 0, 3, 0));
 
@@ -199,8 +194,7 @@ begin
   FQuery.SQL.Text :=
     'SELECT m.correction1, m.correction2, s.stage_index, ' +
     's.applied_stage_index, s.assignment_mode, s.status ' +
-    'FROM main m JOIN start_marks s ON s.id = :ID ' +
-    'WHERE m.number = 104;';
+    'FROM main m JOIN start_marks s ON s.id = :ID ' + 'WHERE m.number = 104;';
   FQuery.ParamByName('ID').AsLargeInt := Applied.Mark.Id;
   FQuery.Open;
   AssertTrue(FQuery.FieldByName('correction1').IsNull);
@@ -212,7 +206,7 @@ begin
 end;
 
 procedure TStartMarkSqliteAdapterTests.
-  Receive_CalculationFailureRollsBackCorrectionAndMarksError;
+Receive_CalculationFailureRollsBackCorrectionAndMarksError;
 var
   Result: TStartMarkReceiveResult;
 begin
@@ -231,8 +225,7 @@ begin
   FQuery.SQL.Text :=
     'SELECT m.correction1, s.applied_stage_index, ' +
     's.assignment_mode, s.status, s.diagnostic ' +
-    'FROM main m JOIN start_marks s ON s.id = :ID ' +
-    'WHERE m.number = 105;';
+    'FROM main m JOIN start_marks s ON s.id = :ID ' + 'WHERE m.number = 105;';
   FQuery.ParamByName('ID').AsLargeInt := Result.Mark.Id;
   FQuery.Open;
   AssertTrue(FQuery.FieldByName('correction1').IsNull);

@@ -9,8 +9,7 @@ uses
   SysUtils, StartMark, StartMarkMatcher;
 
 type
-  TStartMarkChangedEvent = procedure(Sender: TObject;
-    const AMarkId: int64) of object;
+  TStartMarkChangedEvent = procedure(Sender: TObject; const AMarkId: int64) of object;
 
   TStartMarkApplyFailure = (smafNone, smafCorrectionMissing,
     smafParticipantNotFound, smafExistingCorrection,
@@ -43,8 +42,7 @@ type
   IStartMarkApplyPort = interface
     ['{489056E9-7A31-4A80-AAB2-A892F611A1DE}']
     function TryApply(const ARequest: TStartMarkApplyRequest;
-      out AFailure: TStartMarkApplyFailure;
-      out ADiagnostic: string): boolean;
+      out AFailure: TStartMarkApplyFailure; out ADiagnostic: string): boolean;
   end;
 
   { IStartMarkPersistence }
@@ -52,8 +50,7 @@ type
   IStartMarkPersistence = interface
     ['{99472A1C-C05C-4F36-A097-32816B226EB7}']
     function Insert(const AMark: TStartMark): TStartMark;
-    function TryLoadById(const AMarkId: int64;
-      out AMark: TStartMark): boolean;
+    function TryLoadById(const AMarkId: int64; out AMark: TStartMark): boolean;
     function HideWorkQueue: integer;
     procedure Update(const AMark: TStartMark);
   end;
@@ -93,8 +90,7 @@ type
     constructor Create(const ACandidateProvider: IStartMarkCandidateProvider;
       const AApplyPort: IStartMarkApplyPort;
       const APersistence: IStartMarkPersistence);
-    function Receive(const AMark: TStartMark;
-      const AToleranceSeconds: integer;
+    function Receive(const AMark: TStartMark; const AToleranceSeconds: integer;
       const AAutomaticApply: boolean;
       const AAppliedAt: TDateTime): TStartMarkReceiveResult;
     function SetParticipantNumber(const AMarkId: int64;
@@ -110,17 +106,14 @@ type
       const AParticipantNumber, AStageIndex: integer;
       const AOverwriteExistingCorrection: boolean;
       const AAppliedAt: TDateTime): TStartMarkApplyResult;
-    property OnChanged: TStartMarkChangedEvent read FOnChanged
-      write FOnChanged;
+    property OnChanged: TStartMarkChangedEvent read FOnChanged write FOnChanged;
   end;
 
-function StartMarkApplyFailureCode(
-  const AFailure: TStartMarkApplyFailure): string;
+function StartMarkApplyFailureCode(const AFailure: TStartMarkApplyFailure): string;
 
 implementation
 
-function StartMarkApplyFailureCode(
-  const AFailure: TStartMarkApplyFailure): string;
+function StartMarkApplyFailureCode(const AFailure: TStartMarkApplyFailure): string;
 begin
   case AFailure of
     smafNone: Result := '';
@@ -131,9 +124,8 @@ begin
   end;
 end;
 
-constructor TStartMarkService.Create(
-  const ACandidateProvider: IStartMarkCandidateProvider;
-  const AApplyPort: IStartMarkApplyPort;
+constructor TStartMarkService.Create(const ACandidateProvider:
+  IStartMarkCandidateProvider; const AApplyPort: IStartMarkApplyPort;
   const APersistence: IStartMarkPersistence);
 begin
   inherited Create;
@@ -182,8 +174,7 @@ begin
   if Result.Mark.Id = 0 then
     Result.Mark := FPersistence.Insert(Result.Mark);
 
-  if Result.Mark.HasMatchDeltaMs and
-    ((not Result.Mark.HasParticipantNumber) or
+  if Result.Mark.HasMatchDeltaMs and ((not Result.Mark.HasParticipantNumber) or
     (Result.Mark.ParticipantNumber <> AParticipantNumber)) then
   begin
     Result.Mark.HasMatchDeltaMs := False;
@@ -258,34 +249,33 @@ begin
   end;
 
   FCandidateProvider.LoadCandidates(Result.Mark.StageIndex, Candidates);
-  Result.Match := TStartMarkMatcher.Match(Result.Mark, Candidates,
-    AToleranceSeconds);
+  Result.Match := TStartMarkMatcher.Match(Result.Mark, Candidates, AToleranceSeconds);
   Result.HasMatch := True;
 
   case Result.Match.Status of
     smmNoMatch:
-      begin
-        if Changed then
-          NotifyChanged(Result.Mark.Id);
-        Exit;
-      end;
-    smmAmbiguous:
-      begin
-        Result.Mark.HasMatchDeltaMs := Result.Match.HasDeltaMs;
-        Result.Mark.MatchDeltaMs := Result.Match.DeltaMs;
-        Result.Mark.MarkConflict(Result.Match.Reason);
-        FPersistence.Update(Result.Mark);
+    begin
+      if Changed then
         NotifyChanged(Result.Mark.Id);
-        Exit;
-      end;
+      Exit;
+    end;
+    smmAmbiguous:
+    begin
+      Result.Mark.HasMatchDeltaMs := Result.Match.HasDeltaMs;
+      Result.Mark.MatchDeltaMs := Result.Match.DeltaMs;
+      Result.Mark.MarkConflict(Result.Match.Reason);
+      FPersistence.Update(Result.Mark);
+      NotifyChanged(Result.Mark.Id);
+      Exit;
+    end;
     smmMatched:
-      begin
-        Result.Mark.HasMatchDeltaMs := Result.Match.HasDeltaMs;
-        Result.Mark.MatchDeltaMs := Result.Match.DeltaMs;
-        Result.Mark.SuggestParticipant(Result.Match.ParticipantNumber);
-        FPersistence.Update(Result.Mark);
-        Changed := True;
-      end;
+    begin
+      Result.Mark.HasMatchDeltaMs := Result.Match.HasDeltaMs;
+      Result.Mark.MatchDeltaMs := Result.Match.DeltaMs;
+      Result.Mark.SuggestParticipant(Result.Match.ParticipantNumber);
+      FPersistence.Update(Result.Mark);
+      Changed := True;
+    end;
   end;
 
   if not AAutomaticApply then
@@ -313,12 +303,10 @@ begin
 end;
 
 function TStartMarkService.SetParticipantNumber(const AMarkId: int64;
-  const AHasParticipantNumber: boolean;
-  const AParticipantNumber: integer): TStartMark;
+  const AHasParticipantNumber: boolean; const AParticipantNumber: integer): TStartMark;
 begin
   if not FPersistence.TryLoadById(AMarkId, Result) then
-    raise EArgumentException.CreateFmt(
-      'Start mark %d was not found.', [AMarkId]);
+    raise EArgumentException.CreateFmt('Start mark %d was not found.', [AMarkId]);
   Result.SetParticipantNumber(AHasParticipantNumber, AParticipantNumber);
   FPersistence.Update(Result);
   NotifyChanged(Result.Id);
@@ -345,8 +333,7 @@ var
   Mark: TStartMark;
 begin
   if not TryLoad(AMarkId, Mark) then
-    raise EArgumentException.CreateFmt(
-      'Start mark %d was not found.', [AMarkId]);
+    raise EArgumentException.CreateFmt('Start mark %d was not found.', [AMarkId]);
   Result := Apply(Mark, AParticipantNumber, AStageIndex, smamManual,
     AOverwriteExistingCorrection, AAppliedAt);
   NotifyChanged(Result.Mark.Id);

@@ -52,62 +52,9 @@ implementation
 
 const
   CURRENT_CODEBERG_RELEASE_JSON =
-    '{"id":11256131,' +
-    '"tag_name":"0.8.2",' +
-    '"target_commitish":"master",' +
-    '"name":"0.8.2",' +
-    '"body":"### Added\\r\\n\\r\\n' +
-      '- Добавлено журналирование основных действий приложения в файл и интерфейс.' +
-      '\\r\\n\\r\\n### Fixed\\r\\n\\r\\n' +
-      '- Исправлена возможная задержка запуска приложения при отсутствии интернета.' +
-      '\\r\\n",' +
-    '"url":"https://codeberg.org/api/v1/repos/Syutkin/entime/releases/11256131",' +
-    '"html_url":"https://codeberg.org/Syutkin/entime/releases/tag/0.8.2",' +
-    '"tarball_url":"https://codeberg.org/Syutkin/entime/archive/0.8.2.tar.gz",' +
-    '"zipball_url":"https://codeberg.org/Syutkin/entime/archive/0.8.2.zip",' +
-    '"hide_archive_links":true,' +
-    '"upload_url":"https://codeberg.org/api/v1/repos/Syutkin/entime/releases/11256131/assets",' +
-    '"draft":false,"prerelease":false,' +
-    '"created_at":"2026-08-03T00:24:05+02:00",' +
-    '"published_at":"2026-08-03T00:24:05+02:00",' +
-    '"author":{' +
-      '"id":4660,"login":"Syutkin","login_name":"",' +
-      '"source_id":0,"full_name":"",' +
-      '"email":"syutkin@noreply.codeberg.org",' +
-      '"avatar_url":"https://codeberg.org/avatars/f3fe709089bb419e5aa27c4595b9e476",' +
-      '"html_url":"https://codeberg.org/Syutkin",' +
-      '"language":"","is_admin":false,' +
-      '"last_login":"0001-01-01T00:00:00Z",' +
-      '"created":"2019-12-17T10:51:34+01:00",' +
-      '"restricted":false,"active":false,"prohibit_login":false,' +
-      '"location":"","pronouns":"","website":"",' +
-      '"description":"","visibility":"public",' +
-      '"followers_count":0,"following_count":0,' +
-      '"starred_repos_count":0,"username":"Syutkin"' +
-    '},' +
-    '"assets":[{' +
-      '"id":1741619,' +
-      '"name":"Entime-0.8.2-win-x64.zip",' +
-      '"size":8461713,' +
-      '"download_count":1,' +
-      '"created_at":"2026-08-03T00:33:09+02:00",' +
-      '"uuid":"544f3f2b-7cb0-449b-a983-73838cc24d97",' +
-      '"browser_download_url":' +
-        '"https://codeberg.org/Syutkin/entime/releases/download/0.8.2/Entime-0.8.2-win-x64.zip",' +
-      '"type":"attachment"' +
-    '},{' +
-      '"id":1741616,' +
-      '"name":"Entime-0.8.2-win-x64.zip.sha256",' +
-      '"size":90,' +
-      '"download_count":0,' +
-      '"created_at":"2026-08-03T00:33:08+02:00",' +
-      '"uuid":"448eb321-024b-4275-be98-3d43cb014da6",' +
-      '"browser_download_url":' +
-        '"https://codeberg.org/Syutkin/entime/releases/download/0.8.2/Entime-0.8.2-win-x64.zip.sha256",' +
-      '"type":"attachment"' +
-    '}],' +
-    '"archive_download_count":{"zip":0,"tar_gz":0}' +
-    '}';
+    '{"id":11256131,' + '"tag_name":"0.8.2",' + '"target_commitish":"master",' +
+    '"name":"0.8.2",' + '"body":"### Added\\r\\n\\r\\n' +
+    '- Добавлено журналирование основных действий приложения в файл и интерфейс.' + '\\r\\n\\r\\n### Fixed\\r\\n\\r\\n' + '- Исправлена возможная задержка запуска приложения при отсутствии интернета.' + '\\r\\n",' + '"url":"https://codeberg.org/api/v1/repos/Syutkin/entime/releases/11256131",' + '"html_url":"https://codeberg.org/Syutkin/entime/releases/tag/0.8.2",' + '"tarball_url":"https://codeberg.org/Syutkin/entime/archive/0.8.2.tar.gz",' + '"zipball_url":"https://codeberg.org/Syutkin/entime/archive/0.8.2.zip",' + '"hide_archive_links":true,' + '"upload_url":"https://codeberg.org/api/v1/repos/Syutkin/entime/releases/11256131/assets",' + '"draft":false,"prerelease":false,' + '"created_at":"2026-08-03T00:24:05+02:00",' + '"published_at":"2026-08-03T00:24:05+02:00",' + '"author":{' + '"id":4660,"login":"Syutkin","login_name":"",' + '"source_id":0,"full_name":"",' + '"email":"syutkin@noreply.codeberg.org",' + '"avatar_url":"https://codeberg.org/avatars/f3fe709089bb419e5aa27c4595b9e476",' + '"html_url":"https://codeberg.org/Syutkin",' + '"language":"","is_admin":false,' + '"last_login":"0001-01-01T00:00:00Z",' + '"created":"2019-12-17T10:51:34+01:00",' + '"restricted":false,"active":false,"prohibit_login":false,' + '"location":"","pronouns":"","website":"",' + '"description":"","visibility":"public",' + '"followers_count":0,"following_count":0,' + '"starred_repos_count":0,"username":"Syutkin"' + '},' + '"assets":[{' + '"id":1741619,' + '"name":"Entime-0.8.2-win-x64.zip",' + '"size":8461713,' + '"download_count":1,' + '"created_at":"2026-08-03T00:33:09+02:00",' + '"uuid":"544f3f2b-7cb0-449b-a983-73838cc24d97",' + '"browser_download_url":' + '"https://codeberg.org/Syutkin/entime/releases/download/0.8.2/Entime-0.8.2-win-x64.zip",' + '"type":"attachment"' + '},{' + '"id":1741616,' + '"name":"Entime-0.8.2-win-x64.zip.sha256",' + '"size":90,' + '"download_count":0,' + '"created_at":"2026-08-03T00:33:08+02:00",' + '"uuid":"448eb321-024b-4275-be98-3d43cb014da6",' + '"browser_download_url":' + '"https://codeberg.org/Syutkin/entime/releases/download/0.8.2/Entime-0.8.2-win-x64.zip.sha256",' + '"type":"attachment"' + '}],' + '"archive_download_count":{"zip":0,"tar_gz":0}' + '}';
 
 var
   FakeResult: TUpdateCheckResult;
@@ -159,8 +106,7 @@ begin
   FOwner := AOwner;
 end;
 
-function TBlockingUpdateTransport.Execute(
-  const ARequest: THttpRequest): THttpResponse;
+function TBlockingUpdateTransport.Execute(const ARequest: THttpRequest): THttpResponse;
 begin
   EnterCriticalSection(FOwner.FLock);
   try
@@ -240,8 +186,8 @@ begin
   Result := TFakeUpdateChecker.Create;
 end;
 
-function TFakeUpdateChecker.CheckForUpdates(
-  const ACurrentVersion: string): TUpdateCheckResult;
+function TFakeUpdateChecker.CheckForUpdates(const ACurrentVersion: string):
+TUpdateCheckResult;
 begin
   InterlockedIncrement(FakeCheckCount);
   RTLEventSetEvent(FakeStartedEvent);
@@ -288,8 +234,8 @@ begin
   inherited TearDown;
 end;
 
-procedure TUpdaterTests.UpdateCompleted(Sender: TObject;
-  AMode: TUpdateCheckMode; const AResult: TUpdateCheckResult);
+procedure TUpdaterTests.UpdateCompleted(Sender: TObject; AMode: TUpdateCheckMode;
+  const AResult: TUpdateCheckResult);
 begin
   Inc(FCompletionCount);
   FCompletedMode := AMode;
@@ -406,8 +352,7 @@ begin
   checker := TUpdater.Create;
   try
     checkResult := checker.EvaluateReleaseResponse('0.8.1',
-      '{"tag_name":"Entime 0.8.2",' +
-      '"html_url":"https://codeberg.org/release"}');
+      '{"tag_name":"Entime 0.8.2",' + '"html_url":"https://codeberg.org/release"}');
   finally
     checker.Free;
   end;
@@ -612,7 +557,7 @@ const
     ucsUpToDate,
     ucsFailed,
     ucsCancelled
-  );
+    );
 var
   status: TUpdateCheckStatus;
   worker: TUpdateCheckThread;
@@ -620,8 +565,7 @@ begin
   for status in statuses do
   begin
     FakeResult.Status := status;
-    worker := TUpdateCheckThread.Create(
-      CreateFakeUpdateChecker, '0.8.1', nil);
+    worker := TUpdateCheckThread.Create(CreateFakeUpdateChecker, '0.8.1', nil);
     try
       worker.Start;
       worker.WaitFor;
@@ -638,8 +582,7 @@ end;
 
 procedure TUpdaterTests.AutomaticCheckDoesNotStartWhenDisabled;
 begin
-  AssertFalse(FController.StartAutomatic(
-    '0.8.1', False, -1, 0, Now));
+  AssertFalse(FController.StartAutomatic('0.8.1', False, -1, 0, Now));
   AssertFalse(FController.Busy);
   AssertEquals(0, FakeCheckCount);
 end;
@@ -649,8 +592,7 @@ var
   nowValue: TDateTime;
 begin
   nowValue := EncodeDate(2026, 7, 31);
-  AssertFalse(FController.StartAutomatic(
-    '0.8.1', True, 7, nowValue - 1, nowValue));
+  AssertFalse(FController.StartAutomatic('0.8.1', True, 7, nowValue - 1, nowValue));
   AssertFalse(FController.Busy);
   AssertEquals(0, FakeCheckCount);
 end;
@@ -660,8 +602,7 @@ var
   nowValue: TDateTime;
 begin
   nowValue := EncodeDate(2026, 7, 31);
-  AssertTrue(FController.StartAutomatic(
-    '0.8.1', True, 7, nowValue - 8, nowValue));
+  AssertTrue(FController.StartAutomatic('0.8.1', True, 7, nowValue - 8, nowValue));
   WaitForCompletion;
   AssertEquals(1, FakeCheckCount);
   AssertEquals(Ord(ucmAutomatic), Ord(FCompletedMode));
@@ -716,8 +657,7 @@ procedure TUpdaterTests.AutomaticPresentationIsSilentForUpToDateAndFailure;
 begin
   AssertEquals(Ord(ucnNone), Ord(UpdateCheckNotification(
     ucmAutomatic, ucsUpToDate)));
-  AssertEquals(Ord(ucnNone), Ord(UpdateCheckNotification(
-    ucmAutomatic, ucsFailed)));
+  AssertEquals(Ord(ucnNone), Ord(UpdateCheckNotification(ucmAutomatic, ucsFailed)));
   AssertEquals(Ord(ucnUpdateAvailable), Ord(UpdateCheckNotification(
     ucmAutomatic, ucsUpdateAvailable)));
 end;
@@ -726,8 +666,7 @@ procedure TUpdaterTests.ManualPresentationReportsUpToDateAndFailure;
 begin
   AssertEquals(Ord(ucnUpToDate), Ord(UpdateCheckNotification(
     ucmManual, ucsUpToDate)));
-  AssertEquals(Ord(ucnFailure), Ord(UpdateCheckNotification(
-    ucmManual, ucsFailed)));
+  AssertEquals(Ord(ucnFailure), Ord(UpdateCheckNotification(ucmManual, ucsFailed)));
   AssertEquals(Ord(ucnUpdateAvailable), Ord(UpdateCheckNotification(
     ucmManual, ucsUpdateAvailable)));
 end;

@@ -8,14 +8,12 @@ uses
   TimingProtocol, TimingMark;
 
 function TimingMarkFromTimingPacket(const APacket: TTimingPacket;
-  const ASource: TTimingMarkSource;
-  const AReceivedAt: TDateTime): TTimingMark;
+  const ASource: TTimingMarkSource; const AReceivedAt: TDateTime): TTimingMark;
 
 implementation
 
 function TimingMarkFromTimingPacket(const APacket: TTimingPacket;
-  const ASource: TTimingMarkSource;
-  const AReceivedAt: TDateTime): TTimingMark;
+  const ASource: TTimingMarkSource; const AReceivedAt: TDateTime): TTimingMark;
 begin
   case APacket.Kind of
     tpkStart:

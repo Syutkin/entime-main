@@ -6,6 +6,8 @@ PROJECT_FILE="$ROOT_DIR/entime.lpi"
 PACKAGE_FILE="$ROOT_DIR/packages/myforks/myforks.lpk"
 LANGUAGE_DIR="$ROOT_DIR/languages"
 POT_FILE="$LANGUAGE_DIR/entime.pot"
+LAZARUS_CONFIG="$ROOT_DIR/build/lazarus-config"
+LAZARUS_ARGS=(--ws=qt6 --pcp="$LAZARUS_CONFIG" --scp="${LAZARUS_SECONDARY_CONFIG:-$HOME/.lazarus}")
 UPDATE_PO_FILES="$(command -v updatepofiles || true)"
 
 if ! command -v lazbuild >/dev/null 2>&1; then
@@ -44,13 +46,15 @@ if [[ ! -f "$PACKAGE_FILE" ]]; then
   exit 1
 fi
 
-mkdir -p "$LANGUAGE_DIR"
+mkdir -p "$LANGUAGE_DIR" "$LAZARUS_CONFIG"
 
 echo "==> Registering the local package"
-lazbuild --add-package-link "$PACKAGE_FILE"
+lazbuild "${LAZARUS_ARGS[@]}" --add-package-link "$PACKAGE_FILE" \
+  "$ROOT_DIR/packages/simpledelphible/SimpleDelphiBLEPackage.lpk" \
+  "$ROOT_DIR/packages/lazble/lazble.lpk" "$ROOT_DIR/packages/lazble/lazblelcl.lpk"
 
 echo "==> Updating Entime translation catalogues"
-lazbuild --no-write-project --ws=qt6 --build-mode=qt6 "$PROJECT_FILE"
+lazbuild "${LAZARUS_ARGS[@]}" --no-write-project --build-mode=qt6 "$PROJECT_FILE"
 
 TARGET_PLATFORM="$(fpc -iTP)-$(fpc -iTO)"
 RSJ_FILE="$ROOT_DIR/build/units/$TARGET_PLATFORM/qt6/i18n.rsj"
@@ -72,6 +76,10 @@ for catalogue in "$POT_FILE" "$LANGUAGE_DIR"/entime.*.po; do
   while [[ "$(tail -c 2 "$catalogue" | wc -l)" -eq 2 ]]; do
     truncate -s -1 "$catalogue"
   done
+done
+
+for unit in lazbledeviceselectform; do
+  cp "$ROOT_DIR/packages/lazble/languages/$unit."{en,ru}.po "$LANGUAGE_DIR/"
 done
 
 if [[ ! -s "$POT_FILE" ]]; then

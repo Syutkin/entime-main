@@ -6,7 +6,7 @@ unit CompetitionImportService;
 interface
 
 uses
-  Classes, SysUtils, DbSql, StageModel;
+  Classes, SysUtils, DbSql, StageModel, ResultsCsvParser;
 
 type
   ECompetitionImportValidationError = class(Exception);
@@ -23,9 +23,8 @@ type
     FRowCount: integer;
     FStageNames: TStringList;
     FParseResult: TObject;
-    class function CreateFromParseResult(
-      const AEncodingName: string; const AParseResult: TObject):
-      TParticipantsImportPlan; static;
+    class function CreateFromParseResult(const AEncodingName: string;
+      const AParseResult: TObject): TParticipantsImportPlan; static;
     function GetStageNames: TStrings;
   public
     destructor Destroy; override;
@@ -44,15 +43,18 @@ type
     FFormatColumnCount: integer;
     FRowCount: integer;
     FParseResult: TObject;
-    class function CreateFromParseResult(
-      const AEncodingName: string; const AParseResult: TObject):
-      TResultsImportPlan; static;
+    function GetItemCount: integer;
+    function GetItem(const AIndex: integer): TResultImportItem;
+    class function CreateFromParseResult(const AEncodingName: string;
+      const AParseResult: TObject): TResultsImportPlan; static;
   public
     destructor Destroy; override;
     property EncodingName: string read FEncodingName;
     property ImportFormat: TCompetitionResultsImportFormat read FImportFormat;
     property FormatColumnCount: integer read FFormatColumnCount;
     property RowCount: integer read FRowCount;
+    property ItemCount: integer read GetItemCount;
+    property Items[const AIndex: integer]: TResultImportItem read GetItem;
   end;
 
   TParticipantsImportRequest = record
@@ -96,31 +98,38 @@ type
   TCompetitionImportService = record
   public
     class function PrepareParticipantsFile(const AFileName: string;
-      const AMaxStageCount: integer):
-      TParticipantsImportPlan; static;
+      const AMaxStageCount: integer): TParticipantsImportPlan; static;
     class function RequiresStageCapacityExpansion(
-      const APlan: TParticipantsImportPlan;
-      const AContext: TCompetitionDbContext;
+      const APlan: TParticipantsImportPlan; const AContext: TCompetitionDbContext;
       const AStages: TStages): boolean; static;
     class function ApplyParticipants(const APlan: TParticipantsImportPlan;
       const AContext: TCompetitionDbContext; const AStages: TStages;
-      const ARequest: TParticipantsImportRequest):
-      TParticipantsImportOutcome; static;
-    class function PrepareResultsFile(const AFileName: string):
-      TResultsImportPlan; static;
+      const ARequest: TParticipantsImportRequest): TParticipantsImportOutcome;
+      static;
+    class function PrepareResultsFile(
+      const AFileName: string): TResultsImportPlan; static;
     class function InspectResultsParticipants(const APlan: TResultsImportPlan;
       const AContext: TCompetitionDbContext): TResultsImportInspection; static;
     class function ApplyResults(const APlan: TResultsImportPlan;
       const AContext: TCompetitionDbContext; const AStages: TStages;
-      const ARequest: TResultsImportRequest):
-      TResultsImportOutcome; static;
+      const ARequest: TResultsImportRequest): TResultsImportOutcome; static;
   end;
 
 implementation
 
 uses
-  SQLDB, CsvParser, ParticipantsCsvParser, ResultsCsvParser, StartItemModel,
+  SQLDB, CsvParser, ParticipantsCsvParser, StartItemModel,
   CompetitionResultsService, i18n;
+
+function TResultsImportPlan.GetItemCount: integer;
+begin
+  Result := TResultsCsvParseResult(FParseResult).Items.Count;
+end;
+
+function TResultsImportPlan.GetItem(const AIndex: integer): TResultImportItem;
+begin
+  Result := TResultImportItem(TResultsCsvParseResult(FParseResult).Items[AIndex]);
+end;
 
 function FormatParticipantsCsvError(const E: ECsvParserError): string;
 begin
@@ -143,28 +152,24 @@ begin
   else if E is EParticipantRowsNotFound then
     Result := rsParticipantRowsNotFound
   else if E is ERowFieldCountMismatch then
-    Result := Format(rsParticipantRowFieldCountMismatch, [
-      ERowFieldCountMismatch(E).RowNumber,
+    Result := Format(rsParticipantRowFieldCountMismatch,
+      [ERowFieldCountMismatch(E).RowNumber,
       ERowFieldCountMismatch(E).ActualFieldCount,
-      ERowFieldCountMismatch(E).ExpectedFieldCount
-    ])
+      ERowFieldCountMismatch(E).ExpectedFieldCount])
   else if E is EInvalidParticipantNumber then
-    Result := Format(rsInvalidParticipantNumber, [
-      EInvalidParticipantNumber(E).NumberText,
-      EInvalidParticipantNumber(E).RowNumber
-    ])
+    Result := Format(rsInvalidParticipantNumber,
+      [EInvalidParticipantNumber(E).NumberText,
+      EInvalidParticipantNumber(E).RowNumber])
   else if E is EInvalidParticipantStartTime then
-    Result := Format(rsInvalidParticipantStartTime, [
-      EInvalidParticipantStartTime(E).TimeText,
+    Result := Format(rsInvalidParticipantStartTime,
+      [EInvalidParticipantStartTime(E).TimeText,
       EInvalidParticipantStartTime(E).RowNumber,
-      EInvalidParticipantStartTime(E).ColumnName
-    ])
+      EInvalidParticipantStartTime(E).ColumnName])
   else if E is EDuplicateParticipantNumber then
-    Result := Format(rsDuplicateParticipantNumber, [
-      EDuplicateParticipantNumber(E).ParticipantNumber,
+    Result := Format(rsDuplicateParticipantNumber,
+      [EDuplicateParticipantNumber(E).ParticipantNumber,
       EDuplicateParticipantNumber(E).FirstRowNumber,
-      EDuplicateParticipantNumber(E).DuplicateRowNumber
-    ])
+      EDuplicateParticipantNumber(E).DuplicateRowNumber])
   else
     Result := E.Message;
 end;
@@ -182,24 +187,21 @@ begin
     Result := Format(rsUnsupportedResultsColumnCount,
       [EUnsupportedResultsColumnCount(E).ColumnCount])
   else if E is EResultsRowFieldCountMismatch then
-    Result := Format(rsResultsRowFieldCountMismatch, [
-      EResultsRowFieldCountMismatch(E).RowNumber,
+    Result := Format(rsResultsRowFieldCountMismatch,
+      [EResultsRowFieldCountMismatch(E).RowNumber,
       EResultsRowFieldCountMismatch(E).ActualFieldCount,
-      EResultsRowFieldCountMismatch(E).ExpectedFieldCount
-    ])
+      EResultsRowFieldCountMismatch(E).ExpectedFieldCount])
   else if E is EResultsRowsNotFound then
     Result := rsResultsRowsNotFound
   else if E is EInvalidResultParticipantNumber then
-    Result := Format(rsInvalidResultParticipantNumber, [
-      EInvalidResultParticipantNumber(E).NumberText,
-      EInvalidResultParticipantNumber(E).RowNumber
-    ])
+    Result := Format(rsInvalidResultParticipantNumber,
+      [EInvalidResultParticipantNumber(E).NumberText,
+      EInvalidResultParticipantNumber(E).RowNumber])
   else if E is EDuplicateResultParticipantNumber then
-    Result := Format(rsDuplicateResultParticipantNumber, [
-      EDuplicateResultParticipantNumber(E).ParticipantNumber,
+    Result := Format(rsDuplicateResultParticipantNumber,
+      [EDuplicateResultParticipantNumber(E).ParticipantNumber,
       EDuplicateResultParticipantNumber(E).FirstRowNumber,
-      EDuplicateResultParticipantNumber(E).DuplicateRowNumber
-    ])
+      EDuplicateResultParticipantNumber(E).DuplicateRowNumber])
   else if E is EInvalidResultTime then
   begin
     FieldName := EInvalidResultTime(E).FieldName;
@@ -207,33 +209,25 @@ begin
       FieldName := rsStarttime
     else if SameText(FieldName, 'finishtime') then
       FieldName := rsFinishtime;
-    Result := Format(rsInvalidResultTime, [
-      EInvalidResultTime(E).TimeText,
-      EInvalidResultTime(E).RowNumber,
-      FieldName
-    ]);
+    Result := Format(rsInvalidResultTime, [EInvalidResultTime(E).TimeText,
+      EInvalidResultTime(E).RowNumber, FieldName]);
   end
   else if E is EInvalidResultCorrection then
-    Result := Format(rsInvalidResultCorrection, [
-      EInvalidResultCorrection(E).CorrectionText,
-      EInvalidResultCorrection(E).RowNumber
-    ])
+    Result := Format(rsInvalidResultCorrection,
+      [EInvalidResultCorrection(E).CorrectionText,
+      EInvalidResultCorrection(E).RowNumber])
   else if E is EInvalidResultPenalty then
-    Result := Format(rsInvalidResultPenalty, [
-      EInvalidResultPenalty(E).PenaltyText,
-      EInvalidResultPenalty(E).RowNumber
-    ])
+    Result := Format(rsInvalidResultPenalty,
+      [EInvalidResultPenalty(E).PenaltyText,
+      EInvalidResultPenalty(E).RowNumber])
   else if E is EInvalidResultStatus then
-    Result := Format(rsInvalidResultStatus, [
-      EInvalidResultStatus(E).StatusText,
-      EInvalidResultStatus(E).RowNumber
-    ])
+    Result := Format(rsInvalidResultStatus,
+      [EInvalidResultStatus(E).StatusText, EInvalidResultStatus(E).RowNumber])
   else
     Result := E.Message;
 end;
 
-function RequireContext(const AContext: TCompetitionDbContext):
-  TCompetitionDbContext;
+function RequireContext(const AContext: TCompetitionDbContext): TCompetitionDbContext;
 begin
   if AContext = nil then
     raise EArgumentNilException.Create('Competition database context');
@@ -250,8 +244,7 @@ end;
 { TParticipantsImportPlan }
 
 class function TParticipantsImportPlan.CreateFromParseResult(
-  const AEncodingName: string; const AParseResult: TObject):
-  TParticipantsImportPlan;
+  const AEncodingName: string; const AParseResult: TObject): TParticipantsImportPlan;
 var
   StageIndex: integer;
   ParseResult: TParticipantsCsvParseResult;
@@ -272,8 +265,8 @@ begin
       if Result.FDetectedStageNamesText <> '' then
         Result.FDetectedStageNamesText :=
           Result.FDetectedStageNamesText + ', ';
-      Result.FDetectedStageNamesText := Result.FDetectedStageNamesText +
-        Result.FStageNames[StageIndex];
+      Result.FDetectedStageNamesText :=
+        Result.FDetectedStageNamesText + Result.FStageNames[StageIndex];
     end;
     Result.FParseResult := AParseResult;
   except
@@ -304,9 +297,8 @@ end;
 
 { TResultsImportPlan }
 
-class function TResultsImportPlan.CreateFromParseResult(
-  const AEncodingName: string; const AParseResult: TObject):
-  TResultsImportPlan;
+class function TResultsImportPlan.CreateFromParseResult(const AEncodingName: string;
+  const AParseResult: TObject): TResultsImportPlan;
 var
   ParseResult: TResultsCsvParseResult;
 begin
@@ -319,20 +311,20 @@ begin
     Result.FRowCount := ParseResult.Items.Count;
     case ParseResult.Format of
       rcfFullStage:
-        begin
-          Result.FImportFormat := crifFullStage;
-          Result.FFormatColumnCount := 6;
-        end;
+      begin
+        Result.FImportFormat := crifFullStage;
+        Result.FFormatColumnCount := 6;
+      end;
       rcfStart:
-        begin
-          Result.FImportFormat := crifStart;
-          Result.FFormatColumnCount := 3;
-        end;
+      begin
+        Result.FImportFormat := crifStart;
+        Result.FFormatColumnCount := 3;
+      end;
       rcfFinish:
-        begin
-          Result.FImportFormat := crifFinish;
-          Result.FFormatColumnCount := 2;
-        end;
+      begin
+        Result.FImportFormat := crifFinish;
+        Result.FFormatColumnCount := 2;
+      end;
     end;
     Result.FParseResult := AParseResult;
   except
@@ -347,8 +339,8 @@ begin
   inherited Destroy;
 end;
 
-function ToRepositoryImportFormat(
-  const AFormat: TCompetitionResultsImportFormat): TStageResultImportFormat;
+function ToRepositoryImportFormat(const AFormat: TCompetitionResultsImportFormat):
+TStageResultImportFormat;
 begin
   case AFormat of
     crifFullStage: Result := srifFullStage;
@@ -373,8 +365,7 @@ end;
 { TCompetitionImportService }
 
 class function TCompetitionImportService.PrepareParticipantsFile(
-  const AFileName: string; const AMaxStageCount: integer):
-  TParticipantsImportPlan;
+  const AFileName: string; const AMaxStageCount: integer): TParticipantsImportPlan;
 var
   CanonicalFileName, CsvText, EncodingName: string;
   Parser: TParticipantsCsvParser;
@@ -390,8 +381,8 @@ begin
       ParseResult := Parser.Parse(CsvText, AMaxStageCount);
       if ParseResult.DetectedStageCount > AMaxStageCount then
         raise ECompetitionImportValidationError.Create(Format(
-          rsTooManyParticipantStages,
-          [ParseResult.DetectedStageCount, AMaxStageCount]));
+          rsTooManyParticipantStages, [ParseResult.DetectedStageCount,
+          AMaxStageCount]));
       Result := TParticipantsImportPlan.CreateFromParseResult(EncodingName,
         ParseResult);
       ParseResult := nil;
@@ -407,8 +398,8 @@ begin
 end;
 
 class function TCompetitionImportService.RequiresStageCapacityExpansion(
-  const APlan: TParticipantsImportPlan;
-  const AContext: TCompetitionDbContext; const AStages: TStages): boolean;
+  const APlan: TParticipantsImportPlan; const AContext: TCompetitionDbContext;
+  const AStages: TStages): boolean;
 var
   Query: TSQLQuery;
 begin
@@ -426,18 +417,18 @@ begin
 end;
 
 class function TCompetitionImportService.ApplyParticipants(
-  const APlan: TParticipantsImportPlan;
-  const AContext: TCompetitionDbContext; const AStages: TStages;
-  const ARequest: TParticipantsImportRequest):
-  TParticipantsImportOutcome;
+  const APlan: TParticipantsImportPlan; const AContext: TCompetitionDbContext;
+  const AStages: TStages; const ARequest: TParticipantsImportRequest):
+TParticipantsImportOutcome;
 var
   ParseResult: TParticipantsCsvParseResult;
   Query: TSQLQuery;
   UnitOfWork: TCompetitionUnitOfWork;
   ImportedCategories, CategoryNames: TStringList;
   StartItem: TStartItemModel;
+  CalculationStages: TStages;
   TargetStageCount, PhysicalStageCapacity, ImportedActiveStageIndex,
-    ItemIndex, CategoryIndex: integer;
+  ItemIndex, CategoryIndex, StageIndex: integer;
   PhysicalExpansionRequired: boolean;
 begin
   Result := Default(TParticipantsImportOutcome);
@@ -457,8 +448,8 @@ begin
   if Result.StageDefinitionsApplied then
   begin
     ImportedActiveStageIndex := ARequest.StoredActiveStageIndex;
-    if (ImportedActiveStageIndex < 1) or
-      (ImportedActiveStageIndex > APlan.StageNames.Count) then
+    if (ImportedActiveStageIndex < 1) or (ImportedActiveStageIndex >
+      APlan.StageNames.Count) then
       ImportedActiveStageIndex := 1;
     for ItemIndex := APlan.StageNames.Count + 1 to AStages.Count do
       if AStages[ItemIndex].isActive then
@@ -473,8 +464,7 @@ begin
     begin
       PhysicalStageCapacity := TSchemaSql.DetectStageCapacity(Query);
       PhysicalExpansionRequired := TargetStageCount > PhysicalStageCapacity;
-      if PhysicalExpansionRequired and
-        (not ARequest.ExpansionBackupCreated) then
+      if PhysicalExpansionRequired and (not ARequest.ExpansionBackupCreated) then
         raise ECompetitionImportBackupError.Create(Format(
           rsStageCapacityExpansionBackupError,
           [AContext.Connection.DatabaseName]));
@@ -483,6 +473,7 @@ begin
     UnitOfWork := AContext.BeginUnitOfWork;
     ImportedCategories := nil;
     CategoryNames := nil;
+    CalculationStages := nil;
     try
       if PhysicalExpansionRequired then
         TSchemaSql.EnsureStageCapacity(Query, TargetStageCount);
@@ -518,13 +509,37 @@ begin
         Result.ImportedCategoryCount := ImportedCategories.Count;
         for CategoryIndex := 0 to ImportedCategories.Count - 1 do
           CategoryNames[CategoryIndex] := ImportedCategories[CategoryIndex];
-        for CategoryIndex := 0 to CategoryNames.Count - 1 do
-          TConfigSql.ExecUpsertByKey(Query, 'catname' +
-            IntToStr(CategoryIndex + 1), CategoryNames[CategoryIndex]);
+        TConfigSql.PrepareUpsert(Query);
+        try
+          for CategoryIndex := 0 to CategoryNames.Count - 1 do
+            TConfigSql.ExecPreparedUpsert(Query, 'catname' +
+              IntToStr(CategoryIndex + 1), CategoryNames[CategoryIndex]);
+        finally
+          TConfigSql.FinishPreparedUpsert(Query);
+        end;
       end;
 
+      // Keep the caller's stage model unchanged until the import commits.
+      CalculationStages := TStages.Create(TargetStageCount);
+      for StageIndex := 1 to TargetStageCount do
+        if Result.StageDefinitionsApplied then
+        begin
+          CalculationStages[StageIndex].isActive := StageIndex <= APlan.StageNames.Count;
+          if CalculationStages[StageIndex].isActive then
+            CalculationStages[StageIndex].Name := APlan.StageNames[StageIndex - 1];
+        end
+        else
+        begin
+          CalculationStages[StageIndex].isActive := AStages[StageIndex].isActive;
+          CalculationStages[StageIndex].Name := AStages[StageIndex].Name;
+        end;
+      TParticipantStatusService.RecalculateAllInCurrentTransaction(
+        AContext, CalculationStages);
+      TResultCalculationService.RecalculateAllInCurrentTransaction(
+        AContext, CalculationStages);
       UnitOfWork.Commit;
     finally
+      CalculationStages.Free;
       CategoryNames.Free;
       ImportedCategories.Free;
       UnitOfWork.Free;
@@ -614,10 +629,9 @@ begin
   end;
 end;
 
-class function TCompetitionImportService.ApplyResults(
-  const APlan: TResultsImportPlan; const AContext: TCompetitionDbContext;
-  const AStages: TStages; const ARequest: TResultsImportRequest):
-  TResultsImportOutcome;
+class function TCompetitionImportService.ApplyResults(const APlan: TResultsImportPlan;
+  const AContext: TCompetitionDbContext; const AStages: TStages;
+  const ARequest: TResultsImportRequest): TResultsImportOutcome;
 var
   ParseResult: TResultsCsvParseResult;
   ItemsToImport: TList;
@@ -640,10 +654,8 @@ begin
   if not AStages.IsActiveIndex(ARequest.StageIndex) then
     raise EArgumentOutOfRangeException.CreateFmt(
       'Import stage %d is not active.', [ARequest.StageIndex]);
-  if (not ARequest.BackupCreated) and
-    (not ARequest.ContinueWithoutBackup) then
-    raise EArgumentException.Create(
-      'Results import requires a backup decision.');
+  if (not ARequest.BackupCreated) and (not ARequest.ContinueWithoutBackup) then
+    raise EArgumentException.Create('Results import requires a backup decision.');
   Result.StageIndex := ARequest.StageIndex;
 
   ParseResult := TResultsCsvParseResult(APlan.FParseResult);
@@ -660,8 +672,7 @@ begin
       ParticipantExists := ExistingNumbers.IndexOf(
         IntToStr(Item.ParticipantNumber)) >= 0;
       if ParticipantExists or ContainsParticipantNumber(
-        ARequest.AcceptedUnknownParticipantNumbers,
-        Item.ParticipantNumber) then
+        ARequest.AcceptedUnknownParticipantNumbers, Item.ParticipantNumber) then
         ItemsToImport.Add(Item);
     end;
     Result.ImportedRowCount := ItemsToImport.Count;
@@ -692,7 +703,7 @@ begin
       begin
         StatusOutcome :=
           TParticipantStatusService.RecalculateAllInCurrentTransaction(
-            AContext, AStages);
+          AContext, AStages);
         Result.StatusProcessedCount := StatusOutcome.ProcessedCount;
         Result.StatusChangedCount := StatusOutcome.ChangedCount;
       end;

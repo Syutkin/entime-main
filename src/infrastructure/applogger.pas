@@ -62,8 +62,7 @@ type
       const AContext: string = '');
     destructor Destroy; override;
     procedure Step(const AStep: string; const AContext: string = '');
-    procedure Finish(const AResult: string = 'ok';
-      const AContext: string = '');
+    procedure Finish(const AResult: string = 'ok'; const AContext: string = '');
     procedure FinishError(E: Exception; const AContext: string = '');
     property Id: QWord read FId;
   end;
@@ -131,8 +130,7 @@ begin
   end;
 end;
 
-function TPerformanceTrace.WithContext(const AMessage,
-  AContext: string): string;
+function TPerformanceTrace.WithContext(const AMessage, AContext: string): string;
 begin
   Result := AMessage;
   if Trim(AContext) <> '' then
@@ -152,8 +150,8 @@ begin
   FStartedAt := GetTickCount64;
   FLastStepAt := FStartedAt;
   FFinished := False;
-  AppLog(WithContext('PERF operation=' + FOperation +
-    ' phase=start id=' + UIntToStr(FId), AContext),
+  AppLog(WithContext('PERF operation=' + FOperation + ' phase=start id=' +
+    UIntToStr(FId), AContext),
     allTrace, alvNone, FSource);
 end;
 
@@ -164,8 +162,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TPerformanceTrace.Step(const AStep: string;
-  const AContext: string);
+procedure TPerformanceTrace.Step(const AStep: string; const AContext: string);
 var
   CurrentTick, Duration: QWord;
 begin
@@ -174,10 +171,9 @@ begin
   CurrentTick := GetTickCount64;
   Duration := CurrentTick - FLastStepAt;
   FLastStepAt := CurrentTick;
-  AppLog(WithContext('PERF operation=' + FOperation +
-    ' phase=step id=' + UIntToStr(FId) +
-    ' duration_ms=' + UIntToStr(Duration) + ' step=' + AStep,
-    AContext), allTrace, alvNone, FSource);
+  AppLog(WithContext('PERF operation=' + FOperation + ' phase=step id=' +
+    UIntToStr(FId) + ' duration_ms=' + UIntToStr(Duration) + ' step=' +
+    AStep, AContext), allTrace, alvNone, FSource);
 end;
 
 procedure TPerformanceTrace.Finish(const AResult, AContext: string);
@@ -188,14 +184,12 @@ begin
     Exit;
   Duration := GetTickCount64 - FStartedAt;
   FFinished := True;
-  AppLog(WithContext('PERF operation=' + FOperation +
-    ' phase=finish id=' + UIntToStr(FId) +
-    ' duration_ms=' + UIntToStr(Duration) + ' result=' + AResult,
-    AContext), allTrace, alvNone, FSource);
+  AppLog(WithContext('PERF operation=' + FOperation + ' phase=finish id=' +
+    UIntToStr(FId) + ' duration_ms=' + UIntToStr(Duration) + ' result=' +
+    AResult, AContext), allTrace, alvNone, FSource);
 end;
 
-procedure TPerformanceTrace.FinishError(E: Exception;
-  const AContext: string);
+procedure TPerformanceTrace.FinishError(E: Exception; const AContext: string);
 var
   ErrorContext: string;
 begin
@@ -224,8 +218,7 @@ begin
     event := nil;
     EnterCriticalSection(LoggerLock);
     try
-      if (FEventGeneration = AppLogEventGeneration) and
-        Assigned(AppLogEvent) then
+      if (FEventGeneration = AppLogEventGeneration) and Assigned(AppLogEvent) then
         event := AppLogEvent;
     finally
       LeaveCriticalSection(LoggerLock);
@@ -285,21 +278,20 @@ begin
     alsFinishMarks: Result := 'FinishMarks';
     alsUpdater: Result := 'Updater';
     alsBle: Result := 'BLE';
-  else
-    Result := 'Application';
+    else
+      Result := 'Application';
   end;
 end;
 
-procedure WriteFileLogEntry(AStream: TStream;
-  const ASettings: TLoggingSettings; ACreatedAt: TDateTime;
-  ALevel: TAppLogLevel; ASource: TAppLogSource; const AMessage: string);
+procedure WriteFileLogEntry(AStream: TStream; const ASettings: TLoggingSettings;
+  ACreatedAt: TDateTime; ALevel: TAppLogLevel; ASource: TAppLogSource;
+  const AMessage: string);
 var
   line: string;
 begin
-  line := Format('%s [%s] [%s] %s%s', [
-    FormatDateTime(ASettings.FileTimestampFormat, ACreatedAt),
-    UpperCase(LogLevelName(ALevel)), LogSourceName(ASource), AMessage,
-    LineEnding]);
+  line := Format('%s [%s] [%s] %s%s',
+    [FormatDateTime(ASettings.FileTimestampFormat, ACreatedAt),
+    UpperCase(LogLevelName(ALevel)), LogSourceName(ASource), AMessage, LineEnding]);
   AStream.WriteBuffer(line[1], Length(line));
 end;
 
@@ -318,8 +310,7 @@ begin
   end;
 end;
 
-function TryParseLogLevel(const AValue: string;
-  out ALevel: TAppLogLevel): boolean;
+function TryParseLogLevel(const AValue: string; out ALevel: TAppLogLevel): boolean;
 begin
   Result := True;
   if SameText(Trim(AValue), 'trace') then
@@ -364,8 +355,8 @@ begin
         if (search.Attr and faDirectory) <> 0 then
           Continue;
         fileName := IncludeTrailingPathDelimiter(ADirectory) + search.Name;
-        if (ACurrentLogFileName <> '') and
-          SameFileName(fileName, ACurrentLogFileName) then
+        if (ACurrentLogFileName <> '') and SameFileName(fileName,
+          ACurrentLogFileName) then
           Continue;
         if FileAge(fileName, modifiedAt) and (modifiedAt < cutoffDate) then
           DeleteFile(fileName);
@@ -422,8 +413,7 @@ begin
     PendingNotice := AMessage;
     PendingNoticeDelivered := False;
   end;
-  if (PendingNotice <> AMessage) and
-    (Pos(AMessage, PendingNotice) = 0) then
+  if (PendingNotice <> AMessage) and (Pos(AMessage, PendingNotice) = 0) then
   begin
     PendingNotice := PendingNotice + LineEnding + AMessage;
     PendingNoticeDelivered := False;
@@ -440,8 +430,8 @@ begin
 
   EnterCriticalSection(LoggerLock);
   try
-    if Assigned(AppLogEvent) and (PendingNotice <> '') and
-      not PendingNoticeDelivered then
+    if Assigned(AppLogEvent) and (PendingNotice <> '') and not
+      PendingNoticeDelivered then
     begin
       shouldDeliver := True;
       PendingNoticeDelivered := True;
@@ -547,8 +537,8 @@ begin
   end;
 end;
 
-function ReadLogLevel(AIni: TIniFile; const AKey: string;
-  ADefault: TAppLogLevel; var AChanged: boolean): TAppLogLevel;
+function ReadLogLevel(AIni: TIniFile; const AKey: string; ADefault: TAppLogLevel;
+  var AChanged: boolean): TAppLogLevel;
 var
   rawValue: string;
 begin
@@ -591,16 +581,19 @@ begin
         changed := True;
       end;
 
-      Result.FileMinimumLevel := ReadLogLevel(ini,
-        LOGGING_INI_FILE_MINIMUM_LEVEL, allDebug, changed);
-      Result.RetentionDays := ReadPositiveInteger(ini,
-        LOGGING_INI_RETENTION_DAYS, DEFAULT_LOG_RETENTION_DAYS, changed);
-      Result.ComboBoxMaxItems := ReadPositiveInteger(ini,
-        LOGGING_INI_COMBOBOX_MAX_ITEMS, DEFAULT_LOG_COMBOBOX_MAX_ITEMS, changed);
-      Result.MemoMaxLines := ReadPositiveInteger(ini,
-        LOGGING_INI_MEMO_MAX_LINES, DEFAULT_LOG_MEMO_MAX_LINES, changed);
-      Result.MemoTrimLines := ReadPositiveInteger(ini,
-        LOGGING_INI_MEMO_TRIM_LINES, DEFAULT_LOG_MEMO_TRIM_LINES, changed);
+      Result.FileMinimumLevel :=
+        ReadLogLevel(ini, LOGGING_INI_FILE_MINIMUM_LEVEL, allDebug, changed);
+      Result.RetentionDays :=
+        ReadPositiveInteger(ini, LOGGING_INI_RETENTION_DAYS,
+        DEFAULT_LOG_RETENTION_DAYS, changed);
+      Result.ComboBoxMaxItems :=
+        ReadPositiveInteger(ini, LOGGING_INI_COMBOBOX_MAX_ITEMS,
+        DEFAULT_LOG_COMBOBOX_MAX_ITEMS, changed);
+      Result.MemoMaxLines := ReadPositiveInteger(ini, LOGGING_INI_MEMO_MAX_LINES,
+        DEFAULT_LOG_MEMO_MAX_LINES, changed);
+      Result.MemoTrimLines :=
+        ReadPositiveInteger(ini, LOGGING_INI_MEMO_TRIM_LINES,
+        DEFAULT_LOG_MEMO_TRIM_LINES, changed);
 
       if Result.MemoTrimLines >= Result.MemoMaxLines then
       begin
@@ -613,14 +606,15 @@ begin
         changed := True;
       end;
 
-      Result.FileTimestampFormat := ReadTimestampFormat(ini,
-        LOGGING_INI_FILE_TIMESTAMP_FORMAT,
+      Result.FileTimestampFormat :=
+        ReadTimestampFormat(ini, LOGGING_INI_FILE_TIMESTAMP_FORMAT,
         DEFAULT_LOG_FILE_TIMESTAMP_FORMAT, changed);
-      Result.ComboBoxTimestampFormat := ReadTimestampFormat(ini,
-        LOGGING_INI_COMBOBOX_TIMESTAMP_FORMAT,
+      Result.ComboBoxTimestampFormat :=
+        ReadTimestampFormat(ini, LOGGING_INI_COMBOBOX_TIMESTAMP_FORMAT,
         DEFAULT_LOG_COMBOBOX_TIMESTAMP_FORMAT, changed);
-      Result.MemoAddTimestamp := ReadBoolean(ini,
-        LOGGING_INI_MEMO_ADD_TIMESTAMP, DEFAULT_LOG_MEMO_ADD_TIMESTAMP, changed);
+      Result.MemoAddTimestamp :=
+        ReadBoolean(ini, LOGGING_INI_MEMO_ADD_TIMESTAMP,
+        DEFAULT_LOG_MEMO_ADD_TIMESTAMP, changed);
 
       if changed then
       begin
@@ -677,8 +671,7 @@ begin
     LogFileName := '';
     DeleteExpiredLogFiles(ASettings, APrimaryLogDirectory, LogFileName);
     DeleteExpiredLogFiles(ASettings, AFallbackLogDirectory, LogFileName);
-    SetPendingNotice(Format(
-      'Unable to create log file. Primary: %s. Fallback: %s',
+    SetPendingNotice(Format('Unable to create log file. Primary: %s. Fallback: %s',
       [primaryError, fallbackError]));
   finally
     LeaveCriticalSection(LoggerLock);
@@ -742,20 +735,20 @@ begin
   writeError := '';
   EnterCriticalSection(LoggerLock);
   try
-    if Assigned(FileLogStream) and
-      (Ord(ALevel) >= Ord(ActiveLoggingSettings.FileMinimumLevel)) then
-      try
-        WriteFileLogEntry(FileLogStream, ActiveLoggingSettings, entry.CreatedAt,
-          ALevel, ASource, AMessage);
-      except
-        on E: Exception do
-        begin
-          writeError := E.Message;
-          FreeAndNil(FileLogStream);
-          SetPendingNotice(Format('File logger disabled after write error: %s',
-            [writeError]));
-        end;
+    if Assigned(FileLogStream) and (Ord(ALevel) >=
+      Ord(ActiveLoggingSettings.FileMinimumLevel)) then
+    try
+      WriteFileLogEntry(FileLogStream, ActiveLoggingSettings, entry.CreatedAt,
+        ALevel, ASource, AMessage);
+    except
+      on E: Exception do
+      begin
+        writeError := E.Message;
+        FreeAndNil(FileLogStream);
+        SetPendingNotice(Format('File logger disabled after write error: %s',
+          [writeError]));
       end;
+    end;
   finally
     LeaveCriticalSection(LoggerLock);
   end;

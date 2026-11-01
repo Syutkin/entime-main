@@ -30,13 +30,11 @@ type
     tppeInvalidTime,
     tppeInvalidCorrection,
     tppeUnexpectedData
-  );
+    );
 
-function TryParseTimingPacket(const ARawPacket: string;
-  out APacket: TTimingPacket;
+function TryParseTimingPacket(const ARawPacket: string; out APacket: TTimingPacket;
   out AError: TTimingPacketParseError): boolean;
-function TimingPacketParseErrorCode(
-  const AError: TTimingPacketParseError): string;
+function TimingPacketParseErrorCode(const AError: TTimingPacketParseError): string;
 function TimingPacketLogValue(const AValue: string): string;
 
 implementation
@@ -78,8 +76,7 @@ begin
   end;
 end;
 
-function TryParseProtocolTime(const AValue: string;
-  out ATime: TDateTime): boolean;
+function TryParseProtocolTime(const AValue: string; out ATime: TDateTime): boolean;
 var
   formatSettings: TFormatSettings;
 begin
@@ -118,8 +115,7 @@ begin
   Result := Length(AValue) - firstSignificantDigit + 1 <= 5;
 end;
 
-procedure InitializePacket(out APacket: TTimingPacket;
-  const ARawPacket: string);
+procedure InitializePacket(out APacket: TTimingPacket; const ARawPacket: string);
 begin
   APacket.Kind := tpkStart;
   APacket.EventTime := 0;
@@ -128,8 +124,7 @@ begin
   APacket.RawText := ARawPacket;
 end;
 
-function TryParseStartPacket(const ABody: string;
-  var APacket: TTimingPacket;
+function TryParseStartPacket(const ABody: string; var APacket: TTimingPacket;
   out AError: TTimingPacketParseError): boolean;
 var
   delimiterPosition: integer;
@@ -150,8 +145,8 @@ begin
     end;
     timeText := Copy(ABody, 1, delimiterPosition - 1);
     correctionText := Copy(ABody, delimiterPosition + 1, MaxInt);
-    if not HasCorrectionStructure(correctionText) or
-      not TryStrToInt(correctionText, APacket.CorrectionMs) or
+    if not HasCorrectionStructure(correctionText) or not
+      TryStrToInt(correctionText, APacket.CorrectionMs) or
       (APacket.CorrectionMs < -TIMING_CORRECTION_LIMIT_MS) or
       (APacket.CorrectionMs > TIMING_CORRECTION_LIMIT_MS) then
     begin
@@ -171,8 +166,7 @@ begin
   Result := True;
 end;
 
-function TryParseFinishPacket(const ABody: string;
-  var APacket: TTimingPacket;
+function TryParseFinishPacket(const ABody: string; var APacket: TTimingPacket;
   out AError: TTimingPacketParseError): boolean;
 begin
   Result := False;
@@ -192,8 +186,7 @@ begin
   Result := True;
 end;
 
-function TryParseTimingPacket(const ARawPacket: string;
-  out APacket: TTimingPacket;
+function TryParseTimingPacket(const ARawPacket: string; out APacket: TTimingPacket;
   out AError: TTimingPacketParseError): boolean;
 var
   body: string;
@@ -234,8 +227,7 @@ begin
   end;
 end;
 
-function TimingPacketParseErrorCode(
-  const AError: TTimingPacketParseError): string;
+function TimingPacketParseErrorCode(const AError: TTimingPacketParseError): string;
 begin
   case AError of
     tppeNone: Result := 'none';
@@ -261,15 +253,14 @@ begin
       #10: encodedValue := '\n';
       #13: encodedValue := '\r';
       '\': encodedValue := '\\';
-    else
-      if (Ord(AValue[i]) >= 32) and (Ord(AValue[i]) <= 126) then
-        encodedValue := AValue[i]
       else
-        encodedValue := '\x' + IntToHex(Ord(AValue[i]), 2);
+        if (Ord(AValue[i]) >= 32) and (Ord(AValue[i]) <= 126) then
+          encodedValue := AValue[i]
+        else
+          encodedValue := '\x' + IntToHex(Ord(AValue[i]), 2);
     end;
 
-    if Length(Result) + Length(encodedValue) >
-      TIMING_LOG_VALUE_MAX_LENGTH - 3 then
+    if Length(Result) + Length(encodedValue) > TIMING_LOG_VALUE_MAX_LENGTH - 3 then
       Exit(Result + '...');
     Result := Result + encodedValue;
   end;

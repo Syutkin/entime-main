@@ -16,16 +16,15 @@ type
   TLedPanelClient = record
   private
     class function TryBuildRequest(const AAddress: string;
-      const AFields: THttpFormFields; out ARequest: THttpRequest): Boolean;
-      static;
+      const AFields: THttpFormFields; out ARequest: THttpRequest): boolean; static;
   public
     class function TryBuildEndpoint(const AAddress: string;
-      out AEndpoint: string): Boolean; static;
+      out AEndpoint: string): boolean; static;
     class function TryBuildFinishRequest(const AResult: TFinishResult;
-      const AAddress: string; out ARequest: THttpRequest): Boolean; static;
-    class function TryBuildTestRequest(const AAddress, ASingleLine,
-      AUpperLine, ABottomLine: string; out ARequest: THttpRequest): Boolean;
-      static;
+      const AAddress: string; out ARequest: THttpRequest): boolean; static;
+    class function TryBuildTestRequest(
+      const AAddress, ASingleLine, AUpperLine, ABottomLine: string;
+      out ARequest: THttpRequest): boolean; static;
     class function Send(const ARequest: THttpRequest;
       const ATransport: IHttpTransport): TFinishNotificationOutcome; static;
   end;
@@ -35,16 +34,16 @@ implementation
 uses
   i18n, ResultFormatting;
 
-function TryParsePort(const AText: string): Boolean;
+function TryParsePort(const AText: string): boolean;
 var
-  Port: Integer;
+  Port: integer;
 begin
   Result := TryStrToInt(AText, Port) and (Port >= 1) and (Port <= 65535);
 end;
 
-function ContainsInvalidAddressCharacter(const AValue: string): Boolean;
+function ContainsInvalidAddressCharacter(const AValue: string): boolean;
 var
-  Character: Char;
+  Character: char;
 begin
   for Character in AValue do
     if (Character <= ' ') or (Character in ['/', '\', '?', '#', '@']) then
@@ -53,10 +52,10 @@ begin
 end;
 
 class function TLedPanelClient.TryBuildEndpoint(const AAddress: string;
-  out AEndpoint: string): Boolean;
+  out AEndpoint: string): boolean;
 var
   Address, Host, PortText: string;
-  ClosingBracket, ColonCount, ColonPosition, Index: Integer;
+  ClosingBracket, ColonCount, ColonPosition, Index: integer;
 begin
   AEndpoint := '';
   Address := Trim(AAddress);
@@ -111,7 +110,7 @@ begin
 end;
 
 class function TLedPanelClient.TryBuildRequest(const AAddress: string;
-  const AFields: THttpFormFields; out ARequest: THttpRequest): Boolean;
+  const AFields: THttpFormFields; out ARequest: THttpRequest): boolean;
 var
   Endpoint: string;
 begin
@@ -123,9 +122,8 @@ begin
     LED_PANEL_CONNECT_TIMEOUT_MS, LED_PANEL_READ_TIMEOUT_MS);
 end;
 
-class function TLedPanelClient.TryBuildFinishRequest(
-  const AResult: TFinishResult; const AAddress: string;
-  out ARequest: THttpRequest): Boolean;
+class function TLedPanelClient.TryBuildFinishRequest(const AResult: TFinishResult;
+  const AAddress: string; out ARequest: THttpRequest): boolean;
 var
   BottomLine, UpperLine: string;
   Fields: THttpFormFields;
@@ -160,9 +158,9 @@ begin
   Result := TryBuildRequest(AAddress, Fields, ARequest);
 end;
 
-class function TLedPanelClient.TryBuildTestRequest(const AAddress,
-  ASingleLine, AUpperLine, ABottomLine: string;
-  out ARequest: THttpRequest): Boolean;
+class function TLedPanelClient.TryBuildTestRequest(
+  const AAddress, ASingleLine, AUpperLine, ABottomLine: string;
+  out ARequest: THttpRequest): boolean;
 var
   Fields: THttpFormFields;
 begin
@@ -184,7 +182,7 @@ end;
 class function TLedPanelClient.Send(const ARequest: THttpRequest;
   const ATransport: IHttpTransport): TFinishNotificationOutcome;
 var
-  Index: Integer;
+  Index: integer;
   Response: THttpResponse;
 begin
   Result := Default(TFinishNotificationOutcome);
@@ -207,24 +205,25 @@ begin
     Result.ResponseHeaderCount := Length(Response.Headers);
     Result.ResponseSize := Length(Response.Body);
     Result.TransportErrorKind := Response.ErrorKind;
-    Result.Success := Response.Completed and
-      (Response.ErrorKind = hekNone) and
+    Result.Success := Response.Completed and (Response.ErrorKind = hekNone) and
       IsHttpSuccessStatus(Response.StatusCode);
     if Result.Success then
       Exit;
     if Response.ErrorKind <> hekNone then
       Result.SafeErrorMessage := Response.ErrorMessage
     else
-      Result.SafeErrorMessage := IntToStr(Response.StatusCode) + ' ' +
-        Response.StatusText;
-    Result.SafeErrorMessage := StringReplace(Result.SafeErrorMessage,
-      ARequest.Url, '[redacted]', [rfReplaceAll, rfIgnoreCase]);
+      Result.SafeErrorMessage :=
+        IntToStr(Response.StatusCode) + ' ' + Response.StatusText;
+    Result.SafeErrorMessage :=
+      StringReplace(Result.SafeErrorMessage, ARequest.Url, '[redacted]',
+      [rfReplaceAll, rfIgnoreCase]);
     if Result.SafeErrorMessage = '' then
       Result.SafeErrorMessage := rsHTTPRequestNotStarted;
   except
     on E: Exception do
-      Result.SafeErrorMessage := StringReplace(E.Message, ARequest.Url,
-        '[redacted]', [rfReplaceAll, rfIgnoreCase]);
+      Result.SafeErrorMessage :=
+        StringReplace(E.Message, ARequest.Url, '[redacted]',
+        [rfReplaceAll, rfIgnoreCase]);
   end;
 end;
 

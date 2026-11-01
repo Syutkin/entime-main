@@ -5,8 +5,7 @@ program Entime;
 {$IFOPT D+} {$DEFINE DEBUG} {$ENDIF}
 
 uses
-  {$IFDEF UNIX} {$IFDEF UseCThreads}
-  cthreads, {$ENDIF} {$ENDIF}
+  {$IFDEF UNIX}cthreads,{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   SysUtils,
   Forms,
@@ -36,12 +35,11 @@ var
   primaryLogDirectory, fallbackLogDirectory: string;
   unhandledExceptionHandler: TUnhandledExceptionHandler;
 
-procedure TUnhandledExceptionHandler.HandleException(Sender: TObject;
-  E: Exception);
-begin
-  LogUnhandledException(E);
-  Application.ShowException(E);
-end;
+  procedure TUnhandledExceptionHandler.HandleException(Sender: TObject; E: Exception);
+  begin
+    LogUnhandledException(E);
+    Application.ShowException(E);
+  end;
 
 begin
   RequireDerivedFormResource := True;
@@ -56,8 +54,8 @@ begin
     ExtractFilePath(ExpandFileName(ParamStr(0)))) + 'heaptrace.trc');
   globalSkipIfNoLeaks := true;
   {$ENDIF DEBUG}
-  Application.Title:='Entime';
-  Application.Scaled:=True;
+  Application.Title := 'Entime';
+  Application.Scaled := True;
   Application.Initialize;
 
   iniFileName := GetDefaultIniName;
@@ -84,9 +82,25 @@ begin
       end;
     end;
   finally
-    Application.OnException := nil;
-    unhandledExceptionHandler.Free;
-    AppLog(rsApplicationShutdown, allInfo, alvNone, alsApplication);
-    FinalizeAppLogger;
+    try
+      try
+        try
+          FreeAndNil(ResultsForm);
+        finally
+          FreeAndNil(MainForm);
+        end;
+      except
+        on E: Exception do
+        begin
+          LogUnhandledException(E);
+          raise;
+        end;
+      end;
+    finally
+      Application.OnException := nil;
+      unhandledExceptionHandler.Free;
+      AppLog(rsApplicationShutdown, allInfo, alvNone, alsApplication);
+      FinalizeAppLogger;
+    end;
   end;
 end.

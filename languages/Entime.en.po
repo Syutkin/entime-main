@@ -11,6 +11,68 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 3.6\n"
 
+#: i18n.rsaboutbleadapter
+#, object-pascal-format
+msgid "Адаптер BLE: %s"
+msgstr "BLE adapter: %s"
+
+#: i18n.rsaboutblebackend
+#, object-pascal-format
+msgid "Бекэнд BLE: %s"
+msgstr "BLE backend: %s"
+
+#: i18n.rsaboutbleerror
+#, object-pascal-format
+msgid "Ошибка BLE: %s"
+msgstr "BLE error: %s"
+
+#: i18n.rsaboutchsdetversion
+#, object-pascal-format
+msgid "chsdet: %d.%d.%d"
+msgstr "chsdet: %d.%d.%d"
+
+#: i18n.rsaboutdialogcaption
+msgctxt "i18n.rsaboutdialogcaption"
+msgid "О программе"
+msgstr "About"
+
+#: i18n.rsabouticonset
+msgid "Набор иконок: Fugue Icons"
+msgstr "Icon set: Fugue Icons"
+
+#: i18n.rsaboutlazbleversion
+#, object-pascal-format
+msgid "LazBle: %s"
+msgstr "LazBle: %s"
+
+#: i18n.rsaboutlibraries
+msgid "Библиотеки:"
+msgstr "Libraries:"
+
+#: i18n.rsaboutnativeversionnotobtained
+msgid "версия не получена"
+msgstr "version not obtained"
+
+#: i18n.rsaboutsimplecbleversion
+#, object-pascal-format
+msgid "SimpleCBLE: %s"
+msgstr "SimpleCBLE: %s"
+
+#: i18n.rsaboutsqliteversion
+#, object-pascal-format
+msgid "SQLite: %s"
+msgstr "SQLite: %s"
+
+#: i18n.rsabouttlazserialversion
+#, object-pascal-format
+msgid "TLazSerial: %s"
+msgstr "TLazSerial: %s"
+
+#: i18n.rsaboutversionnotobtainedwithreason
+#, object-pascal-format
+msgid "версия не получена (%s)"
+msgstr "version not obtained (%s)"
+
 #: i18n.rsaddunknownresultparticipant
 #, object-pascal-format
 msgctxt "i18n.rsaddunknownresultparticipant"
@@ -111,6 +173,76 @@ msgctxt "i18n.rsbackupretentionlabel"
 msgid "Хранить автоматические копии"
 msgstr "Keep automatic backups"
 
+#: i18n.rsblechecking
+msgid "Проверка доступности Bluetooth…"
+msgstr "Checking Bluetooth availability…"
+
+#: i18n.rsbleconnect
+msgid "Подключить"
+msgstr "Connect"
+
+#: i18n.rsbleconnected
+msgid "Подключено"
+msgstr "Connected"
+
+#: i18n.rsbleconnecting
+msgid "Подключение…"
+msgstr "Connecting…"
+
+#: i18n.rsbledeviceneedsscan
+msgid "Устройство не найдено. Нажмите на его название и повторите поиск."
+msgstr "Device not found. Click its name and scan again."
+
+#: i18n.rsbledisconnect
+msgid "Отключить"
+msgstr "Disconnect"
+
+#: i18n.rsbledisconnected
+msgid "Отключено"
+msgstr "Disconnected"
+
+#: i18n.rsbledisconnecting
+msgid "Отключение…"
+msgstr "Disconnecting…"
+
+#: i18n.rsbleerror
+msgid "Ошибка подключения"
+msgstr "Connection error"
+
+#: i18n.rsbleerrordetail
+#, object-pascal-format
+msgid "Ошибка подключения: %s"
+msgstr ""
+
+#: i18n.rsblenoclient
+msgid "Клиент BLE не назначен"
+msgstr "No BLE client assigned"
+
+#: i18n.rsblenodevice
+msgid "Устройство не выбрано"
+msgstr "No device selected"
+
+#: i18n.rsbleprofiles
+msgid "Подготовка служб…"
+msgstr "Preparing services…"
+
+#: i18n.rsblescanning
+msgid "Поиск устройств Bluetooth…"
+msgstr "Scanning for Bluetooth devices…"
+
+#: i18n.rsbleunavailable
+msgid "Bluetooth недоступен"
+msgstr "Bluetooth unavailable"
+
+#: i18n.rsbleunavailabledetail
+#, object-pascal-format
+msgid "Bluetooth недоступен: %s"
+msgstr ""
+
+#: i18n.rsblewaiting
+msgid "Ожидание повторного подключения…"
+msgstr "Waiting to reconnect…"
+
 #: i18n.rsbynameasc
 msgctxt "i18n.rsbynameasc"
 msgid "По именам А-Я"
@@ -145,6 +277,158 @@ msgstr "Failed to create backup!"
 msgctxt "i18n.rscannotdeletefile"
 msgid "Не удалось перезаписать файл"
 msgstr "Failed to overwrite file"
+
+#: i18n.rscardallstages
+msgctxt "i18n.rscardallstages"
+msgid "Все СУ"
+msgstr "All stages"
+
+#: i18n.rscardapplied
+msgid "Применена"
+msgstr "Applied"
+
+#: i18n.rscardautomatic
+msgid "Автоматически"
+msgstr "Automatic"
+
+#: i18n.rscardbusy
+msgid "Дождитесь завершения текущей операции."
+msgstr "Wait for the current operation to finish."
+
+#: i18n.rscardclose
+msgctxt "i18n.rscardclose"
+msgid "Закрыть"
+msgstr "Close"
+
+#: i18n.rscardcomment
+msgctxt "i18n.rscardcomment"
+msgid "Комментарий"
+msgstr "Comment"
+
+#: i18n.rscardconflict
+msgid "Конфликт"
+msgstr "Conflict"
+
+#: i18n.rscarddeleted
+msgctxt "i18n.rscarddeleted"
+msgid "Участник больше не найден в соревновании."
+msgstr "The participant is no longer in the competition."
+
+#: i18n.rscardemail
+msgid "Email"
+msgstr "Email"
+
+#: i18n.rscarderror
+msgid "Ошибка"
+msgstr "Error"
+
+#: i18n.rscardgoparticipant
+msgctxt "i18n.rscardgoparticipant"
+msgid "Перейти к участнику"
+msgstr "Go to participant"
+
+#: i18n.rscardhidden
+msgid "Скрыта"
+msgstr "Hidden"
+
+#: i18n.rscardignored
+msgid "Подавлена антидребезгом"
+msgstr "Debounced"
+
+#: i18n.rscardinactive
+msgid "неактивен"
+msgstr "inactive"
+
+#: i18n.rscardmanual
+msgid "Вручную"
+msgstr "Manual"
+
+#: i18n.rscardmarkchanged
+msgid "Отсечка изменилась или больше не найдена. Проверьте обновлённые данные и выберите запись заново."
+msgstr "The timing mark changed or is no longer available. Review the refreshed data and select the record again."
+
+#: i18n.rscardmarkkind
+msgid "Тип отсечки"
+msgstr "Mark type"
+
+#: i18n.rscardmarks
+#, object-pascal-format
+msgid "Отсечки с номером %d"
+msgstr "Timing marks with number %d"
+
+#: i18n.rscardmarkscope
+msgid "Выбранный СУ"
+msgstr "Selected stage"
+
+#: i18n.rscardnumberscope
+msgid "Записи связаны с текущим сохранённым номером. История прежних номеров и происхождения результатов не восстанавливается."
+msgstr "Records are linked to the currently saved number. Previous numbers and the origin of results cannot be reconstructed."
+
+#: i18n.rscardopenjournal
+msgid "Открыть в журнале"
+msgstr "Open in journal"
+
+#: i18n.rscardpending
+msgid "Ожидает"
+msgstr "Pending"
+
+#: i18n.rscardpersonal
+msgid "Сведения"
+msgstr "Details"
+
+#: i18n.rscardphone
+msgctxt "i18n.rscardphone"
+msgid "Телефон"
+msgstr "Phone"
+
+#: i18n.rscardreaderror
+#, object-pascal-format
+msgid "Не удалось обновить карточку: %s"
+msgstr "Could not refresh the participant card: %s"
+
+#: i18n.rscardrefresh
+msgctxt "i18n.rscardrefresh"
+msgid "Обновить"
+msgstr "Refresh"
+
+#: i18n.rscardrefreshhint
+msgid "Перечитать сохранённые данные участника и отсечки с его текущим номером."
+msgstr "Reread the saved participant data and timing marks with the current number."
+
+#: i18n.rscardresults
+msgctxt "i18n.rscardresults"
+msgid "Результаты"
+msgstr "Results"
+
+#: i18n.rscardsaved
+msgid "Показаны сохранённые данные."
+msgstr "Showing saved data."
+
+#: i18n.rscardstagecount
+msgid "СУ с результатом"
+msgstr "Stages with results"
+
+#: i18n.rscardstageoutside
+#, object-pascal-format
+msgid "СУ %d (вне конфигурации)"
+msgstr "Stage %d (outside the current configuration)"
+
+#: i18n.rscardstale
+msgid "Данные изменились. Карточка обновляется…"
+msgstr "Data changed. Refreshing the participant card…"
+
+#: i18n.rscardthrugap
+msgid "Отставание в сквозном протоколе"
+msgstr "Overall standings gap"
+
+#: i18n.rscardthruplace
+msgid "Место в сквозном протоколе"
+msgstr "Overall standings place"
+
+#: i18n.rscardtitle
+msgctxt "i18n.rscardtitle"
+msgid "Карточка участника"
+msgstr "Participant card"
 
 #: i18n.rscat1
 msgctxt "i18n.rscat1"
@@ -552,6 +836,7 @@ msgid "С начала текущего этапа"
 msgstr "Since the start of the current stage"
 
 #: i18n.rsfinishmarkjournalfiltererror
+msgctxt "i18n.rsfinishmarkjournalfiltererror"
 msgid "Ошибочные"
 msgstr "Errors"
 
@@ -699,6 +984,194 @@ msgctxt "i18n.rsimportfinishtime"
 msgid "Финишное время для СУ %d: %s загружено"
 msgstr "Finish time for stage %d: %s loaded"
 
+#: i18n.rsimportpreview
+msgid "Сравнение перед импортом"
+msgstr "Compare before import"
+
+#: i18n.rsimportpreviewaction
+msgid "Действие"
+msgstr "Action"
+
+#: i18n.rsimportpreviewall
+msgid "Все изменения"
+msgstr "All changes"
+
+#: i18n.rsimportpreviewapplied
+#, object-pascal-format
+msgid "Импорт СУ %d: изменено полей %d, участников %d, создано %d, пропущено %d."
+msgstr "Stage %d import: %d fields changed, %d participants updated, %d created, %d skipped."
+
+#: i18n.rsimportpreviewapply
+msgid "Применить выбранное"
+msgstr "Apply selected"
+
+#: i18n.rsimportpreviewapplying
+#, object-pascal-format
+msgid "Импорт СУ %d: выбрано полей %d, создать %d."
+msgstr "Stage %d import: %d fields selected, %d participants to create."
+
+#: i18n.rsimportpreviewcancel
+msgid "Отмена"
+msgstr "Cancel"
+
+#: i18n.rsimportpreviewcancelled
+msgid "Импорт отменён."
+msgstr "Import cancelled."
+
+#: i18n.rsimportpreviewchanges
+msgid "Изменения"
+msgstr "Changes"
+
+#: i18n.rsimportpreviewclear
+msgctxt "i18n.rsimportpreviewclear"
+msgid "Очистить"
+msgstr "Clear"
+
+#: i18n.rsimportpreviewclearhint
+msgid "Снять выбор всех полей и создание новых номеров."
+msgstr "Deselect all fields and the creation of new numbers."
+
+#: i18n.rsimportpreviewclearselection
+msgctxt "i18n.rsimportpreviewclearselection"
+msgid "Снять выбор"
+msgstr "Deselect all"
+
+#: i18n.rsimportpreviewconfirmall
+msgid "Создать все неизвестные номера"
+msgstr "Create all unknown numbers"
+
+#: i18n.rsimportpreviewcreate
+msgid "Создать"
+msgstr "Create"
+
+#: i18n.rsimportpreviewcurrent
+msgid "Сейчас"
+msgstr "Current"
+
+#: i18n.rsimportprevieweditorsaveerror
+#, object-pascal-format
+msgid "Не удалось сохранить текущие правки: %s"
+msgstr "Could not save the current edits: %s"
+
+#: i18n.rsimportpreviewempty
+msgid "Нет изменений для применения."
+msgstr "No changes to apply."
+
+#: i18n.rsimportpreviewerror
+#, object-pascal-format
+msgid "Не удалось выполнить импорт: %s"
+msgstr "Import failed: %s"
+
+#: i18n.rsimportpreviewfield
+msgid "Поле"
+msgstr "Field"
+
+#: i18n.rsimportpreviewfile
+#, object-pascal-format
+msgid "Файл: %s"
+msgstr "File: %s"
+
+#: i18n.rsimportpreviewfill
+msgid "Заполнить"
+msgstr "Fill"
+
+#: i18n.rsimportpreviewfinishformat
+msgid "Финиши"
+msgstr "Finishes"
+
+#: i18n.rsimportpreviewfullformat
+msgid "Полный СУ"
+msgstr "Full stage"
+
+#: i18n.rsimportpreviewproposed
+msgid "Из файла"
+msgstr "From file"
+
+#: i18n.rsimportpreviewready
+msgid "Проверьте значения и выберите изменения. После импорта результаты и производные статусы пересчитываются по действующим правилам."
+msgstr "Review the values and select changes. Results and derived statuses are recalculated under the existing rules after import."
+
+#: i18n.rsimportpreviewrefresh
+msgid "Обновить сравнение"
+msgstr "Refresh comparison"
+
+#: i18n.rsimportpreviewrefreshhint
+msgid ""
+"Заново сравнить сохранённые данные соревнования с уже загруженным CSV.\n"
+"Выбор неизменившихся значений сохранится; изменившиеся нужно выбрать заново."
+msgstr ""
+"Compare saved competition data with the CSV already loaded.\n"
+"Selections for unchanged values are kept; changed values must be selected again."
+
+#: i18n.rsimportpreviewreplace
+msgid "Заменить"
+msgstr "Replace"
+
+#: i18n.rsimportpreviewsame
+msgid "Без изменений"
+msgstr "Unchanged"
+
+#: i18n.rsimportpreviewsavedrefresherror
+#, object-pascal-format
+msgid "Импорт сохранён. Не удалось обновить отображение: %s"
+msgstr "Import saved. Could not refresh the display: %s"
+
+#: i18n.rsimportpreviewsaveeditor
+msgid "Сохранить изменения в основной таблице перед сравнением импорта?"
+msgstr "Save changes in the main table before comparing the import?"
+
+#: i18n.rsimportpreviewselect
+msgctxt "i18n.rsimportpreviewselect"
+msgid "Применить"
+msgstr "Apply"
+
+#: i18n.rsimportpreviewselectall
+msgid "Выбрать все изменения"
+msgstr "Select all changes"
+
+#: i18n.rsimportpreviewselectallhint
+msgid "Выбрать изменения во всём файле для известных и подтверждённых новых участников."
+msgstr "Select changes throughout the file for known participants and confirmed new participants."
+
+#: i18n.rsimportpreviewselected
+#, object-pascal-format
+msgid "Выбрано полей: %d · Участников: %d · Создать: %d"
+msgstr "Selected fields: %d · Participants: %d · Create: %d"
+
+#: i18n.rsimportpreviewsessionchanged
+msgid "Соревнование или выбранный СУ изменились. Откройте сравнение заново."
+msgstr "The competition or selected stage has changed. Open the comparison again."
+
+#: i18n.rsimportpreviewshowsame
+msgid "Показать без изменений"
+msgstr "Show unchanged"
+
+#: i18n.rsimportpreviewsourcerow
+msgid "Строка файла"
+msgstr "File row"
+
+#: i18n.rsimportpreviewstage
+#, object-pascal-format
+msgid "СУ %d — %s · %s"
+msgstr "Stage %d — %s · %s"
+
+#: i18n.rsimportpreviewstale
+msgid "Данные изменились. Сравнение обновлено; проверьте и заново выберите изменившиеся значения."
+msgstr "Data changed. The comparison has been refreshed; review and reselect the changed values."
+
+#: i18n.rsimportpreviewstartformat
+msgid "Старты и поправки"
+msgstr "Starts and corrections"
+
+#: i18n.rsimportpreviewsummary
+#, object-pascal-format
+msgid "Заполнений: %d · Замен: %d · Очисток: %d · Без изменений: %d · Неизвестных номеров: %d"
+msgstr "Fills: %d · Replacements: %d · Clears: %d · Unchanged: %d · Unknown numbers: %d"
+
+#: i18n.rsimportpreviewunknown
+msgid "Неизвестные номера"
+msgstr "Unknown numbers"
+
 #: i18n.rsimportstarttime
 #, object-pascal-format
 msgctxt "i18n.rsimportstarttime"
@@ -751,6 +1224,227 @@ msgstr "Invalid status \"%s\" in row %d. Allowed values: DNF, DNS, DSQ, or numer
 msgctxt "i18n.rsinvalidresulttime"
 msgid "Некорректное время \"%s\" в строке %d, поле \"%s\". Допустимые форматы: чч:мм, чч:мм:сс, чч:мм:сс.ммм или чч:мм:сс,ммм"
 msgstr "Invalid time \"%s\" in row %d, field \"%s\". Supported formats: hh:mm, hh:mm:ss, hh:mm:ss.mmm, or hh:mm:ss,mmm"
+
+#: i18n.rslabelborders
+msgctxt "i18n.rslabelborders"
+msgid "Печатать границы наклеек"
+msgstr "Print label borders"
+
+#: i18n.rslabelbottom
+msgctxt "i18n.rslabelbottom"
+msgid "Снизу"
+msgstr "Bottom"
+
+#: i18n.rslabelbuilderror
+#, object-pascal-format
+msgid "Не удалось сформировать наклейки: %s"
+msgstr "Could not create labels: %s"
+
+#: i18n.rslabelcontents
+msgctxt "i18n.rslabelcontents"
+msgid "Содержимое"
+msgstr "Contents"
+
+#: i18n.rslabelcurrentsettings
+msgid "Текущие настройки"
+msgstr "Current settings"
+
+#: i18n.rslabelempty
+msgid "Нет участников для печати наклеек."
+msgstr "No participants to print labels for."
+
+#: i18n.rslabelfirst
+msgctxt "i18n.rslabelfirst"
+msgid "Первая наклейка"
+msgstr "First label"
+
+#: i18n.rslabelfirsthint
+msgid "Заполнение слева направо, сверху вниз. Выбранная ячейка используется только на первом листе."
+msgstr "Fill from left to right, then top to bottom. The selected starting cell applies only to the first sheet."
+
+#: i18n.rslabelfirstreset
+msgid "Первая наклейка сброшена на 1: вместимость листа изменилась."
+msgstr "The first label was reset to 1 because the sheet capacity changed."
+
+#: i18n.rslabelfont
+msgctxt "i18n.rslabelfont"
+msgid "Шрифт таблицы, пт"
+msgstr "Table font, pt"
+
+#: i18n.rslabelfontreduced
+#, object-pascal-format
+msgid "Шрифт уменьшен с %d до %d пт, чтобы вместить содержимое."
+msgstr "Font reduced from %d to %d pt to fit the contents."
+
+#: i18n.rslabelgaps
+msgctxt "i18n.rslabelgaps"
+msgid "Промежутки, мм"
+msgstr "Gaps, mm"
+
+#: i18n.rslabelgapx
+msgctxt "i18n.rslabelgapx"
+msgid "Между колонками"
+msgstr "Between columns"
+
+#: i18n.rslabelgapy
+msgctxt "i18n.rslabelgapy"
+msgid "Между рядами"
+msgstr "Between rows"
+
+#: i18n.rslabelgrid
+#, object-pascal-format
+msgid "%d × %d, %d наклеек на листе"
+msgstr "%d × %d, %d labels per sheet"
+
+#: i18n.rslabelheight
+msgctxt "i18n.rslabelheight"
+msgid "Высота"
+msgstr "Height"
+
+#: i18n.rslabelincomplete
+msgid "Заполните параметры наклеек."
+msgstr "Complete the label settings."
+
+#: i18n.rslabelinvalidfont
+msgid "Размер шрифта: от 1 до 36 пт; минимум не больше обычного размера."
+msgstr "Font size: 1 to 36 pt; the minimum cannot exceed the normal size."
+
+#: i18n.rslabelinvalidgaps
+msgid "Промежутки должны быть неотрицательными и не превышать размер листа."
+msgstr "Gaps must be non-negative and no larger than the sheet."
+
+#: i18n.rslabelinvalidmargins
+msgid "Поля должны быть неотрицательными и оставлять место на A4."
+msgstr "Margins must be non-negative and leave space on A4."
+
+#: i18n.rslabelinvalidpadding
+msgid "Внутренний отступ должен оставлять место для содержимого наклейки."
+msgstr "Inner padding must leave space for the label contents."
+
+#: i18n.rslabelinvalidsize
+msgid "Размеры наклейки должны быть положительными и не превышать A4."
+msgstr "Label dimensions must be positive and fit A4."
+
+#: i18n.rslabelleft
+msgctxt "i18n.rslabelleft"
+msgid "Слева"
+msgstr "Left"
+
+#: i18n.rslabelmargins
+msgctxt "i18n.rslabelmargins"
+msgid "Поля листа, мм"
+msgstr "Sheet margins, mm"
+
+#: i18n.rslabelmarginshint
+msgid "Слева и сверху — начало сетки; справа и снизу — минимальные поля. Остаток остаётся справа и снизу."
+msgstr "Left and top set the grid origin; right and bottom are minimum margins. Unused space stays on the right and bottom."
+
+#: i18n.rslabelminfont
+msgctxt "i18n.rslabelminfont"
+msgid "Минимальный шрифт, пт"
+msgstr "Minimum font, pt"
+
+#: i18n.rslabelnospace
+msgid "На листе не помещается ни одна наклейка. Проверьте размеры и поля."
+msgstr "No labels fit on the sheet. Check the dimensions and margins."
+
+#: i18n.rslabeloverflow
+#, object-pascal-format
+msgid "Наклеек с переполнением: %d. Увеличьте размер наклейки или уменьшите отступы."
+msgstr "Overflowing labels: %d. Increase the label size or reduce the padding."
+
+#: i18n.rslabelpadding
+msgctxt "i18n.rslabelpadding"
+msgid "Внутренний отступ, мм"
+msgstr "Inner padding, mm"
+
+#: i18n.rslabelpaper
+msgctxt "i18n.rslabelpaper"
+msgid "Наклейка, мм"
+msgstr "Label, mm"
+
+#: i18n.rslabelprinthint
+msgid "Печатайте PDF в масштабе 100% / «Фактический размер», без подгонки к странице."
+msgstr "Print the PDF at 100% / actual size, without fitting to the page."
+
+#: i18n.rslabelready
+#, object-pascal-format
+msgid "Участников: %d; страниц: %d; шрифт таблицы: %d пт."
+msgstr "Participants: %d; pages: %d; table font: %d pt."
+
+#: i18n.rslabelright
+msgctxt "i18n.rslabelright"
+msgid "Справа"
+msgstr "Right"
+
+#: i18n.rslabelsaved
+#, object-pascal-format
+msgid "Наклейки сохранены: %s"
+msgstr "Labels saved: %s"
+
+#: i18n.rslabelsaveerror
+#, object-pascal-format
+msgid "Не удалось сохранить наклейки: %s"
+msgstr "Could not save labels: %s"
+
+#: i18n.rslabelsavepdf
+msgctxt "i18n.rslabelsavepdf"
+msgid "Сохранить PDF…"
+msgstr "Save PDF…"
+
+#: i18n.rslabelsettingserror
+#, object-pascal-format
+msgid "Не удалось сохранить настройки наклеек: %s"
+msgstr "Could not save label settings: %s"
+
+#: i18n.rslabelstartcolumns
+msgctxt "i18n.rslabelstartcolumns"
+msgid "Колонки стартов"
+msgstr "Start columns"
+
+#: i18n.rslabeltemplateactions
+msgid "Действия с шаблоном"
+msgstr "Template actions"
+
+#: i18n.rslabeltemplatedirectoryerror
+msgid "Не удалось создать каталог шаблонов."
+msgstr "Could not create the templates directory."
+
+#: i18n.rslabeltemplateinvalidfield
+#, object-pascal-format
+msgid "Некорректный или отсутствующий параметр: %s"
+msgstr "Invalid or missing setting: %s"
+
+#: i18n.rslabeltemplatelabel
+msgctxt "i18n.rslabeltemplatelabel"
+msgid "Шаблон"
+msgstr "Template"
+
+#: i18n.rslabeltemplatemissingfile
+msgid "Файл шаблона не найден."
+msgstr "Template file not found."
+
+#: i18n.rslabeltemplatename
+msgid "Название шаблона"
+msgstr "Template name"
+
+#: i18n.rslabeltemplatesaveas
+msgid "Сохранить как…"
+msgstr "Save as…"
+
+#: i18n.rslabeltemplatesavechanges
+msgid "Сохранить изменения"
+msgstr "Save changes"
+
+#: i18n.rslabeltop
+msgctxt "i18n.rslabeltop"
+msgid "Сверху"
+msgstr "Top"
+
+#: i18n.rslabelwidth
+msgctxt "i18n.rslabelwidth"
+msgid "Ширина"
+msgstr "Width"
 
 #: i18n.rslanguagechanged
 #, object-pascal-format
@@ -931,6 +1625,35 @@ msgstr "Open in new window"
 msgctxt "i18n.rsopenstartmarkswindowhint"
 msgid "Открыть журнал стартовых отметок"
 msgstr "Open the start marks journal"
+
+#: i18n.rsoverallheaderhint
+msgid "Вид протокола на каждой странице."
+msgstr "Protocol type on each page."
+
+#: i18n.rsoverallheadingshint
+msgid "Название соревнования и вид протокола в основном тексте."
+msgstr "Competition name and protocol type in the document body."
+
+#: i18n.rsoverallnostages
+msgctxt "i18n.rsoverallnostages"
+msgid "Нет активных СУ."
+msgstr "No active stages."
+
+#: i18n.rsoverallstagegaps
+msgid "Отставания на СУ"
+msgstr "Stage gaps"
+
+#: i18n.rsoverallstagepenalties
+msgid "Штрафы на СУ"
+msgstr "Stage penalties"
+
+#: i18n.rsoverallstageplaces
+msgid "Места на СУ"
+msgstr "Stage places"
+
+#: i18n.rsoverallstageresults
+msgid "Результаты СУ"
+msgstr "Stage results"
 
 #: i18n.rsparticipantcorrectionset
 #, object-pascal-format
@@ -1136,6 +1859,345 @@ msgstr "Connection to port %s restored"
 #, object-pascal-format
 msgid "Порт %s недоступен"
 msgstr "Port %s is unavailable"
+
+#: i18n.rsprintall
+msgctxt "i18n.rsprintall"
+msgid "Выбрать все"
+msgstr "Select all"
+
+#: i18n.rsprintbrowsetemplate
+msgctxt "i18n.rsprintbrowsetemplate"
+msgid "Выбрать…"
+msgstr "Browse…"
+
+#: i18n.rsprintbusy
+msgid "Дождитесь завершения текущей операции и повторите формирование."
+msgstr "Wait for the current operation to finish and try again."
+
+#: i18n.rsprintcategories
+msgctxt "i18n.rsprintcategories"
+msgid "Категории"
+msgstr "Categories"
+
+#: i18n.rsprintchoosetemplate
+msgctxt "i18n.rsprintchoosetemplate"
+msgid "Выбрать HTML-шаблон"
+msgstr "Choose an HTML template"
+
+#: i18n.rsprintempty
+msgid "Нет участников для выбранных параметров."
+msgstr "No participants match the selected parameters."
+
+#: i18n.rsprinterror
+#, object-pascal-format
+msgid "Не удалось сформировать протокол: %s"
+msgstr "Could not build the protocol: %s"
+
+#: i18n.rsprintexported
+#, object-pascal-format
+msgid "Протокол сохранён: %s"
+msgstr "Protocol saved: %s"
+
+#: i18n.rsprintfirst
+msgid "Первая страница"
+msgstr "First page"
+
+#: i18n.rsprintfit
+msgid "По ширине"
+msgstr "Fit width"
+
+#: i18n.rsprintfooter
+msgctxt "i18n.rsprintfooter"
+msgid "Нижний колонтитул"
+msgstr "Footer"
+
+#: i18n.rsprintfooterhint
+msgctxt "i18n.rsprintfooterhint"
+msgid "Дата и номер страницы. Подписи берутся из шаблона."
+msgstr "Date and page number. Signatures come from the template."
+
+#: i18n.rsprintheader
+msgctxt "i18n.rsprintheader"
+msgid "Верхний колонтитул"
+msgstr "Header"
+
+#: i18n.rsprintheaderhint
+msgctxt "i18n.rsprintheaderhint"
+msgid "Вид протокола и СУ на каждой странице."
+msgstr "Protocol and stage on every page."
+
+#: i18n.rsprintheadings
+msgctxt "i18n.rsprintheadings"
+msgid "Заголовки протокола"
+msgstr "Protocol headings"
+
+#: i18n.rsprintheadingshint
+msgctxt "i18n.rsprintheadingshint"
+msgid "Название соревнования и строка с видом протокола и СУ в основном тексте."
+msgstr "Competition name and protocol/stage heading in the document body."
+
+#: i18n.rsprintincomplete
+msgctxt "i18n.rsprintincomplete"
+msgid "Участники без результата"
+msgstr "Participants without results"
+
+#: i18n.rsprintlandscape
+msgid "Альбомная"
+msgstr "Landscape"
+
+#: i18n.rsprintlast
+msgid "Последняя страница"
+msgstr "Last page"
+
+#: i18n.rsprintmode
+msgctxt "i18n.rsprintmode"
+msgid "Протокол"
+msgstr "Protocol"
+
+#: i18n.rsprintnext
+msgid "Следующая страница"
+msgstr "Next page"
+
+#: i18n.rsprintnone
+msgctxt "i18n.rsprintnone"
+msgid "Снять выбор"
+msgstr "Clear selection"
+
+#: i18n.rsprintnotemplate
+msgctxt "i18n.rsprintnotemplate"
+msgid "Без шаблона"
+msgstr "No template"
+
+#: i18n.rsprintnotimplemented
+msgid "Формирование этого протокола пока не реализовано."
+msgstr "Generating this protocol is not implemented yet."
+
+#: i18n.rsprintorientation
+msgctxt "i18n.rsprintorientation"
+msgid "Ориентация A4"
+msgstr "A4 orientation"
+
+#: i18n.rsprintoverall
+msgctxt "i18n.rsprintoverall"
+msgid "Общий"
+msgstr "Overall"
+
+#: i18n.rsprintpenalty
+msgctxt "i18n.rsprintpenalty"
+msgid "Штраф"
+msgstr "Penalty"
+
+#: i18n.rsprintpending
+msgid "Есть несохранённые правки. Сформировать протокол по последним сохранённым данным? Правки сохранятся в редакторе."
+msgstr "There are unsaved edits. Build a protocol from the last saved data? Your edits will remain in the editor."
+
+#: i18n.rsprintportrait
+msgid "Книжная"
+msgstr "Portrait"
+
+#: i18n.rsprintprevious
+msgid "Предыдущая страница"
+msgstr "Previous page"
+
+#: i18n.rsprintsave
+msgctxt "i18n.rsprintsave"
+msgid "Сохранить…"
+msgstr "Save…"
+
+#: i18n.rsprintsaveerror
+#, object-pascal-format
+msgid "Не удалось сохранить протокол: %s"
+msgstr "Could not save protocol: %s"
+
+#: i18n.rsprintsinglestage
+msgctxt "i18n.rsprintsinglestage"
+msgid "Отдельный СУ"
+msgstr "Single stage"
+
+#: i18n.rsprinttemplate
+msgctxt "i18n.rsprinttemplate"
+msgid "Шаблон"
+msgstr "Template"
+
+#: i18n.rsprinttemplatefilter
+msgctxt "i18n.rsprinttemplatefilter"
+msgid "HTML-шаблоны|*.html;*.htm"
+msgstr "HTML templates|*.html;*.htm"
+
+#: i18n.rsprotocolbalance
+msgctxt "i18n.rsprotocolbalance"
+msgid "Баланс протокола"
+msgstr "Protocol balance"
+
+#: i18n.rsprotocolbalanceallparticipants
+msgid "Все участники"
+msgstr "All participants"
+
+#: i18n.rsprotocolbalancefinisherrors
+#, object-pascal-format
+msgid "Ошибки финишей: %d"
+msgstr "Finish errors: %d"
+
+#: i18n.rsprotocolbalancefinisherrorsunavailable
+msgid "Ошибки финишей: —"
+msgstr "Finish errors: —"
+
+#: i18n.rsprotocolbalancefinishwithoutstart
+msgid "Финиш без старта"
+msgstr "Finish without start"
+
+#: i18n.rsprotocolbalancegroup
+msgid "Группа"
+msgstr "Group"
+
+#: i18n.rsprotocolbalanceincoming
+msgid "Входящие отсечки"
+msgstr "Incoming timing marks"
+
+#: i18n.rsprotocolbalanceinvalidresult
+#, object-pascal-format
+msgid "Некорректный результат: %s"
+msgstr "Invalid result: %s"
+
+#: i18n.rsprotocolbalancemissingfinish
+msgid "Нет финиша и статуса"
+msgstr "No finish or status"
+
+#: i18n.rsprotocolbalancemissingresult
+msgid "Результат отсутствует или некорректен"
+msgstr "Result is missing or invalid"
+
+#: i18n.rsprotocolbalancenavigationerror
+#, object-pascal-format
+msgid "Не удалось открыть запись: %s"
+msgstr "Could not open the record: %s"
+
+#: i18n.rsprotocolbalancenoactivestages
+msgctxt "i18n.rsprotocolbalancenoactivestages"
+msgid "Нет активных СУ."
+msgstr "No active stages."
+
+#: i18n.rsprotocolbalancenomatchingparticipants
+msgid "В выбранной группе нет участников."
+msgstr "The selected group has no participants."
+
+#: i18n.rsprotocolbalancenoparticipants
+msgid "В соревновании нет участников."
+msgstr "The competition has no participants."
+
+#: i18n.rsprotocolbalancenostagedata
+msgid "Нет данных по СУ"
+msgstr "No stage data"
+
+#: i18n.rsprotocolbalancenotconnected
+msgid "Данные баланса пока не подключены."
+msgstr "Protocol balance data is not connected yet."
+
+#: i18n.rsprotocolbalanceopencompetition
+msgid "Откройте соревнование."
+msgstr "Open a competition."
+
+#: i18n.rsprotocolbalanceopenparticipant
+msgctxt "i18n.rsprotocolbalanceopenparticipant"
+msgid "Перейти к участнику"
+msgstr "Go to participant"
+
+#: i18n.rsprotocolbalanceparticipantmissing
+msgctxt "i18n.rsprotocolbalanceparticipantmissing"
+msgid "Участник больше не найден в соревновании."
+msgstr "The participant is no longer in the competition."
+
+#: i18n.rsprotocolbalanceparticipants
+msgid "Участников"
+msgstr "Participants"
+
+#: i18n.rsprotocolbalancependingfinishes
+#, object-pascal-format
+msgid "Финиши к разбору: %d"
+msgstr "Finishes to review: %d"
+
+#: i18n.rsprotocolbalancependingfinishesunavailable
+msgid "Финиши к разбору: —"
+msgstr "Finishes to review: —"
+
+#: i18n.rsprotocolbalancependingstarts
+#, object-pascal-format
+msgid "Старты к разбору: %d"
+msgstr "Starts to review: %d"
+
+#: i18n.rsprotocolbalancependingstartsunavailable
+msgid "Старты к разбору: —"
+msgstr "Starts to review: —"
+
+#: i18n.rsprotocolbalancereaderror
+#, object-pascal-format
+msgid "Не удалось загрузить баланс: %s"
+msgstr "Could not load protocol balance: %s"
+
+#: i18n.rsprotocolbalanceready
+msgid "Показаны сохранённые данные соревнования."
+msgstr "Showing saved competition data."
+
+#: i18n.rsprotocolbalancerecordcount
+#, object-pascal-format
+msgid "Записей: %d"
+msgstr "Records: %d"
+
+#: i18n.rsprotocolbalancerecordcountunavailable
+msgid "Записей: —"
+msgstr "Records: —"
+
+#: i18n.rsprotocolbalancerefresh
+msgctxt "i18n.rsprotocolbalancerefresh"
+msgid "Обновить"
+msgstr "Refresh"
+
+#: i18n.rsprotocolbalancesavebeforenavigation
+msgid "Сохранить изменения в основной таблице перед переходом?"
+msgstr "Save changes in the main table before navigating?"
+
+#: i18n.rsprotocolbalanceshow
+msgid "Показать:"
+msgstr "Show:"
+
+#: i18n.rsprotocolbalancestagenotselected
+msgid "СУ не выбран"
+msgstr "No stage selected"
+
+#: i18n.rsprotocolbalancestageunavailable
+msgid "Выбранный СУ больше не активен."
+msgstr "The selected stage is no longer active."
+
+#: i18n.rsprotocolbalancestale
+msgid "Данные изменились; ожидается обновление."
+msgstr "Data changed; waiting to refresh."
+
+#: i18n.rsprotocolbalancestarterrors
+#, object-pascal-format
+msgid "Ошибки стартов: %d"
+msgstr "Start errors: %d"
+
+#: i18n.rsprotocolbalancestarterrorsunavailable
+msgid "Ошибки стартов: —"
+msgstr "Start errors: —"
+
+#: i18n.rsprotocolbalancestate
+msgctxt "i18n.rsprotocolbalancestate"
+msgid "Состояние"
+msgstr "State"
+
+#: i18n.rsprotocolbalanceunknownstatus
+#, object-pascal-format
+msgid "Неизвестный статус: %s"
+msgstr "Unknown status: %s"
+
+#: i18n.rsprotocolbalanceunresolved
+msgid "Без итога"
+msgstr "No outcome"
+
+#: i18n.rsprotocolbalancewithresult
+msgid "С результатом"
+msgstr "With result"
 
 #: i18n.rsqualificationresults
 msgctxt "i18n.rsqualificationresults"
@@ -1394,6 +2456,19 @@ msgctxt "i18n.rsstageresultsexported"
 msgid "Результаты СУ %d (%s) экспортированы: %s"
 msgstr "Stage %d results (%s) exported: %s"
 
+#: i18n.rsstartbynumber
+msgid "По номеру"
+msgstr "By number"
+
+#: i18n.rsstartbytime
+msgid "По времени старта"
+msgstr "By start time"
+
+#: i18n.rsstarteverystage
+msgctxt "i18n.rsstarteverystage"
+msgid "Все СУ"
+msgstr "All stages"
+
 #: i18n.rsstartfilecopyerror
 msgctxt "i18n.rsstartfilecopyerror"
 msgid "Ошибка создания стартового файла"
@@ -1403,6 +2478,27 @@ msgstr "Error creating start file"
 msgctxt "i18n.rsstartfilecreated"
 msgid "Файл для стартовых ворот создан"
 msgstr "Start gate file created"
+
+#: i18n.rsstartfitwidth
+msgid "Вместить по горизонтали"
+msgstr "Fit to width"
+
+#: i18n.rsstartheaderhint
+msgid "Вид стартового протокола на каждой странице."
+msgstr "Start protocol heading on every page."
+
+#: i18n.rsstartheadingshint
+msgid "Название соревнования и строка с видом стартового протокола."
+msgstr "Competition name and start protocol heading."
+
+#: i18n.rsstartincludemissing
+msgid "Участники без времени старта"
+msgstr "Participants without a start time"
+
+#: i18n.rsstartlabels
+msgctxt "i18n.rsstartlabels"
+msgid "Стартовые наклейки"
+msgstr "Start labels"
 
 #: i18n.rsstartlistexported
 #, object-pascal-format
@@ -1468,6 +2564,11 @@ msgctxt "i18n.rsstartmarkjournalfiltercurrentstage"
 msgid "С начала текущего этапа"
 msgstr "Since the start of the current stage"
 
+#: i18n.rsstartmarkjournalfiltererror
+msgctxt "i18n.rsstartmarkjournalfiltererror"
+msgid "Ошибочные"
+msgstr "Errors"
+
 #: i18n.rsstartmarkjournalfilterhidden
 msgctxt "i18n.rsstartmarkjournalfilterhidden"
 msgid "Скрытые"
@@ -1482,6 +2583,10 @@ msgstr "Last 15 minutes"
 msgctxt "i18n.rsstartmarkjournalfilterpending"
 msgid "Ожидающие"
 msgstr "Pending"
+
+#: i18n.rsstartmarkjournalfilterpendingorconflict
+msgid "К разбору (ожидающие и конфликтные)"
+msgstr "To review (pending and conflicting)"
 
 #: i18n.rsstartmarkjournalrefreshwarning
 #, object-pascal-format
@@ -1546,6 +2651,20 @@ msgstr "The start mark for participant %d was received on stage %d — %s, but s
 msgid "Выбор этапа"
 msgstr "Select stage"
 
+#: i18n.rsstartmode
+msgctxt "i18n.rsstartmode"
+msgid "Протокол"
+msgstr "Protocol"
+
+#: i18n.rsstartorder
+msgid "Порядок"
+msgstr "Order"
+
+#: i18n.rsstartprinttitle
+msgctxt "i18n.rsstartprinttitle"
+msgid "Стартовый протокол"
+msgstr "Start protocol"
+
 #: i18n.rsstartprogram
 #, object-pascal-format
 msgctxt "i18n.rsstartprogram"
@@ -1557,10 +2676,24 @@ msgctxt "i18n.rsstartprotocol"
 msgid "Стартовый протокол"
 msgstr "Start protocol"
 
+#: i18n.rsstartsinglestage
+msgctxt "i18n.rsstartsinglestage"
+msgid "Отдельный СУ"
+msgstr "Single stage"
+
+#: i18n.rsstartsortstage
+msgid "Сортировать по старту СУ"
+msgstr "Sort by stage start"
+
 #: i18n.rsstarttime
 msgctxt "i18n.rsstarttime"
 msgid "Старт"
 msgstr "Start"
+
+#: i18n.rsstatisticsoverview
+msgctxt "i18n.rsstatisticsoverview"
+msgid "Обзор"
+msgstr "Overview"
 
 #: i18n.rsstatus
 msgctxt "i18n.rsstatus"
@@ -1660,6 +2793,101 @@ msgstr "Interval, seconds"
 msgctxt "i18n.rstelegramretryenabled"
 msgid "Повторять при ошибке"
 msgstr "Retry on error"
+
+#: i18n.rstemplatealignment
+#, object-pascal-format
+msgctxt "i18n.rstemplatealignment"
+msgid "Неподдерживаемый text-align: %s"
+msgstr "Unsupported text-align: %s"
+
+#: i18n.rstemplateattribute
+#, object-pascal-format
+msgctxt "i18n.rstemplateattribute"
+msgid "Неподдерживаемый атрибут %s: %s"
+msgstr "Unsupported %s attribute: %s"
+
+#: i18n.rstemplateelement
+#, object-pascal-format
+msgctxt "i18n.rstemplateelement"
+msgid "Неподдерживаемый элемент HTML: %s"
+msgstr "Unsupported HTML element: %s"
+
+#: i18n.rstemplatefontsize
+#, object-pascal-format
+msgctxt "i18n.rstemplatefontsize"
+msgid "Неподдерживаемый font-size: %s"
+msgstr "Unsupported font-size: %s"
+
+#: i18n.rstemplateheadelement
+#, object-pascal-format
+msgctxt "i18n.rstemplateheadelement"
+msgid "Неподдерживаемый элемент head: %s"
+msgstr "Unsupported head element: %s"
+
+#: i18n.rstemplateincompletehtml
+msgctxt "i18n.rstemplateincompletehtml"
+msgid "Незавершённый HTML"
+msgstr "Incomplete HTML"
+
+#: i18n.rstemplateinvalidcss
+#, object-pascal-format
+msgctxt "i18n.rstemplateinvalidcss"
+msgid "Некорректный CSS: %s"
+msgstr "Invalid CSS: %s"
+
+#: i18n.rstemplateinvalidunicode
+#, object-pascal-format
+msgctxt "i18n.rstemplateinvalidunicode"
+msgid "Недопустимая сущность Unicode: &%s;"
+msgstr "Invalid Unicode entity: &%s;"
+
+#: i18n.rstemplateinvalidutf8
+msgctxt "i18n.rstemplateinvalidutf8"
+msgid "Некорректный UTF-8"
+msgstr "Invalid UTF-8"
+
+#: i18n.rstemplatemeta
+msgctxt "i18n.rstemplatemeta"
+msgid "Поддерживается только meta charset=\"utf-8\""
+msgstr "Only meta charset=\"utf-8\" is supported"
+
+#: i18n.rstemplatemissingmarker
+msgctxt "i18n.rstemplatemissingmarker"
+msgid "Отсутствует метка {{RESULTS}}"
+msgstr "Missing {{RESULTS}} marker"
+
+#: i18n.rstemplateonemarker
+msgctxt "i18n.rstemplateonemarker"
+msgid "Требуется ровно одна метка {{RESULTS}}"
+msgstr "Expected one {{RESULTS}} marker"
+
+#: i18n.rstemplateoutsideelement
+#, object-pascal-format
+msgctxt "i18n.rstemplateoutsideelement"
+msgid "Элемент %s вне %s"
+msgstr "%s outside %s"
+
+#: i18n.rstemplateoutsidetext
+#, object-pascal-format
+msgctxt "i18n.rstemplateoutsidetext"
+msgid "Текст вне абзаца: %s; {{RESULTS}} должна стоять отдельно"
+msgstr "Text outside a paragraph: %s; {{RESULTS}} must stand alone"
+
+#: i18n.rstemplateseparatemarker
+msgctxt "i18n.rstemplateseparatemarker"
+msgid "Метка {{RESULTS}} должна быть отдельным абзацем"
+msgstr "{{RESULTS}} must be a separate paragraph"
+
+#: i18n.rstemplatetable
+msgctxt "i18n.rstemplatetable"
+msgid "В table допускаются строки tr из двух td с одним p в каждой."
+msgstr "A table must have tr rows with two td cells and one p in each cell."
+
+#: i18n.rstemplateunsupportedcss
+#, object-pascal-format
+msgctxt "i18n.rstemplateunsupportedcss"
+msgid "Неподдерживаемый CSS: %s"
+msgstr "Unsupported CSS: %s"
 
 #: i18n.rsthruresultscalculationerror
 #, object-pascal-format
@@ -1946,6 +3174,17 @@ msgctxt "tmainform.acopenstartmarkjournal.hint"
 msgid "Открыть журнал стартовых отметок"
 msgstr "Open the start marks journal"
 
+#: tmainform.acparticipantcard.caption
+#, fuzzy
+msgctxt "tmainform.acparticipantcard.caption"
+msgid "Карточка участника"
+msgstr "Participant card"
+
+#: tmainform.acprintfinish.caption
+msgctxt "tmainform.acprintfinish.caption"
+msgid "Финишный протокол…"
+msgstr "Finish protocol…"
+
 #: tmainform.acrunracesettings.caption
 msgid "Параметры соревнования"
 msgstr "Competition parameters"
@@ -2043,7 +3282,7 @@ msgstr ""
 
 #: tmainform.clock.caption
 msgid "00:00:00"
-msgstr ""
+msgstr "00:00:00"
 
 #: tmainform.currentstagegroup.caption
 msgctxt "tmainform.currentstagegroup.caption"
@@ -2064,6 +3303,10 @@ msgstr "Copy"
 msgid "Empty"
 msgstr "Empty"
 
+#: tmainform.exportprotocolsmenuitem.caption
+msgid "Экспорт"
+msgstr "Export"
+
 #: tmainform.exportstageresults.caption
 msgctxt "tmainform.exportstageresults.caption"
 msgid "Экспорт результатов СУ..."
@@ -2075,6 +3318,7 @@ msgid "Экспорт результатов СУ для переноса в д�
 msgstr "Export stage results for transfer to another database"
 
 #: tmainform.fileclose.caption
+msgctxt "tmainform.fileclose.caption"
 msgid "Закрыть"
 msgstr "Close"
 
@@ -2283,6 +3527,7 @@ msgid "Экспорт результатов СУ для переноса в д�
 msgstr "Export stage results for transfer to another database"
 
 #: tmainform.menuitemabout.caption
+msgctxt "tmainform.menuitemabout.caption"
 msgid "О программе"
 msgstr "About"
 
@@ -2341,6 +3586,16 @@ msgstr "Delete participant"
 #: tmainform.pmsetstatus.caption
 msgid "Установить ..."
 msgstr "Set ..."
+
+#: tmainform.printstartmenuitem.caption
+msgid "Стартовый протокол…"
+msgstr "Start protocol…"
+
+#: tmainform.protocolbalancesheet.caption
+#, fuzzy
+msgctxt "tmainform.protocolbalancesheet.caption"
+msgid "Баланс протокола"
+msgstr "Protocol balance"
 
 #: tmainform.racemodelabel.caption
 msgid "Режим гонки"
@@ -2479,6 +3734,12 @@ msgstr "Total"
 msgid "Сквозной"
 msgstr "Through"
 
+#: tmainform.statisticsoverviewsheet.caption
+#, fuzzy
+msgctxt "tmainform.statisticsoverviewsheet.caption"
+msgid "Обзор"
+msgstr "Overview"
+
 #: tmainform.statrxdbgrid1.columns[0].title.caption
 msgctxt "tmainform.statrxdbgrid1.columns[0].title.caption"
 msgid "Категория"
@@ -2524,7 +3785,7 @@ msgstr "Results"
 #: tmainform.timinginputdevicelabel.caption
 msgctxt "tmainform.timinginputdevicelabel.caption"
 msgid "COM1"
-msgstr ""
+msgstr "COM1"
 
 #: tresultsform.caption
 msgctxt "tresultsform.caption"
@@ -2844,6 +4105,7 @@ msgid "Разное"
 msgstr "Miscellaneous"
 
 #: tsettingsform.groupboxcategory.caption
+msgctxt "tsettingsform.groupboxcategory.caption"
 msgid "Категории"
 msgstr "Categories"
 
@@ -2856,6 +4118,7 @@ msgid "Название"
 msgstr "Name"
 
 #: tsettingsform.groupboxname.hint
+msgctxt "tsettingsform.groupboxname.hint"
 msgid "Название соревнования"
 msgstr "Competition name"
 
@@ -3038,6 +4301,156 @@ msgstr "2"
 msgid "03:43.459"
 msgstr "03:43.459"
 
+#: tstartlabelsprintform.borderscheck.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.borderscheck.caption"
+msgid "Печатать границы наклеек"
+msgstr "Print label borders"
+
+#: tstartlabelsprintform.bottomlabel.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.bottomlabel.caption"
+msgid "Снизу"
+msgstr "Bottom"
+
+#: tstartlabelsprintform.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.caption"
+msgid "Стартовые наклейки"
+msgstr "Start labels"
+
+#: tstartlabelsprintform.closebutton.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.closebutton.caption"
+msgid "Закрыть"
+msgstr "Close"
+
+#: tstartlabelsprintform.firstbutton.caption
+msgid "|<"
+msgstr ""
+
+#: tstartlabelsprintform.firstslotlabel.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.firstslotlabel.caption"
+msgid "Первая наклейка"
+msgstr "First label"
+
+#: tstartlabelsprintform.fontlabel.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.fontlabel.caption"
+msgid "Шрифт таблицы, пт"
+msgstr "Table font, pt"
+
+#: tstartlabelsprintform.gapsgroup.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.gapsgroup.caption"
+msgid "Промежутки, мм"
+msgstr "Gaps, mm"
+
+#: tstartlabelsprintform.gapxlabel.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.gapxlabel.caption"
+msgid "Между колонками"
+msgstr "Between columns"
+
+#: tstartlabelsprintform.gapylabel.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.gapylabel.caption"
+msgid "Между рядами"
+msgstr "Between rows"
+
+#: tstartlabelsprintform.heightlabel.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.heightlabel.caption"
+msgid "Высота"
+msgstr "Height"
+
+#: tstartlabelsprintform.lastbutton.caption
+msgid ">|"
+msgstr ""
+
+#: tstartlabelsprintform.leftlabel.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.leftlabel.caption"
+msgid "Слева"
+msgstr "Left"
+
+#: tstartlabelsprintform.marginsgroup.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.marginsgroup.caption"
+msgid "Поля листа, мм"
+msgstr "Sheet margins, mm"
+
+#: tstartlabelsprintform.minfontlabel.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.minfontlabel.caption"
+msgid "Минимальный шрифт, пт"
+msgstr "Minimum font, pt"
+
+#: tstartlabelsprintform.nextbutton.caption
+msgid ">"
+msgstr ""
+
+#: tstartlabelsprintform.paddinglabel.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.paddinglabel.caption"
+msgid "Внутренний отступ, мм"
+msgstr "Inner padding, mm"
+
+#: tstartlabelsprintform.pagecountlabel.caption
+msgid "/ 0"
+msgstr ""
+
+#: tstartlabelsprintform.papergroup.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.papergroup.caption"
+msgid "Наклейка, мм"
+msgstr "Label, mm"
+
+#: tstartlabelsprintform.previousbutton.caption
+msgid "<"
+msgstr ""
+
+#: tstartlabelsprintform.rightlabel.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.rightlabel.caption"
+msgid "Справа"
+msgstr "Right"
+
+#: tstartlabelsprintform.savebutton.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.savebutton.caption"
+msgid "Сохранить PDF…"
+msgstr "Save PDF…"
+
+#: tstartlabelsprintform.startcolumnscombo.text
+msgid "1"
+msgstr ""
+
+#: tstartlabelsprintform.startcolumnslabel.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.startcolumnslabel.caption"
+msgid "Колонки стартов"
+msgstr "Start columns"
+
+#: tstartlabelsprintform.textgroup.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.textgroup.caption"
+msgid "Содержимое"
+msgstr "Contents"
+
+#: tstartlabelsprintform.toplabel.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.toplabel.caption"
+msgid "Сверху"
+msgstr "Top"
+
+#: tstartlabelsprintform.widthlabel.caption
+#, fuzzy
+msgctxt "tstartlabelsprintform.widthlabel.caption"
+msgid "Ширина"
+msgstr "Width"
+
 #: tstartlistform.caption
 msgid "Параметры стартового протокола"
 msgstr "Start list parameters"
@@ -3180,4 +4593,3 @@ msgstr "Device"
 msgctxt "tstartmarksform.rxdbgridstartmarks.columns[9].title.caption"
 msgid "Режим назначения"
 msgstr "Assignment mode"
-

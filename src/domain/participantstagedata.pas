@@ -31,8 +31,8 @@ type
 
 implementation
 
-class function TParticipantStageData.Create(
-  const AStageIndex: integer): TParticipantStageData;
+class function TParticipantStageData.Create(const AStageIndex: integer):
+TParticipantStageData;
 begin
   if AStageIndex < 1 then
     raise EArgumentOutOfRangeException.CreateFmt(

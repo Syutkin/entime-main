@@ -12,31 +12,31 @@ type
   TLoopbackHttpServer = class(TThread)
   private
     FServer: TInetServer;
-    FStarted: Boolean;
-    FPort: Word;
-    FDelayMs: Cardinal;
+    FStarted: boolean;
+    FPort: word;
+    FDelayMs: cardinal;
     FRequestStarted: PRTLEvent;
-    FRequestReceived: LongInt;
+    FRequestReceived: longint;
     FLastMethod: string;
     FLastTarget: string;
-    FLastBody: RawByteString;
+    FLastBody: rawbytestring;
     FLastRequestHeader: string;
     procedure HandleConnection(Sender: TObject; AStream: TSocketStream);
-    function ReadLine(AStream: TStream): RawByteString;
-    procedure SendResponse(AStream: TStream; const ACode: Integer;
-      const ACodeText, ABody: RawByteString; const AExtraHeader: string = '');
+    function ReadLine(AStream: TStream): rawbytestring;
+    procedure SendResponse(AStream: TStream; const ACode: integer;
+      const ACodeText, ABody: rawbytestring; const AExtraHeader: string = '');
   protected
     procedure Execute; override;
   public
     constructor Create;
     destructor Destroy; override;
     function BaseUrl: string;
-    function WaitForRequestStarted(const ATimeoutMs: Cardinal): Boolean;
-    property DelayMs: Cardinal read FDelayMs write FDelayMs;
-    property Port: Word read FPort;
+    function WaitForRequestStarted(const ATimeoutMs: cardinal): boolean;
+    property DelayMs: cardinal read FDelayMs write FDelayMs;
+    property Port: word read FPort;
     property LastMethod: string read FLastMethod;
     property LastTarget: string read FLastTarget;
-    property LastBody: RawByteString read FLastBody;
+    property LastBody: rawbytestring read FLastBody;
     property LastRequestHeader: string read FLastRequestHeader;
   end;
 
@@ -45,7 +45,7 @@ implementation
 function HeaderValue(const AHeaders: TStrings; const AName: string): string;
 var
   HeaderLine: string;
-  Index: Integer;
+  Index: integer;
   SeparatorPosition: SizeInt;
 begin
   Result := '';
@@ -126,9 +126,9 @@ begin
   end;
 end;
 
-function TLoopbackHttpServer.ReadLine(AStream: TStream): RawByteString;
+function TLoopbackHttpServer.ReadLine(AStream: TStream): rawbytestring;
 var
-  Character: AnsiChar;
+  Character: ansichar;
 begin
   Result := '';
   repeat
@@ -142,35 +142,34 @@ begin
 end;
 
 procedure TLoopbackHttpServer.SendResponse(AStream: TStream;
-  const ACode: Integer; const ACodeText, ABody: RawByteString;
+  const ACode: integer; const ACodeText, ABody: rawbytestring;
   const AExtraHeader: string);
 var
-  Header: RawByteString;
+  Header: rawbytestring;
 begin
-  Header := 'HTTP/1.1 ' + RawByteString(IntToStr(ACode)) + ' ' + ACodeText +
-    #13#10 + 'Connection: close'#13#10 +
-    'Content-Length: ' + RawByteString(IntToStr(Length(ABody))) + #13#10 +
+  Header := 'HTTP/1.1 ' + rawbytestring(IntToStr(ACode)) + ' ' +
+    ACodeText + #13#10 + 'Connection: close'#13#10 + 'Content-Length: ' +
+    rawbytestring(IntToStr(Length(ABody))) + #13#10 +
     'Content-Type: text/plain; charset=utf-8'#13#10;
   if AExtraHeader <> '' then
-    Header := Header + RawByteString(AExtraHeader) + #13#10;
+    Header := Header + rawbytestring(AExtraHeader) + #13#10;
   Header := Header + #13#10;
   AStream.WriteBuffer(Header[1], Length(Header));
   if Length(ABody) > 0 then
     AStream.WriteBuffer(ABody[1], Length(ABody));
 end;
 
-procedure TLoopbackHttpServer.HandleConnection(Sender: TObject;
-  AStream: TSocketStream);
+procedure TLoopbackHttpServer.HandleConnection(Sender: TObject; AStream: TSocketStream);
 var
-  BodyLength: Integer;
-  FirstLine: RawByteString;
-  HeaderLine: RawByteString;
+  BodyLength: integer;
+  FirstLine: rawbytestring;
+  HeaderLine: rawbytestring;
   Headers: TStringList;
   MethodEnd: SizeInt;
   TargetEnd: SizeInt;
   Path: string;
-  Remaining: Integer;
-  ReadCount: Integer;
+  Remaining: integer;
+  ReadCount: integer;
 begin
   AStream.IOTimeout := 2000;
   {$IFDEF Linux}
@@ -184,8 +183,8 @@ begin
     if (MethodEnd <= 0) or (TargetEnd <= MethodEnd) then
       Exit;
     FLastMethod := string(Copy(FirstLine, 1, MethodEnd - 1));
-    FLastTarget := string(Copy(FirstLine, MethodEnd + 1,
-      TargetEnd - MethodEnd - 1));
+    FLastTarget := string(Copy(FirstLine, MethodEnd + 1, TargetEnd -
+      MethodEnd - 1));
 
     repeat
       HeaderLine := ReadLine(AStream);
@@ -244,7 +243,7 @@ begin
 end;
 
 function TLoopbackHttpServer.WaitForRequestStarted(
-  const ATimeoutMs: Cardinal): Boolean;
+  const ATimeoutMs: cardinal): boolean;
 begin
   RTLEventWaitFor(FRequestStarted, ATimeoutMs);
   Result := InterlockedCompareExchange(FRequestReceived, 0, 0) <> 0;

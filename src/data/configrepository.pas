@@ -14,15 +14,17 @@ type
     class function SelectByKey: string; static;
   public
     class function UpsertByKey: string; static;
-    class procedure ExecUpsertByKey(Q: TSQLQuery; const Key, Value: string);
-      static;
+    class procedure ExecUpsertByKey(Q: TSQLQuery; const Key, Value: string); static;
+    class procedure PrepareUpsert(Q: TSQLQuery); static;
+    class procedure ExecPreparedUpsert(Q: TSQLQuery; const Key, Value: string); static;
+    class procedure FinishPreparedUpsert(Q: TSQLQuery); static;
     class procedure LoadAll(Q: TSQLQuery; Values: TStrings); static;
-    class function StringValue(const Values: TStrings; const Key,
-      DefaultValue: string): string; static;
+    class function StringValue(const Values: TStrings;
+      const Key, DefaultValue: string): string; static;
     class function BoolValue(const Values: TStrings; const Key: string;
       const DefaultValue: boolean): boolean; static;
-    class function GetString(Q: TSQLQuery; const Key,
-      DefaultValue: string): string; static;
+    class function GetString(Q: TSQLQuery; const Key, DefaultValue: string): string;
+      static;
     class function GetInteger(Q: TSQLQuery; const Key: string;
       const DefaultValue: integer): integer; static;
     class function GetBool(Q: TSQLQuery; const Key: string;
@@ -31,8 +33,7 @@ type
 
 implementation
 
-function ParseBoolText(const Value: string;
-  const DefaultValue: boolean): boolean;
+function ParseBoolText(const Value: string; const DefaultValue: boolean): boolean;
 var
   intValue: integer;
 begin
@@ -56,15 +57,41 @@ begin
     'ON CONFLICT(key) DO UPDATE SET value = excluded.value;';
 end;
 
-class procedure TConfigSql.ExecUpsertByKey(Q: TSQLQuery;
-  const Key, Value: string);
+class procedure TConfigSql.PrepareUpsert(Q: TSQLQuery);
 begin
+  if Q = nil then
+    raise EArgumentNilException.Create('Q');
+  Q.Close;
+  if Q.Prepared then
+    Q.UnPrepare;
   Q.SQL.Text := UpsertByKey;
+  Q.Prepare;
+end;
+
+class procedure TConfigSql.ExecPreparedUpsert(Q: TSQLQuery; const Key, Value: string);
+begin
   Q.ParamByName('KEY').AsString := Key;
   Q.ParamByName('VALUE').AsString := Value;
-  Q.Close;
   Q.ExecSQL;
+end;
+
+class procedure TConfigSql.FinishPreparedUpsert(Q: TSQLQuery);
+begin
+  if Q = nil then
+    Exit;
   Q.Close;
+  if Q.Prepared then
+    Q.UnPrepare;
+end;
+
+class procedure TConfigSql.ExecUpsertByKey(Q: TSQLQuery; const Key, Value: string);
+begin
+  PrepareUpsert(Q);
+  try
+    ExecPreparedUpsert(Q, Key, Value);
+  finally
+    FinishPreparedUpsert(Q);
+  end;
 end;
 
 class procedure TConfigSql.LoadAll(Q: TSQLQuery; Values: TStrings);
@@ -115,8 +142,8 @@ begin
     Result := DefaultValue;
 end;
 
-class function TConfigSql.BoolValue(const Values: TStrings;
-  const Key: string; const DefaultValue: boolean): boolean;
+class function TConfigSql.BoolValue(const Values: TStrings; const Key: string;
+  const DefaultValue: boolean): boolean;
 var
   valueIndex: integer;
   valueText: string;
@@ -132,8 +159,8 @@ begin
     Result := ParseBoolText(valueText, DefaultValue);
 end;
 
-class function TConfigSql.GetString(Q: TSQLQuery; const Key,
-  DefaultValue: string): string;
+class function TConfigSql.GetString(Q: TSQLQuery;
+  const Key, DefaultValue: string): string;
 begin
   Result := DefaultValue;
   Q.Close;

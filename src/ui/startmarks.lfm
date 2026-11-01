@@ -7,7 +7,7 @@ object StartMarksForm: TStartMarksForm
   ClientHeight = 623
   ClientWidth = 1100
   Constraints.MinHeight = 150
-  Constraints.MinWidth = 150
+  Constraints.MinWidth = 360
   Position = poMainFormCenter
   LCLVersion = '4.8.0.0'
   OnClose = FormClose
@@ -18,11 +18,17 @@ object StartMarksForm: TStartMarksForm
     Top = 0
     Width = 1100
     Align = alTop
+    AutoSize = True
     BevelOuter = bvNone
     ClientHeight = 42
     ClientWidth = 1100
     TabOrder = 0
     object LabelJournalFilter: TLabel
+      AnchorSideLeft.Control = PanelJournalFilter
+      AnchorSideTop.Control = ComboBoxJournalFilter
+      AnchorSideTop.Side = asrCenter
+      BorderSpacing.Left = 8
+      FocusControl = ComboBoxJournalFilter
       Left = 8
       Height = 18
       Top = 12
@@ -31,6 +37,16 @@ object StartMarksForm: TStartMarksForm
       ParentColor = False
     end
     object ComboBoxJournalFilter: TComboBox
+      AnchorSideLeft.Control = LabelJournalFilter
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = PanelJournalFilter
+      AnchorSideRight.Control = PanelJournalFilter
+      AnchorSideRight.Side = asrBottom
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 5
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 6
       Left = 72
       Height = 32
       Top = 5
@@ -39,6 +55,24 @@ object StartMarksForm: TStartMarksForm
       Style = csDropDownList
       TabOrder = 0
       OnChange = ComboBoxJournalFilterChange
+    end
+    object LabelStageScope: TLabel
+      AnchorSideLeft.Control = PanelJournalFilter
+      AnchorSideTop.Control = ComboBoxJournalFilter
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = PanelJournalFilter
+      AnchorSideRight.Side = asrBottom
+      Left = 8
+      Top = 43
+      Width = 1084
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 8
+      BorderSpacing.Top = 6
+      BorderSpacing.Right = 8
+      BorderSpacing.Bottom = 6
+      Caption = ''
+      Visible = False
+      WordWrap = True
     end
   end
   object RxDBGridStartMarks: TRxDBGrid

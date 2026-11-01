@@ -24,6 +24,8 @@ type
     procedure SetUp; override;
     procedure TearDown; override;
   published
+    procedure StageRecalculation_MatchesFullAndSkipsOtherActiveStages;
+    procedure StageStatus_SkipsOtherStagesButGlobalDsqRecalculatesThem;
     procedure RecalculateAll_UsesOwnQueriesAndPreservesUiDataset;
     procedure ClearResults_ClearsCalculatedAndStageValues;
     procedure SetStageStatus_RecalculatesGlobalStatusAndResults;
@@ -62,8 +64,7 @@ begin
   FContext.Free;
 end;
 
-procedure TCompetitionResultsServiceTests.ReceiveLogEntry(
-  const AEntry: TAppLogEntry);
+procedure TCompetitionResultsServiceTests.ReceiveLogEntry(const AEntry: TAppLogEntry);
 begin
   FLogEntryReceived := True;
   FLastLogEntry := AEntry;
@@ -99,7 +100,99 @@ begin
 end;
 
 procedure TCompetitionResultsServiceTests.
-  RecalculateAll_UsesOwnQueriesAndPreservesUiDataset;
+StageRecalculation_MatchesFullAndSkipsOtherActiveStages;
+var
+  Expected, Actual: TStringList;
+  UnitOfWork: TCompetitionUnitOfWork;
+
+  procedure Snapshot(const Values: TStrings);
+  var
+    I: integer;
+  begin
+    FQuery.Close;
+    FQuery.SQL.Text := 'SELECT * FROM main ORDER BY number;';
+    FQuery.Open;
+    while not FQuery.EOF do
+    begin
+      for I := 0 to FQuery.FieldCount - 1 do
+        if FQuery.Fields[I].IsNull then
+          Values.Add('<NULL>')
+        else
+          Values.Add(FQuery.Fields[I].AsString);
+      FQuery.Next;
+    end;
+    FQuery.Close;
+  end;
+
+begin
+  UnitOfWork := FContext.BeginUnitOfWork;
+  try
+    TSchemaSql.EnsureStageCapacity(FQuery, 3);
+    UnitOfWork.Commit;
+  finally
+    UnitOfWork.Free;
+  end;
+  FStages.Resize(3);
+  FStages[3].isActive := True;
+  ExecSql('INSERT INTO main (number, category, starttime1, finishtime1, ' +
+    'starttime3, finishtime3, status1, status) VALUES ' +
+    '(1, ''A'', ''10:00:00'', ''10:10:00'', ''11:00:00'', ''11:09:00'', NULL, NULL),' +
+    '(2, ''A'', ''10:00:00'', ''10:10:00'', ''11:00:00'', ''11:10:00'', NULL, NULL),' +
+    '(3, ''B'', ''10:00:00'', ''10:11:00'', NULL, NULL, NULL, NULL),' +
+    '(4, ''A'', NULL, NULL, NULL, NULL, ''1'', ''1''),' +
+    '(5, ''A'', ''10:00:00'', NULL, NULL, NULL, ''2'', ''2''),' +
+    '(6, ''B'', ''10:00:00'', ''10:12:00'', ''11:00:00'', ''11:10:00'', NULL, ''3'');');
+  TResultCalculationService.RecalculateAll(FContext, FStages);
+  ExecSql('CREATE TRIGGER forbid_unaffected BEFORE UPDATE OF result3 ON main ' +
+    'BEGIN SELECT RAISE(ABORT, ''unaffected stage recalculated''); END;');
+  FUiQuery.SQL.Text := 'SELECT number FROM main ORDER BY number;';
+  FUiQuery.Open;
+  Expected := TStringList.Create;
+  Actual := TStringList.Create;
+  try
+    TParticipantStageService.SaveCorrection(FContext, FStages, 1, 1, 250);
+    TParticipantStageService.SaveStartTime(FContext, FStages, 3, 1, '10:01:00');
+    AssertTrue(FUiQuery.Active);
+    Snapshot(Actual);
+    ExecSql('DROP TRIGGER forbid_unaffected;');
+    TResultCalculationService.RecalculateAll(FContext, FStages);
+    Snapshot(Expected);
+    AssertEquals('Every persisted field must match a full recalculation',
+      Expected.Text, Actual.Text);
+  finally
+    Actual.Free;
+    Expected.Free;
+  end;
+end;
+
+procedure TCompetitionResultsServiceTests.
+StageStatus_SkipsOtherStagesButGlobalDsqRecalculatesThem;
+begin
+  FStages[2].isActive := True;
+  ExecSql('INSERT INTO main (number, starttime1, finishtime1, starttime2, finishtime2) '
+    +
+    'VALUES (1, ''10:00:00'', ''10:10:00'', ''11:00:00'', ''11:20:00'');');
+  TResultCalculationService.RecalculateAll(FContext, FStages);
+  ExecSql('CREATE TRIGGER forbid_unaffected BEFORE UPDATE OF result2 ON main ' +
+    'BEGIN SELECT RAISE(ABORT, ''unaffected stage recalculated''); END;');
+  TParticipantStatusService.SetStatus(FContext, FStages, 1, 1, psDNS);
+  TParticipantStatusService.ClearStatus(FContext, FStages, 1, 1, pcscStageOnly);
+  ExecSql('DROP TRIGGER forbid_unaffected;');
+  TParticipantStatusService.SetStatus(FContext, FStages, 1, 1, psDSQ);
+  FQuery.SQL.Text := 'SELECT result1, result2 FROM main WHERE number = 1;';
+  FQuery.Open;
+  AssertEquals('DSQ', FQuery.Fields[0].AsString);
+  AssertEquals('DSQ', FQuery.Fields[1].AsString);
+  FQuery.Close;
+  TParticipantStatusService.ClearStatus(FContext, FStages, 1, 1, pcscGlobalOnly);
+  FQuery.SQL.Text := 'SELECT result1, result2 FROM main WHERE number = 1;';
+  FQuery.Open;
+  AssertFalse('Clearing global DSQ must restore every active stage',
+    FQuery.Fields[1].AsString = 'DSQ');
+end;
+
+procedure TCompetitionResultsServiceTests.
+RecalculateAll_UsesOwnQueriesAndPreservesUiDataset;
 begin
   ExecSql(
     'INSERT INTO main (number, name, starttime1, finishtime1) VALUES ' +
@@ -127,7 +220,7 @@ begin
 end;
 
 procedure TCompetitionResultsServiceTests.
-  ClearResults_ClearsCalculatedAndStageValues;
+ClearResults_ClearsCalculatedAndStageValues;
 begin
   ExecSql(
     'INSERT INTO main (number, starttime1, correction1, finishtime1, ' +
@@ -156,7 +249,7 @@ begin
 end;
 
 procedure TCompetitionResultsServiceTests.
-  SetStageStatus_RecalculatesGlobalStatusAndResults;
+SetStageStatus_RecalculatesGlobalStatusAndResults;
 var
   Outcome: TParticipantStatusOutcome;
 begin
@@ -164,14 +257,12 @@ begin
     'INSERT INTO main (number, starttime1, finishtime1) VALUES ' +
     '(103, ''10:00:00.000'', ''10:10:00.000'');');
 
-  Outcome := TParticipantStatusService.SetStatus(FContext, FStages,
-    103, 1, psDNS);
+  Outcome := TParticipantStatusService.SetStatus(FContext, FStages, 103, 1, psDNS);
 
   AssertEquals(Ord(psNone), Ord(Outcome.PreviousStatus));
   AssertTrue(Outcome.Changed);
   FQuery.SQL.Text :=
-    'SELECT status, status1, result1, sumresult FROM main ' +
-    'WHERE number = 103;';
+    'SELECT status, status1, result1, sumresult FROM main ' + 'WHERE number = 103;';
   FQuery.Open;
   AssertEquals('1', FQuery.FieldByName('status').AsString);
   AssertEquals('1', FQuery.FieldByName('status1').AsString);
@@ -187,8 +278,7 @@ begin
     'INSERT INTO main (number, starttime1, finishtime1) VALUES ' +
     '(104, ''10:00:00.000'', ''10:10:00.000'');');
 
-  Outcome := TParticipantStatusService.SetStatus(FContext, FStages,
-    104, 1, psDSQ);
+  Outcome := TParticipantStatusService.SetStatus(FContext, FStages, 104, 1, psDSQ);
 
   AssertTrue(Outcome.Changed);
   FQuery.SQL.Text :=
@@ -200,7 +290,7 @@ begin
 end;
 
 procedure TCompetitionResultsServiceTests.
-  ClearStageAndGlobalStatus_RecalculatesResults;
+ClearStageAndGlobalStatus_RecalculatesResults;
 begin
   ExecSql(
     'INSERT INTO main (number, status, status1, result1) VALUES ' +
@@ -210,8 +300,7 @@ begin
     pcscStageAndGlobal);
 
   FQuery.SQL.Text :=
-    'SELECT status, status1, result1, sumresult FROM main ' +
-    'WHERE number = 105;';
+    'SELECT status, status1, result1, sumresult FROM main ' + 'WHERE number = 105;';
   FQuery.Open;
   AssertTrue(FQuery.FieldByName('status').IsNull);
   AssertTrue(FQuery.FieldByName('status1').IsNull);
@@ -220,7 +309,7 @@ begin
 end;
 
 procedure TCompetitionResultsServiceTests.
-  RecalculateAll_ReturnsProcessedAndChangedCounts;
+RecalculateAll_ReturnsProcessedAndChangedCounts;
 var
   Outcome: TStatusRecalculationOutcome;
 begin
@@ -239,7 +328,7 @@ begin
 end;
 
 procedure TCompetitionResultsServiceTests.
-  RecalculateSumResults_LogsDurationOfOneDay;
+RecalculateSumResults_LogsDurationOfOneDay;
 begin
   FStages[2].isActive := True;
   ExecSql(
@@ -268,7 +357,7 @@ begin
 end;
 
 procedure TCompetitionResultsServiceTests.
-  SetStatus_CalculationFailureRollsBackStatus;
+SetStatus_CalculationFailureRollsBackStatus;
 begin
   ExecSql('INSERT INTO main (number) VALUES (108);');
   FStages.Resize(3);
@@ -292,7 +381,7 @@ begin
 end;
 
 procedure TCompetitionResultsServiceTests.
-  StartListQueries_UseOwnedQueryAndReturnOrderedCategories;
+StartListQueries_UseOwnedQueryAndReturnOrderedCategories;
 var
   Categories: TStringList;
 begin
@@ -313,8 +402,8 @@ begin
     AssertEquals('Late', Categories[1]);
     AssertTrue(TCompetitionStartListService.HasFinishes(FContext, 1,
       FStages.Count));
-    AssertFalse(TCompetitionStartListService.HasFinishes(FContext, 2,
-      FStages.Count));
+    AssertFalse(TCompetitionStartListService.HasFinishes(FContext,
+      2, FStages.Count));
     AssertTrue('Read service must preserve UI datasets', FUiQuery.Active);
   finally
     Categories.Free;
@@ -322,15 +411,14 @@ begin
 end;
 
 procedure TCompetitionResultsServiceTests.
-  StartListGeneration_AssignsTimesAndActivatesStageAtomically;
+StartListGeneration_AssignsTimesAndActivatesStageAtomically;
 var
   Categories: TStringList;
   Generation: TStartListGeneration;
 begin
   ExecSql(
     'INSERT INTO main (number, name, category, status) VALUES ' +
-    '(301, ''Zulu'', ''First'', NULL), ' +
-    '(302, ''Alpha'', ''First'', NULL), ' +
+    '(301, ''Zulu'', ''First'', NULL), ' + '(302, ''Alpha'', ''First'', NULL), ' +
     '(303, ''Middle'', ''Second'', NULL);');
   FUiQuery.SQL.Text := 'SELECT number FROM main ORDER BY number;';
   FUiQuery.Open;
@@ -372,7 +460,7 @@ begin
 end;
 
 procedure TCompetitionResultsServiceTests.
-  StageValueCommands_UseOwnedQueryAndRecalculateAtomically;
+StageValueCommands_UseOwnedQueryAndRecalculateAtomically;
 var
   Outcome: TParticipantStageValueOutcome;
 begin

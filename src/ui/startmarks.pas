@@ -19,6 +19,7 @@ type
     ComboBoxJournalFilter: TComboBox;
     DataSourceStartMarks: TDataSource;
     LabelJournalFilter: TLabel;
+    LabelStageScope: TLabel;
     MenuItemCopy: TMenuItem;
     PanelJournalFilter: TPanel;
     PopupMenu1: TPopupMenu;
@@ -30,6 +31,8 @@ type
     procedure FormCreate(Sender: TObject);
     procedure RxDBGridStartMarksDblClick(Sender: TObject);
   private
+    FStageScope: integer;
+    FParticipantNumber: integer;
     procedure ConfigureDiagnosticField;
     function CurrentFilter: TStartMarkJournalFilter;
     procedure DiagnosticFieldGetText(Sender: TField; var AText: string;
@@ -40,10 +43,16 @@ type
   protected
     procedure ShowDiagnostic(const AText: string); virtual;
   public
+    function ConfigureParticipantRecord(const ANumber, AReceivedStage: integer;
+      const AMarkId: int64): boolean;
+    procedure ConfigureScope(const AStageIndex: integer;
+      const AFilter: TStartMarkJournalFilter);
     destructor Destroy; override;
   end;
 
-procedure RunStartMarks;
+procedure RunStartMarks; overload;
+procedure RunStartMarks(const AStageIndex: integer;
+  const AFilter: TStartMarkJournalFilter); overload;
 
 var
   StartMarksForm: TStartMarksForm;
@@ -55,13 +64,20 @@ uses Main, InputDialogs, AppLogger, CompetitionQueryProvider,
 
 procedure RunStartMarks;
 begin
-  with TStartMarksForm.Create(Application) do
-  begin
-    try
-      ShowModal;
-    finally
-      Free;
-    end;
+  RunStartMarks(0, smjfAll);
+end;
+
+procedure RunStartMarks(const AStageIndex: integer;
+  const AFilter: TStartMarkJournalFilter);
+var
+  Journal: TStartMarksForm;
+begin
+  Journal := TStartMarksForm.Create(Application);
+  try
+    Journal.ConfigureScope(AStageIndex, AFilter);
+    Journal.ShowModal;
+  finally
+    Journal.Free;
   end;
 end;
 
@@ -150,19 +166,70 @@ begin
   Result := TStartMarkJournalFilter(ComboBoxJournalFilter.ItemIndex);
 end;
 
+procedure TStartMarksForm.ConfigureScope(const AStageIndex: integer;
+  const AFilter: TStartMarkJournalFilter);
+begin
+  if AStageIndex < 0 then
+    raise EArgumentOutOfRangeException.Create('Invalid stage scope.');
+  if (FStageScope = AStageIndex) and (CurrentFilter = AFilter) then Exit;
+  if ((AStageIndex > 0) or (AFilter in [smjfPendingOrConflict, smjfError])) and
+    (ComboBoxJournalFilter.Items.Count = Ord(smjfPendingOrConflict)) then
+  begin
+    ComboBoxJournalFilter.Items.Add(rsStartMarkJournalFilterPendingOrConflict);
+    ComboBoxJournalFilter.Items.Add(rsStartMarkJournalFilterError);
+  end;
+  FParticipantNumber := 0;
+  FStageScope := AStageIndex;
+  LabelStageScope.Caption := Format(rsSUFormat, [AStageIndex]);
+  LabelStageScope.Visible := AStageIndex > 0;
+  if AStageIndex > 0 then
+    ComboBoxJournalFilter.Items[Ord(smjfCurrentStage)] := LabelStageScope.Caption
+  else
+    ComboBoxJournalFilter.Items[Ord(smjfCurrentStage)] :=
+      rsStartMarkJournalFilterCurrentStage;
+  ComboBoxJournalFilter.ItemIndex := Ord(AFilter);
+  RefreshJournal(False);
+end;
+
+function TStartMarksForm.ConfigureParticipantRecord(
+  const ANumber, AReceivedStage: integer; const AMarkId: int64): boolean;
+begin
+  if (ANumber <= 0) or (AReceivedStage <= 0) or (AMarkId <= 0) then
+    raise EArgumentOutOfRangeException.Create('Invalid participant journal scope');
+  FParticipantNumber := ANumber;
+  FStageScope := AReceivedStage;
+  ComboBoxJournalFilter.ItemIndex := 0;
+  LabelStageScope.Caption := Format(rsSUFormat, [AReceivedStage]) +
+    ' · ' + rsNumber + ': ' + IntToStr(ANumber);
+  LabelStageScope.Visible := True;
+  RefreshJournal(False);
+  Result := StartMarksDataset.Locate('id', AMarkId, []);
+end;
+
 procedure TStartMarksForm.ConfigureJournalDataset;
 var
   ReceivedSince: TDateTime;
-  StageIndex: integer;
+  StageIndex, OrderPos: integer;
+  Sql: string;
 begin
   ReceivedSince := 0;
-  StageIndex := 0;
+  StageIndex := FStageScope;
   if CurrentFilter = smjfLast15Minutes then
-    ReceivedSince := IncMinute(Now, -15)
-  else if CurrentFilter = smjfCurrentStage then
+    ReceivedSince := IncMinute(Now, -15);
+  if (CurrentFilter = smjfCurrentStage) and (StageIndex = 0) then
     StageIndex := MainForm.CurrentStageIndex;
   TDatasetSql.ConfigureStartMarkJournal(StartMarksDataset, CurrentFilter,
     ReceivedSince, StageIndex);
+  if FParticipantNumber > 0 then
+  begin
+    Sql := StartMarksDataset.SQL.Text;
+    OrderPos := Pos(' ORDER BY ', UpperCase(Sql));
+    Insert(' AND participant_number = :CARD_NUMBER', Sql, OrderPos);
+    StartMarksDataset.SQL.Text := Sql;
+    TStartMarkSql.BindJournalParameters(StartMarksDataset, CurrentFilter,
+      ReceivedSince, StageIndex);
+    StartMarksDataset.ParamByName('CARD_NUMBER').AsInteger := FParticipantNumber;
+  end;
 end;
 
 procedure TStartMarksForm.RefreshJournal(const APreserveSelection: boolean);
@@ -186,8 +253,7 @@ begin
   end;
 end;
 
-procedure TStartMarksForm.StartMarkChanged(Sender: TObject;
-  const AMarkId: int64);
+procedure TStartMarksForm.StartMarkChanged(Sender: TObject; const AMarkId: int64);
 begin
   try
     RefreshJournal(True);
@@ -209,8 +275,7 @@ begin
   end;
 end;
 
-procedure TStartMarksForm.FormClose(Sender: TObject;
-  var CloseAction: TCloseAction);
+procedure TStartMarksForm.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   StartMarksDataset.Close;
 end;

@@ -1,0 +1,475 @@
+object ProtocolPrintForm: TProtocolPrintForm
+  Left = 100
+  Height = 720
+  Top = 80
+  Width = 1120
+  Caption = 'Протокол'
+  ClientHeight = 720
+  ClientWidth = 1120
+  Constraints.MinHeight = 480
+  Constraints.MinWidth = 820
+  PopupMode = pmAuto
+  Position = poOwnerFormCenter
+  LCLVersion = '4.8.0.0'
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  object FooterPanel: TPanel
+    Left = 8
+    Height = 28
+    Top = 684
+    Width = 1104
+    Align = alBottom
+    AutoSize = True
+    BorderSpacing.Around = 8
+    BevelOuter = bvNone
+    ClientHeight = 28
+    ClientWidth = 1104
+    TabOrder = 3
+    object StateLabel: TLabel
+      AnchorSideLeft.Control = FooterPanel
+      AnchorSideTop.Control = FooterPanel
+      AnchorSideTop.Side = asrCenter
+      AnchorSideRight.Control = FooterPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 0
+      Height = 18
+      Top = 5
+      Width = 67
+      Caption = 'Состояние'
+      WordWrap = True
+    end
+    object CloseButton: TButton
+      AnchorSideTop.Control = FooterPanel
+      AnchorSideRight.Control = FooterPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 1038
+      Height = 28
+      Top = 0
+      Width = 66
+      Anchors = [akTop, akRight]
+      AutoSize = True
+      Cancel = True
+      Caption = 'Закрыть'
+      ModalResult = 2
+      TabOrder = 1
+      OnClick = CloseClick
+    end
+    object SaveButton: TButton
+      AnchorSideTop.Control = CloseButton
+      AnchorSideRight.Control = CloseButton
+      Left = 912
+      Height = 28
+      Top = 0
+      Width = 118
+      Anchors = [akTop, akRight]
+      AutoSize = True
+      BorderSpacing.Right = 8
+      Caption = 'Сохранить PDF…'
+      TabOrder = 0
+      OnClick = SaveClick
+    end
+  end
+  object ParametersPanel: TPanel
+    Left = 8
+    Height = 628
+    Top = 48
+    Width = 270
+    Align = alLeft
+    BorderSpacing.Around = 8
+    BevelOuter = bvNone
+    ClientHeight = 628
+    ClientWidth = 270
+    TabOrder = 0
+    object TemplatePanel: TPanel
+      AnchorSideLeft.Control = ParametersPanel
+      AnchorSideTop.Control = OrientationCombo
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = ParametersPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 0
+      Height = 0
+      Top = 0
+      Width = 0
+      Anchors = [akTop, akLeft, akRight]
+      AutoSize = True
+      BorderSpacing.Top = 8
+      BevelOuter = bvNone
+      ClientHeight = 0
+      ClientWidth = 0
+      TabOrder = 1
+      object TemplateLabel: TLabel
+        AnchorSideLeft.Control = TemplatePanel
+        AnchorSideTop.Control = TemplatePanel
+        Left = 0
+        Height = 0
+        Top = 0
+        Width = 0
+        Caption = 'Шаблон'
+      end
+      object BrowseTemplateButton: TButton
+        AnchorSideTop.Control = TemplateLabel
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = TemplatePanel
+        AnchorSideRight.Side = asrBottom
+        Left = 0
+        Height = 0
+        Top = 0
+        Width = 0
+        Anchors = [akTop, akRight]
+        AutoSize = True
+        BorderSpacing.Top = 4
+        Caption = 'Выбрать…'
+        TabOrder = 1
+        OnClick = BrowseTemplateClick
+      end
+      object TemplateCombo: TComboBox
+        AnchorSideLeft.Control = TemplatePanel
+        AnchorSideTop.Control = BrowseTemplateButton
+        AnchorSideTop.Side = asrCenter
+        AnchorSideRight.Control = BrowseTemplateButton
+        Left = 0
+        Height = 0
+        Top = 0
+        Width = 0
+        Anchors = [akTop, akLeft, akRight]
+        BorderSpacing.Right = 6
+        ItemHeight = 0
+        Style = csDropDownList
+        TabOrder = 0
+        OnChange = ParametersChange
+      end
+    end
+    object StageLabel: TLabel
+      AnchorSideLeft.Control = ParametersPanel
+      AnchorSideTop.Control = TemplatePanel
+      AnchorSideTop.Side = asrBottom
+      Left = 0
+      Height = 18
+      Top = 0
+      Width = 18
+      BorderSpacing.Top = 8
+      Caption = 'СУ'
+    end
+    object StageCombo: TComboBox
+      AnchorSideLeft.Control = ParametersPanel
+      AnchorSideTop.Control = StageLabel
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = ParametersPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 0
+      Height = 32
+      Top = 22
+      Width = 270
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 4
+      ItemHeight = 25
+      Style = csDropDownList
+      TabOrder = 2
+      OnChange = ParametersChange
+    end
+    object OrientationLabel: TLabel
+      AnchorSideLeft.Control = ParametersPanel
+      AnchorSideTop.Control = ParametersPanel
+      Left = 0
+      Height = 18
+      Top = 62
+      Width = 98
+      Caption = 'Ориентация A4'
+    end
+    object OrientationCombo: TComboBox
+      AnchorSideLeft.Control = ParametersPanel
+      AnchorSideTop.Control = OrientationLabel
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = ParametersPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 0
+      Height = 32
+      Top = 84
+      Width = 270
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 4
+      ItemHeight = 25
+      Style = csDropDownList
+      TabOrder = 0
+      OnChange = ParametersChange
+    end
+    object IncompleteCheck: TCheckBox
+      AnchorSideLeft.Control = ParametersPanel
+      AnchorSideTop.Control = StageCombo
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = ParametersPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 0
+      Height = 22
+      Top = 124
+      Width = 270
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 8
+      Caption = 'Строки без данных'
+      Checked = True
+      State = cbChecked
+      TabOrder = 3
+      OnChange = ParametersChange
+    end
+    object HeadingsCheck: TCheckBox
+      AnchorSideLeft.Control = ParametersPanel
+      AnchorSideTop.Control = IncompleteCheck
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = ParametersPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 0
+      Height = 0
+      Hint = 'Название соревнования и строка с видом протокола и СУ в основном тексте.'
+      Top = 0
+      Width = 0
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 4
+      Caption = 'Заголовки протокола'
+      Checked = True
+      ParentShowHint = False
+      ShowHint = True
+      State = cbChecked
+      TabOrder = 4
+      OnChange = ParametersChange
+    end
+    object HeaderCheck: TCheckBox
+      AnchorSideLeft.Control = ParametersPanel
+      AnchorSideTop.Control = HeadingsCheck
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = ParametersPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 0
+      Height = 0
+      Hint = 'Вид протокола и СУ на каждой странице.'
+      Top = 0
+      Width = 0
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 4
+      Caption = 'Верхний колонтитул'
+      Checked = True
+      ParentShowHint = False
+      ShowHint = True
+      State = cbChecked
+      TabOrder = 5
+      OnChange = ParametersChange
+    end
+    object FooterCheck: TCheckBox
+      AnchorSideLeft.Control = ParametersPanel
+      AnchorSideTop.Control = HeaderCheck
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = ParametersPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 0
+      Height = 22
+      Hint = 'Дата и номер страницы. Подписи берутся из шаблона.'
+      Top = 150
+      Width = 270
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 4
+      Caption = 'Нижний колонтитул'
+      Checked = True
+      ParentShowHint = False
+      ShowHint = True
+      State = cbChecked
+      TabOrder = 6
+      OnChange = ParametersChange
+    end
+    object CategoryLabel: TLabel
+      AnchorSideLeft.Control = ParametersPanel
+      AnchorSideTop.Control = FooterCheck
+      AnchorSideTop.Side = asrBottom
+      Left = 0
+      Height = 18
+      Top = 206
+      Width = 66
+      BorderSpacing.Top = 8
+      Caption = 'Категории'
+    end
+    object SelectionPanel: TPanel
+      AnchorSideLeft.Control = ParametersPanel
+      AnchorSideTop.Control = CategoryLabel
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = ParametersPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 0
+      Height = 28
+      Top = 228
+      Width = 270
+      Anchors = [akTop, akLeft, akRight]
+      AutoSize = True
+      BorderSpacing.Top = 4
+      BevelOuter = bvNone
+      ChildSizing.HorizontalSpacing = 6
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 2
+      ClientHeight = 28
+      ClientWidth = 270
+      TabOrder = 8
+      object AllButton: TButton
+        Left = 0
+        Height = 28
+        Top = 0
+        Width = 92
+        AutoSize = True
+        Caption = 'Выбрать все'
+        TabOrder = 0
+        OnClick = SelectionClick
+      end
+      object ClearButton: TButton
+        Left = 98
+        Height = 28
+        Top = 0
+        Width = 95
+        AutoSize = True
+        Caption = 'Снять выбор'
+        TabOrder = 1
+        OnClick = SelectionClick
+      end
+    end
+    object CategoriesList: TCheckListBox
+      AnchorSideLeft.Control = ParametersPanel
+      AnchorSideTop.Control = SelectionPanel
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = ParametersPanel
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = ParametersPanel
+      AnchorSideBottom.Side = asrBottom
+      Left = 0
+      Height = 368
+      Top = 260
+      Width = 270
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      BorderSpacing.Top = 4
+      ItemHeight = 0
+      TabOrder = 9
+      TopIndex = -1
+      OnClickCheck = ParametersChange
+    end
+  end
+  object NavigationPanel: TPanel
+    Left = 8
+    Height = 32
+    Top = 8
+    Width = 1104
+    Align = alTop
+    AutoSize = True
+    BorderSpacing.Around = 8
+    BevelOuter = bvNone
+    ChildSizing.HorizontalSpacing = 6
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 7
+    ClientHeight = 32
+    ClientWidth = 1104
+    TabOrder = 1
+    object FirstButton: TButton
+      Left = 0
+      Height = 32
+      Top = 0
+      Width = 29
+      AutoSize = True
+      Caption = '|<'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 0
+      OnClick = NavigateClick
+    end
+    object PreviousButton: TButton
+      Left = 35
+      Height = 32
+      Top = 0
+      Width = 21
+      AutoSize = True
+      Caption = '<'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 1
+      OnClick = NavigateClick
+    end
+    object PageSpin: TSpinEdit
+      Left = 62
+      Height = 32
+      Top = 0
+      Width = 50
+      MaxValue = 1
+      MinValue = 1
+      TabOrder = 2
+      Value = 1
+      OnChange = PageChange
+    end
+    object PageCountLabel: TLabel
+      Left = 118
+      Height = 32
+      Top = 0
+      Width = 16
+      Caption = '/ 0'
+      Layout = tlCenter
+    end
+    object NextButton: TButton
+      Left = 140
+      Height = 32
+      Top = 0
+      Width = 21
+      AutoSize = True
+      Caption = '>'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 3
+      OnClick = NavigateClick
+    end
+    object LastButton: TButton
+      Left = 167
+      Height = 32
+      Top = 0
+      Width = 29
+      AutoSize = True
+      Caption = '>|'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 4
+      OnClick = NavigateClick
+    end
+    object ZoomCombo: TComboBox
+      Left = 202
+      Height = 32
+      Top = 0
+      Width = 100
+      ItemHeight = 25
+      Style = csDropDownList
+      TabOrder = 5
+      OnChange = ZoomChange
+    end
+  end
+  object PreviewScroll: TScrollBox
+    Left = 286
+    Height = 628
+    Top = 48
+    Width = 826
+    HorzScrollBar.Page = 10
+    VertScrollBar.Page = 10
+    Align = alClient
+    BorderSpacing.Around = 8
+    ClientHeight = 628
+    ClientWidth = 826
+    TabOrder = 2
+    OnResize = ZoomChange
+    object PageCanvas: TPaintBox
+      Left = 0
+      Height = 10
+      Top = 0
+      Width = 10
+      OnPaint = PaintPage
+    end
+  end
+  object SaveDialog: TSaveDialog
+    DefaultExt = '.pdf'
+    Filter = 'PDF|*.pdf'
+    Options = [ofOverwritePrompt, ofPathMustExist, ofEnableSizing]
+  end
+  object TemplateDialog: TOpenDialog
+    Title = 'Выбрать HTML-шаблон'
+    Filter = 'HTML|*.html;*.htm'
+    Options = [ofFileMustExist, ofEnableSizing]
+    Left = 400
+    Top = 80
+  end
+end

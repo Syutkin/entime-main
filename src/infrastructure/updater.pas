@@ -16,19 +16,19 @@ type
     ucsUpToDate,
     ucsFailed,
     ucsCancelled
-  );
+    );
 
   TUpdateCheckMode = (
     ucmAutomatic,
     ucmManual
-  );
+    );
 
   TUpdateCheckNotification = (
     ucnNone,
     ucnUpdateAvailable,
     ucnUpToDate,
     ucnFailure
-  );
+    );
 
   TUpdateCheckResult = record
     Status: TUpdateCheckStatus;
@@ -39,8 +39,7 @@ type
 
   IUpdateChecker = interface
     ['{B77162FC-E3E9-4719-913D-04C6C17F7BC0}']
-    function CheckForUpdates(
-      const ACurrentVersion: string): TUpdateCheckResult;
+    function CheckForUpdates(const ACurrentVersion: string): TUpdateCheckResult;
     procedure Cancel;
   end;
 
@@ -60,14 +59,12 @@ type
     procedure Initialize(const ATransportFactory: IHttpTransportFactory);
   public
     constructor Create; overload;
-    constructor Create(
-      const ATransportFactory: IHttpTransportFactory); overload;
+    constructor Create(const ATransportFactory: IHttpTransportFactory); overload;
     destructor Destroy; override;
     property URL: string read FUrl write FUrl;
-    function CheckForUpdates(
-      const ACurrentVersion: string): TUpdateCheckResult;
-    function EvaluateReleaseResponse(const ACurrentVersion,
-      AJson: string): TUpdateCheckResult;
+    function CheckForUpdates(const ACurrentVersion: string): TUpdateCheckResult;
+    function EvaluateReleaseResponse(
+      const ACurrentVersion, AJson: string): TUpdateCheckResult;
     procedure Cancel;
   end;
 
@@ -97,23 +94,21 @@ type
     FOnCompleted: TUpdateCheckCompletedEvent;
     FWorker: TUpdateCheckThread;
     procedure WorkerFinished;
-    function Start(const ACurrentVersion: string;
-      AMode: TUpdateCheckMode): boolean;
+    function Start(const ACurrentVersion: string; AMode: TUpdateCheckMode): boolean;
   public
     constructor Create(ACheckerFactory: TUpdateCheckerFactory;
       AOnCompleted: TUpdateCheckCompletedEvent);
     destructor Destroy; override;
-    function StartAutomatic(const ACurrentVersion: string;
-      AEnabled: boolean; AIntervalInDays: integer;
-      ALastCheck, ANow: TDateTime): boolean;
+    function StartAutomatic(const ACurrentVersion: string; AEnabled: boolean;
+      AIntervalInDays: integer; ALastCheck, ANow: TDateTime): boolean;
     function StartManual(const ACurrentVersion: string): boolean;
     procedure Cancel;
     function Busy: boolean;
   end;
 
 function CreateDefaultUpdateChecker: IUpdateChecker;
-function IsAutomaticUpdateCheckDue(AEnabled: boolean;
-  AIntervalInDays: integer; ALastCheck, ANow: TDateTime): boolean;
+function IsAutomaticUpdateCheckDue(AEnabled: boolean; AIntervalInDays: integer;
+  ALastCheck, ANow: TDateTime): boolean;
 function IsNewerVersion(const ACurrentVersion, ALastVersion: string): boolean;
 function UpdateCheckSucceeded(AStatus: TUpdateCheckStatus): boolean;
 function UpdateCheckNotification(AMode: TUpdateCheckMode;
@@ -161,8 +156,7 @@ begin
     // contain only major, minor and patch. Compare the shared first three.
     if parts.Count < 3 then
       Exit;
-    if not TryStrToInt(parts[0], AMajor) or
-      not TryStrToInt(parts[1], AMinor) or
+    if not TryStrToInt(parts[0], AMajor) or not TryStrToInt(parts[1], AMinor) or
       not TryStrToInt(parts[2], APatch) then
       Exit;
     Result := (AMajor >= 0) and (AMinor >= 0) and (APatch >= 0);
@@ -179,8 +173,7 @@ var
 begin
   Result := False;
   AVersion := Trim(ATagName);
-  if (Length(AVersion) > 1) and
-    ((AVersion[1] = 'v') or (AVersion[1] = 'V')) then
+  if (Length(AVersion) > 1) and ((AVersion[1] = 'v') or (AVersion[1] = 'V')) then
     Delete(AVersion, 1, 1);
 
   dotCount := 0;
@@ -195,15 +188,13 @@ begin
     AVersion := '';
 end;
 
-function IsNewerVersion(const ACurrentVersion,
-  ALastVersion: string): boolean;
+function IsNewerVersion(const ACurrentVersion, ALastVersion: string): boolean;
 var
   currentMajor, currentMinor, currentPatch: integer;
   lastMajor, lastMinor, lastPatch: integer;
 begin
   Result := False;
-  if not TryParseVersion(ACurrentVersion, currentMajor, currentMinor,
-    currentPatch) or
+  if not TryParseVersion(ACurrentVersion, currentMajor, currentMinor, currentPatch) or
     not TryParseVersion(ALastVersion, lastMajor, lastMinor, lastPatch) then
     Exit;
 
@@ -214,11 +205,10 @@ begin
   Result := lastPatch > currentPatch;
 end;
 
-function IsAutomaticUpdateCheckDue(AEnabled: boolean;
-  AIntervalInDays: integer; ALastCheck, ANow: TDateTime): boolean;
+function IsAutomaticUpdateCheckDue(AEnabled: boolean; AIntervalInDays: integer;
+  ALastCheck, ANow: TDateTime): boolean;
 begin
-  Result := AEnabled and
-    ((AIntervalInDays < 0) or
+  Result := AEnabled and ((AIntervalInDays < 0) or
     (IncDay(ALastCheck, AIntervalInDays) < ANow));
 end;
 
@@ -255,8 +245,8 @@ end;
 
 { TUpdater }
 
-function TUpdater.EvaluateReleaseResponse(const ACurrentVersion,
-  AJson: string): TUpdateCheckResult;
+function TUpdater.EvaluateReleaseResponse(
+  const ACurrentVersion, AJson: string): TUpdateCheckResult;
 var
   JsonData, tagData, urlData: TJSONData;
   lastVersion, releaseUrl: string;
@@ -312,15 +302,13 @@ begin
   Initialize(TFpHttpTransportFactory.Create);
 end;
 
-constructor TUpdater.Create(
-  const ATransportFactory: IHttpTransportFactory);
+constructor TUpdater.Create(const ATransportFactory: IHttpTransportFactory);
 begin
   inherited Create;
   Initialize(ATransportFactory);
 end;
 
-procedure TUpdater.Initialize(
-  const ATransportFactory: IHttpTransportFactory);
+procedure TUpdater.Initialize(const ATransportFactory: IHttpTransportFactory);
 begin
   if not Assigned(ATransportFactory) then
     raise EArgumentNilException.Create('ATransportFactory');
@@ -338,8 +326,7 @@ begin
   inherited Destroy;
 end;
 
-function TUpdater.CheckForUpdates(
-  const ACurrentVersion: string): TUpdateCheckResult;
+function TUpdater.CheckForUpdates(const ACurrentVersion: string): TUpdateCheckResult;
 var
   ErrorMessage, Json: string;
   AlreadyActive: boolean;
@@ -352,8 +339,8 @@ var
 begin
   Fields := nil;
   Json := '';
-  Request := BuildHttpGetRequest(URL, Fields,
-    UPDATE_HTTP_TIMEOUT_MS, UPDATE_HTTP_TIMEOUT_MS);
+  Request := BuildHttpGetRequest(URL, Fields, UPDATE_HTTP_TIMEOUT_MS,
+    UPDATE_HTTP_TIMEOUT_MS);
 
   RegisteredTransport := False;
   Transport := nil;
@@ -483,8 +470,7 @@ end;
 
 { TUpdateCheckController }
 
-constructor TUpdateCheckController.Create(
-  ACheckerFactory: TUpdateCheckerFactory;
+constructor TUpdateCheckController.Create(ACheckerFactory: TUpdateCheckerFactory;
   AOnCompleted: TUpdateCheckCompletedEvent);
 begin
   inherited Create;
@@ -512,8 +498,7 @@ begin
     Exit;
 
   FMode := AMode;
-  FWorker := TUpdateCheckThread.Create(
-    checker, ACurrentVersion, @WorkerFinished);
+  FWorker := TUpdateCheckThread.Create(checker, ACurrentVersion, @WorkerFinished);
   try
     FWorker.Start;
     Result := True;
@@ -523,18 +508,15 @@ begin
   end;
 end;
 
-function TUpdateCheckController.StartAutomatic(
-  const ACurrentVersion: string; AEnabled: boolean;
-  AIntervalInDays: integer; ALastCheck, ANow: TDateTime): boolean;
+function TUpdateCheckController.StartAutomatic(const ACurrentVersion: string;
+  AEnabled: boolean; AIntervalInDays: integer; ALastCheck, ANow: TDateTime): boolean;
 begin
-  if not IsAutomaticUpdateCheckDue(
-    AEnabled, AIntervalInDays, ALastCheck, ANow) then
+  if not IsAutomaticUpdateCheckDue(AEnabled, AIntervalInDays, ALastCheck, ANow) then
     Exit(False);
   Result := Start(ACurrentVersion, ucmAutomatic);
 end;
 
-function TUpdateCheckController.StartManual(
-  const ACurrentVersion: string): boolean;
+function TUpdateCheckController.StartManual(const ACurrentVersion: string): boolean;
 begin
   Result := Start(ACurrentVersion, ucmManual);
 end;

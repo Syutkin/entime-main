@@ -71,7 +71,7 @@ const
     'diffleader',
     'place',
     'status'
-  );
+    );
   STAGE_COLUMN_TYPES: array[0..7] of string = (
     'VARCHAR',
     'INTEGER',
@@ -81,7 +81,7 @@ const
     'VARCHAR',
     'INTEGER',
     'VARCHAR'
-  );
+    );
   START_MARK_REQUIRED_COLUMNS: array[0..13] of string = (
     'id',
     'stage_index',
@@ -97,7 +97,7 @@ const
     'status',
     'applied_at',
     'diagnostic'
-  );
+    );
   START_MARK_STATUS_INDEX = 'idx_start_marks_status_received_at';
   START_MARK_STAGE_INDEX = 'idx_start_marks_stage_event_time';
   FINISH_MARK_REQUIRED_COLUMNS: array[0..10] of string = (
@@ -112,7 +112,7 @@ const
     'status',
     'applied_at',
     'diagnostic'
-  );
+    );
   FINISH_MARK_STATUS_INDEX = 'idx_finish_marks_status_received_at';
   FINISH_MARK_STAGE_INDEX = 'idx_finish_marks_stage_event_time';
 
@@ -158,8 +158,7 @@ begin
     current := current + ch;
     if ch = '''' then
     begin
-      if inString and (i < Length(SqlText)) and
-        (SqlText[i + 1] = '''') then
+      if inString and (i < Length(SqlText)) and (SqlText[i + 1] = '''') then
       begin
         Inc(i);
         current := current + SqlText[i];
@@ -189,15 +188,14 @@ begin
   Result := '';
   for I := 1 to StageCount do
   begin
-    Result := Result +
-      ' "starttime' + IntToStr(I) + '" VARCHAR,' + LineEnding +
-      ' "correction' + IntToStr(I) + '" INTEGER,' + LineEnding +
-      ' "finishtime' + IntToStr(I) + '" VARCHAR,' + LineEnding +
-      ' "penalty' + IntToStr(I) + '" VARCHAR,' + LineEnding +
-      ' "result' + IntToStr(I) + '" VARCHAR,' + LineEnding +
+    Result := Result + ' "starttime' + IntToStr(I) + '" VARCHAR,' +
+      LineEnding + ' "correction' + IntToStr(I) + '" INTEGER,' +
+      LineEnding + ' "finishtime' + IntToStr(I) + '" VARCHAR,' +
+      LineEnding + ' "penalty' + IntToStr(I) + '" VARCHAR,' +
+      LineEnding + ' "result' + IntToStr(I) + '" VARCHAR,' + LineEnding +
       ' "diffleader' + IntToStr(I) + '" VARCHAR,' + LineEnding +
-      ' "place' + IntToStr(I) + '" INTEGER,' + LineEnding +
-      ' "status' + IntToStr(I) + '" VARCHAR,' + LineEnding;
+      ' "place' + IntToStr(I) + '" INTEGER,' + LineEnding + ' "status' +
+      IntToStr(I) + '" VARCHAR,' + LineEnding;
   end;
 end;
 
@@ -222,8 +220,7 @@ var
 begin
   statements := GetSchemaStatements;
   needle := 'CREATE TABLE "' + UpperCase(TableName) + '"';
-  needleIfNotExists := 'CREATE TABLE IF NOT EXISTS "' +
-    UpperCase(TableName) + '"';
+  needleIfNotExists := 'CREATE TABLE IF NOT EXISTS "' + UpperCase(TableName) + '"';
   for i := 0 to statements.Count - 1 do
   begin
     statement := statements[i];
@@ -233,8 +230,7 @@ begin
       Exit(statement);
   end;
   raise Exception.CreateFmt(
-    'CREATE TABLE statement for table "%s" not found in schema file.',
-    [TableName]);
+    'CREATE TABLE statement for table "%s" not found in schema file.', [TableName]);
 end;
 
 function FindCreateIndexStatement(const IndexName: string): string;
@@ -255,8 +251,7 @@ begin
       Exit(Statement);
   end;
   raise Exception.CreateFmt(
-    'CREATE INDEX statement for index "%s" not found in schema file.',
-    [IndexName]);
+    'CREATE INDEX statement for index "%s" not found in schema file.', [IndexName]);
 end;
 
 function CreateTableStatementFromSchema(const TableName: string): string;
@@ -272,15 +267,13 @@ var
   Suffix: string;
 begin
   StageIndex := 0;
-  for PrefixIndex := Low(STAGE_COLUMN_PREFIXES) to
-    High(STAGE_COLUMN_PREFIXES) do
+  for PrefixIndex := Low(STAGE_COLUMN_PREFIXES) to High(STAGE_COLUMN_PREFIXES) do
   begin
     Prefix := STAGE_COLUMN_PREFIXES[PrefixIndex];
     if Copy(ColumnName, 1, Length(Prefix)) <> Prefix then
       Continue;
     Suffix := Copy(ColumnName, Length(Prefix) + 1, MaxInt);
-    if (Suffix <> '') and TryStrToInt(Suffix, StageIndex) and
-      (StageIndex > 0) then
+    if (Suffix <> '') and TryStrToInt(Suffix, StageIndex) and (StageIndex > 0) then
       Exit(True);
   end;
   StageIndex := 0;
@@ -296,8 +289,7 @@ begin
   if Q.Transaction = nil then
     raise EDatabaseError.Create('Schema query transaction must be assigned.');
   if not Q.Transaction.Active then
-    raise EDatabaseError.Create(
-      'Schema changes require an active unit of work.');
+    raise EDatabaseError.Create('Schema changes require an active unit of work.');
 end;
 
 function MainColumnExists(Q: TSQLQuery; const ColumnName: string): boolean;
@@ -315,8 +307,7 @@ begin
   end;
 end;
 
-function SqliteObjectExists(Q: TSQLQuery; const AType,
-  AName: string): boolean;
+function SqliteObjectExists(Q: TSQLQuery; const AType, AName: string): boolean;
 begin
   Q.Close;
   Q.SQL.Text :=
@@ -332,8 +323,8 @@ begin
   end;
 end;
 
-function TableColumnExists(Q: TSQLQuery; const ATableName,
-  AColumnName: string): boolean;
+function TableColumnExists(Q: TSQLQuery;
+  const ATableName, AColumnName: string): boolean;
 begin
   Q.Close;
   Q.SQL.Text :=
@@ -405,8 +396,8 @@ begin
     for StageIndex := 1 to MaxStageIndex do
     begin
       PresentColumnCount := 0;
-      for ColumnIndex := Low(STAGE_COLUMN_PREFIXES) to
-        High(STAGE_COLUMN_PREFIXES) do
+      for ColumnIndex := Low(STAGE_COLUMN_PREFIXES)
+        to High(STAGE_COLUMN_PREFIXES) do
       begin
         ExpectedColumnName := STAGE_COLUMN_PREFIXES[ColumnIndex] +
           IntToStr(StageIndex);
@@ -416,8 +407,7 @@ begin
 
       if PresentColumnCount = 0 then
         raise ECompetitionSchemaError.CreateFmt(
-          'Stage %d is missing before stage %d.',
-          [StageIndex, MaxStageIndex]);
+          'Stage %d is missing before stage %d.', [StageIndex, MaxStageIndex]);
       if PresentColumnCount <> Length(STAGE_COLUMN_PREFIXES) then
         raise ECompetitionSchemaError.CreateFmt(
           'Stage %d has %d of %d required columns.',
@@ -438,10 +428,8 @@ begin
   ValueText := Trim(TConfigSql.GetString(Q, 'stagecount', ''));
   if ValueText = '' then
     Exit(0);
-  if (not TryStrToInt(ValueText, Result)) or
-    (not IsValidStageCount(Result)) then
-    raise ECompetitionSchemaError.CreateFmt(
-      rsStageCountRangeError,
+  if (not TryStrToInt(ValueText, Result)) or (not IsValidStageCount(Result)) then
+    raise ECompetitionSchemaError.CreateFmt(rsStageCountRangeError,
       [ValueText, MIN_STAGE_COUNT, MAX_SUPPORTED_STAGE_COUNT]);
 end;
 
@@ -459,22 +447,20 @@ begin
       'Invalid schema version "%s".', [ValueText]);
 end;
 
-class procedure TSchemaSql.AddStageColumns(Q: TSQLQuery;
-  const StageIndex: integer);
+class procedure TSchemaSql.AddStageColumns(Q: TSQLQuery; const StageIndex: integer);
 var
   PrefixIndex: integer;
   ColumnName: string;
 begin
   RequireSupportedStageIndex(StageIndex);
   RequireActiveSchemaTransaction(Q);
-  for PrefixIndex := Low(STAGE_COLUMN_PREFIXES) to
-    High(STAGE_COLUMN_PREFIXES) do
+  for PrefixIndex := Low(STAGE_COLUMN_PREFIXES) to High(STAGE_COLUMN_PREFIXES) do
   begin
     ColumnName := STAGE_COLUMN_PREFIXES[PrefixIndex] + IntToStr(StageIndex);
     if MainColumnExists(Q, ColumnName) then
       Continue;
-    Q.SQL.Text := 'ALTER TABLE "main" ADD COLUMN ' +
-      SqlIdentifier(ColumnName) + ' ' + STAGE_COLUMN_TYPES[PrefixIndex] + ';';
+    Q.SQL.Text := 'ALTER TABLE "main" ADD COLUMN ' + SqlIdentifier(ColumnName) +
+      ' ' + STAGE_COLUMN_TYPES[PrefixIndex] + ';';
     Q.ExecSQL;
     Q.Close;
   end;
@@ -522,8 +508,7 @@ begin
   for ColumnName in START_MARK_REQUIRED_COLUMNS do
     if not TableColumnExists(Q, 'start_marks', ColumnName) then
       raise ECompetitionSchemaError.CreateFmt(
-        'Table "start_marks" is missing required column "%s".',
-        [ColumnName]);
+        'Table "start_marks" is missing required column "%s".', [ColumnName]);
 
   Q.SQL.Text := CreateStartMarksStatusReceivedAtIndex;
   Q.ExecSQL;
@@ -562,8 +547,7 @@ begin
   for ColumnName in FINISH_MARK_REQUIRED_COLUMNS do
     if not TableColumnExists(Q, 'finish_marks', ColumnName) then
       raise ECompetitionSchemaError.CreateFmt(
-        'Table "finish_marks" is missing required column "%s".',
-        [ColumnName]);
+        'Table "finish_marks" is missing required column "%s".', [ColumnName]);
 
   Q.SQL.Text := CreateFinishMarksStatusReceivedAtIndex;
   Q.ExecSQL;
@@ -573,8 +557,7 @@ begin
   Q.Close;
 end;
 
-class function TSchemaSql.CreateTableMain(
-  const StageCount: integer): string;
+class function TSchemaSql.CreateTableMain(const StageCount: integer): string;
 var
   templateSql: string;
 begin

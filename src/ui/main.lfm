@@ -14,6 +14,7 @@ object MainForm: TMainForm
   LCLVersion = '4.8.0.0'
   WindowState = wsMaximized
   OnClose = FormClose
+  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   object DebugSplitter: TSplitter
@@ -212,16 +213,17 @@ object MainForm: TMainForm
         OnClick = TimingInputDeviceLabelClick
       end
     end
-    object TimingInputStatusText: TStaticText
+    object TimingInputStatusText: TLabel
       Left = 170
       Height = 34
       Top = 0
       Width = 210
       Align = alLeft
+      AutoSize = False
+      Layout = tlCenter
       ParentFont = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 1
     end
     object ComboBoxLog: TComboBox
       Left = 380
@@ -247,7 +249,7 @@ object MainForm: TMainForm
       BorderSpacing.Around = 6
       Caption = '00:00:00'
       ParentFont = False
-      TabOrder = 3
+      TabOrder = 1
     end
   end
   object MainPanel: TPanel
@@ -813,6 +815,7 @@ object MainForm: TMainForm
       ParentFont = False
       TabIndex = 0
       TabOrder = 1
+      OnChange = PageControl1Change
       object TabSheet1: TTabSheet
         Caption = 'Стартовый'
         ClientHeight = 522
@@ -1192,323 +1195,453 @@ object MainForm: TMainForm
         ClientWidth = 482
         ParentFont = False
         OnShow = TabSheet2Show
-        object GroupBox1: TGroupBox
-          AnchorSideLeft.Control = TabSheet2
-          AnchorSideTop.Control = TabSheet2
+        object StatisticsPageControl: TPageControl
           Left = 0
-          Height = 329
+          Height = 522
           Top = 0
-          Width = 172
-          AutoSize = True
-          Caption = 'Количество участников'
-          ClientHeight = 300
-          ClientWidth = 168
-          Constraints.MaxHeight = 329
-          Constraints.MinHeight = 329
-          Constraints.MinWidth = 167
-          ParentFont = False
+          Width = 482
+          ActivePage = StatisticsOverviewSheet
+          Align = alClient
+          TabIndex = 0
           TabOrder = 0
-          object StatRxDBGrid1: TRxDBGrid
-            Left = 0
-            Height = 300
-            Top = 0
-            Width = 168
-            ColumnDefValues.BlobText = '(данные)'
-            TitleButtons = False
-            AutoSort = False
-            Columns = <            
-              item
-                Title.Alignment = taCenter
-                Title.Orientation = toHorizontal
-                Title.Caption = 'Категория'
-                Width = 113
-                FieldName = 'category'
-                EditButtons = <>
-                Filter.DropDownRows = 0
-                Filter.EmptyValue = '(Пусто)'
-                Filter.NotEmptyValue = '(Не пусто)'
-                Filter.AllValue = '(Все значения)'
-                Filter.EmptyFont.Style = [fsItalic]
-                Filter.ItemIndex = -1
-                Footers = <                
+          OnChange = StatisticsPageControlChange
+          object StatisticsOverviewSheet: TTabSheet
+            Caption = 'Обзор'
+            ClientHeight = 487
+            ClientWidth = 476
+            object GroupBox1: TGroupBox
+              AnchorSideLeft.Control = StatisticsOverviewSheet
+              AnchorSideTop.Control = StatisticsOverviewSheet
+              Left = 0
+              Height = 329
+              Top = 0
+              Width = 172
+              AutoSize = True
+              Caption = 'Количество участников'
+              ClientHeight = 300
+              ClientWidth = 168
+              Constraints.MaxHeight = 329
+              Constraints.MinHeight = 329
+              Constraints.MinWidth = 167
+              ParentFont = False
+              TabOrder = 0
+              object StatRxDBGrid1: TRxDBGrid
+                Left = 0
+                Height = 300
+                Top = 0
+                Width = 168
+                ColumnDefValues.BlobText = '(данные)'
+                TitleButtons = False
+                AutoSort = False
+                Columns = <                
                   item
+                    Title.Alignment = taCenter
+                    Title.Orientation = toHorizontal
+                    Title.Caption = 'Категория'
+                    Width = 113
                     FieldName = 'category'
-                    Value = 'Итого:'
-                    ValueType = fvtStaticText
-                  end>
-              end            
-              item
-                Alignment = taCenter
-                Title.Alignment = taCenter
-                Title.Orientation = toHorizontal
-                Title.Caption = 'Кол-во'
-                Width = 49
-                FieldName = 'catcount'
-                EditButtons = <>
-                Filter.DropDownRows = 0
-                Filter.EmptyValue = '(Пусто)'
-                Filter.NotEmptyValue = '(Не пусто)'
-                Filter.AllValue = '(Все значения)'
-                Filter.EmptyFont.Style = [fsItalic]
-                Filter.ItemIndex = -1
-                Footers = <                
+                    EditButtons = <>
+                    Filter.DropDownRows = 0
+                    Filter.EmptyValue = '(Пусто)'
+                    Filter.NotEmptyValue = '(Не пусто)'
+                    Filter.AllValue = '(Все значения)'
+                    Filter.EmptyFont.Style = [fsItalic]
+                    Filter.ItemIndex = -1
+                    Footers = <                    
+                      item
+                        FieldName = 'category'
+                        Value = 'Итого:'
+                        ValueType = fvtStaticText
+                      end>
+                  end                
                   item
                     Alignment = taCenter
+                    Title.Alignment = taCenter
+                    Title.Orientation = toHorizontal
+                    Title.Caption = 'Кол-во'
+                    Width = 49
                     FieldName = 'catcount'
-                    ValueType = fvtSum
+                    EditButtons = <>
+                    Filter.DropDownRows = 0
+                    Filter.EmptyValue = '(Пусто)'
+                    Filter.NotEmptyValue = '(Не пусто)'
+                    Filter.AllValue = '(Все значения)'
+                    Filter.EmptyFont.Style = [fsItalic]
+                    Filter.ItemIndex = -1
+                    Footers = <                    
+                      item
+                        Alignment = taCenter
+                        FieldName = 'catcount'
+                        ValueType = fvtSum
+                      end>
                   end>
-              end>
-            KeyStrokes = <            
-              item
-                Command = rxgcShowFindDlg
-                ShortCut = 16454
-                Enabled = True
-              end            
-              item
-                Command = rxgcShowColumnsDlg
-                ShortCut = 16471
-                Enabled = True
-              end            
-              item
-                Command = rxgcShowFilterDlg
-                ShortCut = 16468
-                Enabled = True
-              end            
-              item
-                Command = rxgcShowSortDlg
-                ShortCut = 16467
-                Enabled = True
-              end            
-              item
-                Command = rxgcShowQuickFilter
-                ShortCut = 16465
-                Enabled = True
-              end            
-              item
-                Command = rxgcHideQuickFilter
-                ShortCut = 16456
-                Enabled = True
-              end            
-              item
-                Command = rxgcSelectAll
-                ShortCut = 16449
-                Enabled = True
-              end            
-              item
-                Command = rxgcDeSelectAll
-                ShortCut = 16429
-                Enabled = True
-              end            
-              item
-                Command = rxgcInvertSelection
-                ShortCut = 16426
-                Enabled = True
-              end            
-              item
-                Command = rxgcOptimizeColumnsWidth
-                ShortCut = 16427
-                Enabled = True
-              end            
-              item
-                Command = rxgcCopyCellValue
-                ShortCut = 16451
-                Enabled = True
-              end>
-            FooterOptions.Active = True
-            FooterOptions.RowCount = 1
-            FooterOptions.DrawFullLine = False
-            SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
-            SearchOptions.FromStart = False
-            OptionsRx = [rdgAllowColumnsForm, rdgFooterRows]
-            FooterRowCount = 1
-            Align = alClient
-            AutoEdit = False
-            BorderStyle = bsNone
-            Color = clWindow
-            DrawFullLine = False
-            SelectedColor = clHighlight
-            DataSource = StatDataSource1
-            FixedCols = 0
-            Options = [dgTitles, dgColumnResize, dgRowLines, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
-            ParentFont = False
-            Scrollbars = ssNone
-            TabOrder = 0
+                KeyStrokes = <                
+                  item
+                    Command = rxgcShowFindDlg
+                    ShortCut = 16454
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcShowColumnsDlg
+                    ShortCut = 16471
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcShowFilterDlg
+                    ShortCut = 16468
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcShowSortDlg
+                    ShortCut = 16467
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcShowQuickFilter
+                    ShortCut = 16465
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcHideQuickFilter
+                    ShortCut = 16456
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcSelectAll
+                    ShortCut = 16449
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcDeSelectAll
+                    ShortCut = 16429
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcInvertSelection
+                    ShortCut = 16426
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcOptimizeColumnsWidth
+                    ShortCut = 16427
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcCopyCellValue
+                    ShortCut = 16451
+                    Enabled = True
+                  end>
+                FooterOptions.Active = True
+                FooterOptions.RowCount = 1
+                FooterOptions.DrawFullLine = False
+                SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+                SearchOptions.FromStart = False
+                OptionsRx = [rdgAllowColumnsForm, rdgFooterRows]
+                FooterRowCount = 1
+                Align = alClient
+                AutoEdit = False
+                BorderStyle = bsNone
+                Color = clWindow
+                DrawFullLine = False
+                SelectedColor = clHighlight
+                DataSource = StatDataSource1
+                FixedCols = 0
+                Options = [dgTitles, dgColumnResize, dgRowLines, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
+                ParentFont = False
+                Scrollbars = ssNone
+                TabOrder = 0
+              end
+            end
+            object GroupBox2: TGroupBox
+              AnchorSideLeft.Control = GroupBox1
+              AnchorSideLeft.Side = asrBottom
+              AnchorSideTop.Control = StatisticsOverviewSheet
+              Left = 177
+              Height = 329
+              Top = 0
+              Width = 349
+              AutoSize = True
+              BorderSpacing.Left = 5
+              Caption = 'Сейчас на трассе'
+              ClientHeight = 300
+              ClientWidth = 345
+              Constraints.MaxHeight = 329
+              Constraints.MinHeight = 329
+              Constraints.MinWidth = 349
+              ParentFont = False
+              TabOrder = 1
+              object StatRxDBGrid2: TRxDBGrid
+                Left = 0
+                Height = 300
+                Top = 0
+                Width = 345
+                ColumnDefValues.BlobText = '(данные)'
+                TitleButtons = False
+                AutoSort = False
+                Columns = <                
+                  item
+                    Alignment = taCenter
+                    Title.Alignment = taCenter
+                    Title.Orientation = toHorizontal
+                    Title.Caption = 'Номер'
+                    Width = 45
+                    FieldName = 'number'
+                    EditButtons = <>
+                    Filter.DropDownRows = 0
+                    Filter.EmptyValue = '(Пусто)'
+                    Filter.NotEmptyValue = '(Не пусто)'
+                    Filter.AllValue = '(Все значения)'
+                    Filter.EmptyFont.Style = [fsItalic]
+                    Filter.ItemIndex = -1
+                    Footers = <                    
+                      item
+                        FieldName = 'category'
+                        Value = 'Итого:'
+                        ValueType = fvtStaticText
+                      end>
+                  end                
+                  item
+                    Title.Alignment = taCenter
+                    Title.Orientation = toHorizontal
+                    Title.Caption = 'Имя'
+                    Width = 151
+                    FieldName = 'name'
+                    EditButtons = <>
+                    Filter.DropDownRows = 0
+                    Filter.EmptyValue = '(Пусто)'
+                    Filter.NotEmptyValue = '(Не пусто)'
+                    Filter.AllValue = '(Все значения)'
+                    Filter.EmptyFont.Style = [fsItalic]
+                    Filter.ItemIndex = -1
+                    Footers = <                    
+                      item
+                        Alignment = taCenter
+                        FieldName = 'catcount'
+                        ValueType = fvtSum
+                      end>
+                  end                
+                  item
+                    Alignment = taCenter
+                    Title.Alignment = taCenter
+                    Title.Orientation = toHorizontal
+                    Title.Caption = 'Старт'
+                    Width = 75
+                    FieldName = 'starttime'
+                    EditButtons = <>
+                    Filter.DropDownRows = 0
+                    Filter.EmptyValue = '(Пусто)'
+                    Filter.NotEmptyValue = '(Не пусто)'
+                    Filter.AllValue = '(Все значения)'
+                    Filter.EmptyFont.Style = [fsItalic]
+                    Filter.ItemIndex = -1
+                    Footers = <>
+                  end                
+                  item
+                    Alignment = taCenter
+                    Title.Alignment = taCenter
+                    Title.Orientation = toHorizontal
+                    Title.Caption = 'Время'
+                    Width = 75
+                    FieldName = 'timeontrack'
+                    EditButtons = <>
+                    Filter.DropDownRows = 0
+                    Filter.EmptyValue = '(Пусто)'
+                    Filter.NotEmptyValue = '(Не пусто)'
+                    Filter.AllValue = '(Все значения)'
+                    Filter.EmptyFont.Style = [fsItalic]
+                    Filter.ItemIndex = -1
+                    Footers = <>
+                  end>
+                KeyStrokes = <                
+                  item
+                    Command = rxgcShowFindDlg
+                    ShortCut = 16454
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcShowColumnsDlg
+                    ShortCut = 16471
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcShowFilterDlg
+                    ShortCut = 16468
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcShowSortDlg
+                    ShortCut = 16467
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcShowQuickFilter
+                    ShortCut = 16465
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcHideQuickFilter
+                    ShortCut = 16456
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcSelectAll
+                    ShortCut = 16449
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcDeSelectAll
+                    ShortCut = 16429
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcInvertSelection
+                    ShortCut = 16426
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcOptimizeColumnsWidth
+                    ShortCut = 16427
+                    Enabled = True
+                  end                
+                  item
+                    Command = rxgcCopyCellValue
+                    ShortCut = 16451
+                    Enabled = True
+                  end>
+                FooterOptions.Active = True
+                FooterOptions.DrawFullLine = False
+                SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+                SearchOptions.FromStart = False
+                OptionsRx = [rdgAllowColumnsForm, rdgFooterRows]
+                Align = alClient
+                AutoEdit = False
+                BorderStyle = bsNone
+                Color = clWindow
+                DrawFullLine = False
+                SelectedColor = clHighlight
+                DataSource = StatDataSource2
+                FixedCols = 0
+                Options = [dgTitles, dgColumnResize, dgRowLines, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
+                ParentFont = False
+                PopupMenu = OnTracePopupMenu
+                Scrollbars = ssAutoHorizontal
+                TabOrder = 0
+              end
+            end
           end
-        end
-        object GroupBox2: TGroupBox
-          AnchorSideLeft.Control = GroupBox1
-          AnchorSideLeft.Side = asrBottom
-          AnchorSideTop.Control = TabSheet2
-          Left = 177
-          Height = 329
-          Top = 0
-          Width = 349
-          AutoSize = True
-          BorderSpacing.Left = 5
-          Caption = 'Сейчас на трассе'
-          ClientHeight = 300
-          ClientWidth = 345
-          Constraints.MaxHeight = 329
-          Constraints.MinHeight = 329
-          Constraints.MinWidth = 349
-          ParentFont = False
-          TabOrder = 1
-          object StatRxDBGrid2: TRxDBGrid
-            Left = 0
-            Height = 300
-            Top = 0
-            Width = 345
-            ColumnDefValues.BlobText = '(данные)'
-            TitleButtons = False
-            AutoSort = False
-            Columns = <            
-              item
-                Alignment = taCenter
-                Title.Alignment = taCenter
-                Title.Orientation = toHorizontal
-                Title.Caption = 'Номер'
-                Width = 45
-                FieldName = 'number'
-                EditButtons = <>
-                Filter.DropDownRows = 0
-                Filter.EmptyValue = '(Пусто)'
-                Filter.NotEmptyValue = '(Не пусто)'
-                Filter.AllValue = '(Все значения)'
-                Filter.EmptyFont.Style = [fsItalic]
-                Filter.ItemIndex = -1
-                Footers = <                
-                  item
-                    FieldName = 'category'
-                    Value = 'Итого:'
-                    ValueType = fvtStaticText
-                  end>
-              end            
-              item
-                Title.Alignment = taCenter
-                Title.Orientation = toHorizontal
-                Title.Caption = 'Имя'
-                Width = 151
-                FieldName = 'name'
-                EditButtons = <>
-                Filter.DropDownRows = 0
-                Filter.EmptyValue = '(Пусто)'
-                Filter.NotEmptyValue = '(Не пусто)'
-                Filter.AllValue = '(Все значения)'
-                Filter.EmptyFont.Style = [fsItalic]
-                Filter.ItemIndex = -1
-                Footers = <                
-                  item
-                    Alignment = taCenter
-                    FieldName = 'catcount'
-                    ValueType = fvtSum
-                  end>
-              end            
-              item
-                Alignment = taCenter
-                Title.Alignment = taCenter
-                Title.Orientation = toHorizontal
-                Title.Caption = 'Старт'
-                Width = 75
-                FieldName = 'starttime'
-                EditButtons = <>
-                Filter.DropDownRows = 0
-                Filter.EmptyValue = '(Пусто)'
-                Filter.NotEmptyValue = '(Не пусто)'
-                Filter.AllValue = '(Все значения)'
-                Filter.EmptyFont.Style = [fsItalic]
-                Filter.ItemIndex = -1
-                Footers = <>
-              end            
-              item
-                Alignment = taCenter
-                Title.Alignment = taCenter
-                Title.Orientation = toHorizontal
-                Title.Caption = 'Время'
-                Width = 75
-                FieldName = 'timeontrack'
-                EditButtons = <>
-                Filter.DropDownRows = 0
-                Filter.EmptyValue = '(Пусто)'
-                Filter.NotEmptyValue = '(Не пусто)'
-                Filter.AllValue = '(Все значения)'
-                Filter.EmptyFont.Style = [fsItalic]
-                Filter.ItemIndex = -1
-                Footers = <>
-              end>
-            KeyStrokes = <            
-              item
-                Command = rxgcShowFindDlg
-                ShortCut = 16454
-                Enabled = True
-              end            
-              item
-                Command = rxgcShowColumnsDlg
-                ShortCut = 16471
-                Enabled = True
-              end            
-              item
-                Command = rxgcShowFilterDlg
-                ShortCut = 16468
-                Enabled = True
-              end            
-              item
-                Command = rxgcShowSortDlg
-                ShortCut = 16467
-                Enabled = True
-              end            
-              item
-                Command = rxgcShowQuickFilter
-                ShortCut = 16465
-                Enabled = True
-              end            
-              item
-                Command = rxgcHideQuickFilter
-                ShortCut = 16456
-                Enabled = True
-              end            
-              item
-                Command = rxgcSelectAll
-                ShortCut = 16449
-                Enabled = True
-              end            
-              item
-                Command = rxgcDeSelectAll
-                ShortCut = 16429
-                Enabled = True
-              end            
-              item
-                Command = rxgcInvertSelection
-                ShortCut = 16426
-                Enabled = True
-              end            
-              item
-                Command = rxgcOptimizeColumnsWidth
-                ShortCut = 16427
-                Enabled = True
-              end            
-              item
-                Command = rxgcCopyCellValue
-                ShortCut = 16451
-                Enabled = True
-              end>
-            FooterOptions.Active = True
-            FooterOptions.DrawFullLine = False
-            SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
-            SearchOptions.FromStart = False
-            OptionsRx = [rdgAllowColumnsForm, rdgFooterRows]
-            Align = alClient
-            AutoEdit = False
-            BorderStyle = bsNone
-            Color = clWindow
-            DrawFullLine = False
-            SelectedColor = clHighlight
-            DataSource = StatDataSource2
-            FixedCols = 0
-            Options = [dgTitles, dgColumnResize, dgRowLines, dgConfirmDelete, dgCancelOnExit, dgDblClickAutoSize]
-            ParentFont = False
-            PopupMenu = OnTracePopupMenu
-            Scrollbars = ssAutoHorizontal
-            TabOrder = 0
+          object ProtocolBalanceSheet: TTabSheet
+            Caption = 'Баланс протокола'
+            ClientHeight = 487
+            ClientWidth = 476
+            inline ProtocolBalanceView: TProtocolBalanceFrame
+              Height = 487
+              Width = 476
+              Align = alClient
+              ClientHeight = 487
+              ClientWidth = 476
+              inherited HeaderPanel: TPanel
+                Width = 476
+                ClientWidth = 476
+                inherited TitleLabel: TLabel
+                  Height = 18
+                  Width = 122
+                end
+                inherited RefreshButton: TButton
+                  Left = 392
+                  Height = 28
+                  Width = 76
+                end
+                inherited StateLabel: TLabel
+                  Height = 18
+                  Top = 38
+                  Width = 460
+                end
+              end
+              inherited ActionsPanel: TPanel
+                Height = 107
+                Top = 380
+                Width = 476
+                ClientHeight = 107
+                ClientWidth = 476
+                inherited IncomingGroup: TGroupBox
+                  Height = 103
+                  Width = 460
+                  ClientHeight = 74
+                  ClientWidth = 456
+                  inherited PendingStartsButton: TButton
+                    Height = 28
+                    Width = 214
+                  end
+                  inherited PendingFinishesButton: TButton
+                    Left = 226
+                    Height = 28
+                    Width = 224
+                  end
+                  inherited StartErrorsButton: TButton
+                    Height = 28
+                    Top = 40
+                    Width = 214
+                  end
+                  inherited FinishErrorsButton: TButton
+                    Left = 226
+                    Height = 28
+                    Top = 40
+                    Width = 224
+                  end
+                end
+              end
+              inherited ContentPanel: TPanel
+                Height = 316
+                Width = 476
+                ClientHeight = 316
+                ClientWidth = 476
+                inherited SummaryPanel: TPanel
+                  Width = 476
+                  ClientWidth = 476
+                  inherited SummaryGrid: TRxDBGrid
+                    Width = 460
+                  end
+                end
+                inherited SummarySplitter: TSplitter
+                  Width = 476
+                end
+                inherited DetailsPanel: TPanel
+                  Height = 180
+                  Width = 476
+                  ClientHeight = 180
+                  ClientWidth = 476
+                  inherited FilterPanel: TPanel
+                    Width = 476
+                    ClientWidth = 476
+                    inherited StageLabel: TLabel
+                      Height = 18
+                      Width = 460
+                    end
+                    inherited FilterLabel: TLabel
+                      Height = 18
+                      Top = 35
+                      Width = 61
+                    end
+                    inherited FilterComboBox: TComboBox
+                      Left = 77
+                      Height = 32
+                      Width = 311
+                      ItemHeight = 25
+                    end
+                    inherited RecordCountLabel: TLabel
+                      Left = 396
+                      Height = 18
+                      Top = 35
+                      Width = 72
+                    end
+                  end
+                  inherited DetailsGrid: TRxDBGrid
+                    Height = 108
+                    Width = 460
+                  end
+                end
+              end
+            end
           end
         end
       end
@@ -1921,17 +2054,6 @@ object MainForm: TMainForm
     Parity = pNone
     FlowControl = fcNone
     StopBits = sbOne
-    SynSer.Tag = 0
-    SynSer.Handle = -1
-    SynSer.RaiseExcept = False
-    SynSer.TestDSR = False
-    SynSer.TestCTS = False
-    SynSer.MaxLineLength = 0
-    SynSer.DeadlockTimeout = 30000
-    SynSer.LinuxLock = False
-    SynSer.ConvertLineEnd = False
-    SynSer.AtTimeout = 1000
-    SynSer.InterPacketTimeout = True
     Device = 'COM1'
     RcvLineCRLF = False
     OnStatus = SerialStatus
@@ -1991,6 +2113,19 @@ object MainForm: TMainForm
       end
       object N12: TMenuItem
         Caption = '-'
+      end
+      object ExportProtocolsMenuItem: TMenuItem
+        Caption = 'Экспорт'
+        object PrintStartMenuItem: TMenuItem
+          Caption = 'Стартовый протокол…'
+          OnClick = PrintProtocolExecute
+        end
+        object PrintFinishMenuItem: TMenuItem
+          Action = AcPrintFinish
+        end
+        object PrintLabelsMenuItem: TMenuItem
+          Action = AcPrintStartLabels
+        end
       end
       object MenuItemExport: TMenuItem
         Action = FileExportFull
@@ -2119,6 +2254,23 @@ object MainForm: TMainForm
     Images = ImageList1
     Left = 229
     Top = 112
+    object AcPrintStartLabels: TAction
+      Category = 'File'
+      Caption = 'Стартовые наклейки…'
+      OnExecute = PrintStartLabelsExecute
+      OnUpdate = CheckDBOpen
+    end
+    object AcPrintFinish: TAction
+      Category = 'File'
+      Caption = 'Финишный протокол…'
+      OnExecute = PrintProtocolExecute
+      OnUpdate = CheckDBOpen
+    end
+    object AcParticipantCard: TAction
+      Caption = 'Карточка участника'
+      OnExecute = ParticipantCardExecute
+      OnUpdate = ParticipantCardUpdate
+    end
     object AcCOMSetup: TAction
       Category = 'COM'
       Caption = 'Настройка'
@@ -2673,6 +2825,9 @@ object MainForm: TMainForm
     end
     object N1: TMenuItem
       Caption = '-'
+    end
+    object CardMenuItem: TMenuItem
+      Action = AcParticipantCard
     end
     object pmSetStartTime: TMenuItem
       Action = AcSetStarttime
@@ -3349,11 +3504,6 @@ object MainForm: TMainForm
       ADE9BF809E6005010A123294508D3D9D50208304854BF0E7C1DF0B7EEE670DF8
       FF0188AEA594E3E6BD670000000049454E44AE426082
     }
-    AdditionalInfo.Strings = (
-      'Icon set:'
-      'Fugue Icons'
-      'https://p.yusukekamiyamane.com/'
-    )
     Left = 1296
     Top = 704
   end
@@ -3832,6 +3982,7 @@ object MainForm: TMainForm
     LazBle = LazBleComponent1
     AutoReconnect = True
     OnConfigureClient = LazBleLclClient1ConfigureClient
+    OnUnconfigureClient = LazBleLclClient1UnconfigureClient
     OnDeviceChanged = LazBleLclClient1DeviceChanged
     OnStateChanged = LazBleLclClient1StateChanged
     OnError = LazBleLclClient1Error

@@ -50,7 +50,19 @@ type
     property ActiveStagesCount: integer read GetActiveStagesCount;
   end;
 
+function StageConfigurationSignature(const Stages: TStages): string;
+
 implementation
+
+function StageConfigurationSignature(const Stages: TStages): string;
+var
+  I: integer;
+begin
+  Result := IntToStr(Stages.Count);
+  for I := 1 to Stages.Count do Result :=
+      Result + '|' + IntToStr(Ord(Stages[I].isActive)) + ':' + IntToStr(Length(Stages[I].Name)) +
+      ':' + Stages[I].Name;
+end;
 
 { TStageModel }
 
@@ -85,8 +97,8 @@ procedure TStages.ValidateCount(const NewCount: integer);
 begin
   if not IsValidStageCount(NewCount) then
     raise EArgumentOutOfRangeException.CreateFmt(
-      rsStageCountRangeError,
-      [IntToStr(NewCount), MIN_STAGE_COUNT, MAX_SUPPORTED_STAGE_COUNT]);
+      rsStageCountRangeError, [IntToStr(NewCount), MIN_STAGE_COUNT,
+      MAX_SUPPORTED_STAGE_COUNT]);
 end;
 
 function TStages.GetElem(const Index: integer): TStageModel;

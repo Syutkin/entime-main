@@ -28,8 +28,8 @@ type
     StageNames: TCompetitionStringArray;
     StageActive: TCompetitionBooleanArray;
     StageConfigured: TCompetitionBooleanArray;
-    class function Create(const AStageCount,
-      ACategoryCount: integer): TCompetitionConfiguration; static;
+    class function Create(const AStageCount, ACategoryCount: integer):
+      TCompetitionConfiguration; static;
     function StageCount: integer;
     function CategoryCount: integer;
   end;
@@ -39,16 +39,16 @@ type
     class function OpenCompetition(const AContext: TCompetitionDbContext;
       const AExistingFile: boolean; const ADefaultStageCount: integer;
       const ADefaultCategories: array of string; const ARaceName: string;
-      const ACreateBackup: TCompetitionBackupAction):
-      TCompetitionPreparation; static;
+      const ACreateBackup: TCompetitionBackupAction): TCompetitionPreparation;
+      static;
     class function LoadConfiguration(const AContext: TCompetitionDbContext;
-      const AStageCount, ACategoryCount: integer):
-      TCompetitionConfiguration; static;
+      const AStageCount, ACategoryCount: integer): TCompetitionConfiguration;
+      static;
     class function SaveConfiguration(const AContext: TCompetitionDbContext;
       const AConfiguration: TCompetitionConfiguration;
       const APhysicalStageCapacity: integer): integer; static;
-    class function PhysicalStageCapacity(
-      const AContext: TCompetitionDbContext): integer; static;
+    class function PhysicalStageCapacity(const AContext: TCompetitionDbContext):
+      integer; static;
     class procedure Close(const AContext: TCompetitionDbContext); static;
   end;
 
@@ -57,8 +57,8 @@ implementation
 uses
   Classes, Math, SQLDB, StageConfig, i18n;
 
-class function TCompetitionConfiguration.Create(const AStageCount,
-  ACategoryCount: integer): TCompetitionConfiguration;
+class function TCompetitionConfiguration.Create(
+  const AStageCount, ACategoryCount: integer): TCompetitionConfiguration;
 begin
   if not IsValidStageCount(AStageCount) then
     raise EArgumentOutOfRangeException.CreateFmt(
@@ -86,10 +86,9 @@ end;
 
 class function TCompetitionLifecycleService.OpenCompetition(
   const AContext: TCompetitionDbContext; const AExistingFile: boolean;
-  const ADefaultStageCount: integer;
-  const ADefaultCategories: array of string; const ARaceName: string;
-  const ACreateBackup: TCompetitionBackupAction):
-  TCompetitionPreparation;
+  const ADefaultStageCount: integer; const ADefaultCategories: array of string;
+  const ARaceName: string; const ACreateBackup: TCompetitionBackupAction):
+TCompetitionPreparation;
 var
   ConfiguredStageCount, TargetStageCapacity: integer;
   FinishMarksSchemaReady, MigrationRequired, StartMarksSchemaReady: boolean;
@@ -135,15 +134,13 @@ begin
       Result.RequiredStageCount := Result.PhysicalStageCount
     else
       Result.RequiredStageCount := ConfiguredStageCount;
-    TargetStageCapacity := Max(ADefaultStageCount,
-      Result.RequiredStageCount);
+    TargetStageCapacity := Max(ADefaultStageCount, Result.RequiredStageCount);
     StartMarksSchemaReady := TSchemaSql.StartMarksSchemaReady(Query);
     FinishMarksSchemaReady := TSchemaSql.FinishMarksSchemaReady(Query);
     MigrationRequired := (ConfiguredStageCount = 0) or
       (Result.SchemaVersion < CURRENT_COMPETITION_SCHEMA_VERSION) or
       (Result.PhysicalStageCount < TargetStageCapacity) or
-      (not StartMarksSchemaReady) or
-      (not FinishMarksSchemaReady);
+      (not StartMarksSchemaReady) or (not FinishMarksSchemaReady);
     Result.Migrated := MigrationRequired;
     if MigrationRequired then
     begin
@@ -173,8 +170,8 @@ begin
 end;
 
 class function TCompetitionLifecycleService.LoadConfiguration(
-  const AContext: TCompetitionDbContext; const AStageCount,
-  ACategoryCount: integer): TCompetitionConfiguration;
+  const AContext: TCompetitionDbContext;
+  const AStageCount, ACategoryCount: integer): TCompetitionConfiguration;
 var
   ConfigValues: TStringList;
   Index: integer;
@@ -188,19 +185,18 @@ begin
   try
     TConfigSql.LoadAll(Query, ConfigValues);
     Result.RaceName := TConfigSql.StringValue(ConfigValues, 'racename', '');
-    Result.ActiveStageIndex := TConfigSql.GetInteger(Query,
-      'activestage', 1);
+    Result.ActiveStageIndex := TConfigSql.GetInteger(Query, 'activestage', 1);
     for Index := 0 to Result.CategoryCount - 1 do
-      Result.Categories[Index] := TConfigSql.StringValue(ConfigValues,
-        'catname' + IntToStr(Index + 1), '');
+      Result.Categories[Index] :=
+        TConfigSql.StringValue(ConfigValues, 'catname' + IntToStr(Index + 1), '');
     for Index := 0 to Result.StageCount - 1 do
     begin
-      Result.StageNames[Index] := TConfigSql.StringValue(ConfigValues,
-        'stagename' + IntToStr(Index + 1), '');
-      Result.StageConfigured[Index] := ConfigValues.IndexOfName(
-        'stage' + IntToStr(Index + 1)) >= 0;
-      Result.StageActive[Index] := TConfigSql.BoolValue(ConfigValues,
-        'stage' + IntToStr(Index + 1), False);
+      Result.StageNames[Index] :=
+        TConfigSql.StringValue(ConfigValues, 'stagename' + IntToStr(Index + 1), '');
+      Result.StageConfigured[Index] :=
+        ConfigValues.IndexOfName('stage' + IntToStr(Index + 1)) >= 0;
+      Result.StageActive[Index] :=
+        TConfigSql.BoolValue(ConfigValues, 'stage' + IntToStr(Index + 1), False);
     end;
   finally
     ConfigValues.Free;
@@ -226,30 +222,34 @@ begin
   if (AConfiguration.ActiveStageIndex < 1) or
     (AConfiguration.ActiveStageIndex > AConfiguration.StageCount) then
     raise EArgumentOutOfRangeException.CreateFmt(
-      'Invalid active stage index: %d.',
-      [AConfiguration.ActiveStageIndex]);
+      'Invalid active stage index: %d.', [AConfiguration.ActiveStageIndex]);
 
   Query := AContext.CreateQuery(nil);
   UnitOfWork := AContext.BeginUnitOfWork;
   try
     if AConfiguration.StageCount > APhysicalStageCapacity then
       TSchemaSql.EnsureStageCapacity(Query, AConfiguration.StageCount);
-    TConfigSql.ExecUpsertByKey(Query, 'stagecount',
-      IntToStr(AConfiguration.StageCount));
-    TConfigSql.ExecUpsertByKey(Query, 'racename',
-      AConfiguration.RaceName);
-    for Index := 0 to AConfiguration.CategoryCount - 1 do
-      TConfigSql.ExecUpsertByKey(Query, 'catname' + IntToStr(Index + 1),
-        AConfiguration.Categories[Index]);
-    for Index := 0 to AConfiguration.StageCount - 1 do
-    begin
-      TConfigSql.ExecUpsertByKey(Query, 'stage' + IntToStr(Index + 1),
-        BoolToStr(AConfiguration.StageActive[Index], True));
-      TConfigSql.ExecUpsertByKey(Query, 'stagename' + IntToStr(Index + 1),
-        AConfiguration.StageNames[Index]);
+    TConfigSql.PrepareUpsert(Query);
+    try
+      TConfigSql.ExecPreparedUpsert(Query, 'stagecount',
+        IntToStr(AConfiguration.StageCount));
+      TConfigSql.ExecPreparedUpsert(Query, 'racename',
+        AConfiguration.RaceName);
+      for Index := 0 to AConfiguration.CategoryCount - 1 do
+        TConfigSql.ExecPreparedUpsert(Query, 'catname' + IntToStr(Index + 1),
+          AConfiguration.Categories[Index]);
+      for Index := 0 to AConfiguration.StageCount - 1 do
+      begin
+        TConfigSql.ExecPreparedUpsert(Query, 'stage' + IntToStr(Index + 1),
+          BoolToStr(AConfiguration.StageActive[Index], True));
+        TConfigSql.ExecPreparedUpsert(Query, 'stagename' + IntToStr(Index + 1),
+          AConfiguration.StageNames[Index]);
+      end;
+      TConfigSql.ExecPreparedUpsert(Query, 'activestage',
+        IntToStr(AConfiguration.ActiveStageIndex));
+    finally
+      TConfigSql.FinishPreparedUpsert(Query);
     end;
-    TConfigSql.ExecUpsertByKey(Query, 'activestage',
-      IntToStr(AConfiguration.ActiveStageIndex));
     UnitOfWork.Commit;
     Result := Max(APhysicalStageCapacity, AConfiguration.StageCount);
   finally

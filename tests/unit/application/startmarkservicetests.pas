@@ -21,8 +21,7 @@ type
     FUpdateCount: integer;
   public
     function Insert(const AMark: TStartMark): TStartMark;
-    function TryLoadById(const AMarkId: int64;
-      out AMark: TStartMark): boolean;
+    function TryLoadById(const AMarkId: int64; out AMark: TStartMark): boolean;
     function HideWorkQueue: integer;
     procedure Update(const AMark: TStartMark);
     property InsertCount: integer read FInsertCount;
@@ -44,8 +43,7 @@ type
   public
     procedure LoadCandidates(const AStageIndex: integer;
       out ACandidates: TStartMarkCandidateArray);
-    property Candidates: TStartMarkCandidateArray read FCandidates
-      write FCandidates;
+    property Candidates: TStartMarkCandidateArray read FCandidates write FCandidates;
     property CallCount: integer read FCallCount;
     property LastStageIndex: integer read FLastStageIndex;
   end;
@@ -60,13 +58,11 @@ type
     FNextFailure: TStartMarkApplyFailure;
   public
     function TryApply(const ARequest: TStartMarkApplyRequest;
-      out AFailure: TStartMarkApplyFailure;
-      out ADiagnostic: string): boolean;
+      out AFailure: TStartMarkApplyFailure; out ADiagnostic: string): boolean;
     property CallCount: integer read FCallCount;
     property LastRequest: TStartMarkApplyRequest read FLastRequest;
     property NextDiagnostic: string read FNextDiagnostic write FNextDiagnostic;
-    property NextFailure: TStartMarkApplyFailure read FNextFailure
-      write FNextFailure;
+    property NextFailure: TStartMarkApplyFailure read FNextFailure write FNextFailure;
   end;
 
   { TStartMarkServiceTests }
@@ -112,8 +108,7 @@ type
 
 implementation
 
-function TFakeStartMarkPersistence.Insert(
-  const AMark: TStartMark): TStartMark;
+function TFakeStartMarkPersistence.Insert(const AMark: TStartMark): TStartMark;
 begin
   Inc(FInsertCount);
   Result := AMark;
@@ -140,8 +135,8 @@ begin
   FLastUpdated := AMark;
 end;
 
-procedure TFakeStartMarkCandidateProvider.LoadCandidates(
-  const AStageIndex: integer; out ACandidates: TStartMarkCandidateArray);
+procedure TFakeStartMarkCandidateProvider.LoadCandidates(const AStageIndex: integer;
+  out ACandidates: TStartMarkCandidateArray);
 var
   Index: integer;
 begin
@@ -152,10 +147,8 @@ begin
     ACandidates[Index] := FCandidates[Index];
 end;
 
-function TFakeStartMarkApplyPort.TryApply(
-  const ARequest: TStartMarkApplyRequest;
-  out AFailure: TStartMarkApplyFailure;
-  out ADiagnostic: string): boolean;
+function TFakeStartMarkApplyPort.TryApply(const ARequest: TStartMarkApplyRequest;
+  out AFailure: TStartMarkApplyFailure; out ADiagnostic: string): boolean;
 begin
   Inc(FCallCount);
   FLastRequest := ARequest;
@@ -173,8 +166,8 @@ begin
   FApplyPortInterface := FApplyPort;
   FPersistence := TFakeStartMarkPersistence.Create;
   FPersistenceInterface := FPersistence;
-  FService := TStartMarkService.Create(FProviderInterface,
-    FApplyPortInterface, FPersistenceInterface);
+  FService := TStartMarkService.Create(FProviderInterface, FApplyPortInterface,
+    FPersistenceInterface);
 end;
 
 procedure TStartMarkServiceTests.TearDown;
@@ -197,11 +190,9 @@ var
 begin
   Mark := MarkAt(EncodeTime(10, 0, 0, 0));
   Mark.Id := 0;
-  SetCandidates([TStartMarkCandidate.Create(17, 2,
-    EncodeTime(10, 0, 1, 0))]);
+  SetCandidates([TStartMarkCandidate.Create(17, 2, EncodeTime(10, 0, 1, 0))]);
 
-  Result := FService.Receive(Mark, 3, True,
-    EncodeDateTime(2026, 8, 13, 10, 0, 3, 0));
+  Result := FService.Receive(Mark, 3, True, EncodeDateTime(2026, 8, 13, 10, 0, 3, 0));
 
   AssertEquals(1, FPersistence.InsertCount);
   AssertEquals(73, FApplyPort.LastRequest.MarkId);
@@ -228,8 +219,7 @@ begin
     FProvider.FCandidates[Index] := AValues[Index];
 end;
 
-procedure TStartMarkServiceTests.MarkChanged(Sender: TObject;
-  const AMarkId: int64);
+procedure TStartMarkServiceTests.MarkChanged(Sender: TObject; const AMarkId: int64);
 begin
   Inc(FChangedCount);
   FChangedMarkId := AMarkId;
@@ -272,7 +262,7 @@ begin
 end;
 
 procedure TStartMarkServiceTests.
-  HideWorkQueue_DelegatesToPersistence;
+HideWorkQueue_DelegatesToPersistence;
 begin
   FPersistence.HideWorkQueueResult := 3;
 
@@ -283,12 +273,11 @@ begin
 end;
 
 procedure TStartMarkServiceTests.
-  Receive_ManualModeStoresNearestProposalWithoutApplying;
+Receive_ManualModeStoresNearestProposalWithoutApplying;
 var
   Result: TStartMarkReceiveResult;
 begin
-  SetCandidates([TStartMarkCandidate.Create(17, 2,
-    EncodeTime(10, 0, 2, 0))]);
+  SetCandidates([TStartMarkCandidate.Create(17, 2, EncodeTime(10, 0, 2, 0))]);
 
   Result := FService.Receive(MarkAt(EncodeTime(10, 0, 0, 0)), 3,
     False, EncodeDateTime(2026, 8, 13, 10, 0, 3, 0));
@@ -310,8 +299,7 @@ procedure TStartMarkServiceTests.Receive_NoMatchLeavesMarkPending;
 var
   Result: TStartMarkReceiveResult;
 begin
-  SetCandidates([TStartMarkCandidate.Create(17, 2,
-    EncodeTime(10, 0, 10, 0))]);
+  SetCandidates([TStartMarkCandidate.Create(17, 2, EncodeTime(10, 0, 10, 0))]);
 
   Result := FService.Receive(MarkAt(EncodeTime(10, 0, 0, 0)), 3,
     True, EncodeDateTime(2026, 8, 13, 10, 0, 3, 0));
@@ -328,8 +316,7 @@ procedure TStartMarkServiceTests.Receive_AmbiguousMatchCreatesConflict;
 var
   Result: TStartMarkReceiveResult;
 begin
-  SetCandidates([
-    TStartMarkCandidate.Create(17, 2, EncodeTime(9, 59, 59, 0)),
+  SetCandidates([TStartMarkCandidate.Create(17, 2, EncodeTime(9, 59, 59, 0)),
     TStartMarkCandidate.Create(18, 2, EncodeTime(10, 0, 1, 0))]);
 
   Result := FService.Receive(MarkAt(EncodeTime(10, 0, 0, 0)), 3,
@@ -344,17 +331,15 @@ begin
 end;
 
 procedure TStartMarkServiceTests.
-  Receive_AutomaticModeAppliesUniqueCorrectedMark;
+Receive_AutomaticModeAppliesUniqueCorrectedMark;
 var
   AppliedAt: TDateTime;
   Result: TStartMarkReceiveResult;
 begin
   AppliedAt := EncodeDateTime(2026, 8, 13, 10, 0, 3, 0);
-  SetCandidates([TStartMarkCandidate.Create(17, 2,
-    EncodeTime(10, 0, 2, 0))]);
+  SetCandidates([TStartMarkCandidate.Create(17, 2, EncodeTime(10, 0, 2, 0))]);
 
-  Result := FService.Receive(MarkAt(EncodeTime(10, 0, 0, 0)), 3,
-    True, AppliedAt);
+  Result := FService.Receive(MarkAt(EncodeTime(10, 0, 0, 0)), 3, True, AppliedAt);
 
   AssertEquals(Ord(smsApplied), Ord(Result.Mark.Status));
   AssertEquals(Ord(smamAutomatic), Ord(Result.Mark.AssignmentMode));
@@ -373,12 +358,11 @@ begin
 end;
 
 procedure TStartMarkServiceTests.
-  Receive_AutomaticModeWithoutCorrectionCreatesConflict;
+Receive_AutomaticModeWithoutCorrectionCreatesConflict;
 var
   Result: TStartMarkReceiveResult;
 begin
-  SetCandidates([TStartMarkCandidate.Create(17, 2,
-    EncodeTime(10, 0, 1, 0))]);
+  SetCandidates([TStartMarkCandidate.Create(17, 2, EncodeTime(10, 0, 1, 0))]);
 
   Result := FService.Receive(MarkAt(EncodeTime(10, 0, 0, 0), False),
     3, True, EncodeDateTime(2026, 8, 13, 10, 0, 3, 0));
@@ -390,13 +374,12 @@ begin
 end;
 
 procedure TStartMarkServiceTests.
-  Receive_AutomaticModeDoesNotOverwriteExistingCorrection;
+Receive_AutomaticModeDoesNotOverwriteExistingCorrection;
 var
   Result: TStartMarkReceiveResult;
 begin
   FApplyPort.NextFailure := smafExistingCorrection;
-  SetCandidates([TStartMarkCandidate.Create(17, 2,
-    EncodeTime(10, 0, 1, 0))]);
+  SetCandidates([TStartMarkCandidate.Create(17, 2, EncodeTime(10, 0, 1, 0))]);
 
   Result := FService.Receive(MarkAt(EncodeTime(10, 0, 0, 0)), 3,
     True, EncodeDateTime(2026, 8, 13, 10, 0, 3, 0));
@@ -408,13 +391,12 @@ begin
 end;
 
 procedure TStartMarkServiceTests.
-  Receive_AutomaticModeMissingParticipantCreatesConflict;
+Receive_AutomaticModeMissingParticipantCreatesConflict;
 var
   Result: TStartMarkReceiveResult;
 begin
   FApplyPort.NextFailure := smafParticipantNotFound;
-  SetCandidates([TStartMarkCandidate.Create(17, 2,
-    EncodeTime(10, 0, 1, 0))]);
+  SetCandidates([TStartMarkCandidate.Create(17, 2, EncodeTime(10, 0, 1, 0))]);
 
   Result := FService.Receive(MarkAt(EncodeTime(10, 0, 0, 0)), 3,
     True, EncodeDateTime(2026, 8, 13, 10, 0, 3, 0));
@@ -433,8 +415,7 @@ begin
   AssertTrue(Mark.TryApply(17, 2, smamAutomatic,
     EncodeDateTime(2026, 8, 13, 10, 0, 3, 0)));
 
-  Result := FService.Receive(Mark, 3, True,
-    EncodeDateTime(2026, 8, 13, 10, 0, 4, 0));
+  Result := FService.Receive(Mark, 3, True, EncodeDateTime(2026, 8, 13, 10, 0, 4, 0));
 
   AssertFalse(Result.HasMatch);
   AssertEquals(Ord(smsApplied), Ord(Result.Mark.Status));
@@ -444,7 +425,7 @@ begin
 end;
 
 procedure TStartMarkServiceTests.
-  SetParticipantNumber_LoadsAndPersistsDraftWithoutApplying;
+SetParticipantNumber_LoadsAndPersistsDraftWithoutApplying;
 var
   Mark: TStartMark;
 begin
@@ -463,7 +444,7 @@ begin
 end;
 
 procedure TStartMarkServiceTests.
-  ApplyManualById_LoadsCurrentMarkBeforeApplying;
+ApplyManualById_LoadsCurrentMarkBeforeApplying;
 var
   AppliedAt: TDateTime;
   Mark: TStartMark;
@@ -485,7 +466,7 @@ begin
 end;
 
 procedure TStartMarkServiceTests.
-  ApplyManual_ReplacesProposalAndCanUseDifferentStage;
+ApplyManual_ReplacesProposalAndCanUseDifferentStage;
 var
   AppliedAt: TDateTime;
   Mark: TStartMark;
@@ -541,8 +522,7 @@ begin
   Mark := MarkAt(EncodeTime(10, 0, 0, 0));
   AssertTrue(Mark.TryApply(17, 2, smamManual, AppliedAt));
 
-  Result := FService.ApplyManual(Mark, 23, 4, True,
-    AppliedAt + OneSecond);
+  Result := FService.ApplyManual(Mark, 23, 4, True, AppliedAt + OneSecond);
 
   AssertTrue(Result.Applied);
   AssertEquals(17, Result.Mark.ParticipantNumber);

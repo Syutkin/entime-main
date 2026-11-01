@@ -17,7 +17,7 @@ type
 implementation
 
 procedure TCompetitionExportServiceTests.
-  BuildStartListFieldSpecs_UsesOnlyActiveStagesInIndexOrder;
+BuildStartListFieldSpecs_UsesOnlyActiveStagesInIndexOrder;
 var
   CompetitionStages: TStages;
   FieldSpecs: TExportFieldSpecs;
@@ -42,7 +42,7 @@ begin
 end;
 
 procedure TCompetitionExportServiceTests.
-  BuildResultsFieldSpecs_AddsStageAndSummaryFields;
+BuildResultsFieldSpecs_AddsStageAndSummaryFields;
 var
   CompetitionStages: TStages;
   FieldSpecs: TExportFieldSpecs;

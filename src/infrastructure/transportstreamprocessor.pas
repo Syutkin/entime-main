@@ -21,8 +21,7 @@ type
   end;
 
   TTransportTimingPacketEvent = procedure(Sender: TObject;
-    const APacket: TTimingPacket;
-    const ASource: TTimingMarkSource) of object;
+    const APacket: TTimingPacket; const ASource: TTimingMarkSource) of object;
   TTransportFirmwareResponseEvent = procedure(Sender: TObject;
     const AResponse: TFirmwareResponse) of object;
   TTransportStreamRejectedEvent = procedure(Sender: TObject;
@@ -48,15 +47,15 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    procedure Feed(const AChunk: RawByteString;
-      const ASource: TTimingMarkSource; const AReceivedAt: TDateTime);
+    procedure Feed(const AChunk: rawbytestring; const ASource: TTimingMarkSource;
+      const AReceivedAt: TDateTime);
     procedure Reset;
     property OnFirmwareResponse: TTransportFirmwareResponseEvent
       read FOnFirmwareResponse write FOnFirmwareResponse;
-    property OnRejected: TTransportStreamRejectedEvent read FOnRejected
-      write FOnRejected;
-    property OnTimingPacket: TTransportTimingPacketEvent read FOnTimingPacket
-      write FOnTimingPacket;
+    property OnRejected: TTransportStreamRejectedEvent
+      read FOnRejected write FOnRejected;
+    property OnTimingPacket: TTransportTimingPacketEvent
+      read FOnTimingPacket write FOnTimingPacket;
   end;
 
 function TransportStreamRejectedCode(
@@ -71,8 +70,8 @@ begin
     tsrkTimingPacket:
       Result := 'timing_' + TimingPacketParseErrorCode(ARejected.TimingError);
     tsrkFirmwareResponse:
-      Result := 'firmware_' +
-        FirmwareResponseParseErrorCode(ARejected.FirmwareError);
+      Result := 'firmware_' + FirmwareResponseParseErrorCode(
+        ARejected.FirmwareError);
     tsrkDiagnostic: Result := 'diagnostic';
   end;
 end;
@@ -94,7 +93,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TTransportStreamProcessor.Feed(const AChunk: RawByteString;
+procedure TTransportStreamProcessor.Feed(const AChunk: rawbytestring;
   const ASource: TTimingMarkSource; const AReceivedAt: TDateTime);
 var
   Frames: TTransportFrameArray;
@@ -115,16 +114,14 @@ begin
     end;
 end;
 
-procedure TTransportStreamProcessor.ProcessFirmwareResponse(
-  const ARawJson: string; const ASource: TTimingMarkSource;
-  const AReceivedAt: TDateTime);
+procedure TTransportStreamProcessor.ProcessFirmwareResponse(const ARawJson: string;
+  const ASource: TTimingMarkSource; const AReceivedAt: TDateTime);
 var
   Error: TFirmwareResponseParseError;
   Handler: TTransportFirmwareResponseEvent;
   Response: TFirmwareResponse;
 begin
-  if FFirmwareParser.TryParse(ARawJson, ASource, AReceivedAt,
-    Response, Error) then
+  if FFirmwareParser.TryParse(ARawJson, ASource, AReceivedAt, Response, Error) then
   begin
     Handler := FOnFirmwareResponse;
     if Assigned(Handler) then
@@ -134,8 +131,8 @@ begin
     Reject(tsrkFirmwareResponse, ARawJson, ASource, tppeNone, Error);
 end;
 
-procedure TTransportStreamProcessor.ProcessTimingPacket(
-  const ARawPacket: string; const ASource: TTimingMarkSource);
+procedure TTransportStreamProcessor.ProcessTimingPacket(const ARawPacket: string;
+  const ASource: TTimingMarkSource);
 var
   Error: TTimingPacketParseError;
   Handler: TTransportTimingPacketEvent;
@@ -151,9 +148,8 @@ begin
     Reject(tsrkTimingPacket, ARawPacket, ASource, Error);
 end;
 
-procedure TTransportStreamProcessor.Reject(
-  const AKind: TTransportStreamRejectedKind; const ARawText: string;
-  const ASource: TTimingMarkSource;
+procedure TTransportStreamProcessor.Reject(const AKind: TTransportStreamRejectedKind;
+  const ARawText: string; const ASource: TTimingMarkSource;
   const ATimingError: TTimingPacketParseError;
   const AFirmwareError: TFirmwareResponseParseError);
 var

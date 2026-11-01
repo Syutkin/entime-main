@@ -1,0 +1,260 @@
+object ResultsImportPreviewForm: TResultsImportPreviewForm
+  Left = 200
+  Height = 640
+  Top = 100
+  Width = 1080
+  Caption = 'Сравнение перед импортом'
+  ClientHeight = 640
+  ClientWidth = 1080
+  Position = poOwnerFormCenter
+  PopupMode = pmAuto
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnCloseQuery = FormCloseQuery
+  object HeaderPanel: TPanel
+    Align = alTop
+    AutoSize = True
+    BevelOuter = bvNone
+    BorderSpacing.Around = 8
+    object FileLabel: TLabel
+      AnchorSideLeft.Control = HeaderPanel
+      AnchorSideTop.Control = HeaderPanel
+      AnchorSideRight.Control = HeaderPanel
+      AnchorSideRight.Side = asrBottom
+      Anchors = [akTop, akLeft, akRight]
+      Caption = 'Файл'
+      WordWrap = True
+    end
+    object StageLabel: TLabel
+      AnchorSideLeft.Control = FileLabel
+      AnchorSideTop.Control = FileLabel
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = HeaderPanel
+      AnchorSideRight.Side = asrBottom
+      Anchors = [akTop, akLeft, akRight]
+      WordWrap = True
+      BorderSpacing.Top = 4
+      Caption = 'СУ'
+    end
+    object SummaryLabel: TLabel
+      AnchorSideLeft.Control = FileLabel
+      AnchorSideTop.Control = StageLabel
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = HeaderPanel
+      AnchorSideRight.Side = asrBottom
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Top = 4
+      Caption = 'Сводка'
+      WordWrap = True
+    end
+  end
+  object FooterPanel: TPanel
+    Align = alBottom
+    AutoSize = True
+    BevelOuter = bvNone
+    BorderSpacing.Around = 8
+    object StateLabel: TLabel
+      AnchorSideLeft.Control = FooterPanel
+      AnchorSideTop.Control = FooterPanel
+      AnchorSideRight.Control = FooterPanel
+      AnchorSideRight.Side = asrBottom
+      Anchors = [akTop, akLeft, akRight]
+      Caption = 'Состояние'
+      WordWrap = True
+    end
+    object SelectionLabel: TLabel
+      AnchorSideLeft.Control = StateLabel
+      AnchorSideTop.Control = StateLabel
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = FooterPanel
+      AnchorSideRight.Side = asrBottom
+      Anchors = [akTop, akLeft, akRight]
+      WordWrap = True
+      BorderSpacing.Top = 4
+      Caption = 'Выбор'
+    end
+    object CancelButton: TButton
+      AnchorSideTop.Control = SelectionLabel
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = FooterPanel
+      AnchorSideRight.Side = asrBottom
+      Anchors = [akTop, akRight]
+      AutoSize = True
+      BorderSpacing.Top = 8
+      Cancel = True
+      Caption = 'Отмена'
+      ModalResult = 2
+      TabOrder = 1
+    end
+    object ApplyButton: TButton
+      AnchorSideTop.Control = CancelButton
+      AnchorSideRight.Control = CancelButton
+      Anchors = [akTop, akRight]
+      AutoSize = True
+      BorderSpacing.Right = 8
+      Caption = 'Применить выбранное'
+      OnClick = ApplyClick
+      TabOrder = 0
+    end
+  end
+  object Pages: TPageControl
+    Align = alClient
+    BorderSpacing.Left = 8
+    BorderSpacing.Right = 8
+    ActivePage = ChangesPage
+    TabOrder = 0
+    object ChangesPage: TTabSheet
+      Caption = 'Изменения'
+      object FilterPanel: TPanel
+        Align = alTop
+        AutoSize = True
+        BevelOuter = bvNone
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.LeftRightSpacing = 8
+        BorderSpacing.Around = 4
+        object FilterComboBox: TComboBox
+          Width = 220
+          Style = csDropDownList
+          OnChange = FilterChange
+          TabOrder = 0
+        end
+        object ShowSameCheckBox: TCheckBox
+          AutoSize = True
+          Caption = 'Показать без изменений'
+          OnChange = FilterChange
+          TabOrder = 1
+        end
+      end
+      object CommandsPanel: TPanel
+        Align = alBottom
+        AutoSize = True
+        BevelOuter = bvNone
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 3
+        ChildSizing.HorizontalSpacing = 8
+        ChildSizing.LeftRightSpacing = 8
+        BorderSpacing.Around = 4
+        object SelectAllButton: TButton
+          AutoSize = True
+          ShowHint = True
+          Caption = 'Выбрать все изменения'
+          OnClick = SelectionCommand
+          TabOrder = 0
+        end
+        object ClearSelectionButton: TButton
+          AutoSize = True
+          ShowHint = True
+          Caption = 'Снять выбор'
+          OnClick = SelectionCommand
+          TabOrder = 1
+        end
+        object RefreshButton: TButton
+          AutoSize = True
+          ShowHint = True
+          Caption = 'Обновить сравнение'
+          OnClick = RefreshClick
+          TabOrder = 2
+        end
+      end
+      object ChangesGrid: TStringGrid
+        Align = alClient
+        ColCount = 8
+        FixedCols = 0
+        RowCount = 2
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goEditing, goTabs, goTruncCellHints]
+        ShowHint = True
+        OnCheckboxToggled = ChangesToggled
+        OnHeaderClick = ChangesHeaderClick
+        OnKeyDown = GridKeyDown
+        TabOrder = 1
+        Columns = <
+          item
+            ButtonStyle = cbsCheckboxColumn
+            Title.Caption = 'Применить'
+            Width = 85
+            ValueChecked = '1'
+            ValueUnchecked = '0'
+          end
+          item
+            Title.Caption = 'Номер'
+            ReadOnly = True
+            Width = 65
+          end
+          item
+            Title.Caption = 'Участник'
+            ReadOnly = True
+            Width = 160
+          end
+          item
+            Title.Caption = 'Поле'
+            ReadOnly = True
+            Width = 100
+          end
+          item
+            Title.Caption = 'Сейчас'
+            ReadOnly = True
+            Width = 140
+          end
+          item
+            Title.Caption = 'Из файла'
+            ReadOnly = True
+            Width = 140
+          end
+          item
+            Title.Caption = 'Действие'
+            ReadOnly = True
+            Width = 100
+          end
+          item
+            Title.Caption = 'Строка файла'
+            ReadOnly = True
+            Width = 95
+          end>
+      end
+    end
+    object UnknownPage: TTabSheet
+      Caption = 'Неизвестные номера'
+      object NewCommandsPanel: TPanel
+        Align = alBottom
+        AutoSize = True
+        BevelOuter = bvNone
+        BorderSpacing.Around = 4
+        object ConfirmAllButton: TButton
+          AutoSize = True
+          Caption = 'Создать все неизвестные номера'
+          OnClick = SelectionCommand
+          TabOrder = 0
+        end
+      end
+      object UnknownGrid: TStringGrid
+        Align = alClient
+        ColCount = 3
+        FixedCols = 0
+        RowCount = 2
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goEditing, goTabs, goTruncCellHints]
+        ShowHint = True
+        OnCheckboxToggled = UnknownToggled
+        OnKeyDown = GridKeyDown
+        TabOrder = 0
+        Columns = <
+          item
+            ButtonStyle = cbsCheckboxColumn
+            Title.Caption = 'Создать'
+            Width = 85
+            ValueChecked = '1'
+            ValueUnchecked = '0'
+          end
+          item
+            Title.Caption = 'Номер'
+            ReadOnly = True
+            Width = 85
+          end
+          item
+            Title.Caption = 'Строка файла'
+            ReadOnly = True
+            Width = 120
+          end>
+      end
+    end
+  end
+end

@@ -11,16 +11,14 @@ uses
 type
   TTelegramNotificationCoordinatorTests = class(TTestCase)
   private
-    FCallbackCount: Integer;
+    FCallbackCount: integer;
     FCallbackThreadId: TThreadID;
     FLastDelivery: TTelegramDeliveryResult;
-    FDroppedCount: Integer;
+    FDroppedCount: integer;
     FLastDropped: TTelegramQueueItemInfo;
-    procedure Completed(Sender: TObject;
-      const ADelivery: TTelegramDeliveryResult);
-    procedure Dropped(Sender: TObject;
-      const AItem: TTelegramQueueItemInfo);
-    procedure WaitForCallbacks(const ACount: Integer;
+    procedure Completed(Sender: TObject; const ADelivery: TTelegramDeliveryResult);
+    procedure Dropped(Sender: TObject; const AItem: TTelegramQueueItemInfo);
+    procedure WaitForCallbacks(const ACount: integer;
       const ATimeoutMs: QWord = 5000);
   published
     procedure RetryPolicy_InvalidValuesUseDefaults;
@@ -52,9 +50,9 @@ type
     FLock: TRTLCriticalSection;
     FResponses: array of THttpResponse;
     FUrls: array of string;
-    FExecuteCount: Integer;
+    FExecuteCount: integer;
     FExecuteThreadId: TThreadID;
-    FBlockFirst: Boolean;
+    FBlockFirst: boolean;
     FStartedEvent: PRTLEvent;
     FReleaseEvent: PRTLEvent;
     function ExecuteRequest(const ARequest: THttpRequest): THttpResponse;
@@ -65,10 +63,10 @@ type
     procedure QueueResponse(const AResponse: THttpResponse);
     procedure BlockFirstRequest;
     procedure ReleaseFirstRequest;
-    function WaitForRequest(const ATimeoutMs: Cardinal): Boolean;
-    function ExecuteCount: Integer;
+    function WaitForRequest(const ATimeoutMs: cardinal): boolean;
+    function ExecuteCount: integer;
     function ExecuteThreadId: TThreadID;
-    function UrlAt(const AIndex: Integer): string;
+    function UrlAt(const AIndex: integer): string;
   end;
 
 function SuccessfulResponse: THttpResponse;
@@ -79,7 +77,7 @@ begin
   Result.StatusText := 'OK';
 end;
 
-function StatusResponse(const AStatusCode: Integer): THttpResponse;
+function StatusResponse(const AStatusCode: integer): THttpResponse;
 begin
   Result := Default(THttpResponse);
   Result.Completed := True;
@@ -101,7 +99,7 @@ begin
   Result.ErrorMessage := 'request timed out';
 end;
 
-function NotificationResult(const ANumber: Integer): TFinishResult;
+function NotificationResult(const ANumber: integer): TFinishResult;
 begin
   Result := Default(TFinishResult);
   Result.ParticipantNumber := ANumber;
@@ -110,7 +108,7 @@ begin
 end;
 
 procedure TTelegramNotificationCoordinatorTests.
-  RetryPolicy_InvalidValuesUseDefaults;
+RetryPolicy_InvalidValuesUseDefaults;
 var
   Policy: TTelegramRetryPolicy;
 begin
@@ -120,15 +118,13 @@ begin
   AssertEquals(TELEGRAM_RETRY_DEFAULT_DELAY_SECONDS, Policy.DelaySeconds);
 end;
 
-constructor TControlledTransport.Create(
-  const AOwner: TControlledTransportFactory);
+constructor TControlledTransport.Create(const AOwner: TControlledTransportFactory);
 begin
   inherited Create;
   FOwner := AOwner;
 end;
 
-function TControlledTransport.Execute(
-  const ARequest: THttpRequest): THttpResponse;
+function TControlledTransport.Execute(const ARequest: THttpRequest): THttpResponse;
 begin
   Result := FOwner.ExecuteRequest(ARequest);
 end;
@@ -160,10 +156,9 @@ begin
   Result := TControlledTransport.Create(Self);
 end;
 
-procedure TControlledTransportFactory.QueueResponse(
-  const AResponse: THttpResponse);
+procedure TControlledTransportFactory.QueueResponse(const AResponse: THttpResponse);
 var
-  Index: Integer;
+  Index: integer;
 begin
   EnterCriticalSection(FLock);
   try
@@ -186,7 +181,7 @@ begin
 end;
 
 function TControlledTransportFactory.WaitForRequest(
-  const ATimeoutMs: Cardinal): Boolean;
+  const ATimeoutMs: cardinal): boolean;
 begin
   RTLEventWaitFor(FStartedEvent, ATimeoutMs);
   Result := ExecuteCount > 0;
@@ -195,8 +190,8 @@ end;
 function TControlledTransportFactory.ExecuteRequest(
   const ARequest: THttpRequest): THttpResponse;
 var
-  Index, ResponseIndex: Integer;
-  ShouldBlock: Boolean;
+  Index, ResponseIndex: integer;
+  ShouldBlock: boolean;
 begin
   EnterCriticalSection(FLock);
   try
@@ -226,7 +221,7 @@ begin
   end;
 end;
 
-function TControlledTransportFactory.ExecuteCount: Integer;
+function TControlledTransportFactory.ExecuteCount: integer;
 begin
   EnterCriticalSection(FLock);
   try
@@ -246,7 +241,7 @@ begin
   end;
 end;
 
-function TControlledTransportFactory.UrlAt(const AIndex: Integer): string;
+function TControlledTransportFactory.UrlAt(const AIndex: integer): string;
 begin
   EnterCriticalSection(FLock);
   try
@@ -271,14 +266,13 @@ begin
   FLastDropped := AItem;
 end;
 
-procedure TTelegramNotificationCoordinatorTests.WaitForCallbacks(
-  const ACount: Integer; const ATimeoutMs: QWord);
+procedure TTelegramNotificationCoordinatorTests.WaitForCallbacks(const ACount: integer;
+  const ATimeoutMs: QWord);
 var
   StartedAt: QWord;
 begin
   StartedAt := GetTickCount64;
-  while (FCallbackCount < ACount) and
-    (GetTickCount64 - StartedAt < ATimeoutMs) do
+  while (FCallbackCount < ACount) and (GetTickCount64 - StartedAt < ATimeoutMs) do
   begin
     CheckSynchronize(10);
     Sleep(1);
@@ -288,7 +282,7 @@ begin
 end;
 
 procedure TTelegramNotificationCoordinatorTests.
-  DisabledRetries_PerformsOneBackgroundAttempt;
+DisabledRetries_PerformsOneBackgroundAttempt;
 var
   Coordinator: TTelegramNotificationCoordinator;
   FactoryIntf: IHttpTransportFactory;
@@ -317,7 +311,7 @@ begin
 end;
 
 procedure TTelegramNotificationCoordinatorTests.
-  EnabledRetries_RetriesNetworkAndRetryableStatuses;
+EnabledRetries_RetriesNetworkAndRetryableStatuses;
 var
   Coordinator: TTelegramNotificationCoordinator;
   FactoryIntf: IHttpTransportFactory;
@@ -336,8 +330,7 @@ begin
   try
     Coordinator.OnCompleted := @Completed;
     AssertTrue(Coordinator.EnqueueResult(NotificationResult(2),
-      'https://example.invalid/token',
-      TTelegramRetryPolicy.Create(True, 5, 1)));
+      'https://example.invalid/token', TTelegramRetryPolicy.Create(True, 5, 1)));
     WaitForCallbacks(1, 7000);
     AssertEquals(6, FactoryObject.ExecuteCount);
     AssertEquals(6, FLastDelivery.AttemptCount);
@@ -348,7 +341,7 @@ begin
 end;
 
 procedure TTelegramNotificationCoordinatorTests.
-  EnabledRetries_DoesNotRetryOtherClientErrors;
+EnabledRetries_DoesNotRetryOtherClientErrors;
 var
   Coordinator: TTelegramNotificationCoordinator;
   FactoryIntf: IHttpTransportFactory;
@@ -363,8 +356,7 @@ begin
   try
     Coordinator.OnCompleted := @Completed;
     AssertTrue(Coordinator.EnqueueResult(NotificationResult(3),
-      'https://example.invalid/token',
-      TTelegramRetryPolicy.Create(True, 2, 1)));
+      'https://example.invalid/token', TTelegramRetryPolicy.Create(True, 2, 1)));
     WaitForCallbacks(1);
     AssertEquals(1, FactoryObject.ExecuteCount);
   finally
@@ -377,7 +369,7 @@ var
   Coordinator: TTelegramNotificationCoordinator;
   FactoryIntf: IHttpTransportFactory;
   FactoryObject: TControlledTransportFactory;
-  Index: Integer;
+  Index: integer;
 begin
   FCallbackCount := 0;
   FactoryObject := TControlledTransportFactory.Create;
@@ -401,12 +393,12 @@ begin
 end;
 
 procedure TTelegramNotificationCoordinatorTests.
-  Queue_OverflowDropsOldestWaitingItem;
+Queue_OverflowDropsOldestWaitingItem;
 var
   Coordinator: TTelegramNotificationCoordinator;
   FactoryIntf: IHttpTransportFactory;
   FactoryObject: TControlledTransportFactory;
-  Index: Integer;
+  Index: integer;
 begin
   FCallbackCount := 0;
   FDroppedCount := 0;
@@ -438,7 +430,7 @@ begin
 end;
 
 procedure TTelegramNotificationCoordinatorTests.
-  Shutdown_CancelsRetryDelayAndSuppressesCallbacks;
+Shutdown_CancelsRetryDelayAndSuppressesCallbacks;
 var
   Coordinator: TTelegramNotificationCoordinator;
   FactoryIntf: IHttpTransportFactory;
@@ -452,8 +444,7 @@ begin
   Coordinator := TTelegramNotificationCoordinator.Create(FactoryIntf);
   Coordinator.OnCompleted := @Completed;
   AssertTrue(Coordinator.EnqueueResult(NotificationResult(4),
-    'https://example.invalid/token',
-    TTelegramRetryPolicy.Create(True, 2, 1)));
+    'https://example.invalid/token', TTelegramRetryPolicy.Create(True, 2, 1)));
   AssertTrue(FactoryObject.WaitForRequest(1000));
   StartedAt := GetTickCount64;
   Coordinator.Shutdown;

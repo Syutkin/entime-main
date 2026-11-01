@@ -11,11 +11,10 @@ uses
 type
   TLedPanelCoordinatorTests = class(TTestCase)
   private
-    FCallbackCount: Integer;
+    FCallbackCount: integer;
     FCallbackThreadId: TThreadID;
-    procedure Completed(Sender: TObject;
-      const ADelivery: TLedPanelDeliveryResult);
-    procedure WaitForCallbacks(const ACount: Integer);
+    procedure Completed(Sender: TObject; const ADelivery: TLedPanelDeliveryResult);
+    procedure WaitForCallbacks(const ACount: integer);
   published
     procedure Queue_RunsOutsideUiAndKeepsOnlyLastWaitingValue;
     procedure Shutdown_CancelsActiveAndSuppressesCallbacks;
@@ -42,20 +41,20 @@ type
     FStarted: PRTLEvent;
     FRelease: PRTLEvent;
     FUrls: array of string;
-    FBodies: array of RawByteString;
+    FBodies: array of rawbytestring;
     FExecuteThreadId: TThreadID;
-    FCancelCount: Integer;
+    FCancelCount: integer;
     function ExecuteRequest(const ARequest: THttpRequest): THttpResponse;
   public
     constructor Create;
     destructor Destroy; override;
     function CreateTransport: IHttpTransport;
-    function WaitForFirst(const ATimeoutMs: Cardinal): Boolean;
+    function WaitForFirst(const ATimeoutMs: cardinal): boolean;
     procedure ReleaseFirst;
-    function ExecuteCount: Integer;
-    function BodyAt(const AIndex: Integer): string;
+    function ExecuteCount: integer;
+    function BodyAt(const AIndex: integer): string;
     function ExecuteThreadId: TThreadID;
-    function CancelCount: Integer;
+    function CancelCount: integer;
   end;
 
 constructor TBlockingTransport.Create(const AOwner: TBlockingTransportFactory);
@@ -64,8 +63,7 @@ begin
   FOwner := AOwner;
 end;
 
-function TBlockingTransport.Execute(
-  const ARequest: THttpRequest): THttpResponse;
+function TBlockingTransport.Execute(const ARequest: THttpRequest): THttpResponse;
 begin
   Result := FOwner.ExecuteRequest(ARequest);
 end;
@@ -106,7 +104,7 @@ end;
 function TBlockingTransportFactory.ExecuteRequest(
   const ARequest: THttpRequest): THttpResponse;
 var
-  Index: Integer;
+  Index: integer;
 begin
   EnterCriticalSection(FLock);
   try
@@ -127,8 +125,7 @@ begin
   Result.StatusCode := 204;
 end;
 
-function TBlockingTransportFactory.WaitForFirst(
-  const ATimeoutMs: Cardinal): Boolean;
+function TBlockingTransportFactory.WaitForFirst(const ATimeoutMs: cardinal): boolean;
 begin
   RTLEventWaitFor(FStarted, ATimeoutMs);
   Result := ExecuteCount > 0;
@@ -139,7 +136,7 @@ begin
   RTLEventSetEvent(FRelease);
 end;
 
-function TBlockingTransportFactory.ExecuteCount: Integer;
+function TBlockingTransportFactory.ExecuteCount: integer;
 begin
   EnterCriticalSection(FLock);
   try
@@ -149,7 +146,7 @@ begin
   end;
 end;
 
-function TBlockingTransportFactory.BodyAt(const AIndex: Integer): string;
+function TBlockingTransportFactory.BodyAt(const AIndex: integer): string;
 begin
   EnterCriticalSection(FLock);
   try
@@ -169,7 +166,7 @@ begin
   end;
 end;
 
-function TBlockingTransportFactory.CancelCount: Integer;
+function TBlockingTransportFactory.CancelCount: integer;
 begin
   EnterCriticalSection(FLock);
   try
@@ -186,13 +183,12 @@ begin
   FCallbackThreadId := GetCurrentThreadID;
 end;
 
-procedure TLedPanelCoordinatorTests.WaitForCallbacks(const ACount: Integer);
+procedure TLedPanelCoordinatorTests.WaitForCallbacks(const ACount: integer);
 var
   StartedAt: QWord;
 begin
   StartedAt := GetTickCount64;
-  while (FCallbackCount < ACount) and
-    (GetTickCount64 - StartedAt < 3000) do
+  while (FCallbackCount < ACount) and (GetTickCount64 - StartedAt < 3000) do
   begin
     CheckSynchronize(10);
     Sleep(1);
@@ -201,7 +197,7 @@ begin
 end;
 
 procedure TLedPanelCoordinatorTests.
-  Queue_RunsOutsideUiAndKeepsOnlyLastWaitingValue;
+Queue_RunsOutsideUiAndKeepsOnlyLastWaitingValue;
 var
   Coordinator: TLedPanelCoordinator;
   Factory: IHttpTransportFactory;
@@ -232,7 +228,7 @@ begin
 end;
 
 procedure TLedPanelCoordinatorTests.
-  Shutdown_CancelsActiveAndSuppressesCallbacks;
+Shutdown_CancelsActiveAndSuppressesCallbacks;
 var
   Coordinator: TLedPanelCoordinator;
   Factory: IHttpTransportFactory;

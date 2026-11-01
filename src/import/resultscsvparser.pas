@@ -74,8 +74,7 @@ type
     FCorrectionText: string;
     FRowNumber: integer;
   public
-    constructor Create(const ACorrectionText: string;
-      const ARowNumber: integer);
+    constructor Create(const ACorrectionText: string; const ARowNumber: integer);
     property CorrectionText: string read FCorrectionText;
     property RowNumber: integer read FRowNumber;
   end;
@@ -104,7 +103,7 @@ type
     rcfFullStage,
     rcfStart,
     rcfFinish
-  );
+    );
 
   TResultImportItem = class
   private
@@ -160,8 +159,8 @@ begin
     [AColumnCount]);
 end;
 
-constructor EResultsRowFieldCountMismatch.Create(const ARowNumber,
-  AActualFieldCount, AExpectedFieldCount: integer);
+constructor EResultsRowFieldCountMismatch.Create(
+  const ARowNumber, AActualFieldCount, AExpectedFieldCount: integer);
 begin
   FRowNumber := ARowNumber;
   FActualFieldCount := AActualFieldCount;
@@ -229,18 +228,18 @@ end;
 function NormalizeResultTime(const AValue: string; const ARowNumber: integer;
   const AFieldName: string): string;
 var
-  value: string;
+  Value: string;
 begin
-  value := Trim(AValue);
-  if value = '' then
+  Value := Trim(AValue);
+  if Value = '' then
     Exit('');
 
-  if not TryNormalizeTime(value, Result) then
-    raise EInvalidResultTime.Create(value, ARowNumber, AFieldName);
+  if not TryNormalizeTime(Value, Result) then
+    raise EInvalidResultTime.Create(Value, ARowNumber, AFieldName);
 end;
 
-constructor TResultImportItem.Create(const ASourceRowNumber,
-  AParticipantNumber: integer);
+constructor TResultImportItem.Create(
+  const ASourceRowNumber, AParticipantNumber: integer);
 begin
   inherited Create;
   FSourceRowNumber := ASourceRowNumber;
@@ -259,14 +258,13 @@ begin
   inherited Destroy;
 end;
 
-function TResultsCsvParser.Parse(
-  const ACsvText: string): TResultsCsvParseResult;
+function TResultsCsvParser.Parse(const ACsvText: string): TResultsCsvParseResult;
 var
   csvDocument: TCSVDocument;
   participantRows: TStringList;
-  csvText, numberKey, numberText, value: string;
+  csvText, numberKey, numberText, Value: string;
   columnCount, firstDataRow, firstParticipantRow, numberIndex,
-    participantNumber, row: integer;
+  participantNumber, row: integer;
   item: TResultImportItem;
 begin
   csvText := NormalizeText(ACsvText);
@@ -329,8 +327,8 @@ begin
         numberIndex := participantRows.IndexOfName(numberKey);
         if numberIndex >= 0 then
         begin
-          firstParticipantRow := StrToInt(
-            participantRows.ValueFromIndex[numberIndex]);
+          firstParticipantRow :=
+            StrToInt(participantRows.ValueFromIndex[numberIndex]);
           raise EDuplicateResultParticipantNumber.Create(
             participantNumber, firstParticipantRow, row + 1);
         end;
@@ -340,74 +338,74 @@ begin
         try
           case Result.FFormat of
             rcfFinish:
-              begin
-                value := Trim(csvDocument.Cells[1, row]);
-                // В двухколоночном формате время финиша обязательно.
-                if value = '' then
-                  raise EInvalidResultTime.Create(
-                    value, row + 1, 'finishtime');
+            begin
+              Value := Trim(csvDocument.Cells[1, row]);
+              // В двухколоночном формате время финиша обязательно.
+              if Value = '' then
+                raise EInvalidResultTime.Create(
+                  Value, row + 1, 'finishtime');
 
-                if SameText(value, ParticipantStatusToToken(psDNF)) then
-                begin
-                  item.FHasStatus := True;
-                  item.FStatus := psDNF;
-                end
-                else
-                  item.FFinishTime := NormalizeResultTime(
-                    value, row + 1, 'finishtime');
-              end;
+              if SameText(Value, ParticipantStatusToToken(psDNF)) then
+              begin
+                item.FHasStatus := True;
+                item.FStatus := psDNF;
+              end
+              else
+                item.FFinishTime :=
+                  NormalizeResultTime(Value, row + 1, 'finishtime');
+            end;
 
             rcfStart:
-              begin
-                value := Trim(csvDocument.Cells[1, row]);
-                // В трёхколоночном формате время старта обязательно.
-                if value = '' then
-                  raise EInvalidResultTime.Create(
-                    value, row + 1, 'starttime');
-                item.FStartTime := NormalizeResultTime(
-                  value, row + 1, 'starttime');
+            begin
+              Value := Trim(csvDocument.Cells[1, row]);
+              // В трёхколоночном формате время старта обязательно.
+              if Value = '' then
+                raise EInvalidResultTime.Create(
+                  Value, row + 1, 'starttime');
+              item.FStartTime :=
+                NormalizeResultTime(Value, row + 1, 'starttime');
 
-                // Мобильное приложение записывает DNS в поле поправки.
-                value := Trim(csvDocument.Cells[2, row]);
-                if SameText(value, ParticipantStatusToToken(psDNS)) then
-                begin
-                  item.FHasStatus := True;
-                  item.FStatus := psDNS;
-                end
-                else
-                begin
-                  // Поправка должна быть целым числом; пустое поле недопустимо.
-                  if not TryStrToInt(value, item.FCorrection) then
-                    raise EInvalidResultCorrection.Create(value, row + 1);
-                  item.FHasCorrection := True;
-                end;
+              // Мобильное приложение записывает DNS в поле поправки.
+              Value := Trim(csvDocument.Cells[2, row]);
+              if SameText(Value, ParticipantStatusToToken(psDNS)) then
+              begin
+                item.FHasStatus := True;
+                item.FStatus := psDNS;
+              end
+              else
+              begin
+                // Поправка должна быть целым числом; пустое поле недопустимо.
+                if not TryStrToInt(Value, item.FCorrection) then
+                  raise EInvalidResultCorrection.Create(Value, row + 1);
+                item.FHasCorrection := True;
               end;
+            end;
 
             rcfFullStage:
-              begin
-                item.FStartTime := NormalizeResultTime(
-                  csvDocument.Cells[1, row], row + 1, 'starttime');
+            begin
+              item.FStartTime :=
+                NormalizeResultTime(csvDocument.Cells[1, row], row + 1, 'starttime');
 
-                value := Trim(csvDocument.Cells[2, row]);
-                item.FHasCorrection := value <> '';
-                if item.FHasCorrection and
-                  (not TryStrToInt(value, item.FCorrection)) then
-                  raise EInvalidResultCorrection.Create(value, row + 1);
+              Value := Trim(csvDocument.Cells[2, row]);
+              item.FHasCorrection := Value <> '';
+              if item.FHasCorrection and (not
+                TryStrToInt(Value, item.FCorrection)) then
+                raise EInvalidResultCorrection.Create(Value, row + 1);
 
-                item.FFinishTime := NormalizeResultTime(
-                  csvDocument.Cells[3, row], row + 1, 'finishtime');
+              item.FFinishTime :=
+                NormalizeResultTime(csvDocument.Cells[3, row], row + 1, 'finishtime');
 
-                value := Trim(csvDocument.Cells[4, row]);
-                if (value <> '') and
-                  (not TryNormalizeDuration(value, item.FPenalty)) then
-                  raise EInvalidResultPenalty.Create(value, row + 1);
+              Value := Trim(csvDocument.Cells[4, row]);
+              if (Value <> '') and (not
+                TryNormalizeDuration(Value, item.FPenalty)) then
+                raise EInvalidResultPenalty.Create(Value, row + 1);
 
-                value := Trim(csvDocument.Cells[5, row]);
-                item.FHasStatus := value <> '';
-                if item.FHasStatus and
-                  (not TryParseParticipantStatus(value, item.FStatus)) then
-                  raise EInvalidResultStatus.Create(value, row + 1);
-              end;
+              Value := Trim(csvDocument.Cells[5, row]);
+              item.FHasStatus := Value <> '';
+              if item.FHasStatus and (not
+                TryParseParticipantStatus(Value, item.FStatus)) then
+                raise EInvalidResultStatus.Create(Value, row + 1);
+            end;
           end;
 
           Result.FItems.Add(item);

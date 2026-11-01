@@ -18,8 +18,7 @@ type
     FStoredMark: TFinishMark;
   public
     function Insert(const AMark: TFinishMark): TFinishMark;
-    function TryLoadById(const AMarkId: int64;
-      out AMark: TFinishMark): boolean;
+    function TryLoadById(const AMarkId: int64; out AMark: TFinishMark): boolean;
     function HideWorkQueue: integer;
     procedure Update(const AMark: TFinishMark);
     property InsertCount: integer read FInsertCount;
@@ -57,8 +56,7 @@ type
 
 implementation
 
-function TFakeFinishMarkPersistence.Insert(
-  const AMark: TFinishMark): TFinishMark;
+function TFakeFinishMarkPersistence.Insert(const AMark: TFinishMark): TFinishMark;
 begin
   if FFailInsert then
     raise Exception.Create('insert failed');
@@ -102,8 +100,7 @@ begin
   FService := TFinishMarkService.Create(FPersistenceInterface, 250);
 end;
 
-procedure TFinishMarkServiceTests.MarkChanged(Sender: TObject;
-  const AMarkId: int64);
+procedure TFinishMarkServiceTests.MarkChanged(Sender: TObject; const AMarkId: int64);
 begin
   Inc(FChangedCount);
   FLastChangedId := AMarkId;
@@ -127,8 +124,7 @@ end;
 function TFinishMarkServiceTests.MarkAt(const ATime: TDateTime): TFinishMark;
 begin
   Result := TFinishMark.FromTimingMark(TTimingMark.Finish(ATime,
-    TTimingMarkSource.Serial('COM1'),
-    EncodeDateTime(2026, 8, 13, 10, 0, 0, 0)), 1);
+    TTimingMarkSource.Serial('COM1'), EncodeDateTime(2026, 8, 13, 10, 0, 0, 0)), 1);
 end;
 
 procedure TFinishMarkServiceTests.Handle_PreservesCurrentDebounceBoundary;
@@ -177,7 +173,7 @@ begin
 end;
 
 procedure TFinishMarkServiceTests.
-  Handle_PersistsPendingMarkAndReturnsStableId;
+Handle_PersistsPendingMarkAndReturnsStableId;
 var
   ResultMark: TFinishMark;
 begin
@@ -189,7 +185,7 @@ begin
 end;
 
 procedure TFinishMarkServiceTests.
-  Handle_PersistsDebouncedMarkWithDiagnostic;
+Handle_PersistsDebouncedMarkWithDiagnostic;
 var
   BaseTime: TDateTime;
   ResultMark: TFinishMark;
@@ -197,8 +193,7 @@ begin
   BaseTime := EncodeTime(10, 0, 0, 0);
   FService.Handle(MarkAt(BaseTime), True);
 
-  ResultMark := FService.Handle(
-    MarkAt(IncMilliSecond(BaseTime, 100)), False);
+  ResultMark := FService.Handle(MarkAt(IncMilliSecond(BaseTime, 100)), False);
 
   AssertEquals(2, FPersistence.InsertCount);
   AssertEquals(73, ResultMark.Id);
@@ -209,7 +204,7 @@ begin
 end;
 
 procedure TFinishMarkServiceTests.
-  SetParticipantNumber_LoadsAndPersistsDraftWithoutApplying;
+SetParticipantNumber_LoadsAndPersistsDraftWithoutApplying;
 var
   Mark: TFinishMark;
 begin
@@ -225,7 +220,7 @@ begin
 end;
 
 procedure TFinishMarkServiceTests.
-  HideWorkQueue_DelegatesToPersistenceAndResetsSequence;
+HideWorkQueue_DelegatesToPersistenceAndResetsSequence;
 var
   BaseTime: TDateTime;
   Mark: TFinishMark;

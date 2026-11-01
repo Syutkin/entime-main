@@ -10,18 +10,15 @@ type
     psDNS,
     psDNF,
     psDSQ
-  );
+    );
 
-function ParticipantStatusToDbValue(
-  const AStatus: TParticipantStatus): string;
-function ParticipantStatusToToken(
-  const AStatus: TParticipantStatus): string;
+function ParticipantStatusToDbValue(const AStatus: TParticipantStatus): string;
+function ParticipantStatusToToken(const AStatus: TParticipantStatus): string;
 function TryParticipantStatusFromDbValue(const AValue: string;
   out AStatus: TParticipantStatus): boolean;
 function TryParseParticipantStatus(const AValue: string;
   out AStatus: TParticipantStatus): boolean;
-function DeriveGlobalParticipantStatus(
-  const ACurrentGlobalStatus: TParticipantStatus;
+function DeriveGlobalParticipantStatus(const ACurrentGlobalStatus: TParticipantStatus;
   const AStageStatuses: array of TParticipantStatus;
   const AActiveStageIndexes: array of integer): TParticipantStatus;
 
@@ -42,16 +39,14 @@ const
     (DbValue: '1'; Token: 'DNS'),
     (DbValue: '2'; Token: 'DNF'),
     (DbValue: '3'; Token: 'DSQ')
-  );
+    );
 
-function ParticipantStatusToDbValue(
-  const AStatus: TParticipantStatus): string;
+function ParticipantStatusToDbValue(const AStatus: TParticipantStatus): string;
 begin
   Result := ParticipantStatusInfo[AStatus].DbValue;
 end;
 
-function ParticipantStatusToToken(
-  const AStatus: TParticipantStatus): string;
+function ParticipantStatusToToken(const AStatus: TParticipantStatus): string;
 begin
   Result := ParticipantStatusInfo[AStatus].Token;
 end;
@@ -60,11 +55,11 @@ function TryParticipantStatusFromDbValue(const AValue: string;
   out AStatus: TParticipantStatus): boolean;
 var
   candidate: TParticipantStatus;
-  value: string;
+  Value: string;
 begin
-  value := Trim(AValue);
+  Value := Trim(AValue);
   for candidate := Low(TParticipantStatus) to High(TParticipantStatus) do
-    if value = ParticipantStatusInfo[candidate].DbValue then
+    if Value = ParticipantStatusInfo[candidate].DbValue then
     begin
       AStatus := candidate;
       Exit(True);
@@ -78,12 +73,12 @@ function TryParseParticipantStatus(const AValue: string;
   out AStatus: TParticipantStatus): boolean;
 var
   candidate: TParticipantStatus;
-  value: string;
+  Value: string;
 begin
-  value := Trim(AValue);
+  Value := Trim(AValue);
   for candidate := Low(TParticipantStatus) to High(TParticipantStatus) do
-    if (value = ParticipantStatusInfo[candidate].DbValue) or
-      SameText(value, ParticipantStatusInfo[candidate].Token) then
+    if (Value = ParticipantStatusInfo[candidate].DbValue) or
+      SameText(Value, ParticipantStatusInfo[candidate].Token) then
     begin
       AStatus := candidate;
       Exit(True);
@@ -93,8 +88,7 @@ begin
   Result := False;
 end;
 
-function DeriveGlobalParticipantStatus(
-  const ACurrentGlobalStatus: TParticipantStatus;
+function DeriveGlobalParticipantStatus(const ACurrentGlobalStatus: TParticipantStatus;
   const AStageStatuses: array of TParticipantStatus;
   const AActiveStageIndexes: array of integer): TParticipantStatus;
 var

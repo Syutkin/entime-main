@@ -5,15 +5,23 @@ program EntimeIntegrationTests;
 {$R *.res}
 
 uses
-  {$IFDEF UNIX}{$IFDEF UseCThreads}
+  {$IFDEF UNIX}
   cthreads,
-  {$ENDIF}{$ENDIF}
+  {$ENDIF}
   Interfaces,
   Forms,
   SqlQuerySortEngine,
   consoletestrunner,
+  MySpinEditIntegrationTests,
+  StartLabelsPrintIntegrationTests,
+  StartProtocolPrintIntegrationTests,
+  ProtocolPrintFormTests,
+  OverallFinishPrintIntegrationTests,
+  StageFinishPrintIntegrationTests,
   CompetitionExportServiceTests,
-  MainIntegrationTests;
+  MainIntegrationTests,
+  ResultsImportPreviewTests,
+  ParticipantCardIntegrationTests;
 
 var
   App: TTestRunner;

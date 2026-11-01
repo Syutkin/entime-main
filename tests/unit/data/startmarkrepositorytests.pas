@@ -6,7 +6,8 @@ interface
 
 uses
   SysUtils, DateUtils, DB, FPCUnit, TestRegistry, SQLDB, CompetitionDbContext,
-  CompetitionSchemaMigrator, TimingMark, StartMark, StartMarkRepository;
+  CompetitionSchemaMigrator, TimingMark, StartMark, StartMarkRepository,
+  CompetitionQueryProvider;
 
 type
   { TStartMarkRepositoryTests }
@@ -31,6 +32,8 @@ type
     procedure SelectWorkQueue_ReturnsOnlyUnappliedMarksInReceiptOrder;
     procedure SelectJournal_ReturnsEveryStatusNewestFirst;
     procedure SelectJournal_FiltersByStatusTimeAndReceivedStage;
+    procedure SelectJournal_CombinesReceivedStageWithEveryStateFilter;
+    procedure SelectJournal_RejectsNegativeStageScope;
   end;
 
 implementation
@@ -67,15 +70,15 @@ begin
   end;
 end;
 
-function TStartMarkRepositoryTests.PendingMark(const AEventTime,
-  AReceivedAt: TDateTime; const AHasCorrection: boolean): TStartMark;
+function TStartMarkRepositoryTests.PendingMark(const AEventTime, AReceivedAt: TDateTime;
+  const AHasCorrection: boolean): TStartMark;
 begin
   Result := TStartMark.FromTimingMark(TTimingMark.Start(AEventTime,
     AHasCorrection, 0, TTimingMarkSource.Serial('COM7'), AReceivedAt), 2);
 end;
 
 procedure TStartMarkRepositoryTests.
-  InsertAndLoadAll_PreserveCompleteAppliedMark;
+InsertAndLoadAll_PreserveCompleteAppliedMark;
 var
   AppliedAt: TDateTime;
   Inserted: TStartMark;
@@ -84,8 +87,7 @@ var
 begin
   AppliedAt := EncodeDateTime(2026, 8, 13, 10, 0, 3, 456);
   Mark := TStartMark.FromTimingMark(TTimingMark.Start(
-    EncodeTime(9, 59, 58, 123), True, -27,
-    TTimingMarkSource.Ble('ENTime-3'),
+    EncodeTime(9, 59, 58, 123), True, -27, TTimingMarkSource.Ble('ENTime-3'),
     EncodeDateTime(2026, 8, 13, 10, 0, 0, 321)), 2);
   Mark.HasMatchDeltaMs := True;
   Mark.MatchDeltaMs := 1877;
@@ -119,7 +121,7 @@ begin
 end;
 
 procedure TStartMarkRepositoryTests.
-  InsertAndLoadAll_PreserveNullablePendingFields;
+InsertAndLoadAll_PreserveNullablePendingFields;
 var
   Inserted: TStartMark;
   Marks: TStartMarkArray;
@@ -171,7 +173,7 @@ begin
 end;
 
 procedure TStartMarkRepositoryTests.
-  Update_PersistsMutableStateWithoutChangingReceivedStage;
+Update_PersistsMutableStateWithoutChangingReceivedStage;
 var
   Inserted, Changed: TStartMark;
   Marks: TStartMarkArray;
@@ -195,7 +197,7 @@ begin
 end;
 
 procedure TStartMarkRepositoryTests.
-  HideWorkQueue_HidesPendingAndConflictOnly;
+HideWorkQueue_HidesPendingAndConflictOnly;
 var
   Applied, Conflict, Hidden, Pending: TStartMark;
 begin
@@ -235,7 +237,7 @@ begin
 end;
 
 procedure TStartMarkRepositoryTests.
-  SelectWorkQueue_ReturnsOnlyUnappliedMarksInReceiptOrder;
+SelectWorkQueue_ReturnsOnlyUnappliedMarksInReceiptOrder;
 var
   Applied, Hidden, Pending: TStartMark;
 begin
@@ -265,7 +267,7 @@ begin
 end;
 
 procedure TStartMarkRepositoryTests.
-  SelectJournal_ReturnsEveryStatusNewestFirst;
+SelectJournal_ReturnsEveryStatusNewestFirst;
 var
   Applied, Conflict, Hidden: TStartMark;
 begin
@@ -299,13 +301,13 @@ begin
 end;
 
 procedure TStartMarkRepositoryTests.
-  SelectJournal_FiltersByStatusTimeAndReceivedStage;
+SelectJournal_FiltersByStatusTimeAndReceivedStage;
 var
   Applied, Conflict, ErrorMark, Hidden, Recent: TStartMark;
 
   procedure AssertFilter(const AFilter: TStartMarkJournalFilter;
-    const AExpectedCount: integer; const AReceivedSince: TDateTime;
-    const AStageIndex: integer);
+  const AExpectedCount: integer; const AReceivedSince: TDateTime;
+  const AStageIndex: integer);
   begin
     FQuery.Close;
     FQuery.SQL.Text := TStartMarkSql.SelectJournal(AFilter);
@@ -348,6 +350,63 @@ begin
   AssertFilter(smjfLast15Minutes, 5,
     EncodeDateTime(2026, 8, 14, 9, 45, 0, 0), 0);
   AssertFilter(smjfCurrentStage, 1, 0, 1);
+end;
+
+procedure TStartMarkRepositoryTests.
+SelectJournal_CombinesReceivedStageWithEveryStateFilter;
+const
+  EXPECTED: array[TStartMarkJournalFilter] of integer = (5, 1, 1, 1, 2, 5, 5, 2, 1);
+var
+  Mark: TStartMark;
+  Status: TStartMarkStatus;
+  StageIndex: integer;
+  Filter: TStartMarkJournalFilter;
+begin
+  for StageIndex := 1 to 2 do
+    for Status := Low(TStartMarkStatus) to High(TStartMarkStatus) do
+    begin
+      Mark := PendingMark(EncodeTime(10, 0, 0, 0),
+        EncodeDateTime(2026, 10, 29, 8 + StageIndex, Ord(Status), 0, 0));
+      Mark.StageIndex := StageIndex;
+      Mark.Status := Status;
+      Mark.HasParticipantNumber := True;
+      Mark.ParticipantNumber := 17;
+      Mark.HasAppliedStageIndex := Status = smsApplied;
+      Mark.AppliedStageIndex := 3 - StageIndex;
+      FRepository.Insert(Mark);
+    end;
+  for Filter := Low(TStartMarkJournalFilter) to High(TStartMarkJournalFilter) do
+  begin
+    TDatasetSql.ConfigureStartMarkJournal(FQuery, Filter,
+      EncodeDateTime(2026, 10, 29, 9, 45, 0, 0), 2);
+    FQuery.Open;
+    AssertEquals('Filter ' + IntToStr(Ord(Filter)), EXPECTED[Filter],
+      FQuery.RecordCount);
+    while not FQuery.EOF do
+    begin
+      AssertEquals('Received stage, not applied stage', 2,
+        FQuery.FieldByName('stage_index').AsInteger);
+      if Filter = smjfError then
+        AssertEquals('error', FQuery.FieldByName('status').AsString);
+      if Filter = smjfPendingOrConflict then
+        AssertTrue(FQuery.FieldByName('status').AsString <> 'error');
+      FQuery.Next;
+    end;
+    FQuery.Close;
+  end;
+  TDatasetSql.ConfigureStartMarkJournal(FQuery);
+  FQuery.Open;
+  AssertEquals('Unscoped journal still includes all stages', 10, FQuery.RecordCount);
+end;
+
+procedure TStartMarkRepositoryTests.SelectJournal_RejectsNegativeStageScope;
+begin
+  try
+    TDatasetSql.ConfigureStartMarkJournal(FQuery, smjfPending, 0, -1);
+    Fail('Expected invalid stage scope');
+  except
+    on E: EArgumentOutOfRangeException do ;
+  end;
 end;
 
 initialization

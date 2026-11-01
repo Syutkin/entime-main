@@ -61,7 +61,7 @@ begin
     TDatasetSql.ResultStageSum([1])) = 1);
   AssertTrue(Pos('ORDER BY number ASC',
     TStartlistSql.SelectNumbersForCategory(STARTLIST_SORT_BY_NUMBER_ASC,
-      False, False, False)) > 0);
+    False, False, False)) > 0);
 end;
 
 procedure TDataLayerSplitTests.ParticipantApi_IsAvailableWithoutDbSqlFacade;
@@ -84,8 +84,8 @@ procedure TDataLayerSplitTests.ResultCalculationApi_IsAvailableWithoutDbSqlFacad
 begin
   AssertEquals('UPDATE main SET sumplace = NULL, sumdiffleader = NULL;',
     TResultCalculationRepository.ResetSumPlaceAndDiff);
-  AssertTrue(Pos('result3',
-    TResultCalculationRepository.SelectForSumCalculation([1, 3])) > 0);
+  AssertTrue(Pos('result3', TResultCalculationRepository.SelectForSumCalculation(
+    [1, 3])) > 0);
 end;
 
 procedure TDataLayerSplitTests.CompetitionImportApi_IsAvailableWithoutDbSqlFacade;
@@ -96,7 +96,7 @@ begin
     TCompetitionImportRepository.UpsertParticipantRowStatement(2)) > 0);
   AssertTrue(Pos('finishtime2',
     TCompetitionImportRepository.UpsertStageResultRowStatement(
-      srifFinish, 2, 2)) > 0);
+    srifFinish, 2, 2)) > 0);
 end;
 
 initialization

@@ -49,31 +49,29 @@ type
   public
     class function SelectAll: string; static;
     class function SelectNumbers: string; static;
-    class function ResetStartTime(const StageIndex: integer; const StageCount:
-      integer = MAX_SUPPORTED_STAGE_COUNT): string; static;
-    class function UpdateStartTime(const StageIndex: integer; const StageCount:
-      integer = MAX_SUPPORTED_STAGE_COUNT): string; static;
+    class function ResetStartTime(const StageIndex: integer;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT): string; static;
+    class function UpdateStartTime(const StageIndex: integer;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT): string; static;
     class function SelectMinStartTime(const StageIndex: integer;
       const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT): string; static;
     class function SelectMaxNumber: string; static;
     class function SelectCategoryGrouped: string; static;
     class function SelectCategoryGroupedOrderedByStartTime(
-      const StageIndex: integer; const StageCount: integer =
-      MAX_SUPPORTED_STAGE_COUNT): string; static;
-    class function SelectCategoryResults(
-      const ColumnsCsv: string): string; static;
+      const StageIndex: integer;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT): string; static;
+    class function SelectCategoryResults(const ColumnsCsv: string): string; static;
     class function SelectStatusAll: string; static;
-    class function SelectStatusByStage(
-      const StageIndex: integer; const StageCount: integer =
-      MAX_SUPPORTED_STAGE_COUNT): string; static;
+    class function SelectStatusByStage(const StageIndex: integer;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT): string; static;
     class function ExportFinishTime(const StageIndex: integer;
       const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT): string; static;
 
-    class function OpenByNumber(Q: TSQLQuery;
-      const Number: integer): boolean; static;
+    class function OpenByNumber(Q: TSQLQuery; const Number: integer): boolean;
+      static;
     class function TryGetCurrentId(Q: TSQLQuery; out Id: integer): boolean; static;
-    class function TryGetCurrentNumber(Q: TSQLQuery;
-      out Number: string): boolean; static;
+    class function TryGetCurrentNumber(Q: TSQLQuery; out Number: string): boolean;
+      static;
     class function TryLoadIdentity(Q: TSQLQuery; const Number: integer;
       out ParticipantName, Category: string): boolean; static;
     class function LoadStatuses(Q: TSQLQuery; const Number, StageCount: integer;
@@ -89,52 +87,47 @@ type
       const StageIndex: integer; const Category: string;
       out LeaderNumber: integer; out Data: TParticipantStageData;
       const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT): boolean; static;
-    class function OpenByCategoryLeader(Q: TSQLQuery;
-      const StageIndex: integer; const Category: string; const StageCount:
-      integer = MAX_SUPPORTED_STAGE_COUNT): boolean; static;
+    class function OpenByCategoryLeader(Q: TSQLQuery; const StageIndex: integer;
+      const Category: string; const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT):
+      boolean; static;
     class function TryGetNumberByStartTimeBetween(Q: TSQLQuery;
       const StageIndex: integer; const TimeBefore, TimeAfter: string;
-      out Number: integer; const StageCount: integer =
-      MAX_SUPPORTED_STAGE_COUNT): boolean; static;
+      out Number: integer; const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT):
+      boolean; static;
     class function GetPenaltyGroupsCount(Q: TSQLQuery;
       const StageCount: integer): integer; static;
-    class function GetFinishCount(Q: TSQLQuery;
-      const StageIndex: integer; const StageCount: integer =
-      MAX_SUPPORTED_STAGE_COUNT): integer; static;
+    class function GetFinishCount(Q: TSQLQuery; const StageIndex: integer;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT): integer; static;
     class function GetMaxNumber(Q: TSQLQuery): integer; static;
-    class function GetMinStartTime(Q: TSQLQuery;
-      const StageIndex: integer; const StageCount: integer =
-      MAX_SUPPORTED_STAGE_COUNT): string; static;
+    class function GetMinStartTime(Q: TSQLQuery; const StageIndex: integer;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT): string; static;
     class function HasAnyDataInStageRange(Q: TSQLQuery;
-      const FirstStageIndex, LastStageIndex, StageCount: integer): boolean;
-      static;
+      const FirstStageIndex, LastStageIndex, StageCount: integer): boolean; static;
     class function IsParticipantOnTrack(Q: TSQLQuery;
-      const StageIndex, Number: integer; const StageCount: integer =
-      MAX_SUPPORTED_STAGE_COUNT): boolean; static;
+      const StageIndex, Number: integer;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT): boolean; static;
     class procedure LoadCategories(Q: TSQLQuery; Categories: TStrings); static;
     class procedure LoadNumbers(Q: TSQLQuery; Numbers: TStrings); static;
     class procedure LoadGroupedCategories(Q: TSQLQuery; Categories: TStrings;
       const MaxCount: integer = 0); static;
     class procedure LoadCategoriesOrderedByStartTime(Q: TSQLQuery;
       const StageIndex, StageCount: integer; Categories: TStrings); static;
-    class procedure LoadStatusNumbers(Q: TSQLQuery; const StageIndex,
-      StageCount: integer; Numbers: TStrings); static;
+    class procedure LoadStatusNumbers(Q: TSQLQuery;
+      const StageIndex, StageCount: integer; Numbers: TStrings); static;
     class procedure ConfigureFinishExport(Q: TSQLQuery;
       const StageIndex, StageCount: integer); static;
     class procedure ConfigureCategoryResults(Q: TSQLQuery;
       const ColumnsCsv, Category: string); static;
 
-    class procedure ExecResetStartTime(Q: TSQLQuery;
-      const StageIndex: integer; const StageCount: integer =
-      MAX_SUPPORTED_STAGE_COUNT); static;
-    class procedure ExecUpdateStartTime(Q: TSQLQuery;
-      const StageIndex: integer; const StartTime: string;
-      const Number: integer; const StageCount: integer =
-      MAX_SUPPORTED_STAGE_COUNT); static;
+    class procedure ExecResetStartTime(Q: TSQLQuery; const StageIndex: integer;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT); static;
+    class procedure ExecUpdateStartTime(Q: TSQLQuery; const StageIndex: integer;
+      const StartTime: string; const Number: integer;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT); static;
     class procedure ExecUpdateStageStatus(Q: TSQLQuery;
       const StageIndex: integer; const Status: TParticipantStatus;
-      const Number: string; const StageCount: integer =
-      MAX_SUPPORTED_STAGE_COUNT); static;
+      const Number: string; const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT);
+      static;
     class procedure ExecUpdateOnlyGlobalStatusDsq(Q: TSQLQuery;
       const Number: string); static;
     class procedure ExecUpdateGlobalStatus(Q: TSQLQuery;
@@ -144,24 +137,24 @@ type
       const Status: TParticipantStatus; const Number: integer); static;
     class procedure FinishPreparedGlobalStatusUpdates(Q: TSQLQuery); static;
     class procedure ExecClearStatusAllForStage(Q: TSQLQuery;
-      const StageIndex: integer; const Number: string; const StageCount:
-      integer = MAX_SUPPORTED_STAGE_COUNT); static;
+      const StageIndex: integer; const Number: string;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT); static;
     class procedure ExecClearOnlyGlobalStatus(Q: TSQLQuery;
       const Number: string); static;
     class procedure ExecClearStageStatus(Q: TSQLQuery;
-      const StageIndex: integer; const Number: string; const StageCount:
-      integer = MAX_SUPPORTED_STAGE_COUNT); static;
+      const StageIndex: integer; const Number: string;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT); static;
     class procedure ExecUpdateStartTimeForNumber(Q: TSQLQuery;
       const StageIndex: integer; const StartTime: string;
-      const Number: integer; const StageCount: integer =
-      MAX_SUPPORTED_STAGE_COUNT); static;
+      const Number: integer; const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT);
+      static;
     class procedure ExecUpdateCorrection(Q: TSQLQuery;
-      const StageIndex, Correction, Number: integer; const StageCount:
-      integer = MAX_SUPPORTED_STAGE_COUNT); static;
+      const StageIndex, Correction, Number: integer;
+      const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT); static;
     class procedure ExecUpdateFinishForCheckedStages(Q: TSQLQuery;
       const CheckedStages: array of integer; const TimeValue: string;
-      const Number: integer; const StageCount: integer =
-      MAX_SUPPORTED_STAGE_COUNT); static;
+      const Number: integer; const StageCount: integer = MAX_SUPPORTED_STAGE_COUNT);
+      static;
   end;
 
   TStartMarkSql = StartMarkRepository.TStartMarkSql;
@@ -188,14 +181,12 @@ begin
   Result := TParticipantRepository.SelectNumbers;
 end;
 
-class function TMainSql.ResetStartTime(
-  const StageIndex, StageCount: integer): string;
+class function TMainSql.ResetStartTime(const StageIndex, StageCount: integer): string;
 begin
   Result := TStageResultRepository.ResetStartTime(StageIndex, StageCount);
 end;
 
-class function TMainSql.UpdateStartTime(
-  const StageIndex, StageCount: integer): string;
+class function TMainSql.UpdateStartTime(const StageIndex, StageCount: integer): string;
 begin
   Result := TStageResultRepository.UpdateStartTime(StageIndex, StageCount);
 end;
@@ -223,8 +214,7 @@ begin
     StageIndex, StageCount);
 end;
 
-class function TMainSql.SelectCategoryResults(
-  const ColumnsCsv: string): string;
+class function TMainSql.SelectCategoryResults(const ColumnsCsv: string): string;
 begin
   Result := TParticipantRepository.SelectCategoryResults(ColumnsCsv);
 end;
@@ -246,42 +236,38 @@ begin
   Result := TStageResultRepository.ExportFinishTime(StageIndex, StageCount);
 end;
 
-class function TMainSql.OpenByNumber(Q: TSQLQuery;
-  const Number: integer): boolean;
+class function TMainSql.OpenByNumber(Q: TSQLQuery; const Number: integer): boolean;
 begin
   Result := TParticipantRepository.OpenByNumber(Q, Number);
 end;
 
-class function TMainSql.TryGetCurrentId(Q: TSQLQuery;
-  out Id: integer): boolean;
+class function TMainSql.TryGetCurrentId(Q: TSQLQuery; out Id: integer): boolean;
 begin
   Result := TParticipantRepository.TryGetCurrentId(Q, Id);
 end;
 
-class function TMainSql.TryGetCurrentNumber(Q: TSQLQuery;
-  out Number: string): boolean;
+class function TMainSql.TryGetCurrentNumber(Q: TSQLQuery; out Number: string): boolean;
 begin
   Result := TParticipantRepository.TryGetCurrentNumber(Q, Number);
 end;
 
-class function TMainSql.TryLoadIdentity(Q: TSQLQuery;
-  const Number: integer; out ParticipantName, Category: string): boolean;
+class function TMainSql.TryLoadIdentity(Q: TSQLQuery; const Number: integer;
+  out ParticipantName, Category: string): boolean;
 begin
   Result := TParticipantRepository.TryLoadIdentity(Q, Number,
     ParticipantName, Category);
 end;
 
-class function TMainSql.LoadStatuses(Q: TSQLQuery;
-  const Number, StageCount: integer; out GlobalStatus: TParticipantStatus;
+class function TMainSql.LoadStatuses(Q: TSQLQuery; const Number, StageCount: integer;
+  out GlobalStatus: TParticipantStatus;
   out StageStatuses: TParticipantStatusArray): boolean;
 begin
   Result := TParticipantRepository.LoadStatuses(Q, Number, StageCount,
     GlobalStatus, StageStatuses);
 end;
 
-class procedure TMainSql.LoadAllStatuses(Q: TSQLQuery;
-  const StageCount: integer; const ActiveStageIndexes: array of integer;
-  out Rows: TParticipantStatusRows);
+class procedure TMainSql.LoadAllStatuses(Q: TSQLQuery; const StageCount: integer;
+  const ActiveStageIndexes: array of integer; out Rows: TParticipantStatusRows);
 begin
   TParticipantRepository.LoadAllStatuses(Q, StageCount, ActiveStageIndexes,
     Rows);
@@ -291,14 +277,13 @@ class function TMainSql.TryLoadParticipantStageData(Q: TSQLQuery;
   const Number, StageIndex, StageCount: integer;
   out Data: TParticipantStageData): boolean;
 begin
-  Result := TStageResultRepository.TryLoadParticipantStageData(Q, Number,
-    StageIndex, StageCount, Data);
+  Result := TStageResultRepository.TryLoadParticipantStageData(Q,
+    Number, StageIndex, StageCount, Data);
 end;
 
 class function TMainSql.TryLoadCategoryLeaderStageData(Q: TSQLQuery;
-  const StageIndex: integer; const Category: string;
-  out LeaderNumber: integer; out Data: TParticipantStageData;
-  const StageCount: integer): boolean;
+  const StageIndex: integer; const Category: string; out LeaderNumber: integer;
+  out Data: TParticipantStageData; const StageCount: integer): boolean;
 begin
   Result := TStageResultRepository.TryLoadCategoryLeaderStageData(Q,
     StageIndex, Category, LeaderNumber, Data, StageCount);
@@ -409,8 +394,8 @@ begin
 end;
 
 class procedure TMainSql.ExecUpdateStartTime(Q: TSQLQuery;
-  const StageIndex: integer; const StartTime: string; const Number,
-  StageCount: integer);
+  const StageIndex: integer; const StartTime: string;
+  const Number, StageCount: integer);
 begin
   TStageResultRepository.ExecUpdateStartTime(Q, StageIndex, StartTime, Number,
     StageCount);
@@ -459,8 +444,7 @@ begin
     StageCount);
 end;
 
-class procedure TMainSql.ExecClearOnlyGlobalStatus(Q: TSQLQuery;
-  const Number: string);
+class procedure TMainSql.ExecClearOnlyGlobalStatus(Q: TSQLQuery; const Number: string);
 begin
   TParticipantRepository.ExecClearOnlyGlobalStatus(Q, Number);
 end;
@@ -473,8 +457,8 @@ begin
 end;
 
 class procedure TMainSql.ExecUpdateStartTimeForNumber(Q: TSQLQuery;
-  const StageIndex: integer; const StartTime: string; const Number,
-  StageCount: integer);
+  const StageIndex: integer; const StartTime: string;
+  const Number, StageCount: integer);
 begin
   TStageResultRepository.ExecUpdateStartTimeForNumber(Q, StageIndex,
     StartTime, Number, StageCount);

@@ -31,12 +31,10 @@ type
     CorrectionMs: integer;
     Source: TTimingMarkSource;
     ReceivedAt: TDateTime;
-    class function Start(const AEventTime: TDateTime;
-      const AHasCorrection: boolean; const ACorrectionMs: integer;
-      const ASource: TTimingMarkSource;
+    class function Start(const AEventTime: TDateTime; const AHasCorrection: boolean;
+      const ACorrectionMs: integer; const ASource: TTimingMarkSource;
       const AReceivedAt: TDateTime): TTimingMark; static;
-    class function Finish(const AEventTime: TDateTime;
-      const ASource: TTimingMarkSource;
+    class function Finish(const AEventTime: TDateTime; const ASource: TTimingMarkSource;
       const AReceivedAt: TDateTime): TTimingMark; static;
   end;
 
@@ -50,14 +48,12 @@ begin
   Result.DeviceId := ADeviceId;
 end;
 
-class function TTimingMarkSource.Serial(
-  const ADeviceId: string): TTimingMarkSource;
+class function TTimingMarkSource.Serial(const ADeviceId: string): TTimingMarkSource;
 begin
   Result := CreateSource(tmskSerial, ADeviceId);
 end;
 
-class function TTimingMarkSource.Ble(
-  const ADeviceId: string): TTimingMarkSource;
+class function TTimingMarkSource.Ble(const ADeviceId: string): TTimingMarkSource;
 begin
   Result := CreateSource(tmskBle, ADeviceId);
 end;
@@ -69,8 +65,7 @@ end;
 
 class function TTimingMark.Start(const AEventTime: TDateTime;
   const AHasCorrection: boolean; const ACorrectionMs: integer;
-  const ASource: TTimingMarkSource;
-  const AReceivedAt: TDateTime): TTimingMark;
+  const ASource: TTimingMarkSource; const AReceivedAt: TDateTime): TTimingMark;
 begin
   Result := Default(TTimingMark);
   Result.Kind := tmkStart;
@@ -85,8 +80,7 @@ begin
 end;
 
 class function TTimingMark.Finish(const AEventTime: TDateTime;
-  const ASource: TTimingMarkSource;
-  const AReceivedAt: TDateTime): TTimingMark;
+  const ASource: TTimingMarkSource; const AReceivedAt: TDateTime): TTimingMark;
 begin
   Result := Default(TTimingMark);
   Result.Kind := tmkFinish;

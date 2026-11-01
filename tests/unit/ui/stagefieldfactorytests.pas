@@ -69,8 +69,7 @@ begin
   CorrectionText := AText;
 end;
 
-procedure TStageFieldEventRecorder.PenaltySetText(Sender: TField;
-  const AText: string);
+procedure TStageFieldEventRecorder.PenaltySetText(Sender: TField; const AText: string);
 begin
   PenaltyText := AText;
 end;
@@ -154,7 +153,7 @@ begin
 end;
 
 procedure TStageFieldFactoryTests.
-  EnsureStageCount_RemovesOnlyFactoryCreatedFieldsWhenShrinking;
+EnsureStageCount_RemovesOnlyFactoryCreatedFieldsWhenShrinking;
 var
   BootstrapFactory: TStageFieldFactory;
 begin
@@ -173,10 +172,8 @@ begin
   FFactory.EnsureStageCount(DEFAULT_STAGE_COUNT);
   AssertEquals(0, FFactory.CreatedFieldCount);
   AssertEquals(DEFAULT_STAGE_COUNT * 8, FDataSet.FieldCount);
-  AssertTrue(FDataSet.FindField(
-    'status' + IntToStr(DEFAULT_STAGE_COUNT + 1)) = nil);
-  AssertTrue(FDataSet.FindField(
-    'status' + IntToStr(DEFAULT_STAGE_COUNT)) <> nil);
+  AssertTrue(FDataSet.FindField('status' + IntToStr(DEFAULT_STAGE_COUNT + 1)) = nil);
+  AssertTrue(FDataSet.FindField('status' + IntToStr(DEFAULT_STAGE_COUNT)) <> nil);
 end;
 
 procedure TStageFieldFactoryTests.EnsureStageCount_RejectsUnsupportedCount;

@@ -17,8 +17,7 @@ type
     function AddColumn(const AFieldName, ATitle: string;
       const AWidth: integer; const AAlignment: TAlignment;
       const AColor: TColor = clDefault): TRxColumn;
-    procedure SetColumnCaption(const AColumn: TRxColumn;
-      const ACaption: string);
+    procedure SetColumnCaption(const AColumn: TRxColumn; const ACaption: string);
     function StageColumn(const AStageIndex, AColumnOffset: integer): TRxColumn;
   public
     constructor Create(const AGrid: TMyRxDBGrid);
@@ -65,8 +64,7 @@ begin
 end;
 
 function TStageGridColumnFactory.AddColumn(const AFieldName, ATitle: string;
-  const AWidth: integer; const AAlignment: TAlignment;
-  const AColor: TColor): TRxColumn;
+  const AWidth: integer; const AAlignment: TAlignment; const AColor: TColor): TRxColumn;
 begin
   Result := FGrid.Columns.Add;
   Result.FieldName := AFieldName;
@@ -94,17 +92,16 @@ begin
   FGrid.BeginColumnsUpdate;
 end;
 
-function TStageGridColumnFactory.StageColumn(const AStageIndex,
-  AColumnOffset: integer): TRxColumn;
+function TStageGridColumnFactory.StageColumn(
+  const AStageIndex, AColumnOffset: integer): TRxColumn;
 var
   columnIndex: integer;
 begin
-  if (AStageIndex < 1) or
-    (AStageIndex > FCreatedColumns.Count div STAGE_GRID_COLUMN_COUNT) then
+  if (AStageIndex < 1) or (AStageIndex > FCreatedColumns.Count div
+    STAGE_GRID_COLUMN_COUNT) then
     raise EArgumentOutOfRangeException.CreateFmt(
       'Stage index %d has no grid columns.', [AStageIndex]);
-  if (AColumnOffset < 0) or
-    (AColumnOffset >= STAGE_GRID_COLUMN_COUNT) then
+  if (AColumnOffset < 0) or (AColumnOffset >= STAGE_GRID_COLUMN_COUNT) then
     raise EArgumentOutOfRangeException.CreateFmt(
       'Stage column offset %d is outside the range 0..%d.',
       [AColumnOffset, STAGE_GRID_COLUMN_COUNT - 1]);
@@ -139,8 +136,8 @@ begin
   StageColumn(AStageIndex, STAGE_COLUMN_PLACE).Visible := AActive;
 end;
 
-procedure TStageGridColumnFactory.ConfigureSingleStage(
-  const AStageIndex: integer; const AShowStageName: boolean);
+procedure TStageGridColumnFactory.ConfigureSingleStage(const AStageIndex: integer;
+  const AShowStageName: boolean);
 begin
   if not AShowStageName then
   begin
@@ -184,9 +181,8 @@ begin
   PreviousColumnCount := FCreatedColumns.Count;
   TailColumns := TList.Create;
   performanceTrace := TPerformanceTrace.Create(
-    'ui.stage_grid_columns.rebuild', alsApplication,
-    'stage_count=' + IntToStr(AStageCount) +
-    ' previous_column_count=' + IntToStr(PreviousColumnCount));
+    'ui.stage_grid_columns.rebuild', alsApplication, 'stage_count=' +
+    IntToStr(AStageCount) + ' previous_column_count=' + IntToStr(PreviousColumnCount));
   try
     try
       TargetColumnCount := AStageCount * STAGE_GRID_COLUMN_COUNT;
@@ -222,8 +218,8 @@ begin
 
         FCreatedColumns.Capacity := TargetColumnCount;
 
-        for StageIndex := FCreatedColumns.Count div STAGE_GRID_COLUMN_COUNT + 1
-          to AStageCount do
+        for StageIndex := FCreatedColumns.Count div STAGE_GRID_COLUMN_COUNT +
+          1 to AStageCount do
         begin
           StageSuffix := IntToStr(StageIndex);
           StageName := Format(rsSUFormat, [StageIndex]);

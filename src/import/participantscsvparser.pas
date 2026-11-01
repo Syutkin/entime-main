@@ -133,8 +133,8 @@ begin
   inherited CreateFmt('Duplicate column name: %s', [AColumnName]);
 end;
 
-constructor ERowFieldCountMismatch.Create(const ARowNumber,
-  AActualFieldCount, AExpectedFieldCount: integer);
+constructor ERowFieldCountMismatch.Create(
+  const ARowNumber, AActualFieldCount, AExpectedFieldCount: integer);
 begin
   FRowNumber := ARowNumber;
   FActualFieldCount := AActualFieldCount;
@@ -163,8 +163,8 @@ begin
     [ATimeText, ARowNumber, AColumnName]);
 end;
 
-constructor EDuplicateParticipantNumber.Create(const AParticipantNumber,
-  AFirstRowNumber, ADuplicateRowNumber: integer);
+constructor EDuplicateParticipantNumber.Create(
+  const AParticipantNumber, AFirstRowNumber, ADuplicateRowNumber: integer);
 begin
   FParticipantNumber := AParticipantNumber;
   FFirstRowNumber := AFirstRowNumber;
@@ -303,8 +303,8 @@ begin
 
         // В строке должно быть столько же полей, сколько в заголовке.
         if csvDocument.ColCount[row] <> legend.Count then
-          raise ERowFieldCountMismatch.Create(
-            row + 1, csvDocument.ColCount[row], legend.Count);
+          raise ERowFieldCountMismatch.Create(row + 1,
+            csvDocument.ColCount[row], legend.Count);
 
         startItem := TStartItemModel.Create;
         try
@@ -325,8 +325,8 @@ begin
               numberIndex := participantRows.IndexOfName(numberKey);
               if numberIndex >= 0 then
               begin
-                firstParticipantRow := StrToInt(
-                  participantRows.ValueFromIndex[numberIndex]);
+                firstParticipantRow :=
+                  StrToInt(participantRows.ValueFromIndex[numberIndex]);
                 raise EDuplicateParticipantNumber.Create(
                   num, firstParticipantRow, row + 1);
               end;

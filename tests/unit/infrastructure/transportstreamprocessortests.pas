@@ -18,8 +18,7 @@ type
       const AResponse: TFirmwareResponse);
     procedure PacketReceived(Sender: TObject; const APacket: TTimingPacket;
       const ASource: TTimingMarkSource);
-    procedure Rejected(Sender: TObject;
-      const ARejected: TTransportStreamRejected);
+    procedure Rejected(Sender: TObject; const ARejected: TTransportStreamRejected);
   protected
     procedure SetUp; override;
     procedure TearDown; override;
@@ -55,8 +54,8 @@ begin
   FCallbacks.Add('packet:' + APacket.RawText + ':' + ASource.DeviceId);
 end;
 
-procedure TTransportStreamProcessorTests.FirmwareResponseReceived(
-  Sender: TObject; const AResponse: TFirmwareResponse);
+procedure TTransportStreamProcessorTests.FirmwareResponseReceived(Sender: TObject;
+  const AResponse: TFirmwareResponse);
 begin
   AssertSame(FProcessor, Sender);
   FLastFirmwareResponse := AResponse;
@@ -67,12 +66,12 @@ procedure TTransportStreamProcessorTests.Rejected(Sender: TObject;
   const ARejected: TTransportStreamRejected);
 begin
   AssertSame(FProcessor, Sender);
-  FCallbacks.Add('rejected:' + TransportStreamRejectedCode(ARejected) + ':' +
-    ARejected.Source.DeviceId);
+  FCallbacks.Add('rejected:' + TransportStreamRejectedCode(ARejected) +
+    ':' + ARejected.Source.DeviceId);
 end;
 
 procedure TTransportStreamProcessorTests.
-  Feed_RoutesTimingAndFirmwareFramesWithSource;
+Feed_RoutesTimingAndFirmwareFramesWithSource;
 const
   ReceivedAt: TDateTime = 45678.5;
 var
@@ -90,7 +89,7 @@ begin
 end;
 
 procedure TTransportStreamProcessorTests.
-  Feed_ReportsInvalidMessagesAndContinues;
+Feed_ReportsInvalidMessagesAndContinues;
 var
   Source: TTimingMarkSource;
 begin

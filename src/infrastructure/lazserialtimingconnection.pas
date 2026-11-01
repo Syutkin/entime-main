@@ -25,8 +25,8 @@ type
   public
     constructor Create(const ASerial: TLazSerial);
     destructor Destroy; override;
-    function ReadData: RawByteString;
-    function WriteData(const AData: RawByteString): integer;
+    function ReadData: rawbytestring;
+    function WriteData(const AData: rawbytestring): integer;
   end;
 
 implementation
@@ -74,8 +74,7 @@ begin
   Result := FOnDataAvailable;
 end;
 
-procedure TLazSerialTimingConnection.SetOnDataAvailable(
-  const AHandler: TNotifyEvent);
+procedure TLazSerialTimingConnection.SetOnDataAvailable(const AHandler: TNotifyEvent);
 begin
   FOnDataAvailable := AHandler;
 end;
@@ -89,13 +88,12 @@ begin
     Handler(Self);
 end;
 
-function TLazSerialTimingConnection.ReadData: RawByteString;
+function TLazSerialTimingConnection.ReadData: rawbytestring;
 begin
-  Result := RawByteString(FSerial.ReadData);
+  Result := rawbytestring(FSerial.ReadData);
 end;
 
-function TLazSerialTimingConnection.WriteData(
-  const AData: RawByteString): integer;
+function TLazSerialTimingConnection.WriteData(const AData: rawbytestring): integer;
 begin
   Result := FSerial.WriteData(string(AData));
 end;
